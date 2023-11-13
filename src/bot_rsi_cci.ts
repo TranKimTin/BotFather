@@ -23,7 +23,7 @@ async function main() {
         apiKey: process.env.API_KEY,
         secretKey: process.env.SECRET_KEY,
         symbolList: symbolList,
-        timeframes: [/*'1m', '3m', '5m',*/ '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'],
+        timeframes: [/*'1m', '3m', '5m',*/ '15m', '30m', '1h'/*, '2h', '4h', '6h', '8h', '12h', '1d'*/],
         onCloseCandle: onCloseCandle,
         onClosePosition: async (symbol: string) => { },
         onHandleError: async (err: any, symbol: string | undefined) => { await telegram.sendError((symbol ? symbol : '') + err.message); },
