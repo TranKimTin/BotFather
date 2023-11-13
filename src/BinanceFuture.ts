@@ -119,13 +119,12 @@ class BinanceFuture {
 
     async init(numbler_candle_load: number = 300): Promise<void> {
         // if (!this.isReadOnly)
-            await telegram.sendMessage('bot restart...');
+        await telegram.sendMessage('bot restart...');
         console.log('init digits...');
         let market = await this.binance.loadMarkets(true);
-
         for (let key in market) {
             let item = market[key];
-            let symbol = item.symbol.replace('/', '');
+            let symbol = item.info.symbol.replace('/', '');
             let precision = item.precision;
             this.digits[symbol] = {
                 volume: precision.amount,
@@ -251,6 +250,8 @@ class BinanceFuture {
     }
 
     async getOpenOrders(symbol: string): Promise<Array<Order>> {
+        if (this.isReadOnly) return [];
+
         let orders = await this.binance.fetchOpenOrders(symbol);
         let result = orders.map(item => (
             {
