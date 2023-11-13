@@ -1,0 +1,31 @@
+{
+  "name": "trade",
+  "version": "1.0.0",
+  "main": "BinanceFuture.js",
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "node js/BinanceFuture.js"
+  },
+  "devDependencies": {
+    "@types/delay": "^3.1.0",
+    "@types/dotenv": "^8.2.0",
+    "@types/lodash": "^4.14.201",
+    "@types/moment": "^2.13.0",
+    "@types/node-telegram-bot-api": "^0.63.1"
+  },
+  "dependencies": {
+    "binance-api-node": "^0.12.7",
+    "ccxt": "^4.1.43",
+    "delay": "^5.0.0",
+    "dotenv": "^16.3.1",
+    "google-auth-library": "^9.2.0",
+    "google-spreadsheet": "^4.1.1",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.4",
+    "node-telegram-bot-api": "^0.64.0"
+  }
+}
