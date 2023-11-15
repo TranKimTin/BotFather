@@ -93,3 +93,40 @@ export async function getSymbolList() {
     let data = await res.json() as Array<{ symbol: string }>;
     return data.map(item => item.symbol);
 }
+
+export function checkFinal(tf: string, startTime: number) {
+    let nextTime = startTime / 1000 + 60;
+    switch (tf) {
+        case '1m': return nextTime % 60 == 0;
+        case '3m': return nextTime % 180 == 0;
+        case '5m': return nextTime % 300 == 0;
+        case '15m': return nextTime % 900 == 0;
+        case '30m': return nextTime % 1800 == 0;
+        case '1h': return nextTime % 3600 == 0;
+        case '2h': return nextTime % 7200 == 0;
+        case '4h': return nextTime % 14400 == 0;
+        case '6h': return nextTime % 21600 == 0;
+        case '8h': return nextTime % 28800 == 0;
+        case '12h': return nextTime % 43200 == 0;
+        case '1d': return nextTime % 86400 == 0;
+        default: return false;
+    }
+};
+
+export function getStartTime(tf: string, currentTime: number) {
+    switch (tf) {
+        case '1m': return currentTime - currentTime % 60000;
+        case '3m': return currentTime - currentTime % 180000;
+        case '5m': return currentTime - currentTime % 300000;
+        case '15m': return currentTime - currentTime % 900000;
+        case '30m': return currentTime - currentTime % 1800000;
+        case '1h': return currentTime - currentTime % 3600000;
+        case '2h': return currentTime - currentTime % 7200000;
+        case '4h': return currentTime - currentTime % 14400000;
+        case '6h': return currentTime - currentTime % 21600000;
+        case '8h': return currentTime - currentTime % 28800000;
+        case '12h': return currentTime - currentTime % 43200000;
+        case '1d': return currentTime - currentTime % 86400000;
+        default: return currentTime;
+    }
+}

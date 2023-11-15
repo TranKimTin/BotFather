@@ -4,6 +4,7 @@ import IBinance, { Binance } from 'binance-api-node';
 import moment, { DurationInputArg2 } from 'moment';
 import delay from 'delay';
 import telegram from './telegram';
+import { checkFinal, getStartTime } from './util';
 
 
 export interface RateData {
@@ -198,6 +199,51 @@ class BinanceFuture {
             });
         }
 
+
+        this.client.ws.futuresCandles(this.symbolList, '1m', candle => {
+            for (let tf of this.timeframes) {
+                let data = {
+                    symbol: candle.symbol,
+                    startTime: getStartTime(tf, candle.startTime),
+                    timestring: moment(getStartTime(tf, candle.startTime)).format('YYYY-MM-DD HH:mm:SS'),
+                    open: +candle.open,
+                    high: +candle.high,
+                    low: +candle.low,
+                    close: +candle.close,
+                    volume: +candle.volume,
+                    interval: tf,
+                    isFinal: candle.isFinal && checkFinal(tf, candle.startTime),
+                    change: (+candle.open - +candle.close) / +candle.open,
+                    ampl: (+candle.high - +candle.low) / +candle.open
+                };
+                this.lastPrice[data.symbol] = data.close;
+
+                let dataList = this.data[data.symbol][data.interval];
+                if (!dataList[0]) return;
+
+                if (dataList[0].startTime == data.startTime) {
+                    // dataList[0] = data;
+                    dataList[0].high = Math.max(dataList[0].high, data.high);
+                    dataList[0].low = Math.min(dataList[0].low, data.low);
+                    dataList[0].close = data.close;
+                    dataList[0].volume += candle.isFinal ? data.volume : 0;
+                    dataList[0].isFinal = data.isFinal;
+                    dataList[0].change = (dataList[0].open - dataList[0].close) / dataList[0].open;
+                    dataList[0].ampl = (dataList[0].high - dataList[0].low) / dataList[0].open;
+
+                    if (data.isFinal) {
+                        this.onCloseCandle(data.symbol, data.interval, [...dataList]);
+                    }
+                }
+                else {
+                    dataList.unshift(data);
+                    if (dataList[1] && !dataList[1].isFinal) {
+                        this.onCloseCandle(data.symbol, data.interval, dataList.slice(1));
+                    }
+                }
+            }
+        });
+
         for (let tf of this.timeframes) {
             console.log(`init future candle ${tf}...`);
             let promiseList = [];
@@ -210,39 +256,7 @@ class BinanceFuture {
                 this.data[symbol][tf] = rates[i++];
                 this.lastPrice[symbol] = this.data[symbol][tf][0].close;
             }
-
-            await this.client.ws.futuresCandles(this.symbolList, tf, async candle => {
-                let data = {
-                    symbol: candle.symbol,
-                    startTime: candle.startTime,
-                    timestring: moment(candle.startTime).format('YYYY-MM-DD HH:mm:SS'),
-                    open: +candle.open,
-                    high: +candle.high,
-                    low: +candle.low,
-                    close: +candle.close,
-                    volume: +candle.volume,
-                    interval: candle.interval,
-                    isFinal: candle.isFinal,
-                    change: (+candle.open * 1 - +candle.close * 1) / +candle.open,
-                    ampl: (+candle.high * 1 - +candle.low) / +candle.open
-                };
-                this.lastPrice[data.symbol] = data.close;
-
-                let dataList = this.data[data.symbol][data.interval];
-                if (dataList[0].startTime == data.startTime) {
-                    dataList[0] = data;
-                    if (data.isFinal) {
-                        await this.onCloseCandle(data.symbol, data.interval, [...dataList]);
-                    }
-                }
-                else {
-                    dataList.unshift(data);
-                    if (!dataList[1].isFinal) {
-                        await this.onCloseCandle(data.symbol, data.interval, dataList.slice(1));
-                    }
-                }
-            })//({ fastClose: false, keepClosed: false, delay: 1000 });
-            await delay(5000);
+            await delay(1000);
         }
         console.log('init done.');
         // if (!this.isReadOnly)

@@ -94,7 +94,7 @@ let InConfig: any = {
 }
 // fs.writeFileSync('config.txt', JSON.stringify(InConfig))
 InConfig = JSON.parse(fs.readFileSync('config.txt').toString());
-console.log(InConfig);
+console.log(JSON.stringify(InConfig));
 
 http.createServer(function (req, res) {
     // var q = url.parse(req.url, true).query;

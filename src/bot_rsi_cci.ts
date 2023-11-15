@@ -23,7 +23,7 @@ async function main() {
         apiKey: process.env.API_KEY,
         secretKey: process.env.SECRET_KEY,
         symbolList: symbolList,
-        timeframes: [/*'1m', '3m', '5m',*/ '15m', '30m', '1h'/*, '2h', '4h', '6h', '8h', '12h', '1d'*/],
+        timeframes: [/*'1m', '3m', '5m',*/ '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'],
         onCloseCandle: onCloseCandle,
         onClosePosition: async (symbol: string) => { },
         onHandleError: async (err: any, symbol: string | undefined) => { await telegram.sendError((symbol ? symbol : '') + err.message); },
@@ -153,7 +153,7 @@ async function resistanceAlgo(symbol: string, timeframe: string, data: Array<Rat
 
         if (side == 'none') return;
         console.log(rate);
-        console.log(InConfig);
+        console.log(JSON.stringify(InConfig));
         // console.log({ symbol, timeframe, rsi: curRSI, side, entry1, entry2, TP1, TP2, SL, volume });
         let dataTable = [
             ['Thời gian', moment().format('YYYY-MM-DD HH:mm')],
@@ -276,7 +276,7 @@ async function longChaoAlgo(symbol: string, timeframe: string, data: Array<RateD
         volume = +volume.toFixed(binance.digits[symbol].volume);
 
         console.log(rate);
-        console.log(InConfig);
+        console.log(JSON.stringify(InConfig));
 
         let dataTable = [
             ['Thời gian', moment().format('YYYY-MM-DD HH:mm')],
