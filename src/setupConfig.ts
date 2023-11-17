@@ -3,95 +3,78 @@ import url from 'url';
 import fs from 'fs';
 import telegram from './telegram';
 
-const configResistance = {
-    InVolumeUSD: 15,
-    InChangeRSI: 0.2,
-    InRSI_Value: {
-        lowerbound: 30,
-        upperbound: 58,
-        onlyLowerLong: true,
-        onlyUpperShort: true
+export interface IConfigResistance {
+    InVolumeUSD: number,
+    InChangeRSI: number,
+    InRSI_Value?: {
+        lowerbound: number,
+        upperbound: number,
+        onlyLowerLong: boolean,
+        onlyUpperShort: boolean
     },
-    InEntry1Percent: 90,
-    InEntry2Percent: 0,
-    InTP1_Percent: 0.6,
-    InTP2_Percent: 0,
-    InSL_Percent: 0.6,
-    InTrendUpConfig: {
-        numberOfBar: 3,
-        minUpPercent: 0.6,
-        requireRSI_Up: true
+    InEntry1Percent: number,
+    InEntry2Percent: number,
+    InTP1_Percent: number,
+    InTP2_Percent: number,
+    InSL_Percent: number,
+    InTrendUpConfig?: {
+        numberOfBar: number,
+        minUpPercent: number,
+        requireRSI_Up: boolean
     },
-    InTrendDownConfig: {
-        numberOfBar: 3,
-        minDownPercent: 0.6,
-        requireRSI_Down: true
+    InTrendDownConfig?: {
+        numberOfBar: number,
+        minDownPercent: number,
+        requireRSI_Down: boolean
     },
-    InConfigConditionBar: {
-        maxChangePercent: 0.1,
-        maxAmplPercent: 0.6,
-        barColorBuy: 'Xanh',
-        barColorSell: 'Đỏ'
+    InConfigConditionBar?: {
+        maxChangePercent: number,
+        maxAmplPercent: number,
+        barColorBuy: string,
+        barColorSell: string
     }
-};
+}
 
-let configLongChao = {
-    InVolumeUSD_lc: 15,
+export interface IConfigLongChao {
+    InVolumeUSD_lc: number,
 
-    InEntry_lc: 0,
-    InTP_lc: 0,
-    InSL_lc: 0,
+    InEntry_lc: number,
+    InTP_lc: number,
+    InSL_lc: number,
 
-    changeRSI1_lc: 0,
-    changeRSI2_lc: 0,
-    changeRSI3_lc: 0,
-    changeRSI4_lc: 0,
-    lowerboundRSI_lc: 0,
-    upperboundRSI_lc: 0,
-    requireRSI_Down_lc: true,
-    requireRSI_Up_lc: true,
+    changeRSI1_lc: number,
+    changeRSI2_lc: number,
+    changeRSI3_lc: number,
+    changeRSI4_lc: number,
+    lowerboundRSI_lc: number,
+    upperboundRSI_lc: number,
+    requireRSI_Down_lc: boolean,
+    requireRSI_Up_lc: boolean,
 
-    changeCCI1_lc: 0,
-    changeCCI2_lc: 0,
-    changeCCI3_lc: 0,
-    changeCCI4_lc: 0,
-    lowerboundCCI_lc: 0,
-    upperboundCCI_lc: 0,
-    requireCCI_Down_lc: true,
-    requireCCI_Up_lc: true,
-};
+    changeCCI1_lc: number,
+    changeCCI2_lc: number,
+    changeCCI3_lc: number,
+    changeCCI4_lc: number,
+    lowerboundCCI_lc: number,
+    upperboundCCI_lc: number,
+    requireCCI_Down_lc: boolean,
+    requireCCI_Up_lc: boolean,
+}
 
-let InConfig: any = {
+export interface IInConfig {
     InResistance: {
-        'm1': null,
-        'm3': null,
-        'm5': null,
-        'm15': configResistance,
-        'm30': configResistance,
-        'h1': configResistance,
-        'h2': null,
-        'h4': null,
-        'h6': null,
-        'h8': null,
-        'h12': null,
-        'd1': null
+        [key: string]: IConfigResistance | null
     },
     InLongChao: {
-        'm1': null,
-        'm3': null,
-        'm5': null,
-        'm15': configLongChao,
-        'm30': configLongChao,
-        'h1': configLongChao,
-        'h2': null,
-        'h4': null,
-        'h6': null,
-        'h8': null,
-        'h12': null,
-        'd1': null
+        [key: string]: IConfigLongChao | null
     }
-
 }
+
+let InConfig: IInConfig = {
+    InResistance: {},
+    InLongChao: {}
+}
+
 // fs.writeFileSync('config.txt', JSON.stringify(InConfig))
 InConfig = JSON.parse(fs.readFileSync('config.txt').toString());
 console.log(JSON.stringify(InConfig));
@@ -113,9 +96,9 @@ http.createServer(function (req, res) {
             console.log(requestBody);
             try {
                 requestBody = requestBody.toString();
-                requestBody = JSON.parse(requestBody);
-                InConfig = requestBody;
-                fs.writeFileSync('config.txt', JSON.stringify(InConfig));
+                let config = JSON.parse(requestBody);
+                fs.writeFileSync('config.txt', JSON.stringify(config));
+                InConfig = config;
 
                 telegram.sendMessage('Update config');
 

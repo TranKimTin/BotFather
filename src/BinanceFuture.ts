@@ -199,7 +199,6 @@ class BinanceFuture {
             });
         }
 
-
         this.client.ws.futuresCandles(this.symbolList, '1m', candle => {
             for (let tf of this.timeframes) {
                 let data = {
@@ -279,7 +278,7 @@ class BinanceFuture {
                 status: item.info.status,
                 reduceOnly: item.info.reduceOnly,
                 closePosition: item.info.closePosition,
-                timestamp: moment(item.timestamp).format('DD/MM/YYYY HH:mm:ss'),
+                timestamp: moment(item.timestamp).format('YYYY-MM-DD HH:mm:ss'),
                 timeInt: moment(item.timestamp).valueOf()
             }));
         return result;

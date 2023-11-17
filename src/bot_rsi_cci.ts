@@ -45,10 +45,11 @@ async function resistanceAlgo(symbol: string, timeframe: string, data: Array<Rat
         if (data.length < 14) return;
 
         let key = timeframe[timeframe.length - 1] + timeframe.slice(0, timeframe.length - 1);
-        if (!InConfig[key]) return;
+        let config = InConfig[key];
+        if (!config) return;
 
         let { InVolumeUSD, InChangeRSI, InRSI_Value, InEntry1Percent, InEntry2Percent, InSL_Percent,
-            InTP1_Percent, InTP2_Percent, InTrendUpConfig, InTrendDownConfig, InConfigConditionBar } = InConfig[key];
+            InTP1_Percent, InTP2_Percent, InTrendUpConfig, InTrendDownConfig, InConfigConditionBar } = config;
 
         InEntry1Percent /= 100;
         InEntry2Percent /= 100;
@@ -198,12 +199,13 @@ async function longChaoAlgo(symbol: string, timeframe: string, data: Array<RateD
         if (data.length < 20) return;
 
         let key = timeframe[timeframe.length - 1] + timeframe.slice(0, timeframe.length - 1);
-        if (!InConfig[key]) return;
+        let config = InConfig[key];
+        if (!config) return;
 
         let { InVolumeUSD_lc, InEntry_lc, InTP_lc, InSL_lc, changeRSI1_lc, changeRSI2_lc,
             changeRSI3_lc, changeRSI4_lc, lowerboundRSI_lc, upperboundRSI_lc, requireRSI_Down_lc,
             requireRSI_Up_lc, changeCCI1_lc, changeCCI2_lc, changeCCI3_lc, changeCCI4_lc,
-            lowerboundCCI_lc, upperboundCCI_lc, requireCCI_Down_lc, requireCCI_Up_lc } = InConfig[key];
+            lowerboundCCI_lc, upperboundCCI_lc, requireCCI_Down_lc, requireCCI_Up_lc } = config;
 
         InEntry_lc /= 100;
         InTP_lc /= 100;
@@ -233,7 +235,7 @@ async function longChaoAlgo(symbol: string, timeframe: string, data: Array<RateD
 
             if (condition1 && condition2 && condition3) side = 'sell';
         }
-        if (RSI <= lowerboundRSI_lc) {
+        if (RSI[0] <= lowerboundRSI_lc) {
             let change1 = RSI[2] - RSI[1];
             let change2 = RSI[1] - RSI[0];
 
@@ -243,7 +245,7 @@ async function longChaoAlgo(symbol: string, timeframe: string, data: Array<RateD
 
             if (condition1 && condition2 && condition3) side = 'buy';
         }
-        if (CCI <= lowerboundCCI_lc) {
+        if (CCI[0] <= lowerboundCCI_lc) {
             let change1 = CCI[2] - CCI[1];
             let change2 = CCI[1] - CCI[0];
 
