@@ -3,9 +3,7 @@ import * as ccxt from 'ccxt'
 import IBinance, { Binance } from 'binance-api-node';
 import moment, { DurationInputArg2 } from 'moment';
 import delay from 'delay';
-import telegram from './telegram';
 import { checkFinal, getStartTime } from './util';
-
 
 export interface RateData {
     symbol: string,
@@ -29,6 +27,8 @@ export interface IParamsConstructor {
     timeframes: Array<string>,
     onCloseCandle: (symbol: string, timeframe: string, data: Array<RateData>) => void,
     onClosePosition: (symbol: string) => void,
+    onInitStart: () => void,
+    onInitDone: () => void,
     onHandleError: (err: unknown, symbol: string | undefined) => void,
     isReadOnly?: boolean
 }
@@ -81,6 +81,8 @@ class BinanceFuture {
     private timeframes: Array<string>;
     private onCloseCandle: (symbol: string, timeframe: string, data: Array<RateData>) => void;
     private onHandleError: (err: any, symbol: string | undefined) => void;
+    private onInitStart: () => void;
+    private onInitDone: () => void;
     private onClosePosition: (symbol: string) => void;
 
     public digits: { [key: string]: Digit };
@@ -103,7 +105,9 @@ class BinanceFuture {
         this.onCloseCandle = params.onCloseCandle;
         this.onClosePosition = params.onClosePosition;
         this.onHandleError = params.onHandleError;
-        this.data = {};
+        this.onInitStart = params.onInitStart,
+            this.onInitDone = params.onInitDone,
+            this.data = {};
         this.digits = {};
         this.positions = {};
         this.minVolumes = {};
@@ -120,7 +124,7 @@ class BinanceFuture {
 
     async init(numbler_candle_load: number = 300): Promise<void> {
         // if (!this.isReadOnly)
-        await telegram.sendMessage('bot restart...');
+        await this.onInitStart();
         console.log('init digits...');
         let market = await this.binance.loadMarkets(true);
         for (let key in market) {
@@ -259,7 +263,7 @@ class BinanceFuture {
         }
         console.log('init done.');
         // if (!this.isReadOnly)
-        await telegram.sendMessage('bot restart done.');
+        await this.onInitDone();
     }
 
     async getOpenOrders(symbol: string): Promise<Array<Order>> {

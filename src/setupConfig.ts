@@ -1,7 +1,6 @@
 import http from 'http';
-import url from 'url';
 import fs from 'fs';
-import telegram from './telegram';
+import Telegram from './telegram';
 
 export interface IConfigResistance {
     InVolumeUSD: number,
@@ -70,58 +69,58 @@ export interface IInConfig {
     }
 }
 
-let InConfig: IInConfig = {
-    InResistance: {},
-    InLongChao: {}
+export default class SetupConfig {
+    private InConfig: IInConfig;
+
+    constructor(fileConfig: string, port: number, telegram: Telegram) {
+        this.InConfig = JSON.parse(fs.readFileSync(fileConfig).toString());
+        console.log(JSON.stringify(this.InConfig));
+
+        http.createServer((req, res) => {
+            // var q = url.parse(req.url, true).query;
+            // var txt = JSON.stringify(q);
+            if (req.url == '/load') {
+                return res.end(JSON.stringify(this.InConfig));
+            }
+            else if (req.url == '/updateConfig') {
+                let requestBody = '';
+
+                req.on('data', (chunk) => {
+                    requestBody += chunk.toString();
+                });
+
+                req.on('end', () => {
+                    console.log(requestBody);
+                    try {
+                        requestBody = requestBody.toString();
+                        let config = JSON.parse(requestBody);
+                        fs.writeFileSync(fileConfig, JSON.stringify(config));
+                        this.InConfig = config;
+
+                        telegram.sendMessage('Update config');
+
+                        res.end('Cập nhật config thành công');
+                    }
+                    catch (err: any) {
+                        console.log(err);
+                        res.end('Cập nhật config thất bại ' + err.message);
+                    }
+                });
+            }
+            else if (req.url == '/') {
+                try {
+                    let html = fs.readFileSync('./config.html').toString();
+                    return res.end(html);
+                }
+                catch (err: any) {
+                    res.end(err.message);
+                }
+            }
+        }).listen(port);
+        console.log(`server listen port ${port}`);
+    }
+
+    getConfig() {
+        return this.InConfig;
+    };
 }
-
-// fs.writeFileSync('config.txt', JSON.stringify(InConfig))
-InConfig = JSON.parse(fs.readFileSync('config.txt').toString());
-console.log(JSON.stringify(InConfig));
-
-http.createServer(function (req, res) {
-    // var q = url.parse(req.url, true).query;
-    // var txt = JSON.stringify(q);
-    if (req.url == '/load') {
-        return res.end(JSON.stringify(InConfig));
-    }
-    else if (req.url == '/updateConfig') {
-        let requestBody = '';
-
-        req.on('data', (chunk) => {
-            requestBody += chunk.toString();
-        });
-
-        req.on('end', () => {
-            console.log(requestBody);
-            try {
-                requestBody = requestBody.toString();
-                let config = JSON.parse(requestBody);
-                fs.writeFileSync('config.txt', JSON.stringify(config));
-                InConfig = config;
-
-                telegram.sendMessage('Update config');
-
-                res.end('Cập nhật config thành công');
-            }
-            catch (err: any) {
-                console.log(err);
-                res.end('Cập nhật config thất bại ' + err.message);
-            }
-        });
-    }
-    else if (req.url == '/') {
-        try {
-            let html = fs.readFileSync('./config.html').toString();
-            return res.end(html);
-        }
-        catch (err: any) {
-            res.end(err.message);
-        }
-    }
-}).listen(80);
-console.log('server listen port 80');
-
-export default function getConfig() {
-    return InConfig;
-};

@@ -12,50 +12,52 @@ const tinID = 1833284254;
 
 let bot = new TelegramBot(token, { polling: false });
 
-class Telegram {
+export default class Telegram {
     private listMess: Array<string>;
     private timeoutMess: any;
     private listErr: Array<string>;
     private timeoutErr: any;
     private list: Array<Array<Array<number | string>>>;
     private timeout: any;
+    private TAG: string;
 
-    constructor() {
+    constructor(tag?: string) {
         this.listMess = [];
         this.listErr = [];
         this.list = [];
+        this.TAG = tag ? `${tag}\n` : '';
     }
 
     async sendMessage(mess: string, sendTin = false) {
         try {
-            console.log('Send message telegram', mess);
+            console.log(this.TAG, 'Send message telegram', mess);
             this.listMess.push(mess);
             clearTimeout(this.timeoutMess);
             this.timeoutMess = setTimeout(() => {
-                let s = this.listMess.join('\n\n\n');
+                let s = this.TAG + this.listMess.join('\n\n\n');
                 bot.sendMessage(sendTin ? tinID : chatID, s, { parse_mode: 'HTML' });
                 this.listMess = [];
             }, 1000);
         }
         catch (err: any) {
-            let logError = `${moment().format('DD/MM/YYYY HH:mm:ss')} ____ ${err.message}`;
+            let logError = `${this.TAG}${moment().format('DD/MM/YYYY HH:mm:ss')} ____ ${err.message}`;
             console.log('sendTelegram ERROR', logError);
         }
     }
     async sendError(mess: string) {
         try {
-            console.log('Send error telegram', mess);
+            console.log(this.TAG, 'Send error telegram', mess);
             mess = `❗️❗️❗️ Có lỗi ❗️❗️❗️\n<b>${mess}</b>`;
             this.listErr.push(mess);
             clearTimeout(this.timeoutErr);
             this.timeoutErr = setTimeout(() => {
-                let s = this.listErr.join('\n\n\n');
-                bot.sendMessage(errorChatID, mess, { parse_mode: 'HTML' });
+                let s = this.TAG + this.listErr.join('\n\n\n');
+                bot.sendMessage(errorChatID, s, { parse_mode: 'HTML' });
                 this.listErr = [];
             }, 1000);
         }
         catch (err: any) {
-            let logError = `${moment().format('DD/MM/YYYY HH:mm:ss')} ____ ${err.message}`;
+            let logError = `${this.TAG}${moment().format('DD/MM/YYYY HH:mm:ss')} ____ ${err.message}`;
             console.log('sendTelegram ERROR', logError);
         }
     }
@@ -88,30 +90,28 @@ class Telegram {
                     let tableToText = `\n${genarateString('-', table[0].length)}\n${table.map(item => `${item}\n${genarateString('-', item.length)}\n`).join('').trim()}\n`
 
                     mess += tableToText + '\n\n\n';
-                    console.log('Send table telegram', tableToText);
+                    console.log(this.TAG, 'Send table telegram', tableToText);
                 }
                 this.list = [];
-                mess = `\`\`\`\n${mess}\n\`\`\``;
+                mess = `\`\`\`\n${this.TAG}${mess}\n\`\`\``;
                 await bot.sendMessage(chatID, mess, { parse_mode: 'Markdown' });
             }
             if (this.list.length >= 4) await sendTele();
             else this.timeout = setTimeout(sendTele, 1000)
         }
         catch (err: any) {
-            let logError = `${moment().format('DD/MM/YYYY HH:mm:ss')} ____ ${err.message}`;
+            let logError = `${this.TAG}${moment().format('DD/MM/YYYY HH:mm:ss')} ____ ${err.message}`;
             console.log('sendTelegram ERROR', logError);
         }
     }
     async sendPhoto(path: string, caption = '') {
         try {
-            console.log('Send photo telegram');
+            console.log(this.TAG, 'Send photo telegram');
             await bot.sendPhoto(chatID, path, { caption });
         }
         catch (err: any) {
-            let logError = `${moment().format('DD/MM/YYYY HH:mm:ss')} ____ ${err.message} `;
+            let logError = `${this.TAG}${moment().format('DD/MM/YYYY HH:mm:ss')} ____ ${err.message} `;
             console.log('sendPhotoTelegram ERROR', logError);
         }
     }
 };
-
-export default new Telegram();

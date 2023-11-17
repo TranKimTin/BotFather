@@ -16,17 +16,17 @@ export class GoogleSheet {
     private timeout: any;
     private timeoutLC: any;
 
-    constructor() {
+    constructor(sheetIDResistance: number, sheetID_lc: number) {
         this.serviceAccountAuth = new JWT({
             email: process.env.GOOGLE_SHEET_EMAIL,
-            key: process.env.GOOGLE_SHEET_KEY,
+            key: process.env.GOOGLE_SHEET_KEY?.toString().replace(/\\n/g, "\n"),
             scopes: [
                 'https://www.googleapis.com/auth/spreadsheets',
             ],
         });
 
-        this.sheetIDResistance = 1402460613;
-        this.sheetID_lc = 253910119;
+        this.sheetIDResistance = sheetIDResistance;
+        this.sheetID_lc = sheetID_lc;
         this.id = '1Y66p8jvlSJeBafEcWuzfs8G4iK4NeMS_OVXDefrG4BM';
 
         this.list = [];
@@ -99,4 +99,3 @@ export class GoogleSheet {
         }
     }
 }
- export default new GoogleSheet();
