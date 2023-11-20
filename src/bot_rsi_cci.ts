@@ -9,7 +9,7 @@ import updateSheet from './updateSheet';
 
 dotenv.config({ path: '../.env' });
 
-export class BotRSI_CCI {
+export default class BotRSI_CCI {
     private googleSheet: GoogleSheet;
     private binance?: BinanceFuture;
     private setupConfig: SetupConfig;
@@ -318,11 +318,3 @@ export class BotRSI_CCI {
         }
     }
 }
-
-async function main() {
-    // let bot = new BotRSI_CCI(1402460613, 253910119, 'config.txt', 80, 'BOT_1');
-    let bot = new BotRSI_CCI(2049300785, 1469489754, 'config.txt', 80, 'BOT_1');
-    await bot.init();
-}
-
-main();
