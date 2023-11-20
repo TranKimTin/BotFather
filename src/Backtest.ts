@@ -73,8 +73,13 @@ export default class Backtest {
     }
 
     async initData(from: string, to: string) {
+        let promisList = [];
         for (let symbol of this.symbolList) {
-            let data = await this.getData(symbol, from, to);
+            promisList.push(this.getData(symbol, from, to));
+            if (promisList.length >= 10) {
+                await Promise.all(promisList);
+                promisList = [];
+            }
         }
     }
 
@@ -102,10 +107,6 @@ export default class Backtest {
             }
             limit -= Math.min(limit, maxCall);
             since = moment(data[data.length - 1].startTime).add(1, 'minute').valueOf();
-            for (let i = 1; i < data.length; i++) {
-                let item = data[i];
-                if (item.startTime > 1699628760000 && item.startTime < 1699634820000) console.log(moment(item.startTime), item.startTime - data[i - 1].startTime, item.low)
-            }
         }
         result.sort((a, b) => a.startTime - b.startTime);
 
@@ -116,34 +117,40 @@ export default class Backtest {
         let startDate = moment.utc(from);
         let endDate = moment.utc(to);
         while (startDate.valueOf() <= endDate.valueOf()) {
-            let filename = `../data/${startDate.format('YYYY-MM-DD')}_${symbol}.data`;
+            let filename = `../data/${symbol}_${startDate.format('YYYY-MM-DD')}.data`;
             if (!fs.existsSync(filename)) {
                 let data = await this.getOHLCV(symbol, '1m', 1440, startDate.valueOf());
                 if (data.length == 1440 && data[0].startTime == startDate.valueOf() && data[data.length - 1].startTime + 60000 == startDate.valueOf() + 86400000) {
                     let compressData = await util.compress(JSON.stringify(data));
                     fs.writeFileSync(filename, compressData);
-                    console.log(`update data ${startDate.format('YYYY-MM-DD')}`);
+                    console.log(`update data ${symbol} ${startDate.format('YYYY-MM-DD')}`);
                 }
                 else {
                     console.log('error', { symbol, startDate: startDate.format('YYYY-MM-DD'), length: data.length });
-                    for (let i = 1; i < data.length; i++) {
-                        let item = data[i];
-                        // console.log(moment(item.startTime), item.startTime - data[i - 1].startTime)
-                    }
                 }
+                startDate.add(1, 'day');
+                while (startDate.valueOf() <= data[0].startTime) {
+                    console.log('next day', symbol, startDate.format('YYYY-MM-DD'));
+                    startDate.add(1, 'day');
+                }
+
             }
             else {
                 let dataDecompress = await util.decompress(fs.readFileSync(filename));
                 let data = JSON.parse(dataDecompress.toString());
+                startDate.add(1, 'day');
                 // console.log(data);
             }
-            startDate.add(1, 'day');
         }
     }
 }
 
 async function main() {
-    let symbolList = ['BTCUSDT'];
+    let symbolList = await util.getSymbolList();
+    let ignoreList = ['BTCDOMUSDT', 'USDCUSDT', 'BTCUSDT', 'COCOSUSDT'];
+    symbolList = symbolList.filter(item => item.endsWith("USDT"))
+        .filter(item => !ignoreList.includes(item));
+
     let bot = new Backtest({
         symbolList: symbolList,
         timeframes: [/*'1m', '3m', '5m',*/ '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'],
@@ -151,7 +158,7 @@ async function main() {
         onClosePosition: async (symbol: string) => { },
         onHandleError: async (err: any, symbol: string | undefined) => { },
     });
-    await bot.initData('2023-10-20', '2023-11-19');
+    await bot.initData('2022-10-01', '2023-11-19');
 }
 
 async function onCloseCandle(symbol: string, timeframe: string, data: Array<RateData>) {

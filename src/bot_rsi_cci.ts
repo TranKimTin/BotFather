@@ -26,11 +26,9 @@ export default class BotRSI_CCI {
 
     async init() {
         let symbolList = await util.getSymbolList();
+        let ignoreList = ['BTCDOMUSDT', 'USDCUSDT', 'BTCUSDT', 'COCOSUSDT'];
         symbolList = symbolList.filter(item => item.endsWith("USDT"))
-            .filter(item => item != 'BTCDOMUSDT'
-                && item != 'USDCUSDT'
-                && item != 'BTCUSDT'
-                && item != 'COCOSUSDT');
+            .filter(item => !ignoreList.includes(item));
         // console.log(symbolList.join(' '));
         console.log(`Total ${symbolList.length} symbols`);
 
