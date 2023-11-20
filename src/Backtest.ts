@@ -76,7 +76,7 @@ export default class Backtest {
         let promisList = [];
         for (let symbol of this.symbolList) {
             promisList.push(this.getData(symbol, from, to));
-            if (promisList.length >= 10) {
+            if (promisList.length >= 3) {
                 await Promise.all(promisList);
                 promisList = [];
             }
