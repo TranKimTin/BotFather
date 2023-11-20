@@ -6,8 +6,8 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '../.env' });
 
 const token: any = process.env.TELEGRAM_TOKEN;
-const chatID = 1833284254; //'@tintk_RSI_CCI'
-const errorChatID = 1833284254; //'@tintk_RSI_CCI'
+const chatID = 'tintk_RSI_CCI'; //'@tintk_RSI_CCI'
+const errorChatID = 'tintk_RSI_CCI'; //'@tintk_RSI_CCI'
 const tinID = 1833284254;
 
 let bot = new TelegramBot(token, { polling: false });
