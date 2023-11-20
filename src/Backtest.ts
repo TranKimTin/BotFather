@@ -76,11 +76,11 @@ export default class Backtest {
     }
 
     async getOHLCV(symbol: string, timeframe: string, limit: number, since: number) {
-        console.log(since);
         let result = [];
         let maxCall = 1000;
         let check: { [key: number]: boolean } = {};
         while (limit > 0) {
+            console.log(moment(since));
             // if (limit > maxCall) console.log(`getOHLCV pending ${symbol} ${timeframe} ${limit}`);
             let ohlcv = await this.binance.fetchOHLCV(symbol, timeframe, since, Math.min(limit, maxCall));
             let data = ohlcv.filter(item => item[0] && item[1] && item[2] && item[3] && item[4] && item[5]).map(item => {
@@ -90,8 +90,7 @@ export default class Backtest {
                 let low = item[3] || 0;
                 let close = item[4] || 0;
                 let volume = item[5] || 0;
-                let timestring = moment(startTime).format('YYYY-MM-DD HH:mm:SS');
-                return { symbol, startTime, timestring, open, high, low, close, volume };
+                return { symbol, startTime, open, high, low, close, volume };
             }).filter(item => !check[item.startTime]);
             if (data.length == 0) break;
             data.sort((a, b) => a.startTime - b.startTime);
@@ -100,10 +99,10 @@ export default class Backtest {
                 check[item.startTime] = true;
             }
             limit -= Math.min(limit, maxCall);
-            since = moment(data[0].startTime).subtract(data.length, 'minute').valueOf();
+            since = moment(data[data.length - 1].startTime).add(1, 'minute').valueOf();
         }
         result = result.filter(item => item.startTime && item.open && item.high && item.low && item.close && item.volume);
-        result.sort((a, b) => b.startTime - a.startTime);
+        result.sort((a, b) => a.startTime - b.startTime);
 
         return result;
     }
