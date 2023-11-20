@@ -320,6 +320,7 @@ class BinanceFuture {
             limit -= Math.min(limit, maxCall);
             since = moment(data[0].startTime).subtract(Math.min(limit, maxCall) * (+timeframe.slice(0, timeframe.length - 1)), <DurationInputArg2>timeframe[timeframe.length - 1]).valueOf();
         }
+        result = result.filter(item => item.startTime && item.open && item.high && item.low && item.close && item.volume);
         result.sort((a, b) => b.startTime - a.startTime);
 
         if (result.length) result[0].isFinal = false;
