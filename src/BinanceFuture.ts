@@ -258,7 +258,7 @@ class BinanceFuture {
             let i = 0;
             for (let symbol of this.symbolList) {
                 this.data[symbol][tf] = rates[i++];
-                this.lastPrice[symbol] = this.data[symbol][tf][0].close;
+                this.lastPrice[symbol] = this.data[symbol][tf][0]?.close || 0;
             }
             await delay(1000);
         }
