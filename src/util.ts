@@ -134,7 +134,7 @@ export function getStartTime(tf: string, currentTime: number) {
 
 export async function compress(data: string): Promise<Buffer> {
     return new Promise((resolve, reject) => {
-        zlib.deflate(data, (err, result) => {
+        zlib.deflate(data, { level: 9 }, (err, result) => {
             if (err) return reject(err);
             return resolve(result);
         })
@@ -143,7 +143,7 @@ export async function compress(data: string): Promise<Buffer> {
 
 export async function decompress(data: Buffer): Promise<Buffer> {
     return new Promise((resolve, reject) => {
-        zlib.inflate(data, (err, result) => {
+        zlib.inflate(data, { level: 9 }, (err, result) => {
             if (err) return reject(err);
             return resolve(result);
         })
