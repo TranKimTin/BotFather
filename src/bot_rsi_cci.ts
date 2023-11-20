@@ -14,11 +14,13 @@ export default class BotRSI_CCI {
     private binance?: BinanceFuture;
     private setupConfig: SetupConfig;
     private telegram: Telegram;
+    private isReadOnly: boolean;
 
-    constructor(sheetIDResistance: number, sheetID_lc: number, pathFileConfig: string, port: number, tag: string) {
+    constructor(sheetIDResistance: number, sheetID_lc: number, pathFileConfig: string, port: number, tag: string, isReadOnly: boolean) {
         this.googleSheet = new GoogleSheet(sheetIDResistance, sheetID_lc);
         this.telegram = new Telegram(tag);
         this.setupConfig = new SetupConfig(pathFileConfig, port, this.telegram);
+        this.isReadOnly = isReadOnly;
         updateSheet(sheetIDResistance, sheetID_lc);
     }
 
@@ -27,7 +29,8 @@ export default class BotRSI_CCI {
         symbolList = symbolList.filter(item => item.endsWith("USDT"))
             .filter(item => item != 'BTCDOMUSDT'
                 && item != 'USDCUSDT'
-                && item != 'BTCUSDT');
+                && item != 'BTCUSDT'
+                && item != 'COCOSUSDT');
         // console.log(symbolList.join(' '));
         console.log(`Total ${symbolList.length} symbols`);
 
@@ -41,7 +44,7 @@ export default class BotRSI_CCI {
             onHandleError: async (err: any, symbol: string | undefined) => { await this.telegram.sendError((symbol ? symbol : '') + err.message); },
             onInitStart: async () => { await this.telegram.sendMessage('bot restart...') },
             onInitDone: async () => { await this.telegram.sendMessage('bot restart done.') },
-            isReadOnly: true
+            isReadOnly: this.isReadOnly
         });
 
         await this.binance.init();
