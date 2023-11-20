@@ -132,3 +132,4 @@ js/*.js
 js/config.txt
 *.js
 package-lock.json
+ssh.txt
