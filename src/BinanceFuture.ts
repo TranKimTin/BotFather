@@ -321,7 +321,8 @@ class BinanceFuture {
             since = moment(data[0].startTime).subtract(Math.min(limit, maxCall) * (+timeframe.slice(0, timeframe.length - 1)), <DurationInputArg2>timeframe[timeframe.length - 1]).valueOf();
         }
         result.sort((a, b) => b.startTime - a.startTime);
-        result[0].isFinal = false;
+
+        if (result.length) result[0].isFinal = false;
         return result;
     }
 

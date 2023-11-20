@@ -133,3 +133,6 @@ js/config.txt
 *.js
 package-lock.json
 ssh.txt
+js/config80.txt
+js/config81.txt
+js/config82.txt
