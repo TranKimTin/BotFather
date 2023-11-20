@@ -14,21 +14,20 @@ export default function updateSheet(sheetIDResistance: number, sheetID_lc: numbe
             let ret = [];
             while (1) {
                 let res = await binance.fetchOHLCV(symbol, '1m', since, 1000);
-                let data = res.map(item => ({
-                    symbol,
-                    startTime: item[0],
-                    timestring: moment(item[0]).format('YYYY-MM-DD HH:mm'),
-                    open: item[1],
-                    high: item[2],
-                    low: item[3],
-                    close: item[4],
-                    volume: item[5],
-                }));
+                let data = res.map(item => {
+                    let startTime = item[0] || 0;
+                    let open = item[1] || 0;
+                    let high = item[2] || 0;
+                    let low = item[3] || 0;
+                    let close = item[4] || 0;
+                    let volume = item[5] || 0;
+                    let timestring = moment(startTime).format('YYYY-MM-DD HH:mm:SS');
+                    return { symbol, startTime, timestring, open, high, low, close, volume };
+                });
                 ret.push(...data);
                 if (data.length < 1000) break;
                 since = data[999].startTime + 1000;
             }
-
             return ret;
         }
         catch (err) {

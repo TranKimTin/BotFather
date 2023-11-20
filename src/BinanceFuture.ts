@@ -129,6 +129,7 @@ class BinanceFuture {
         let market = await this.binance.loadMarkets(true);
         for (let key in market) {
             let item = market[key];
+            if (!item) continue;
             let symbol = item.info.symbol.replace('/', '');
             let precision = item.precision;
             this.digits[symbol] = {
@@ -296,20 +297,20 @@ class BinanceFuture {
         while (limit > 0) {
             if (limit > maxCall) console.log(`getOHLCV pending ${symbol} ${timeframe} ${limit}`);
             let ohlcv = await this.binance.fetchOHLCV(symbol, timeframe, since, Math.min(limit, maxCall));
-            let data = ohlcv.map(item => ({
-                symbol,
-                startTime: item[0],
-                timestring: moment(item[0]).format('YYYY-MM-DD HH:mm:SS'),
-                open: item[1],
-                high: item[2],
-                low: item[3],
-                close: item[4],
-                volume: item[5],
-                interval: timeframe,
-                isFinal: true,
-                change: (item[4] - item[1]) / item[1],
-                ampl: (item[2] - item[3]) / (item[1])
-            })).filter(item => !check[item.startTime]);
+            let data = ohlcv.filter(item => item[0] && item[1] && item[2] && item[3] && item[4] && item[5]).map(item => {
+                let startTime = item[0] || 0;
+                let open = item[1] || 0;
+                let high = item[2] || 0;
+                let low = item[3] || 0;
+                let close = item[4] || 0;
+                let volume = item[5] || 0;
+                let interval = timeframe;
+                let isFinal = true;
+                let change = (close - open) / open;
+                let ampl = (high - low) / open;
+                let timestring = moment(startTime).format('YYYY-MM-DD HH:mm:SS');
+                return { symbol, startTime, timestring, open, high, low, close, volume, interval, isFinal, change, ampl };
+            }).filter(item => !check[item.startTime]);
             if (data.length == 0) break;
             data.sort((a, b) => a.startTime - b.startTime);
             result.push(...data);
