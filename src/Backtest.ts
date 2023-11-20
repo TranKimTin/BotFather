@@ -2,6 +2,9 @@ import * as ccxt from 'ccxt';
 import { Digit, Position, RateData } from "./BinanceFuture";
 import moment from 'moment';
 import fs from 'fs';
+import zlib from 'zlib';
+import { reject } from 'lodash';
+import * as util from './util';
 
 interface IParam {
     symbolList: Array<string>,
@@ -107,18 +110,23 @@ export default class Backtest {
         return result;
     }
 
-
     async getData(symbol: string, from: string, to: string) {
         let startDate = moment.utc(from);
         let endDate = moment.utc(to);
         while (startDate.valueOf() <= endDate.valueOf()) {
-            let filename = `../data/${startDate.format('YYYY-MM-DD')}_${symbol}.json`;
+            let filename = `../data/${startDate.format('YYYY-MM-DD')}_${symbol}.data`;
             if (!fs.existsSync(filename)) {
                 let data = await this.getOHLCV(symbol, '1m', 1440, startDate.valueOf());
                 if (data.length) {
-                    fs.writeFileSync(filename, JSON.stringify(data));
+                    let compressData = await util.compress(JSON.stringify(data));
+                    fs.writeFileSync(filename, compressData);
                     console.log(`update data ${startDate.format('YYYY-MM-DD')}`);
                 }
+            }
+            else {
+                let dataDecompress = await util.decompress(fs.readFileSync(filename));
+                let data = JSON.parse(dataDecompress.toString());
+                console.log(data);
             }
             startDate = startDate.add(1, 'day');
         }

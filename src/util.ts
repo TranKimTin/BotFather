@@ -1,5 +1,6 @@
 import moment from 'moment';
 import { RateData } from './BinanceFuture';
+import zlib from 'zlib';
 
 export function iCCI(data: Array<RateData>, period: number) {
     let prices = data.map(item => ({ high: item.high, low: item.low, close: item.close })).reverse();
@@ -129,4 +130,22 @@ export function getStartTime(tf: string, currentTime: number) {
         case '1d': return currentTime - currentTime % 86400000;
         default: return currentTime;
     }
+}
+
+export async function compress(data: string): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+        zlib.deflate(data, (err, result) => {
+            if (err) return reject(err);
+            return resolve(result);
+        })
+    });
+}
+
+export async function decompress(data: Buffer): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+        zlib.inflate(data, (err, result) => {
+            if (err) return reject(err);
+            return resolve(result);
+        })
+    });
 }
