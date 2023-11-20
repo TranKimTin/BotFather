@@ -1,0 +1,145 @@
+import * as ccxt from 'ccxt';
+import { Digit, Position, RateData } from "./BinanceFuture";
+import moment from 'moment';
+import fs from 'fs';
+
+interface IParam {
+    symbolList: Array<string>,
+    timeframes: Array<string>,
+    onCloseCandle: (symbol: string, timeframe: string, data: Array<RateData>) => void,
+    onClosePosition: (symbol: string) => void,
+    onHandleError: (err: unknown, symbol: string | undefined) => void
+}
+
+export default class Backtest {
+    private binance: ccxt.binanceusdm;
+    private symbolList: Array<string>;
+    private timeframes: Array<string>;
+    private onCloseCandle: (symbol: string, timeframe: string, data: Array<RateData>) => void;
+    private onHandleError: (err: any, symbol: string | undefined) => void;
+    private onClosePosition: (symbol: string) => void;
+
+    public digits: { [key: string]: Digit };
+    private data: { [key: string]: { [key: string]: Array<RateData> } };
+    private positions: { [key: string]: Position };
+    private minVolumes: { [key: string]: number };
+    private lastPrice: { [key: string]: number };
+
+    constructor(params: IParam) {
+        this.binance = new ccxt.binanceusdm({});
+        this.symbolList = params.symbolList;
+        this.timeframes = params.timeframes;
+        this.onCloseCandle = params.onCloseCandle;
+        this.onClosePosition = params.onClosePosition;
+        this.onHandleError = params.onHandleError;
+        this.data = {};
+        this.digits = {};
+        this.positions = {};
+        this.minVolumes = {};
+        this.lastPrice = {};
+
+        for (let symbol of this.symbolList) {
+            this.data[symbol] = {};
+            for (let tf of this.timeframes) {
+                this.data[symbol][tf] = [];
+            }
+        }
+
+        if (!fs.existsSync('../data')) {
+            fs.mkdirSync('../data');
+        }
+    }
+
+    async runBacktest(from: string, to: string) {
+        console.log('init digits...');
+        let market = await this.binance.loadMarkets(true);
+        for (let key in market) {
+            let item = market[key];
+            if (!item) continue;
+            let symbol = item.info.symbol.replace('/', '');
+            let precision = item.precision;
+            this.digits[symbol] = {
+                volume: precision.amount,
+                price: precision.price
+                // base: precision.base,
+                // quote: precision.quote
+            }
+            this.minVolumes[symbol] = item.limits.amount?.min || 0;
+        }
+        this.initData(from, to);
+    }
+
+    async initData(from: string, to: string) {
+        for (let symbol of this.symbolList) {
+            let data = await this.getData(symbol, from, to);
+        }
+    }
+
+    async getOHLCV(symbol: string, timeframe: string, limit: number, since: number) {
+        console.log(since);
+        let result = [];
+        let maxCall = 1000;
+        let check: { [key: number]: boolean } = {};
+        while (limit > 0) {
+            // if (limit > maxCall) console.log(`getOHLCV pending ${symbol} ${timeframe} ${limit}`);
+            let ohlcv = await this.binance.fetchOHLCV(symbol, timeframe, since, Math.min(limit, maxCall));
+            let data = ohlcv.filter(item => item[0] && item[1] && item[2] && item[3] && item[4] && item[5]).map(item => {
+                let startTime = item[0] || 0;
+                let open = item[1] || 0;
+                let high = item[2] || 0;
+                let low = item[3] || 0;
+                let close = item[4] || 0;
+                let volume = item[5] || 0;
+                let timestring = moment(startTime).format('YYYY-MM-DD HH:mm:SS');
+                return { symbol, startTime, timestring, open, high, low, close, volume };
+            }).filter(item => !check[item.startTime]);
+            if (data.length == 0) break;
+            data.sort((a, b) => a.startTime - b.startTime);
+            result.push(...data);
+            for (let item of data) {
+                check[item.startTime] = true;
+            }
+            limit -= Math.min(limit, maxCall);
+            since = moment(data[0].startTime).subtract(data.length, 'minute').valueOf();
+        }
+        result = result.filter(item => item.startTime && item.open && item.high && item.low && item.close && item.volume);
+        result.sort((a, b) => b.startTime - a.startTime);
+
+        return result;
+    }
+
+
+    async getData(symbol: string, from: string, to: string) {
+        let startDate = moment.utc(from);
+        let endDate = moment.utc(to);
+        while (startDate.valueOf() <= endDate.valueOf()) {
+            let filename = `../data/${startDate.format('YYYY-MM-DD')}_${symbol}.json`;
+            if (!fs.existsSync(filename)) {
+                let data = await this.getOHLCV(symbol, '1m', 1440, startDate.valueOf());
+                if (data.length) {
+                    fs.writeFileSync(filename, JSON.stringify(data));
+                    console.log(`update data ${startDate.format('YYYY-MM-DD')}`);
+                }
+            }
+            startDate = startDate.add(1, 'day');
+        }
+    }
+}
+
+async function main() {
+    let symbolList = ['BTCUSDT'];
+    let bot = new Backtest({
+        symbolList: symbolList,
+        timeframes: [/*'1m', '3m', '5m',*/ '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'],
+        onCloseCandle: onCloseCandle,
+        onClosePosition: async (symbol: string) => { },
+        onHandleError: async (err: any, symbol: string | undefined) => { },
+    });
+    await bot.initData('2023-10-20', '2023-10-20');
+}
+
+async function onCloseCandle(symbol: string, timeframe: string, data: Array<RateData>) {
+
+}
+
+main();
