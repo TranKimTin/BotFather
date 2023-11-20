@@ -83,10 +83,9 @@ export default class Backtest {
         let maxCall = 1000;
         let check: { [key: number]: boolean } = {};
         while (limit > 0) {
-            console.log(moment(since));
             // if (limit > maxCall) console.log(`getOHLCV pending ${symbol} ${timeframe} ${limit}`);
             let ohlcv = await this.binance.fetchOHLCV(symbol, timeframe, since, Math.min(limit, maxCall));
-            let data = ohlcv.filter(item => item[0] && item[1] && item[2] && item[3] && item[4] && item[5]).map(item => {
+            let data = ohlcv.filter(item => item[0] !== undefined && item[1] !== undefined && item[2] !== undefined && item[3] !== undefined && item[4] !== undefined && item[5] !== undefined).map(item => {
                 let startTime = item[0] || 0;
                 let open = item[1] || 0;
                 let high = item[2] || 0;
@@ -103,8 +102,11 @@ export default class Backtest {
             }
             limit -= Math.min(limit, maxCall);
             since = moment(data[data.length - 1].startTime).add(1, 'minute').valueOf();
+            for (let i = 1; i < data.length; i++) {
+                let item = data[i];
+                if (item.startTime > 1699628760000 && item.startTime < 1699634820000) console.log(moment(item.startTime), item.startTime - data[i - 1].startTime, item.low)
+            }
         }
-        result = result.filter(item => item.startTime && item.open && item.high && item.low && item.close && item.volume);
         result.sort((a, b) => a.startTime - b.startTime);
 
         return result;
@@ -117,18 +119,25 @@ export default class Backtest {
             let filename = `../data/${startDate.format('YYYY-MM-DD')}_${symbol}.data`;
             if (!fs.existsSync(filename)) {
                 let data = await this.getOHLCV(symbol, '1m', 1440, startDate.valueOf());
-                if (data.length) {
+                if (data.length == 1440 && data[0].startTime == startDate.valueOf() && data[data.length - 1].startTime + 60000 == startDate.valueOf() + 86400000) {
                     let compressData = await util.compress(JSON.stringify(data));
                     fs.writeFileSync(filename, compressData);
                     console.log(`update data ${startDate.format('YYYY-MM-DD')}`);
+                }
+                else {
+                    console.log('error', { symbol, startDate: startDate.format('YYYY-MM-DD'), length: data.length });
+                    for (let i = 1; i < data.length; i++) {
+                        let item = data[i];
+                        // console.log(moment(item.startTime), item.startTime - data[i - 1].startTime)
+                    }
                 }
             }
             else {
                 let dataDecompress = await util.decompress(fs.readFileSync(filename));
                 let data = JSON.parse(dataDecompress.toString());
-                console.log(data);
+                // console.log(data);
             }
-            startDate = startDate.add(1, 'day');
+            startDate.add(1, 'day');
         }
     }
 }
@@ -142,7 +151,7 @@ async function main() {
         onClosePosition: async (symbol: string) => { },
         onHandleError: async (err: any, symbol: string | undefined) => { },
     });
-    await bot.initData('2023-10-20', '2023-10-20');
+    await bot.initData('2023-10-20', '2023-11-19');
 }
 
 async function onCloseCandle(symbol: string, timeframe: string, data: Array<RateData>) {

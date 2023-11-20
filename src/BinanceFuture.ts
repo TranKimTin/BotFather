@@ -297,7 +297,7 @@ class BinanceFuture {
         while (limit > 0) {
             if (limit > maxCall) console.log(`getOHLCV pending ${symbol} ${timeframe} ${limit}`);
             let ohlcv = await this.binance.fetchOHLCV(symbol, timeframe, since, Math.min(limit, maxCall));
-            let data = ohlcv.filter(item => item[0] && item[1] && item[2] && item[3] && item[4] && item[5]).map(item => {
+            let data = ohlcv.filter(item => item[0] !== undefined && item[1] !== undefined && item[2] !== undefined && item[3] !== undefined && item[4] !== undefined && item[5] !== undefined).map(item => {
                 let startTime = item[0] || 0;
                 let open = item[1] || 0;
                 let high = item[2] || 0;
@@ -320,7 +320,6 @@ class BinanceFuture {
             limit -= Math.min(limit, maxCall);
             since = moment(data[0].startTime).subtract(Math.min(limit, maxCall) * (+timeframe.slice(0, timeframe.length - 1)), <DurationInputArg2>timeframe[timeframe.length - 1]).valueOf();
         }
-        result = result.filter(item => item.startTime && item.open && item.high && item.low && item.close && item.volume);
         result.sort((a, b) => b.startTime - a.startTime);
 
         if (result.length) result[0].isFinal = false;
