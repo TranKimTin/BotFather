@@ -59,21 +59,6 @@ export interface Order {
     timeInt: number
 }
 
-export interface OHLCV {
-    symbol: string,
-    startTime: number,
-    timestring: string,
-    open: number,
-    high: number,
-    low: number,
-    close: number,
-    volume: number,
-    interval: string,
-    isFinal: boolean,
-    change: number,
-    ampl: number
-}
-
 class BinanceFuture {
     private binance: ccxt.binanceusdm;
     private client: Binance;

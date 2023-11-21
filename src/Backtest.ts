@@ -2,9 +2,30 @@ import * as ccxt from 'ccxt';
 import { Digit, Position, RateData } from "./BinanceFuture";
 import moment from 'moment';
 import fs from 'fs';
-import zlib from 'zlib';
-import { reject } from 'lodash';
 import * as util from './util';
+
+enum OrderStatus {
+    ORDER_BOOKED,
+    ORDER_WAIT_LIMIT,
+    ORDER_WAIT_STOP,
+    ORDER_FILL,
+    ORDER_CANCLE
+}
+
+interface Order {
+    symbol: string,
+    side: 'BUY' | 'SELL' | string,
+    type: 'MARKET' | 'LIMIT' | 'STOP_LIMIT' | 'STOP_MARKET' | string,
+    volume: number,
+    price?: number,
+    stopPrice?: number,
+    status: OrderStatus,
+    createTime: number,
+    updateTime?: number,
+    expiredTime?: number,
+    reduceOnly?: boolean,
+    closePosition?: boolean
+}
 
 interface IParam {
     symbolList: Array<string>,
@@ -18,6 +39,7 @@ export default class Backtest {
     private binance: ccxt.binanceusdm;
     private symbolList: Array<string>;
     private timeframes: Array<string>;
+    private orders: Array<Order>;
     private onCloseCandle: (symbol: string, timeframe: string, data: Array<RateData>) => void;
     private onHandleError: (err: any, symbol: string | undefined) => void;
     private onClosePosition: (symbol: string) => void;
@@ -27,8 +49,10 @@ export default class Backtest {
     private positions: { [key: string]: Position };
     private minVolumes: { [key: string]: number };
     private lastPrice: { [key: string]: number };
+    private timeCurrent: moment.Moment;
 
     constructor(params: IParam) {
+        moment()
         this.binance = new ccxt.binanceusdm({});
         this.symbolList = params.symbolList;
         this.timeframes = params.timeframes;
@@ -40,6 +64,8 @@ export default class Backtest {
         this.positions = {};
         this.minVolumes = {};
         this.lastPrice = {};
+        this.orders = [];
+        this.timeCurrent = moment();
 
         for (let symbol of this.symbolList) {
             this.data[symbol] = {};
@@ -79,15 +105,15 @@ export default class Backtest {
             }
         }
 
-        let timestamp = moment.utc(from);
+        this.timeCurrent = moment.utc(from);
         let endTime = moment.utc(to).add(1, 'day').valueOf();
-        while (timestamp.valueOf() < endTime) {
+        while (this.timeCurrent.valueOf() < endTime) {
             let promiseList = [];
             for (let symbol of this.symbolList) {
                 for (let tf of this.timeframes) {
                     let data = this.data[symbol][tf];
                     let i = idx[symbol][tf];
-                    if (i >= 0 && data[i].startTime == timestamp.valueOf()) {
+                    if (i >= 0 && data[i].startTime == this.timeCurrent.valueOf()) {
                         promiseList.push(this.onCloseCandle(symbol, tf, data.slice(i, i + 300)));
                         idx[symbol][tf]--;
                     }
@@ -95,12 +121,162 @@ export default class Backtest {
             }
             await Promise.all(promiseList);
             await this.handleLogic();
-            timestamp.add(1, 'minute');
+            this.timeCurrent.add(1, 'minute');
         }
     }
 
+    async getOpenOrders(symbol: string): Promise<Array<Order>> {
+        return this.orders;
+    }
+
+    async orderStopMarket(symbol: string, side: string, volume: number, price: number, isTakeProfit: boolean, closePosition: boolean, workingType: 'CONTRACT_PRICE' | 'MARK_PRICE' = 'CONTRACT_PRICE'): Promise<Order> {
+        if (side == 'buy' || side == 'long' || side == 'LONG') side = 'BUY';
+        if (side == 'sell' || side == 'short' || side == 'SHORT') side = 'SELL';
+
+        price = +price.toFixed(this.digits[symbol].price);
+        volume = Math.max(volume, this.minVolumes[symbol]);
+        volume = +volume.toFixed(this.digits[symbol].volume);
+
+        console.log('orderStopMarket', { symbol, side, volume, price, isTakeProfit, closePosition, workingType });
+
+        let order = {
+            symbol,
+            side,
+            volume,
+            price,
+            createTime: this.timeCurrent.valueOf(),
+            updateTime: this.timeCurrent.valueOf(),
+            status: OrderStatus.ORDER_WAIT_STOP,
+            type: 'STOP_MARKET',
+            reduceOnly: closePosition,
+            closePosition
+        };
+
+        this.orders.push(order);
+        return order;
+    }
+
+    async orderStopLimit(symbol: string, side: string, volume: number, stopPrice: number, limitPrice: number, isTakeProfit: boolean, reduceOnly: boolean, workingType: 'CONTRACT_PRICE' | 'MARK_PRICE' = 'CONTRACT_PRICE'): Promise<Order> {
+        if (side == 'buy' || side == 'long' || side == 'LONG') side = 'BUY';
+        if (side == 'sell' || side == 'short' || side == 'SHORT') side = 'SELL';
+
+        stopPrice = +stopPrice.toFixed(this.digits[symbol].price);
+        limitPrice = +limitPrice.toFixed(this.digits[symbol].price);
+        volume = Math.max(volume, this.minVolumes[symbol]);
+        volume = +volume.toFixed(this.digits[symbol].volume);
+
+        console.log('orderStopLimit', { symbol, side, volume, stopPrice, limitPrice, isTakeProfit, reduceOnly, workingType })
+
+        let order: Order = {
+            symbol,
+            side,
+            volume,
+            price: limitPrice,
+            stopPrice,
+            createTime: this.timeCurrent.valueOf(),
+            updateTime: this.timeCurrent.valueOf(),
+            status: OrderStatus.ORDER_WAIT_STOP,
+            type: 'STOP_LIMIT',
+            reduceOnly
+        };
+        this.orders.push(order);
+        return order;
+    }
+
+    async orderMarket(symbol: string, side: string, volume: number, options: { TP?: number, SL?: number, TP_Percent?: number, SL_Percent?: number } = {}): Promise<Array<Order>> {
+        let { TP, SL, TP_Percent, SL_Percent } = options;
+
+        let lastPrice = this.lastPrice[symbol];
+        volume = Math.max(volume, this.minVolumes[symbol]);
+        volume = +volume.toFixed(this.digits[symbol].volume);
+
+        if (side == 'buy' || side == 'long' || side == 'LONG') side = 'BUY';
+        if (side == 'sell' || side == 'short' || side == 'SHORT') side = 'SELL';
+
+        if (!TP && TP_Percent) TP = (side == 'BUY') ? (lastPrice * (1 + TP_Percent)) : lastPrice * (1 - TP_Percent);
+        if (!SL && SL_Percent) SL = (side == 'BUY') ? (lastPrice * (1 - SL_Percent)) : lastPrice * (1 + SL_Percent);
+
+        TP = TP ? +TP?.toFixed(this.digits[symbol].price) : 0;
+        SL = SL ? +SL.toFixed(this.digits[symbol].price) : 0;
+
+        let sideClose = (side == 'BUY') ? 'SELL' : 'BUY';
+
+        console.log('orderMarket', { symbol, side, volume, TP, SL });
+
+        let order: Order = {
+            symbol,
+            side,
+            type: 'MARKET',
+            volume,
+            status: OrderStatus.ORDER_BOOKED,
+            createTime: this.timeCurrent.valueOf(),
+            updateTime: this.timeCurrent.valueOf(),
+        };
+        this.orders.push(order);
+
+        let result: Array<Order> = [order];
+        if (TP) {
+            result.push(((await this.orderLimit(symbol, sideClose, volume, TP)))[0]);
+            result.push(await this.orderStopMarket(symbol, sideClose, volume, SL, false, true));
+        }
+        return result;
+    }
+
+    async orderLimit(symbol: string, side: string, volume: number, price: number, options: { TP?: number, SL?: number, TP_Percent?: number, SL_Percent?: number, expiredTime?: number } = {}): Promise<Array<Order>> {
+        let { TP, SL, TP_Percent, SL_Percent, expiredTime } = options;
+
+        volume = Math.max(volume, this.minVolumes[symbol]);
+        volume = +volume.toFixed(this.digits[symbol].volume);
+        price = +price.toFixed(this.digits[symbol].price);
+
+        if (side == 'buy' || side == 'long' || side == 'LONG') side = 'BUY';
+        if (side == 'sell' || side == 'short' || side == 'SHORT') side = 'SELL';
+
+        if (!TP && TP_Percent) TP = (side == 'BUY') ? (price * (1 + TP_Percent)) : price * (1 - TP_Percent);
+        if (!SL && SL_Percent) SL = (side == 'BUY') ? (price * (1 - SL_Percent)) : price * (1 + SL_Percent);
+
+        TP = TP ? +TP.toFixed(this.digits[symbol].price) : 0;
+        SL = SL ? +SL.toFixed(this.digits[symbol].price) : 0;
+
+        let sideClose = (side == 'BUY') ? 'SELL' : 'BUY';
+
+        let option = {
+            timeInForce: 'GTC',
+            goodTillDate: 0
+        };
+
+        if (expiredTime) {
+            option.timeInForce = 'GTD';
+            option.goodTillDate = expiredTime;
+        }
+
+        console.log('orderLimit', { symbol, side, volume, price, TP, SL, option });
+
+        let order: Order = {
+            symbol,
+            side,
+            type: 'LIMIT',
+            volume,
+            price,
+            status: OrderStatus.ORDER_WAIT_LIMIT,
+            createTime: this.timeCurrent.valueOf(),
+            updateTime: this.timeCurrent.valueOf(),
+            expiredTime: expiredTime || undefined
+        };
+        this.orders.push(order);
+
+        let result: Array<Order> = [order];
+        if (TP) {
+            result.push(await this.orderStopLimit(symbol, sideClose, volume, price, TP, true, true));
+            result.push(await this.orderStopMarket(symbol, sideClose, volume, SL, false, true));
+        }
+        return result;
+    }
+
     private async handleLogic() {
-        
+        for (let order of this.orders) {
+            
+        }
     }
 
     private async initData(from: string, to: string) {
