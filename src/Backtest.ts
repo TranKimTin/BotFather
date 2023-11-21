@@ -69,21 +69,76 @@ export default class Backtest {
             }
             this.minVolumes[symbol] = item.limits.amount?.min || 0;
         }
-        this.initData(from, to);
+        await this.initData(from, to);
+
+        let idx: any = {};
+        for (let symbol of this.symbolList) {
+            idx[symbol] = {};
+            for (let tf of this.timeframes) {
+                idx[symbol][tf] = this.data[symbol][tf].length - 1;
+            }
+        }
+
+        let timestamp = moment.utc(from);
+        let endTime = moment.utc(to).add(1, 'day').valueOf();
+        while (timestamp.valueOf() < endTime) {
+            let promiseList = [];
+            for (let symbol of this.symbolList) {
+                for (let tf of this.timeframes) {
+                    let data = this.data[symbol][tf];
+                    let i = idx[symbol][tf];
+                    if (i >= 0 && data[i].startTime == timestamp.valueOf()) {
+                        promiseList.push(this.onCloseCandle(symbol, tf, data.slice(i, i + 300)));
+                        idx[symbol][tf]--;
+                    }
+                }
+            }
+            await Promise.all(promiseList);
+            await this.handleLogic();
+            timestamp.add(1, 'minute');
+        }
     }
 
-    async initData(from: string, to: string) {
-        let promisList = [];
+    private async handleLogic() {
+        
+    }
+
+    private async initData(from: string, to: string) {
         for (let symbol of this.symbolList) {
-            promisList.push(this.getData(symbol, from, to));
-            if (promisList.length >= 3) {
-                await Promise.all(promisList);
-                promisList = [];
+            let dataM1 = await this.getData(symbol, from, to);
+            for (let item of dataM1) {
+                for (let tf of this.timeframes) {
+                    let rates = this.data[symbol][tf];
+                    if (rates.length && rates[0].startTime == item.startTime) {
+                        rates[0].high = Math.max(rates[0].high, item.high);
+                        rates[0].low = Math.min(rates[0].low, item.low);
+                        rates[0].close = item.close;
+                        rates[0].volume += item.volume;
+                        rates[0].change = (rates[0].open - rates[0].close) / rates[0].open;
+                        rates[0].ampl = (rates[0].high - rates[0].low) / rates[0].open;
+                    }
+                    else if (util.getStartTime(tf, item.startTime) == item.startTime) {
+                        rates.unshift({
+                            symbol: item.symbol,
+                            startTime: item.startTime,
+                            timestring: moment(item.startTime).format('YYYY-MM-DD HH:mm:ss'),
+                            open: item.open,
+                            high: item.high,
+                            low: item.low,
+                            close: item.close,
+                            volume: item.volume,
+                            interval: tf,
+                            isFinal: true,
+                            change: (item.close - item.open) / item.open,
+                            ampl: (item.high - item.low) / item.open
+                        });
+                    }
+                }
             }
         }
     }
 
-    async getOHLCV(symbol: string, timeframe: string, limit: number, since: number) {
+    private async getOHLCV(symbol: string, timeframe: string, limit: number, since: number) {
         let result = [];
         let maxCall = 1000;
         let check: { [key: number]: boolean } = {};
@@ -113,9 +168,10 @@ export default class Backtest {
         return result;
     }
 
-    async getData(symbol: string, from: string, to: string) {
+    private async getData(symbol: string, from: string, to: string): Promise<Array<RateData>> {
         let startDate = moment.utc(from);
         let endDate = moment.utc(to);
+        let result = [];
         while (startDate.valueOf() <= endDate.valueOf()) {
             let filename = `../data/${symbol}_${startDate.format('YYYY-MM-DD')}.data`;
             if (!fs.existsSync(filename)) {
@@ -124,30 +180,44 @@ export default class Backtest {
                     let compressData = await util.compress(JSON.stringify(data));
                     fs.writeFileSync(filename, compressData);
                     console.log(`update data ${symbol} ${startDate.format('YYYY-MM-DD')}`);
+                    result.push(...data)
                 }
                 else {
-                    console.log('error', { symbol, startDate: startDate.format('YYYY-MM-DD'), length: data.length });
+                    // console.log('error', { symbol, startDate: startDate.format('YYYY-MM-DD'), length: data.length });
                 }
-                startDate.add(1, 'day');
+                // startDate.add(1, 'day');
                 while (startDate.valueOf() <= data[0].startTime) {
-                    console.log('next day', symbol, startDate.format('YYYY-MM-DD'));
+                    // console.log('next day', symbol, startDate.format('YYYY-MM-DD'));
                     startDate.add(1, 'day');
                 }
-
             }
             else {
                 let dataDecompress = await util.decompress(fs.readFileSync(filename));
                 let data = JSON.parse(dataDecompress.toString());
+                result.push(...data);
                 startDate.add(1, 'day');
-                // console.log(data);
             }
         }
+        return result.map(item => ({
+            symbol: item.symbol,
+            startTime: item.startTime,
+            timestring: moment(item.startTime).format('YYYY-MM-DD HH:mm:ss'),
+            open: item.open,
+            high: item.high,
+            low: item.low,
+            close: item.close,
+            volume: item.volume,
+            interval: '1m',
+            isFinal: true,
+            change: (item.close - item.open) / item.open,
+            ampl: (item.high - item.low) / item.open
+        }));
     }
 }
 
 async function main() {
     let symbolList = await util.getSymbolList();
-    let ignoreList = ['BTCDOMUSDT', 'USDCUSDT', 'BTCUSDT', 'COCOSUSDT'];
+    let ignoreList = ['BTCDOMUSDT', 'USDCUSDT', 'COCOSUSDT'];
     symbolList = symbolList.filter(item => item.endsWith("USDT"))
         .filter(item => !ignoreList.includes(item));
 
@@ -158,11 +228,11 @@ async function main() {
         onClosePosition: async (symbol: string) => { },
         onHandleError: async (err: any, symbol: string | undefined) => { },
     });
-    await bot.initData('2022-10-01', '2023-11-19');
+    await bot.runBacktest('2023-10-19', '2023-11-19');
 }
 
 async function onCloseCandle(symbol: string, timeframe: string, data: Array<RateData>) {
-
+    // console.log({ symbol, timeframe, timestamp: data[0].timestring });
 }
 
 main();
