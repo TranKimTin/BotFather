@@ -12,6 +12,16 @@ enum OrderStatus {
     ORDER_CANCLE
 }
 
+interface OHLCV {
+    symbol: string,
+    startTime: number,
+    open: number
+    high: number,
+    low: number,
+    close: number,
+    volume: number
+}
+
 interface Order {
     symbol: string,
     side: 'BUY' | 'SELL' | string,
@@ -95,34 +105,12 @@ export default class Backtest {
             }
             this.minVolumes[symbol] = item.limits.amount?.min || 0;
         }
-        await this.initData(from, to);
 
-        let idx: any = {};
-        for (let symbol of this.symbolList) {
-            idx[symbol] = {};
-            for (let tf of this.timeframes) {
-                idx[symbol][tf] = this.data[symbol][tf].length - 1;
-            }
-        }
+        let startDate = moment.utc(from);
+        let endDate = moment.utc(to);
+        
 
-        this.timeCurrent = moment.utc(from);
-        let endTime = moment.utc(to).add(1, 'day').valueOf();
-        while (this.timeCurrent.valueOf() < endTime) {
-            let promiseList = [];
-            for (let symbol of this.symbolList) {
-                for (let tf of this.timeframes) {
-                    let data = this.data[symbol][tf];
-                    let i = idx[symbol][tf];
-                    if (i >= 0 && data[i].startTime == this.timeCurrent.valueOf()) {
-                        promiseList.push(this.onCloseCandle(symbol, tf, data.slice(i, i + 300)));
-                        idx[symbol][tf]--;
-                    }
-                }
-            }
-            await Promise.all(promiseList);
-            await this.handleLogic();
-            this.timeCurrent.add(1, 'minute');
-        }
+
     }
 
     async getOpenOrders(symbol: string): Promise<Array<Order>> {
@@ -274,47 +262,32 @@ export default class Backtest {
     }
 
     private async handleLogic() {
+        let timestamp = this.timeCurrent;
         for (let order of this.orders) {
-            
-        }
-    }
+            let { symbol } = order;
+            let curPrice = this.lastPrice[symbol];
+            if (order.side == 'BUY') {
+                if (order.type == 'MARKET') {
 
-    private async initData(from: string, to: string) {
-        for (let symbol of this.symbolList) {
-            let dataM1 = await this.getData(symbol, from, to);
-            for (let item of dataM1) {
-                for (let tf of this.timeframes) {
-                    let rates = this.data[symbol][tf];
-                    if (rates.length && rates[0].startTime == item.startTime) {
-                        rates[0].high = Math.max(rates[0].high, item.high);
-                        rates[0].low = Math.min(rates[0].low, item.low);
-                        rates[0].close = item.close;
-                        rates[0].volume += item.volume;
-                        rates[0].change = (rates[0].open - rates[0].close) / rates[0].open;
-                        rates[0].ampl = (rates[0].high - rates[0].low) / rates[0].open;
-                    }
-                    else if (util.getStartTime(tf, item.startTime) == item.startTime) {
-                        rates.unshift({
-                            symbol: item.symbol,
-                            startTime: item.startTime,
-                            timestring: moment(item.startTime).format('YYYY-MM-DD HH:mm:ss'),
-                            open: item.open,
-                            high: item.high,
-                            low: item.low,
-                            close: item.close,
-                            volume: item.volume,
-                            interval: tf,
-                            isFinal: true,
-                            change: (item.close - item.open) / item.open,
-                            ampl: (item.high - item.low) / item.open
-                        });
-                    }
                 }
+                else if (order.type == 'LIMIT') {
+
+                }
+                else if (order.type == 'STOP_LIMIT') {
+
+                }
+                else if (order.type == 'MARKET') {
+
+                }
+            }
+            else if (order.side == 'STOP_MARKET') {
+                //
             }
         }
     }
 
-    private async getOHLCV(symbol: string, timeframe: string, limit: number, since: number) {
+
+    private async getOHLCV(symbol: string, timeframe: string, limit: number, since: number): Promise<Array<OHLCV>> {
         let result = [];
         let maxCall = 1000;
         let check: { [key: number]: boolean } = {};
@@ -344,37 +317,32 @@ export default class Backtest {
         return result;
     }
 
-    private async getData(symbol: string, from: string, to: string): Promise<Array<RateData>> {
-        let startDate = moment.utc(from);
-        let endDate = moment.utc(to);
-        let result = [];
-        while (startDate.valueOf() <= endDate.valueOf()) {
-            let filename = `../data/${symbol}_${startDate.format('YYYY-MM-DD')}.data`;
-            if (!fs.existsSync(filename)) {
-                let data = await this.getOHLCV(symbol, '1m', 1440, startDate.valueOf());
-                if (data.length == 1440 && data[0].startTime == startDate.valueOf() && data[data.length - 1].startTime + 60000 == startDate.valueOf() + 86400000) {
-                    let compressData = await util.compress(JSON.stringify(data));
-                    fs.writeFileSync(filename, compressData);
-                    console.log(`update data ${symbol} ${startDate.format('YYYY-MM-DD')}`);
-                    result.push(...data)
-                }
-                else {
-                    // console.log('error', { symbol, startDate: startDate.format('YYYY-MM-DD'), length: data.length });
-                }
-                // startDate.add(1, 'day');
-                while (startDate.valueOf() <= data[0].startTime) {
-                    // console.log('next day', symbol, startDate.format('YYYY-MM-DD'));
-                    startDate.add(1, 'day');
-                }
+    private async getData(symbol: string, date: string): Promise<Array<RateData>> {
+        let startDate = moment.utc(date);
+        let data: Array<OHLCV> = [];
+
+        let filename = `../data/${symbol}_${startDate.format('YYYY-MM-DD')}.data`;
+        if (!fs.existsSync(filename)) {
+            data = await this.getOHLCV(symbol, '1m', 1440, startDate.valueOf());
+            if (data.length == 1440 && data[0].startTime == startDate.valueOf() && data[data.length - 1].startTime + 60000 == startDate.valueOf() + 86400000) {
+                let compressData = await util.compress(JSON.stringify(data));
+                fs.writeFileSync(filename, compressData);
+                console.log(`update data ${symbol} ${startDate.format('YYYY-MM-DD')}`);
             }
             else {
-                let dataDecompress = await util.decompress(fs.readFileSync(filename));
-                let data = JSON.parse(dataDecompress.toString());
-                result.push(...data);
-                startDate.add(1, 'day');
+                if (data[0].startTime == startDate.valueOf()) {
+                    console.log('error', { symbol, startDate: startDate.format('YYYY-MM-DD'), length: data.length });
+                }
+                data = [];
             }
+
         }
-        return result.map(item => ({
+        else {
+            let dataDecompress = await util.decompress(fs.readFileSync(filename));
+            data = JSON.parse(dataDecompress.toString());
+        }
+
+        return data.map(item => ({
             symbol: item.symbol,
             startTime: item.startTime,
             timestring: moment(item.startTime).format('YYYY-MM-DD HH:mm:ss'),
