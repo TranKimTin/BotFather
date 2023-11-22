@@ -39,9 +39,9 @@ export default class ServerData {
 
         });
 
-        server.on('error', function (e) {
+        server.on('error', (err) => {
             // Handle your error here
-            console.log(e.message);
+            console.log(err.message);
         });
 
         server.listen(port);
