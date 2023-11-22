@@ -252,7 +252,7 @@ export async function getOHLCVFromCache(symbol: string, timeframe: string, limit
         }
     }
     data = data.slice(0, limit);
-    data[0].isFinal = false;
+    if (data.length) data[0].isFinal = false;
 
     return data;
 }

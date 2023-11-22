@@ -243,8 +243,8 @@ class BinanceFuture {
             console.log(`init candle ${tf}...`);
             let promiseList = [];
             for (let symbol of this.symbolList) {
-                // promiseList.push(util.getOHLCV(symbol, tf, numbler_candle_load));
-                promiseList.push(util.getOHLCVFromCache(symbol, tf, numbler_candle_load));
+                promiseList.push(util.getOHLCV(symbol, tf, numbler_candle_load));
+                // promiseList.push(util.getOHLCVFromCache(symbol, tf, numbler_candle_load));
                 // promiseList.push(fetch(`http://localhost:${process.env.PORT_DATA_SERVER}/?symbol=${symbol}&timeframe=${tf}&limit=${numbler_candle_load}`));
             }
             // let responses = await Promise.all(promiseList);
@@ -255,7 +255,7 @@ class BinanceFuture {
                 this.data[symbol][tf] = rates[i++];
                 this.lastPrice[symbol] = this.data[symbol][tf][0]?.close || 0;
             }
-            await delay(10000);
+            await delay(5000);
         }
         console.log('init done.');
         // if (!this.isReadOnly)

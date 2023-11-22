@@ -6,6 +6,7 @@ import moment from 'moment';
 import { GoogleSheet } from './GoogleSheet';
 import Telegram from './telegram';
 import updateSheet from './updateSheet';
+import delay from 'delay';
 
 dotenv.config({ path: '../.env' });
 
@@ -23,7 +24,9 @@ export default class BotRSI_CCI {
         updateSheet(sheetIDResistance, sheetIDResistance_v2, sheetID_lc);
     }
 
-    async init() {
+    async init(initDelay: number = 0) {
+        await delay(initDelay);
+
         let symbolList = await util.getSymbolList();
         let ignoreList = ['BTCDOMUSDT', 'USDCUSDT', 'BTCUSDT', 'COCOSUSDT'];
         symbolList = symbolList.filter(item => item.endsWith("USDT"))
