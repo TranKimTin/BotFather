@@ -16,12 +16,12 @@ export default class BotRSI_CCI {
     private telegram: Telegram;
     private isReadOnly: boolean;
 
-    constructor(sheetIDResistance: number, sheetID_lc: number, pathFileConfig: string, port: number, tag: string, isReadOnly: boolean) {
-        this.googleSheet = new GoogleSheet(sheetIDResistance, sheetID_lc);
+    constructor(sheetIDResistance: number, sheetIDResistance_v2: number, sheetID_lc: number, pathFileConfig: string, port: number, tag: string, isReadOnly: boolean) {
+        this.googleSheet = new GoogleSheet(sheetIDResistance, sheetIDResistance_v2, sheetID_lc);
         this.telegram = new Telegram(tag);
         this.setupConfig = new SetupConfig(pathFileConfig, port, this.telegram);
         this.isReadOnly = isReadOnly;
-        updateSheet(sheetIDResistance, sheetID_lc);
+        updateSheet(sheetIDResistance, sheetIDResistance_v2, sheetID_lc);
     }
 
     async init() {
@@ -50,6 +50,7 @@ export default class BotRSI_CCI {
 
     async onCloseCandle(symbol: string, timeframe: string, data: Array<RateData>) {
         await this.resistanceAlgo(symbol, timeframe, data);
+        await this.resistanceAlgo_v2(symbol, timeframe, data);
         await this.longChaoAlgo(symbol, timeframe, data);
     }
 
@@ -174,6 +175,7 @@ export default class BotRSI_CCI {
             console.log(JSON.stringify(InConfig));
             // console.log({ symbol, timeframe, rsi: curRSI, side, entry1, entry2, TP1, TP2, SL, volume });
             let dataTable = [
+                ['Bot', 'RSI v1'],
                 ['Thời gian', moment().format('YYYY-MM-DD HH:mm')],
                 ['Coin', symbol],
                 ['Khung thời gian', timeframe],
@@ -202,6 +204,178 @@ export default class BotRSI_CCI {
                 };
                 await this.binance.orderLimit(symbol, side, volume, entry1, options);
             }
+
+        }
+        catch (err: any) {
+            console.log(err);
+            await this.telegram.sendError(err.message);
+        }
+    }
+
+    async resistanceAlgo_v2(symbol: string, timeframe: string, data: Array<RateData>) {
+        try {
+            if (!this.binance) return;
+
+            let InConfig = this.setupConfig.getConfig().InResistance_v2;
+            // console.log(InConfig)
+            if (data.length < 14) return;
+
+            let key = timeframe[timeframe.length - 1] + timeframe.slice(0, timeframe.length - 1);
+            let config = InConfig[key];
+            if (!config) return;
+
+            let { InVolumeUSD_v2, InShadown1Percent_v2, InShadown2Percent_v2, InNumberOfBarTop_v2, InNumberOfBarExpired_v2, InRSI_Value_v2, InEnableEntryPricePercent_v2, InEntry1Percent_v2, InEntry2Percent_v2, InSL_Percent_v2,
+                InTP1_Percent_v2, InTP2_Percent_v2, InTrendUpConfig_v2, InTrendDownConfig_v2, InConfigConditionBar_v2 } = config;
+
+            InShadown1Percent_v2 /= 100;
+            InShadown2Percent_v2 /= 100;
+            InEntry1Percent_v2 /= 100;
+            InEntry2Percent_v2 /= 100;
+            InSL_Percent_v2 /= 100;
+            InTP1_Percent_v2 /= 100;
+            InTP2_Percent_v2 /= 100;
+
+            let rate = data[0];
+            let rsi = util.iRSI(data, 14);
+            let curRSI = rsi[0];
+            let preRSI = rsi[1];
+            let preRSI2 = rsi[2];
+
+            if (InRSI_Value_v2 && curRSI > InRSI_Value_v2.lowerbound_v2 && curRSI < InRSI_Value_v2.upperbound_v2) return;
+
+            let side = 'none';
+
+            if (InTrendUpConfig_v2) {
+                let { numberOfBar_v2, minUpPercent_v2, requireRSI_Up_v2 } = InTrendUpConfig_v2;
+
+                minUpPercent_v2 /= 100;
+
+                let open = data[numberOfBar_v2].open;
+                let close = data[1].close;
+                let change = (close - open) / open;
+
+                if (change >= Math.abs(minUpPercent_v2)) {
+                    side = 'sell';
+                    if (requireRSI_Up_v2) {
+                        side = (preRSI > preRSI2) ? 'sell' : 'none';
+                    }
+                }
+            }
+            if (InTrendDownConfig_v2) {
+                let { numberOfBar_v2, minDownPercent_v2, requireRSI_Down_v2 } = InTrendDownConfig_v2;
+
+                minDownPercent_v2 /= 100;
+
+                let open = data[numberOfBar_v2].open;
+                let close = data[1].close;
+                let change = (close - open) / open;
+
+                if (change <= -Math.abs(minDownPercent_v2)) {
+                    side = 'buy';
+                    if (requireRSI_Down_v2) {
+                        side = (preRSI < preRSI2) ? 'buy' : 'none';
+                    }
+                }
+            }
+
+
+            if (InConfigConditionBar_v2) {
+                let { barColorBuy_v2, barColorSell_v2 } = InConfigConditionBar_v2;
+                if (side == 'buy' && barColorBuy_v2 == 'Xanh' && rate.close <= rate.open) return;
+                if (side == 'buy' && barColorBuy_v2 == 'Đỏ' && rate.close >= rate.open) return;
+                if (side == 'sell' && barColorSell_v2 == 'Xanh' && rate.close <= rate.open) return;
+                if (side == 'sell' && barColorSell_v2 == 'Đỏ' && rate.close >= rate.open) return;
+            }
+
+            //kiem tra la dinh - day
+            let high = Math.max(data[0].high, data[1].high);
+            let low = Math.min(data[0].low, data[1].low);
+            if (side == 'buy' && low > Math.min(...data.slice(2, InNumberOfBarTop_v2 + 1).map(item => item.low))) return;
+            if (side == 'sell' && high < Math.max(...data.slice(2, InNumberOfBarTop_v2 + 1).map(item => item.high))) return;
+
+            //nen truoc
+            if (side == 'buy' && data[1].close >= data[1].open) return;
+            if (side == 'sell' && data[1].close <= data[1].open) return;
+
+            let shadownTop1 = data[1].high - Math.max(data[1].open, data[1].close);
+            let shadownBot1 = Math.min(data[1].open, data[1].close) - data[1].low;
+            let change1 = Math.abs(data[1].open - data[1].close);
+            let shadownTop2 = data[0].high - Math.max(data[0].open, data[0].close);
+            let shadownBot2 = Math.min(data[0].open, data[0].close) - data[0].low;
+            let change2 = Math.abs(data[0].open - data[0].close);
+
+            if (change1 == 0 || change2 == 0) return;
+            if (side == 'sell' && shadownTop1 / change1 < InShadown1Percent_v2) return;
+            if (side == 'sell' && shadownTop2 / change2 < InShadown2Percent_v2) return;
+            if (side == 'buy' && shadownBot1 / change1 < InShadown1Percent_v2) return;
+            if (side == 'buy' && shadownBot2 / change2 < InShadown2Percent_v2) return;
+
+            if (InRSI_Value_v2 && InRSI_Value_v2.onlyLowerLong_v2 && curRSI <= InRSI_Value_v2.lowerbound_v2 && side == 'sell') return;
+            if (InRSI_Value_v2 && InRSI_Value_v2.onlyUpperShort_v2 && curRSI >= InRSI_Value_v2.upperbound_v2 && side == 'buy') return;
+
+            let curPrice = rate.close;
+            let r = data[0]; //nen xet TP SL theo rau
+            if (side == 'buy' && data[1].low < r.low) r = data[1];
+            if (side == 'sell' && data[1].high > r.high) r = data[1];
+
+            let topShadowLength = (r.high - Math.max(r.open, r.close));
+            let botShadowLength = (Math.min(r.open, r.close) - r.low);
+
+            let entry1 = 0;
+            let entry2: number | '' = 0;
+            //entry 1 % so voi rau dai nhat, entry2 % so voi entry1
+            if (!InEnableEntryPricePercent_v2) { //entry theo rau nen
+                if (side == 'buy') entry1 = Math.min(r.open, r.close) - InEntry1Percent_v2 * botShadowLength;
+                if (side == 'sell') entry1 = Math.max(r.open, r.close) + InEntry1Percent_v2 * topShadowLength;
+            }
+            else { //entry theo gia
+                if (side == 'buy') entry1 = r.low * (1 - InEntry1Percent_v2);
+                if (side == 'sell') entry1 = r.high * (1 + InEntry1Percent_v2);
+            }
+            if (side == 'buy') entry2 = entry1 * (1 - InEntry2Percent_v2);
+            if (side == 'sell') entry2 = entry1 * (1 + InEntry2Percent_v2);
+
+
+            let TP1 = entry1 * (1 + (side == 'buy' ? InTP1_Percent_v2 : -InTP1_Percent_v2));
+            let TP2: number | '' = (entry1 + entry2) / 2 * (1 + (side == 'buy' ? InTP1_Percent_v2 : -InTP1_Percent_v2));
+            let SL = entry1 * (1 + (side == 'buy' ? -InSL_Percent_v2 : InSL_Percent_v2));
+            let volume = InVolumeUSD_v2 / curPrice;
+
+            curRSI = +curRSI.toFixed(2);
+            entry1 = +entry1.toFixed(this.binance.digits[symbol].price);
+            entry2 = +entry2.toFixed(this.binance.digits[symbol].price);
+            TP1 = +TP1.toFixed(this.binance.digits[symbol].price);
+            TP2 = +TP2.toFixed(this.binance.digits[symbol].price);
+            SL = +SL.toFixed(this.binance.digits[symbol].price);
+            volume = +volume.toFixed(this.binance.digits[symbol].volume);
+
+            if (entry1 == entry2) {
+                entry2 = '';
+                TP2 = '';
+            }
+
+            let expiredTime = data[0].startTime + (data[0].startTime - data[1].startTime) * (InNumberOfBarExpired_v2 + 1)
+
+            if (side == 'none') return;
+            console.log(rate);
+            console.log(JSON.stringify(InConfig));
+            // console.log({ symbol, timeframe, rsi: curRSI, side, entry1, entry2, TP1, TP2, SL, volume });
+            let dataTable = [
+                ['Bot', 'RSI v2'],
+                ['Thời gian', moment().format('YYYY-MM-DD HH:mm')],
+                ['Coin', symbol],
+                ['Khung thời gian', timeframe],
+                ['RSI', curRSI],
+                ['RSI thay đổi', (curRSI - preRSI).toFixed(2)],
+                ['Loại', (side == 'buy' ? 'LONG' : 'SHORT')],
+                ['Giá vào 1', entry1],
+                ['Giá vào 2', entry2],
+                ['Take Profit 1', TP1],
+                ['Take Profit 2', TP2],
+                ['Stop Loss', SL]
+            ];
+            await this.telegram.sendTable(dataTable);
+            await this.googleSheet.addRow_v2(symbol, (side == 'buy' ? 'LONG' : 'SHORT'), timeframe, entry1, entry2, TP1, TP2, SL, curRSI, expiredTime);
 
         }
         catch (err: any) {
@@ -300,6 +474,7 @@ export default class BotRSI_CCI {
             console.log(JSON.stringify(InConfig));
 
             let dataTable = [
+                ['Bot', 'Lòng chảo'],
                 ['Thời gian', moment().format('YYYY-MM-DD HH:mm')],
                 ['Coin', symbol],
                 ['Khung thời gian', timeframe],

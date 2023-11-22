@@ -34,6 +34,40 @@ export interface IConfigResistance {
     }
 }
 
+export interface IConfigResistance_v2 {
+    InVolumeUSD_v2: number,
+    InShadown1Percent_v2: number,
+    InShadown2Percent_v2: number,
+    InNumberOfBarTop_v2: number,
+    InNumberOfBarExpired_v2: number,
+    InRSI_Value_v2?: {
+        lowerbound_v2: number,
+        upperbound_v2: number,
+        onlyLowerLong_v2: boolean,
+        onlyUpperShort_v2: boolean
+    },
+    InEnableEntryPricePercent_v2: boolean,
+    InEntry1Percent_v2: number,
+    InEntry2Percent_v2: number,
+    InTP1_Percent_v2: number,
+    InTP2_Percent_v2: number,
+    InSL_Percent_v2: number,
+    InTrendUpConfig_v2?: {
+        numberOfBar_v2: number,
+        minUpPercent_v2: number,
+        requireRSI_Up_v2: boolean
+    },
+    InTrendDownConfig_v2?: {
+        numberOfBar_v2: number,
+        minDownPercent_v2: number,
+        requireRSI_Down_v2: boolean
+    },
+    InConfigConditionBar_v2?: {
+        barColorBuy_v2: string,
+        barColorSell_v2: string
+    }
+}
+
 export interface IConfigLongChao {
     InVolumeUSD_lc: number,
 
@@ -63,6 +97,9 @@ export interface IConfigLongChao {
 export interface IInConfig {
     InResistance: {
         [key: string]: IConfigResistance | null
+    },
+    InResistance_v2: {
+        [key: string]: IConfigResistance_v2 | null
     },
     InLongChao: {
         [key: string]: IConfigLongChao | null

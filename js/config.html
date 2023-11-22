@@ -35,9 +35,11 @@
         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#resistance"
             id="btnResistance">Kháng
             cự rsi</button>
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#resistance_v2"
+            id="btnResistance_v2">Kháng
+            cự rsi V2</button>
         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#longChao" id="btnLongChao">Lòng
-            chảo
-            rsi</button>
+            chảo rsi cci</button>
     </div>
 
 
@@ -55,7 +57,6 @@
                         <div class="col-sm-6">
                             <label for="usr">Khung thời gian:</label>
                             <select class="form-select" id="timeframe">
-                                <option>m5</option>
                                 <option>m15</option>
                                 <option selected="selected">m30</option>
                                 <option>h1</option>
@@ -222,6 +223,203 @@
         </div>
     </div>
 
+    <div class="modal fade" id="resistance_v2" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Cấu hình kháng cự RSI v2</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <label for="usr">Khung thời gian:</label>
+                            <select class="form-select" id="timeframe_v2">
+                                <option>m15</option>
+                                <option selected="selected">m30</option>
+                                <option>h1</option>
+                                <option>h2</option>
+                                <option>h4</option>
+                                <option>h6</option>
+                                <option>h8</option>
+                                <option>h12</option>
+                                <option>d1</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-6">
+                            <label><input type="checkbox" value="" id="enableTimeframe_v2"> Bật/tắt khung thời
+                                gian</label>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <label for="InVolumeUSD">Số tiền đặt mỗi lệnh (USD):</label>
+                            <input type="number" value="0" class="form-control" id="InVolumeUSD_v2">
+                        </div>
+                    </div>
+                    <br />
+                    <br />
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <label><input type="checkbox" value="" id="InRSI_Value_v2"> Bật/tắt giá trị RSI</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <label for="lowerbound">RSI nhỏ hơn:</label>
+                            <input type="number" value="0" class="form-control" id="lowerbound_v2">
+                            <label><input type="checkbox" value="" id="onlyLowerLong_v2"> Chỉ đánh long</label>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <label for="upperbound">RSI lớn hơn</label>
+                            <input type="number" value="0" class="form-control" id="upperbound_v2">
+                            <label><input type="checkbox" value="" id="onlyUpperShort_v2"> Chỉ đánh short</label>
+                        </div>
+                    </div>
+
+                    <br />
+                    <br />
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <label for="InShadown1Percent_v2">Râu nến 1 > thân nến (%)</label>
+                            <input type="number" value="50" class="form-control" id="InShadown1Percent_v2">
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="InShadown2Percent_v2">Râu nến 2 > thân nến (%)</label>
+                            <input type="number" value="50" class="form-control" id="InShadown2Percent_v2">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <label for="InNumberOfBar_v2">Râu là đỉnh / đáy của số nến:</label>
+                            <input type="number" value="1" class="form-control" id="InNumberOfBarTop_v2">
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="InNumberOfBarExpired_v2">Sau mấy nến thì hủy lệnh:</label>
+                            <input type="number" value="1" class="form-control" id="InNumberOfBarExpired_v2">
+                        </div>
+                    </div>
+
+                    <br />
+                    <br />
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <label><input type="checkbox" value="" id="InEnableEntryPricePercent_v2"> Bật (entry theo %
+                                giá từ râu), Tắt (entry theo % độ dài râu)</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <label for="lowerbound">Entry 1 tại râu nến dài hơn (%):</label>
+                            <input type="number" value="0" class="form-control" id="InEntry1Percent_v2">
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="lowerbound">Take profit 1 so với entry (%):</label>
+                            <input type="number" value="0" class="form-control" id="InTP1_Percent_v2">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <label for="lowerbound">Entry 2 so với Entry 1 (%):</label>
+                            <input type="number" value="0" class="form-control" id="InEntry2Percent_v2">
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="lowerbound">Take profit 2 so với trung bình giá (%):</label>
+                            <input type="number" value="0" class="form-control" id="InTP2_Percent_v2">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <label for="lowerbound">Stop loss (%):</label>
+                            <input type="number" value="0" class="form-control" id="InSL_Percent_v2">
+                        </div>
+                    </div>
+
+                    <br /> <br />
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <label><input type="checkbox" value="" id="InTrendUpConfig_v2"> Bật/tắt cấu hình xu hướng
+                                tăng
+                                (Lệnh short)</label>
+                        </div>
+                        <div class="col-sm-6">
+                            <label><input type="checkbox" value="" id="requireRSI_Up_v2"> RSI phải tăng</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <label for="lowerbound">Số nến:</label>
+                            <input type="number" value="0" class="form-control" id="numberOfBarUp_v2">
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="lowerbound">Giá tăng tối thiểu (%):</label>
+                            <input type="number" value="0" class="form-control" id="minUpPercent_v2">
+                        </div>
+                    </div>
+
+                    <br />
+                    <br />
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <label><input type="checkbox" value="" id="InTrendDownConfig_v2"> Bật/tắt cấu hình xu hướng
+                                giảm
+                                (Lệnh long)</label>
+                        </div>
+                        <div class="col-sm-6">
+                            <label><input type="checkbox" value="" id="requireRSI_Down_v2"> RSI phải giảm</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <label for="lowerbound">Số nến:</label>
+                            <input type="number" value="0" class="form-control" id="numberOfBarDown_v2">
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="lowerbound">Giá giảm tối thiểu (%):</label>
+                            <input type="number" value="0" class="form-control" id="minDownPercent_v2">
+                        </div>
+                    </div>
+
+                    <br />
+                    <br />
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <label><input type="checkbox" value="" id="InConfigConditionBar_v2"> Bật/tắt kiểm tra điều
+                                kiện nến</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <label for="usr">Màu nến long:</label>
+                            <select class="form-select" id="barColorBuy_v2">
+                                <option>Xanh</option>
+                                <option>Đỏ</option>
+                                <option>Cả hai</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="usr">Màu nến short:</label>
+                            <select class="form-select" id="barColorSell_v2">
+                                <option>Xanh</option>
+                                <option>Đỏ</option>
+                                <option>Cả hai</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" id="btnUpdateConfigResistance_v2">Update
+                        config</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
 
     <div class="modal fade" id="longChao" role="dialog">
         <div class="modal-dialog modal-lg">
@@ -236,7 +434,6 @@
                         <div class="col-sm-6">
                             <label for="usr">Khung thời gian:</label>
                             <select class="form-select" id="timeframe_lc">
-                                <option>m5</option>
                                 <option>m15</option>
                                 <option selected="selected">m30</option>
                                 <option>h1</option>
@@ -386,6 +583,7 @@
                 success: function (data) {
                     gConfig = data;
                     loadConfig();
+                    loadConfig_v2();
                     loadConfigLongChao();
                 },
                 error: function () {
@@ -394,6 +592,9 @@
             });
         }
 
+        loadData();
+
+        //rsi
         $('#btnResistance').click(function () {
             loadData();
         });
@@ -415,17 +616,17 @@
             console.log({ timeframe })
 
             let InResistance = gConfig.InResistance[timeframe];
-            $('#enableTimeframe').attr('checked', InResistance);
+            $('#enableTimeframe').prop('checked', InResistance);
             if (!InResistance) return;
 
             $('#InVolumeUSD').val(InResistance.InVolumeUSD);
             $('#InChangeRSI').val(InResistance.InChangeRSI);
 
-            $('#InRSI_Value').attr('checked', InResistance.InRSI_Value);
+            $('#InRSI_Value').prop('checked', InResistance.InRSI_Value);
             $('#lowerbound').val(InResistance.InRSI_Value.lowerbound);
             $('#upperbound').val(InResistance.InRSI_Value.upperbound);
-            $('#onlyLowerLong').attr('checked', InResistance.InRSI_Value?.onlyLowerLong);
-            $('#onlyUpperShort').attr('checked', InResistance.InRSI_Value?.onlyUpperShort);
+            $('#onlyLowerLong').prop('checked', InResistance.InRSI_Value?.onlyLowerLong);
+            $('#onlyUpperShort').prop('checked', InResistance.InRSI_Value?.onlyUpperShort);
 
             $('#InEntry1Percent').val(InResistance.InEntry1Percent);
             $('#InTP1_Percent').val(InResistance.InTP1_Percent);
@@ -433,24 +634,22 @@
             $('#InTP2_Percent').val(InResistance.InTP2_Percent);
             $('#InSL_Percent').val(InResistance.InSL_Percent);
 
-            $('#InTrendUpConfig').attr('checked', InResistance.InTrendUpConfig);
-            $('#requireRSI_Up').attr('checked', InResistance.InTrendUpConfig?.requireRSI_Up);
+            $('#InTrendUpConfig').prop('checked', InResistance.InTrendUpConfig);
+            $('#requireRSI_Up').prop('checked', InResistance.InTrendUpConfig?.requireRSI_Up);
             $('#numberOfBarUp').val(InResistance.InTrendUpConfig?.numberOfBar);
             $('#minUpPercent').val(InResistance.InTrendUpConfig?.minUpPercent);
 
-            $('#InTrendDownConfig').attr('checked', InResistance.InTrendDownConfig);
-            $('#requireRSI_Down').attr('checked', InResistance.InTrendDownConfig?.requireRSI_Down);
+            $('#InTrendDownConfig').prop('checked', InResistance.InTrendDownConfig);
+            $('#requireRSI_Down').prop('checked', InResistance.InTrendDownConfig?.requireRSI_Down);
             $('#numberOfBarDown').val(InResistance.InTrendDownConfig?.numberOfBar);
             $('#minDownPercent').val(InResistance.InTrendDownConfig?.minDownPercent);
 
-            $('#InConfigConditionBar').attr('checked', InResistance.InConfigConditionBar);
+            $('#InConfigConditionBar').prop('checked', InResistance.InConfigConditionBar);
             $('#maxChangePercent').val(InResistance.InConfigConditionBar?.maxChangePercent);
             $('#maxAmplPercent').val(InResistance.InConfigConditionBar?.maxAmplPercent);
             $('#barColorBuy').val(InResistance.InConfigConditionBar?.barColorBuy);
             $('#barColorSell').val(InResistance.InConfigConditionBar?.barColorSell);
         }
-
-        loadData();
 
         $('#btnUpdateConfigResistance').click(function () {
             if (!gConfig) return alert('Lỗi');
@@ -475,7 +674,7 @@
             let config = gConfig.InResistance;
 
             let timeframe = $('#timeframe').val();
-            let enableTimeframe = $('#enableTimeframe').is(':checked');
+            let enableTimeframe = $('#enableTimeframe').prop('checked');
             console.log({ timeframe, enableTimeframe })
             if (!enableTimeframe) {
                 config[timeframe] = null;
@@ -488,15 +687,15 @@
             InResistance.InVolumeUSD = $('#InVolumeUSD').val() * 1;
             InResistance.InChangeRSI = $('#InChangeRSI').val() * 1;
 
-            if (!$('#InRSI_Value').is(':checked')) {
+            if (!$('#InRSI_Value').prop('checked')) {
                 InResistance.InRSI_Value = null;
             }
             else {
                 InResistance.InRSI_Value = {};
                 InResistance.InRSI_Value.lowerbound = $('#lowerbound').val() * 1;
                 InResistance.InRSI_Value.upperbound = $('#upperbound').val() * 1;
-                InResistance.InRSI_Value.onlyLowerLong = $('#onlyLowerLong').is(':checked');
-                InResistance.InRSI_Value.onlyUpperShort = $('#onlyUpperShort').is(':checked');
+                InResistance.InRSI_Value.onlyLowerLong = $('#onlyLowerLong').prop('checked');
+                InResistance.InRSI_Value.onlyUpperShort = $('#onlyUpperShort').prop('checked');
             }
 
 
@@ -507,27 +706,27 @@
             InResistance.InTP2_Percent = $('#InTP2_Percent').val() * 1;
             InResistance.InSL_Percent = $('#InSL_Percent').val() * 1;
 
-            if (!$('#InTrendUpConfig').is(':checked')) {
+            if (!$('#InTrendUpConfig').prop('checked')) {
                 InResistance.InTrendUpConfig = null;
             }
             else {
                 InResistance.InTrendUpConfig = {};
-                InResistance.InTrendUpConfig.requireRSI_Up = $('#requireRSI_Up').is(':checked');
+                InResistance.InTrendUpConfig.requireRSI_Up = $('#requireRSI_Up').prop('checked');
                 InResistance.InTrendUpConfig.numberOfBar = $('#numberOfBarUp').val() * 1;
                 InResistance.InTrendUpConfig.minUpPercent = $('#minUpPercent').val() * 1;
             }
 
-            if (!$('#InTrendDownConfig').is(':checked')) {
+            if (!$('#InTrendDownConfig').prop('checked')) {
                 InResistance.InTrendDownConfig = null;
             }
             else {
                 InResistance.InTrendDownConfig = {};
-                InResistance.InTrendDownConfig.requireRSI_Down = $('#requireRSI_Down').is(':checked');
+                InResistance.InTrendDownConfig.requireRSI_Down = $('#requireRSI_Down').prop('checked');
                 InResistance.InTrendDownConfig.numberOfBar = $('#numberOfBarDown').val() * 1;
                 InResistance.InTrendDownConfig.minDownPercent = $('#minDownPercent').val() * 1;
             }
 
-            if (!$('#InConfigConditionBar').is(':checked')) {
+            if (!$('#InConfigConditionBar').prop('checked')) {
                 InResistance.InConfigConditionBar = null;
             }
             else {
@@ -539,6 +738,158 @@
             }
         }
 
+        //rsi v2
+        $('#btnResistance_v2').click(function () {
+            loadData();
+        });
+
+        $("#timeframe_v2").on("focus", function () {
+            updateConfigResistance_v2();
+        });
+
+        $('#timeframe_v2').change(function () {
+            loadConfigResistance_v2();
+        });
+
+        function loadConfig_v2() {
+            loadConfigResistance_v2();
+        }
+
+        function loadConfigResistance_v2() {
+            let timeframe_v2 = $('#timeframe_v2').val();
+            console.log({ timeframe_v2 })
+            console.log('InResistance_v2', gConfig.InResistance_v2)
+
+            let InResistance = gConfig.InResistance_v2[timeframe_v2];
+            $('#enableTimeframe_v2').prop('checked', InResistance);
+            if (!InResistance) return;
+
+            $('#InVolumeUSD_v2').val(InResistance.InVolumeUSD_v2);
+
+            $('#InRSI_Value_v2').prop('checked', InResistance.InRSI_Value_v2);
+            $('#lowerbound_v2').val(InResistance.InRSI_Value_v2.lowerbound_v2);
+            $('#upperbound_v2').val(InResistance.InRSI_Value_v2.upperbound_v2);
+            $('#onlyLowerLong_v2').prop('checked', InResistance.InRSI_Value_v2?.onlyLowerLong_v2);
+            $('#onlyUpperShort_v2').prop('checked', InResistance.InRSI_Value_v2?.onlyUpperShort_v2);
+
+            $('#InShadown1Percent_v2').val(InResistance.InShadown1Percent_v2);
+            $('#InShadown2Percent_v2').val(InResistance.InShadown2Percent_v2);
+            $('#InNumberOfBarTop_v2').val(InResistance.InNumberOfBarTop_v2);
+            $('#InNumberOfBarExpired_v2').val(InResistance.InNumberOfBarExpired_v2);
+
+            $('#InEnableEntryPricePercent_v2').prop('checked', InResistance.InEnableEntryPricePercent_v2);
+
+            $('#InEntry1Percent_v2').val(InResistance.InEntry1Percent_v2);
+            $('#InTP1_Percent_v2').val(InResistance.InTP1_Percent_v2);
+            $('#InEntry2Percent_v2').val(InResistance.InEntry2Percent_v2);
+            $('#InTP2_Percent_v2').val(InResistance.InTP2_Percent_v2);
+            $('#InSL_Percent_v2').val(InResistance.InSL_Percent_v2);
+
+            $('#InTrendUpConfig_v2').prop('checked', InResistance.InTrendUpConfig_v2);
+            $('#requireRSI_Up_v2').prop('checked', InResistance.InTrendUpConfig_v2?.requireRSI_Up_v2);
+            $('#numberOfBarUp_v2').val(InResistance.InTrendUpConfig_v2?.numberOfBar_v2);
+            $('#minUpPercent_v2').val(InResistance.InTrendUpConfig_v2?.minUpPercent_v2);
+
+            $('#InTrendDownConfig_v2').prop('checked', InResistance.InTrendDownConfig_v2);
+            $('#requireRSI_Down_v2').prop('checked', InResistance.InTrendDownConfig_v2?.requireRSI_Down_v2);
+            $('#numberOfBarDown_v2').val(InResistance.InTrendDownConfig_v2?.numberOfBar_v2);
+            $('#minDownPercent_v2').val(InResistance.InTrendDownConfig_v2?.minDownPercent_v2);
+
+            $('#InConfigConditionBar_v2').prop('checked', InResistance.InConfigConditionBar_v2);
+            $('#barColorBuy_v2').val(InResistance.InConfigConditionBar_v2?.barColorBuy_v2);
+            $('#barColorSell_v2').val(InResistance.InConfigConditionBar_v2?.barColorSell_v2);
+        }
+
+        $('#btnUpdateConfigResistance_v2').click(function () {
+            if (!gConfig) return alert('Lỗi');
+            updateConfigResistance_v2();
+            console.log(gConfig);
+            $.ajax({
+                type: "POST",
+                url: "/updateConfig",
+                data: JSON.stringify(gConfig),
+                dataType: "text",
+                success: function (response) {
+                    alert(response)
+                },
+                error: function () {
+                    alert("error");
+                }
+            });
+        });
+
+        function updateConfigResistance_v2() {
+            if (!gConfig) return alert('lỗi');
+            let config = gConfig.InResistance_v2;
+
+            let timeframe_v2 = $('#timeframe_v2').val();
+            let enableTimeframe_v2 = $('#enableTimeframe_v2').prop('checked');
+            console.log({ timeframe_v2, enableTimeframe_v2 })
+            if (!enableTimeframe_v2) {
+                config[timeframe_v2] = null;
+                console.log('disable', timeframe_v2);
+                console.log('InRSI_Value_v2', gConfig.InResistance_v2)
+                return;
+            }
+            config[timeframe_v2] = {};
+
+            let InResistance = config[timeframe_v2];
+
+            InResistance.InVolumeUSD_v2 = $('#InVolumeUSD_v2').val() * 1;
+
+            if (!$('#InRSI_Value_v2').prop('checked')) {
+                InResistance.InRSI_Value_v2 = null;
+            }
+            else {
+                InResistance.InRSI_Value_v2 = {};
+                InResistance.InRSI_Value_v2.lowerbound_v2 = $('#lowerbound_v2').val() * 1;
+                InResistance.InRSI_Value_v2.upperbound_v2 = $('#upperbound_v2').val() * 1;
+                InResistance.InRSI_Value_v2.onlyLowerLong_v2 = $('#onlyLowerLong_v2').prop('checked');
+                InResistance.InRSI_Value_v2.onlyUpperShort_v2 = $('#onlyUpperShort_v2').prop('checked');
+            }
+
+            InResistance.InShadown1Percent_v2 = $('#InShadown1Percent_v2').val() * 1;
+            InResistance.InShadown2Percent_v2 = $('#InShadown2Percent_v2').val() * 1;
+            InResistance.InNumberOfBarTop_v2 = $('#InNumberOfBarTop_v2').val() * 1;
+            InResistance.InNumberOfBarExpired_v2 = $('#InNumberOfBarExpired_v2').val() * 1;
+
+            InResistance.InEnableEntryPricePercent_v2 = $('#InEnableEntryPricePercent_v2').prop('checked');
+
+            InResistance.InEntry1Percent_v2 = $('#InEntry1Percent_v2').val() * 1;
+            InResistance.InTP1_Percent_v2 = $('#InTP1_Percent_v2').val() * 1;
+            InResistance.InEntry2Percent_v2 = $('#InEntry2Percent_v2').val() * 1;
+            InResistance.InTP2_Percent_v2 = $('#InTP2_Percent_v2').val() * 1;
+            InResistance.InSL_Percent_v2 = $('#InSL_Percent_v2').val() * 1;
+
+            if (!$('#InTrendUpConfig_v2').prop('checked')) {
+                InResistance.InTrendUpConfig_v2 = null;
+            }
+            else {
+                InResistance.InTrendUpConfig_v2 = {};
+                InResistance.InTrendUpConfig_v2.requireRSI_Up_v2 = $('#requireRSI_Up_v2').prop('checked');
+                InResistance.InTrendUpConfig_v2.numberOfBar_v2 = $('#numberOfBarUp_v2').val() * 1;
+                InResistance.InTrendUpConfig_v2.minUpPercent_v2 = $('#minUpPercent_v2').val() * 1;
+            }
+
+            if (!$('#InTrendDownConfig_v2').prop('checked')) {
+                InResistance.InTrendDownConfig_v2 = null;
+            }
+            else {
+                InResistance.InTrendDownConfig_v2 = {};
+                InResistance.InTrendDownConfig_v2.requireRSI_Down_v2 = $('#requireRSI_Down_v2').prop('checked');
+                InResistance.InTrendDownConfig_v2.numberOfBar_v2 = $('#numberOfBarDown_v2').val() * 1;
+                InResistance.InTrendDownConfig_v2.minDownPercent_v2 = $('#minDownPercent_v2').val() * 1;
+            }
+
+            if (!$('#InConfigConditionBar_v2').prop('checked')) {
+                InResistance.InConfigConditionBar_v2 = null;
+            }
+            else {
+                InResistance.InConfigConditionBar_v2 = {};
+                InResistance.InConfigConditionBar_v2.barColorBuy_v2 = $('#barColorBuy_v2').val();
+                InResistance.InConfigConditionBar_v2.barColorSell_v2 = $('#barColorSell_v2').val();
+            }
+        }
 
         //long chao
         $('#btnLongChao').click(function () {
@@ -560,7 +911,7 @@
 
             let InLongChao = gConfig.InLongChao[timeframe];
             console.log({ timeframe, gConfig, InLongChao })
-            $('#enableTimeframe_lc').attr('checked', InLongChao);
+            $('#enableTimeframe_lc').prop('checked', InLongChao);
             if (!InLongChao) return;
 
             $('#InVolumeUSD_lc').val(InLongChao.InVolumeUSD_lc);
@@ -573,22 +924,22 @@
             $('#changeRSI1_lc').val(InLongChao.changeRSI1_lc);
             $('#changeRSI2_lc').val(InLongChao.changeRSI2_lc);
             $('#upperboundRSI_lc').val(InLongChao.upperboundRSI_lc);
-            $('#requireRSI_Up_lc').attr('checked', InLongChao.requireRSI_Up_lc);
+            $('#requireRSI_Up_lc').prop('checked', InLongChao.requireRSI_Up_lc);
 
             $('#changeCCI1_lc').val(InLongChao.changeCCI1_lc);
             $('#changeCCI2_lc').val(InLongChao.changeCCI2_lc);
             $('#upperboundCCI_lc').val(InLongChao.upperboundCCI_lc);
-            $('#requireCCI_Up_lc').attr('checked', InLongChao.requireCCI_Up_lc);
+            $('#requireCCI_Up_lc').prop('checked', InLongChao.requireCCI_Up_lc);
 
             $('#changeRSI3_lc').val(InLongChao.changeRSI3_lc);
             $('#changeRSI4_lc').val(InLongChao.changeRSI4_lc);
             $('#lowerboundRSI_lc').val(InLongChao.lowerboundRSI_lc);
-            $('#requireRSI_Down_lc').attr('checked', InLongChao.requireRSI_Down_lc);
+            $('#requireRSI_Down_lc').prop('checked', InLongChao.requireRSI_Down_lc);
 
             $('#changeCCI3_lc').val(InLongChao.changeCCI3_lc);
             $('#changeCCI4_lc').val(InLongChao.changeCCI4_lc);
             $('#lowerboundCCI_lc').val(InLongChao.lowerboundCCI_lc);
-            $('#requireCCI_Down_lc').attr('checked', InLongChao.requireCCI_Down_lc);
+            $('#requireCCI_Down_lc').prop('checked', InLongChao.requireCCI_Down_lc);
         }
 
         $('#btnUpdateConfig_lc').click(function () {
@@ -614,7 +965,7 @@
             let config = gConfig.InLongChao;
 
             let timeframe = $('#timeframe_lc').val();
-            let enableTimeframe = $('#enableTimeframe_lc').is(':checked');
+            let enableTimeframe = $('#enableTimeframe_lc').prop('checked');
             console.log({ timeframe, enableTimeframe })
             if (!enableTimeframe) {
                 config[timeframe] = null;
@@ -633,22 +984,22 @@
             InLongChao.changeRSI1_lc = $('#changeRSI1_lc').val() * 1;
             InLongChao.changeRSI2_lc = $('#changeRSI2_lc').val() * 1;
             InLongChao.upperboundRSI_lc = $('#upperboundRSI_lc').val() * 1;
-            InLongChao.requireRSI_Up_lc = $('#requireRSI_Up_lc').is(':checked');
+            InLongChao.requireRSI_Up_lc = $('#requireRSI_Up_lc').prop('checked');
 
             InLongChao.changeCCI1_lc = $('#changeCCI1_lc').val() * 1;
             InLongChao.changeCCI2_lc = $('#changeCCI2_lc').val() * 1;
             InLongChao.upperboundCCI_lc = $('#upperboundCCI_lc').val() * 1;
-            InLongChao.requireCCI_Up_lc = $('#requireCCI_Up_lc').is(':checked');
+            InLongChao.requireCCI_Up_lc = $('#requireCCI_Up_lc').prop('checked');
 
             InLongChao.changeRSI3_lc = $('#changeRSI3_lc').val() * 1;
             InLongChao.changeRSI4_lc = $('#changeRSI4_lc').val() * 1;
             InLongChao.lowerboundRSI_lc = $('#lowerboundRSI_lc').val() * 1;
-            InLongChao.requireRSI_Down_lc = $('#requireRSI_Down_lc').is(':checked');
+            InLongChao.requireRSI_Down_lc = $('#requireRSI_Down_lc').prop('checked');
 
             InLongChao.changeCCI3_lc = $('#changeCCI3_lc').val() * 1;
             InLongChao.changeCCI4_lc = $('#changeCCI4_lc').val() * 1;
             InLongChao.lowerboundCCI_lc = $('#lowerboundCCI_lc').val() * 1;
-            InLongChao.requireCCI_Down_lc = $('#requireCCI_Down_lc').is(':checked');
+            InLongChao.requireCCI_Down_lc = $('#requireCCI_Down_lc').prop('checked');
         }
     });
 </script>

@@ -9,14 +9,17 @@ dotenv.config({ path: '../.env' });
 export class GoogleSheet {
     private serviceAccountAuth: JWT;
     private sheetIDResistance: number;
+    private sheetIDResistance_v2: number;
     private sheetID_lc: number;
     private id: string;
     private list: Array<Array<string | number>>;
+    private list_v2: Array<Array<string | number>>;
     private listLC: Array<Array<string | number>>;
     private timeout: any;
+    private timeout_v2: any;
     private timeoutLC: any;
 
-    constructor(sheetIDResistance: number, sheetID_lc: number) {
+    constructor(sheetIDResistance: number, sheetIDResistance_v2: number, sheetID_lc: number) {
         this.serviceAccountAuth = new JWT({
             email: process.env.GOOGLE_SHEET_EMAIL,
             key: process.env.GOOGLE_SHEET_KEY?.toString().replace(/\\n/g, "\n"),
@@ -26,10 +29,12 @@ export class GoogleSheet {
         });
 
         this.sheetIDResistance = sheetIDResistance;
+        this.sheetIDResistance_v2 = sheetIDResistance_v2;
         this.sheetID_lc = sheetID_lc;
-        this.id = '1Y66p8jvlSJeBafEcWuzfs8G4iK4NeMS_OVXDefrG4BM';
+        this.id = process.env.GOOGLE_SHEET_ID || '';
 
         this.list = [];
+        this.list_v2 = [];
         this.listLC = [];
     }
 
@@ -67,6 +72,28 @@ export class GoogleSheet {
                 let sheet = await this.getSheet(this.sheetIDResistance);
                 let rows = [...this.list];
                 this.list = [];
+                for (let item of rows) {
+                    await sheet?.addRow(item);
+                }
+            }, 1000);
+        }
+        catch (err) {
+            console.log("ERROR sheet", err);
+        }
+    }
+
+    async addRow_v2(symbol: string, side: string, timeframe: string, entry1: number | string, entry2: number | string, tp1: number | string, tp2: number | string, sl: number | string, rsi: number | string, expiredTime: number | string) {
+        try {
+            let row = [symbol, side, timeframe, moment().format('YYYY-MM-DD HH:mm'), entry1, entry2, tp1, tp2, sl, '', '', '', '', '', '', rsi, expiredTime];
+            console.log('add row google sheet resistance_v2');
+            console.log(JSON.stringify(row));
+
+            this.list_v2.push(row);
+            clearTimeout(this.timeout_v2);
+            this.timeout_v2 = setTimeout(async () => {
+                let sheet = await this.getSheet(this.sheetIDResistance_v2);
+                let rows = [...this.list_v2];
+                this.list_v2 = [];
                 for (let item of rows) {
                     await sheet?.addRow(item);
                 }
