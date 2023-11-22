@@ -96,7 +96,7 @@ export default class Telegram {
                 mess = `\`\`\`\n${this.TAG}${mess}\n\`\`\``;
                 await bot.sendMessage(chatID, mess, { parse_mode: 'Markdown' });
             }
-            if (this.list.length >= 4) await sendTele();
+            if (this.list.length >= 3) await sendTele();
             else this.timeout = setTimeout(sendTele, 1000)
         }
         catch (err: any) {
