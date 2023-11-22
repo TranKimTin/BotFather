@@ -251,6 +251,7 @@ class BinanceFuture {
             let rates = await Promise.all(responses.map(item => item.json()));
             let i = 0;
             for (let symbol of this.symbolList) {
+                console.log(rates[i]);
                 this.data[symbol][tf] = rates[i++];
                 this.lastPrice[symbol] = this.data[symbol][tf][0]?.close || 0;
             }

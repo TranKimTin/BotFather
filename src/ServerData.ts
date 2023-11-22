@@ -32,7 +32,7 @@ export default class ServerData {
                         delete this.queue[key];
                         this.refCount[key] = 0;
                     }
-                    return data;
+                    return res.end(JSON.stringify(data));
                 }
             }
 
