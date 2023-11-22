@@ -6,6 +6,7 @@ import moment from 'moment';
 import { GoogleSheet } from './GoogleSheet';
 import Telegram from './telegram';
 import updateSheet from './updateSheet';
+import ServerData from './ServerData';
 
 dotenv.config({ path: '../.env' });
 
@@ -15,12 +16,14 @@ export default class BotRSI_CCI {
     private setupConfig: SetupConfig;
     private telegram: Telegram;
     private isReadOnly: boolean;
+    private serverData: ServerData;
 
     constructor(sheetIDResistance: number, sheetIDResistance_v2: number, sheetID_lc: number, pathFileConfig: string, port: number, tag: string, isReadOnly: boolean) {
         this.googleSheet = new GoogleSheet(sheetIDResistance, sheetIDResistance_v2, sheetID_lc);
         this.telegram = new Telegram(tag);
         this.setupConfig = new SetupConfig(pathFileConfig, port, this.telegram);
         this.isReadOnly = isReadOnly;
+        this.serverData = new ServerData(process.env.PORT_DATA_SERVER);
         updateSheet(sheetIDResistance, sheetIDResistance_v2, sheetID_lc);
     }
 
