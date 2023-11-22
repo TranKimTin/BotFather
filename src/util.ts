@@ -265,7 +265,8 @@ let cache = {
 async function getOHLCV_m1(symbol: string, limit: number, since: number): Promise<Array<OHLCV>> {
 
     if (cache.key == `${symbol}_${limit}_${since}`
-        && cache.lastTime + 30000 > new Date().getTime()) {
+        && cache.lastTime + 30000 > new Date().getTime()
+        && cache.lastData.length > 0) {
         return cache.lastData;
     }
 
