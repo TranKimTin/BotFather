@@ -13,7 +13,6 @@ export default class ServerData {
 
         let server = http.createServer(async (req, res) => {
             let query = req.url?.split('?')[1];
-            console.log({ query });
             if (query) {
                 let { symbol, timeframe, limit } = JSON.parse('{"' + query.replace(/&/g, '","').replace(/=/g, '":"') + '"}', function (key, value) { return key === "" ? value : decodeURIComponent(value) })
                 if (symbol && timeframe && limit) {
@@ -32,15 +31,14 @@ export default class ServerData {
                         delete this.queue[key];
                         this.refCount[key] = 0;
                     }
-                    console.log('data.length', data.length);
                     return res.end(JSON.stringify(data));
                 }
             }
+            return res.end("[]");
 
         });
 
         server.on('error', (err) => {
-            // Handle your error here
             console.log(err.message);
         });
 
