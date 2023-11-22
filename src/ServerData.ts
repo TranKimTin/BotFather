@@ -35,8 +35,9 @@ export default class ServerData {
                 }
             }
             return res.end("[]");
-
         });
+
+        server.timeout = 1800000;
 
         server.on('error', (err) => {
             console.log(err.message);
