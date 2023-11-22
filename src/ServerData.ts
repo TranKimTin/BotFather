@@ -25,7 +25,6 @@ export default class ServerData {
                         });
                     }
                     this.queue[key].push((data: Array<RateData>) => res.end(JSON.stringify(data)));
-
                 }
             }
             else {
