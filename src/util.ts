@@ -146,6 +146,24 @@ export function getStartTime(tf: string, currentTime: number) {
     }
 }
 
+export function timeframeToNumberMinutes(tf: string) {
+    switch (tf) {
+        case '1m': return 1;
+        case '3m': return 3;
+        case '5m': return 5;
+        case '15m': return 15;
+        case '30m': return 30;
+        case '1h': return 60;
+        case '2h': return 120;
+        case '4h': return 240;
+        case '6h': return 360;
+        case '8h': return 480;
+        case '12h': return 720;
+        case '1d': return 1440;
+        default: return 1;
+    }
+}
+
 export async function compress(data: string): Promise<Buffer> {
     return new Promise((resolve, reject) => {
         zlib.deflate(data, { level: 9 }, (err, result) => {
@@ -164,11 +182,11 @@ export async function decompress(data: Buffer): Promise<Buffer> {
     });
 }
 
-export async function getOHLCV(symbol: string, timeframe: string, limit: number) : Promise<Array<RateData>> {
+export async function getOHLCV(symbol: string, timeframe: string, limit: number): Promise<Array<RateData>> {
     let result = [];
     let maxCall = 1000;
-    let since: number | undefined = undefined;
     let check: { [key: number]: boolean } = {};
+    let since: number | undefined = undefined;
     while (limit > 0) {
         if (limit > maxCall) console.log(`getOHLCV pending ${symbol} ${timeframe} ${limit}`);
         let ohlcv = await binance.fetchOHLCV(symbol, timeframe, since, Math.min(limit, maxCall));
@@ -201,13 +219,51 @@ export async function getOHLCV(symbol: string, timeframe: string, limit: number)
     return result;
 }
 
-async function getOHLCV_m1(symbol: string, timeframe: string, limit: number, since: number): Promise<Array<OHLCV>> {
+export async function getOHLCVFromCache(symbol: string, timeframe: string, limit: number): Promise<Array<RateData>> {
+    let date = moment.utc();
+    let dataM1: Array<RateData> = [];
+    while (dataM1.length < limit * timeframeToNumberMinutes(timeframe)) {
+        let data = await getData_m1(symbol, date.format('YYYY-MM-DD'));
+        if (data.length == 0) break;
+        dataM1.unshift(...data);
+        date.subtract(1, 'day');
+    }
+
+    dataM1.sort((a, b) => a.startTime - b.startTime);
+
+    let data: Array<RateData> = [];
+    for (let candle of dataM1) {
+        candle.timestring = moment(getStartTime(timeframe, candle.startTime)).format('YYYY-MM-DD HH:mm:SS');
+        candle.startTime = getStartTime(timeframe, candle.startTime);
+
+        candle.interval = timeframe;
+        candle.isFinal = true;
+
+        if (data.length == 0 || data[0].startTime != candle.startTime) {
+            data.unshift(candle);
+        }
+        else {
+            data[0].high = Math.max(data[0].high, candle.high);
+            data[0].low = Math.min(data[0].low, candle.low);
+            data[0].close = candle.close;
+            data[0].volume += candle.isFinal ? candle.volume : 0;
+            data[0].change = (data[0].open - data[0].close) / data[0].open;
+            data[0].ampl = (data[0].high - data[0].low) / data[0].open;
+        }
+    }
+    data = data.slice(0, limit);
+    data[0].isFinal = false;
+
+    return data;
+}
+
+async function getOHLCV_m1(symbol: string, limit: number, since: number): Promise<Array<OHLCV>> {
     let result = [];
     let maxCall = 1000;
     let check: { [key: number]: boolean } = {};
     while (limit > 0) {
         // if (limit > maxCall) console.log(`getOHLCV pending ${symbol} ${timeframe} ${limit}`);
-        let ohlcv = await binance.fetchOHLCV(symbol, timeframe, since, Math.min(limit, maxCall));
+        let ohlcv = await binance.fetchOHLCV(symbol, '1m', since, Math.min(limit, maxCall));
         let data = ohlcv.filter(item => item[0] !== undefined && item[1] !== undefined && item[2] !== undefined && item[3] !== undefined && item[4] !== undefined && item[5] !== undefined).map(item => {
             let startTime = item[0] || 0;
             let open = item[1] || 0;
@@ -236,14 +292,17 @@ export async function getData_m1(symbol: string, date: string): Promise<Array<Ra
 
     let filename = `../data/${symbol}_${startDate.format('YYYY-MM-DD')}.data`;
     if (!fs.existsSync(filename)) {
-        data = await getOHLCV_m1(symbol, '1m', 1440, startDate.valueOf());
+        data = await getOHLCV_m1(symbol, 1440, startDate.valueOf());
         if (data.length == 1440 && data[0].startTime == startDate.valueOf() && data[data.length - 1].startTime + 60000 == startDate.valueOf() + 86400000) {
             let compressData = await compress(JSON.stringify(data));
             fs.writeFileSync(filename, compressData);
             console.log(`update data ${symbol} ${startDate.format('YYYY-MM-DD')}`);
         }
         if (data[0].startTime == startDate.valueOf()) {
-            if (startDate.format('YYYY-MM-DD') != moment.utc().format('YYYY-MM-DD')) console.log('error', { symbol, startDate: startDate.format('YYYY-MM-DD'), length: data.length });
+            if (startDate.format('YYYY-MM-DD') != moment.utc().format('YYYY-MM-DD')) {
+                console.log('error', { symbol, startDate: startDate.format('YYYY-MM-DD'), length: data.length });
+                console.log(data[0], data[data.length - 1])
+            }
         }
         else {
             data = [];

@@ -237,7 +237,8 @@ class BinanceFuture {
             console.log(`init candle ${tf}...`);
             let promiseList = [];
             for (let symbol of this.symbolList) {
-                promiseList.push(util.getOHLCV(symbol, tf, numbler_candle_load));
+                // promiseList.push(util.getOHLCV(symbol, tf, numbler_candle_load));
+                promiseList.push(util.getOHLCVFromCache(symbol, tf, numbler_candle_load));
             }
             let rates = await Promise.all(promiseList);
             let i = 0;
