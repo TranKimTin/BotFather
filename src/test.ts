@@ -8,7 +8,7 @@ async function main() {
         apiKey: process.env.API_KEY,
         secretKey: process.env.SECRET_KEY,
         symbolList: ['BTCUSDT'],
-        timeframes: ['5m'],
+        timeframes: ['1m'],
         onCloseCandle: onCloseCandle,
         onClosePosition: () => { },
         onHandleError: () => { },
