@@ -1,9 +1,9 @@
 "use strict";
 import * as ccxt from 'ccxt'
 import IBinance, { Binance } from 'binance-api-node';
-import moment, { DurationInputArg2 } from 'moment';
+import moment from 'moment';
 import delay from 'delay';
-import { checkFinal, getStartTime } from './util';
+import * as util from './util';
 
 export interface RateData {
     symbol: string,
@@ -193,15 +193,15 @@ class BinanceFuture {
             for (let tf of this.timeframes) {
                 let data = {
                     symbol: candle.symbol,
-                    startTime: getStartTime(tf, candle.startTime),
-                    timestring: moment(getStartTime(tf, candle.startTime)).format('YYYY-MM-DD HH:mm:SS'),
+                    startTime: util.getStartTime(tf, candle.startTime),
+                    timestring: moment(util.getStartTime(tf, candle.startTime)).format('YYYY-MM-DD HH:mm:SS'),
                     open: +candle.open,
                     high: +candle.high,
                     low: +candle.low,
                     close: +candle.close,
                     volume: +candle.volume,
                     interval: tf,
-                    isFinal: candle.isFinal && checkFinal(tf, candle.startTime),
+                    isFinal: candle.isFinal && util.checkFinal(tf, candle.startTime),
                     change: (+candle.open - +candle.close) / +candle.open,
                     ampl: (+candle.high - +candle.low) / +candle.open
                 };
@@ -234,10 +234,10 @@ class BinanceFuture {
         });
 
         for (let tf of this.timeframes) {
-            console.log(`init future candle ${tf}...`);
+            console.log(`init candle ${tf}...`);
             let promiseList = [];
             for (let symbol of this.symbolList) {
-                promiseList.push(this.getOHLCV(symbol, tf, numbler_candle_load));
+                promiseList.push(util.getOHLCV(symbol, tf, numbler_candle_load));
             }
             let rates = await Promise.all(promiseList);
             let i = 0;
@@ -245,7 +245,7 @@ class BinanceFuture {
                 this.data[symbol][tf] = rates[i++];
                 this.lastPrice[symbol] = this.data[symbol][tf][0]?.close || 0;
             }
-            await delay(5000);
+            await delay(10000);
         }
         console.log('init done.');
         // if (!this.isReadOnly)
@@ -274,42 +274,7 @@ class BinanceFuture {
         return result;
     }
 
-    async getOHLCV(symbol: string, timeframe: string, limit: number) {
-        let result = [];
-        let maxCall = 1000;
-        let since: number | undefined = undefined;
-        let check: { [key: number]: boolean } = {};
-        while (limit > 0) {
-            if (limit > maxCall) console.log(`getOHLCV pending ${symbol} ${timeframe} ${limit}`);
-            let ohlcv = await this.binance.fetchOHLCV(symbol, timeframe, since, Math.min(limit, maxCall));
-            let data = ohlcv.filter(item => item[0] !== undefined && item[1] !== undefined && item[2] !== undefined && item[3] !== undefined && item[4] !== undefined && item[5] !== undefined).map(item => {
-                let startTime = item[0] || 0;
-                let open = item[1] || 0;
-                let high = item[2] || 0;
-                let low = item[3] || 0;
-                let close = item[4] || 0;
-                let volume = item[5] || 0;
-                let interval = timeframe;
-                let isFinal = true;
-                let change = (close - open) / open;
-                let ampl = (high - low) / open;
-                let timestring = moment(startTime).format('YYYY-MM-DD HH:mm:SS');
-                return { symbol, startTime, timestring, open, high, low, close, volume, interval, isFinal, change, ampl };
-            }).filter(item => !check[item.startTime]);
-            if (data.length == 0) break;
-            data.sort((a, b) => a.startTime - b.startTime);
-            result.push(...data);
-            for (let item of data) {
-                check[item.startTime] = true;
-            }
-            limit -= Math.min(limit, maxCall);
-            since = moment(data[0].startTime).subtract(Math.min(limit, maxCall) * (+timeframe.slice(0, timeframe.length - 1)), <DurationInputArg2>timeframe[timeframe.length - 1]).valueOf();
-        }
-        result.sort((a, b) => b.startTime - a.startTime);
 
-        if (result.length) result[0].isFinal = false;
-        return result;
-    }
 
     async orderStopMarket(symbol: string, side: string, volume: number, price: number, isTakeProfit: boolean, closePosition: boolean, workingType: 'CONTRACT_PRICE' | 'MARK_PRICE' = 'CONTRACT_PRICE') {
         if (side == 'buy' || side == 'long' || side == 'LONG') side = 'BUY';
