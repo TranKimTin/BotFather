@@ -4,6 +4,10 @@ import IBinance, { Binance } from 'binance-api-node';
 import moment from 'moment';
 import delay from 'delay';
 import * as util from './util';
+import ServerData from './ServerData';
+import dotenv from 'dotenv';
+
+dotenv.config({ path: '../.env' });
 
 export interface RateData {
     symbol: string,
@@ -78,6 +82,8 @@ class BinanceFuture {
     private isReadOnly: boolean;
 
     constructor(params: IParamsConstructor) {
+        new ServerData(process.env.PORT_DATA_SERVER);
+
         let key = {
             apiKey: params.isReadOnly ? undefined : params.apiKey,
             secret: params.isReadOnly ? undefined : params.secretKey,
