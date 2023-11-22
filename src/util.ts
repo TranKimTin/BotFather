@@ -257,8 +257,20 @@ export async function getOHLCVFromCache(symbol: string, timeframe: string, limit
     return data;
 }
 
+let cache = {
+    lastData: [] as Array<OHLCV>,
+    lastTime: 0,
+    key: ''
+};
 async function getOHLCV_m1(symbol: string, limit: number, since: number): Promise<Array<OHLCV>> {
-    let result = [];
+
+    if (cache.key == `${symbol}_${limit}_${since}`
+        && cache.lastTime + 10000 > new Date().getTime()
+        && cache.lastData[cache.lastData.length - 1]?.startTime == getStartTime('1m', new Date().getTime())) {
+        return cache.lastData;
+    }
+
+    let result: Array<OHLCV> = [];
     let maxCall = 1000;
     let check: { [key: number]: boolean } = {};
     while (limit > 0) {
@@ -283,6 +295,11 @@ async function getOHLCV_m1(symbol: string, limit: number, since: number): Promis
         since = moment(data[data.length - 1].startTime).add(1, 'minute').valueOf();
     }
     result.sort((a, b) => a.startTime - b.startTime);
+
+    cache.lastData = [...result];
+    cache.key = `${symbol}_${limit}_${since}`;
+    cache.lastTime = new Date().getTime()
+
     return result;
 }
 
