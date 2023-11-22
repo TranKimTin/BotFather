@@ -239,7 +239,7 @@ class BinanceFuture {
             for (let symbol of this.symbolList) {
                 // promiseList.push(util.getOHLCV(symbol, tf, numbler_candle_load));
                 // promiseList.push(util.getOHLCVFromCache(symbol, tf, numbler_candle_load));
-                promiseList.push(fetch(`http://localhost:$${process.env.PORT_DATA_SERVER}/?symbol=${symbol}&timeframe=${tf}&limit=${numbler_candle_load}`));
+                promiseList.push(fetch(`http://localhost:${process.env.PORT_DATA_SERVER}/?symbol=${symbol}&timeframe=${tf}&limit=${numbler_candle_load}`));
             }
             let responses = await Promise.all(promiseList);
             let rates = await Promise.all(responses.map(item => item.json()));
