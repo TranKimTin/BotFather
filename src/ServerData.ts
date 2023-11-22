@@ -11,7 +11,7 @@ export default class ServerData {
         this.queue = {};
         this.refCount = {};
 
-        http.createServer(async (req, res) => {
+        let server = http.createServer(async (req, res) => {
             let query = req.url?.split('?')[1];
             console.log({ query });
             if (query) {
@@ -37,7 +37,14 @@ export default class ServerData {
                 }
             }
 
-        }).listen(port);
+        });
+
+        server.on('error', function (e) {
+            // Handle your error here
+            console.log(e.message);
+        });
+
+        server.listen(port);
         console.log(`server data listen port ${port}`);
 
     }
