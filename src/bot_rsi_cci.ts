@@ -34,11 +34,16 @@ export default class BotRSI_CCI {
         // console.log(symbolList.join(' '));
         console.log(`Total ${symbolList.length} symbols`);
 
+        let config = this.setupConfig.getConfig();
+        let timeframes = ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'];
+        timeframes = timeframes.filter(tf => (config.InLongChao[tf] || config.InResistance[tf] || config.InResistance_v2[tf]))
+
+
         this.binance = new BinanceFuture({
             apiKey: process.env.API_KEY,
             secretKey: process.env.SECRET_KEY,
             symbolList: symbolList,
-            timeframes: [/*'1m', '3m', '5m',*/ '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'],
+            timeframes: timeframes,
             onCloseCandle: this.onCloseCandle.bind(this),
             onClosePosition: async (symbol: string) => { },
             onHandleError: async (err: any, symbol: string | undefined) => { await this.telegram.sendError((symbol ? symbol : '') + err.message); },
