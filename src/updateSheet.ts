@@ -279,7 +279,7 @@ export default function updateSheet(sheetIDResistance: number, sheetIDResistance
 
                     if (!symbol || row.get('Khớp entry 1') == 'không' || row.get('Lợi nhuận %')) continue;
 
-                    let expireTime : number = +row.get('expiredTime');
+                    let expireTime: number = +row.get('expiredTime');
                     // if (symbol != 'BCHUSDT') continue;
                     let data = await getOHLCV(symbol, new Date(timestamp).valueOf());
 
@@ -664,10 +664,11 @@ export default function updateSheet(sheetIDResistance: number, sheetIDResistance
         }
     }
 
-    main().then(() => { mainLC() });
+    main().then(() => main_v2()).then(() => mainLC());
     setInterval(async () => {
         try {
             await main();
+            await main_v2();
             await mainLC();
         }
         catch (err) {
