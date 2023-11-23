@@ -312,16 +312,16 @@ export default class BotRSI_CCI {
 
             let shadownTop1 = data[1].high - Math.max(data[1].open, data[1].close);
             let shadownBot1 = Math.min(data[1].open, data[1].close) - data[1].low;
-            let change1 = Math.abs(data[1].open - data[1].close);
+            let ampl1 = Math.abs(data[1].high - data[1].low);
             let shadownTop2 = data[0].high - Math.max(data[0].open, data[0].close);
             let shadownBot2 = Math.min(data[0].open, data[0].close) - data[0].low;
-            let change2 = Math.abs(data[0].open - data[0].close);
+            let ampl2 = Math.abs(data[0].high - data[0].low);
 
-            if (change1 == 0 || change2 == 0) return;
-            if (side == 'sell' && shadownTop1 / change1 < InShadown1Percent_v2) return;
-            if (side == 'sell' && shadownTop2 / change2 < InShadown2Percent_v2) return;
-            if (side == 'buy' && shadownBot1 / change1 < InShadown1Percent_v2) return;
-            if (side == 'buy' && shadownBot2 / change2 < InShadown2Percent_v2) return;
+            if (ampl1 == 0 || ampl2 == 0) return;
+            if (side == 'sell' && shadownTop1 / ampl1 < InShadown1Percent_v2) return;
+            if (side == 'sell' && shadownTop2 / ampl2 < InShadown2Percent_v2) return;
+            if (side == 'buy' && shadownBot1 / ampl1 < InShadown1Percent_v2) return;
+            if (side == 'buy' && shadownBot2 / ampl2 < InShadown2Percent_v2) return;
 
             if (InRSI_Value_v2 && InRSI_Value_v2.onlyLowerLong_v2 && curRSI <= InRSI_Value_v2.lowerbound_v2 && side == 'sell') return;
             if (InRSI_Value_v2 && InRSI_Value_v2.onlyUpperShort_v2 && curRSI >= InRSI_Value_v2.upperbound_v2 && side == 'buy') return;
