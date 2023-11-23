@@ -36,7 +36,10 @@ export default class BotRSI_CCI {
 
         let config = this.setupConfig.getConfig();
         let timeframes = ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'];
-        timeframes = timeframes.filter(tf => (config.InLongChao[tf] || config.InResistance[tf] || config.InResistance_v2[tf]))
+        timeframes = timeframes.filter(timeframe => {
+            let tf = timeframe[timeframe.length - 1] + timeframe.slice(0, timeframe.length - 1);
+            return (config.InLongChao[tf] || config.InResistance[tf] || config.InResistance_v2[tf]);
+        })
 
 
         this.binance = new BinanceFuture({
