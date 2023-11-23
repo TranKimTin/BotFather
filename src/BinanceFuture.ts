@@ -195,6 +195,7 @@ class BinanceFuture {
             });
         }
 
+        console.log('init timeframe', this.timeframes);
         this.client.ws.futuresCandles(this.symbolList, '1m', candle => {
             for (let tf of this.timeframes) {
                 let data = {
