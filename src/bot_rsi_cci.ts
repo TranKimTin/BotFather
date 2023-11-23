@@ -209,6 +209,9 @@ export default class BotRSI_CCI {
 
         }
         catch (err: any) {
+            console.log(this.setupConfig.getConfig());
+            console.log({ symbol, timeframe });
+            console.log(data[0]);
             console.log(err);
             await this.telegram.sendError(err.message);
         }
@@ -381,6 +384,9 @@ export default class BotRSI_CCI {
 
         }
         catch (err: any) {
+            console.log(this.setupConfig.getConfig());
+            console.log({ symbol, timeframe });
+            console.log(data[0]);
             console.log(err);
             await this.telegram.sendError(err.message);
         }
@@ -491,6 +497,9 @@ export default class BotRSI_CCI {
             await this.googleSheet.addRowLC(symbol, (side == 'buy' ? 'LONG' : 'SHORT'), timeframe, entry, TP, SL);
         }
         catch (err: any) {
+            console.log(this.setupConfig.getConfig());
+            console.log({ symbol, timeframe });
+            console.log(data[0]);
             console.log(err);
             await this.telegram.sendError(err.message);
         }
