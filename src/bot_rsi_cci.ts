@@ -70,7 +70,7 @@ export default class BotRSI_CCI {
 
             let InConfig = this.setupConfig.getConfig().InResistance;
             // console.log(InConfig)
-            if (data.length < 14) return;
+            if (data.length <= 15) return;
 
             let key = timeframe[timeframe.length - 1] + timeframe.slice(0, timeframe.length - 1);
             let config = InConfig[key];
@@ -231,7 +231,7 @@ export default class BotRSI_CCI {
 
             let InConfig = this.setupConfig.getConfig().InResistance_v2;
             // console.log(InConfig)
-            if (data.length < 14) return;
+            if (data.length <= 15) return;
 
             let key = timeframe[timeframe.length - 1] + timeframe.slice(0, timeframe.length - 1);
             let config = InConfig[key];
@@ -405,7 +405,7 @@ export default class BotRSI_CCI {
             if (!this.binance) return;
 
             let InConfig = this.setupConfig.getConfig().InLongChao;
-            if (data.length < 20) return;
+            if (data.length <= 21) return;
 
             let key = timeframe[timeframe.length - 1] + timeframe.slice(0, timeframe.length - 1);
             let config = InConfig[key];
