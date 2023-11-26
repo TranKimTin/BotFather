@@ -72,6 +72,11 @@ export default class Backtest {
             for (let tf of this.timeframes) {
                 this.data[symbol][tf] = [];
             }
+            this.positions[symbol] = {
+                symbol: symbol,
+                side: '',
+                volume: 0
+            };
         }
 
         if (!fs.existsSync('../data')) {
@@ -98,7 +103,7 @@ export default class Backtest {
 
         let startDate = moment.utc(from);
         let endDate = moment.utc(to);
-        
+
 
 
     }
@@ -251,9 +256,10 @@ export default class Backtest {
         return result;
     }
 
-    private async handleLogic() {
+    private handleLogic() {
         let timestamp = this.timeCurrent;
-        for (let order of this.orders) {
+        for (let i = 0; i < this.orders.length; i++) {
+            let order = this.orders[i];
             let { symbol } = order;
             let curPrice = this.lastPrice[symbol];
             if (order.side == 'BUY') {
@@ -274,6 +280,10 @@ export default class Backtest {
                 //
             }
         }
+    }
+
+    private async mathOrder(symbol: string, price: number, type: string) {
+        
     }
 }
 
