@@ -367,7 +367,7 @@ export default class BotRSI_CCI {
                 TP2 = '';
             }
 
-            let expiredTime = data[0].startTime + (data[0].startTime - data[1].startTime) * (InNumberOfBarExpired_v2 + 1)
+            let expiredTime = data[0].startTime + (data[0].startTime - data[1].startTime) * (InNumberOfBarExpired_v2 + 1);
 
             if (side == 'none') return;
             console.log(rate);
@@ -390,6 +390,12 @@ export default class BotRSI_CCI {
             await this.telegram.sendTable(dataTable);
             await this.googleSheet.addRow_v2(symbol, (side == 'buy' ? 'LONG' : 'SHORT'), timeframe, entry1, entry2, TP1, TP2, SL, curRSI, expiredTime);
 
+            if (!this.isReadOnly) {
+                let orderOpen = await this.binance.getOpenOrders(symbol);
+                if (orderOpen.length == 0) {
+                    await this.binance.orderLimit(symbol, side, volume, entry1, { TP: TP1, SL, expiredTime });
+                }
+            }
         }
         catch (err: any) {
             console.log(this.setupConfig.getConfig());
