@@ -201,19 +201,19 @@ export default class BotRSI_CCI {
             await this.telegram.sendTable(dataTable);
             await this.googleSheet.addRow(symbol, (side == 'buy' ? 'LONG' : 'SHORT'), timeframe, entry1, entry2, TP1, TP2, SL, curRSI);
 
-            if (!entry2) {
-                let orders = await this.binance.getOpenOrders(symbol);
-                if (orders.length > 0) {
-                    console.log(symbol, 'đang mở lệnh', orders);
-                    return;
-                };
-                let options = {
-                    TP: TP1,
-                    SL: SL,
-                    expiredTime: data[0].startTime + (data[0].startTime - data[1].startTime) * 2
-                };
-                await this.binance.orderLimit(symbol, side, volume, entry1, options);
-            }
+            // if (!entry2) {
+            //     let orders = await this.binance.getOpenOrders(symbol);
+            //     if (orders.length > 0) {
+            //         console.log(symbol, 'đang mở lệnh', orders);
+            //         return;
+            //     };
+            //     let options = {
+            //         TP: TP1,
+            //         SL: SL,
+            //         expiredTime: data[0].startTime + (data[0].startTime - data[1].startTime) * 2
+            //     };
+            //     await this.binance.orderLimit(symbol, side, volume, entry1, options);
+            // }
 
         }
         catch (err: any) {
