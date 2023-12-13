@@ -66,7 +66,7 @@ export default function updateSheet(sheetIDResistance: number, sheetIDResistance
                     let TP2 = row.get('TP entry 2')?.replace(',', '.') * 1;
                     let SL = row.get('SL')?.replace(',', '.') * 1;
 
-                    if (!symbol || row.get('Khớp entry 1') == 'không' || row.get('Lợi nhuận %')) continue;
+                    if (!symbol || !side || !timeframe || !timestamp || row.get('Khớp entry 1') == 'không' || row.get('Lợi nhuận %')) continue;
 
                     let expireTime = moment(timestamp).add(timeframe.slice(0, timeframe.length - 1), timeframe[timeframe.length - 1]).valueOf();
                     // if (symbol != 'BCHUSDT') continue;
@@ -277,7 +277,7 @@ export default function updateSheet(sheetIDResistance: number, sheetIDResistance
                     let TP2 = row.get('TP entry 2')?.replace(',', '.') * 1;
                     let SL = row.get('SL')?.replace(',', '.') * 1;
 
-                    if (!symbol || row.get('Khớp entry 1') == 'không' || row.get('Lợi nhuận %')) continue;
+                    if (!symbol || !side || !timestamp || row.get('Khớp entry 1') == 'không' || row.get('Lợi nhuận %')) continue;
 
                     let expireTime: number = +row.get('expiredTime');
                     // if (symbol != 'BCHUSDT') continue;
@@ -490,7 +490,7 @@ export default function updateSheet(sheetIDResistance: number, sheetIDResistance
                     let TP2 = 0;
                     let SL = row.get('SL')?.replace(',', '.') * 1;
 
-                    if (!symbol || row.get('Khớp entry 1') == 'không' || row.get('Lợi nhuận %')) continue;
+                    if (!symbol || !side || !timeframe || !timestamp || row.get('Khớp entry 1') == 'không' || row.get('Lợi nhuận %')) continue;
 
                     let expireTime = moment(timestamp).add(timeframe.slice(0, timeframe.length - 1), timeframe[timeframe.length - 1]).valueOf();
                     // if (symbol != 'BCHUSDT') continue;
