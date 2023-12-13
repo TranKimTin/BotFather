@@ -40,6 +40,8 @@ export interface IConfigResistance_v2 {
     InShadown2Percent_v2: number,
     InNumberOfBarTop_v2: number,
     InNumberOfBarExpired_v2: number,
+    InMinAmpl_v2: number,
+    InChangePerAmplPercent_v2: number,
     InRSI_Value_v2?: {
         lowerbound_v2: number,
         upperbound_v2: number,

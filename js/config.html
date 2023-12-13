@@ -306,6 +306,20 @@
 
                     <br />
                     <br />
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <label for="InMinAmplPercent_v2">Thân + 2 râu >= (%):</label>
+                            <input type="number" value="1" class="form-control" id="InMinAmplPercent_v2">
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="InChangePerAmplPercent_v2">thân nến so với (thân + 2 râu) >= (%)</label>
+                            <input type="number" value="1" class="form-control" id="InChangePerAmplPercent_v2">
+                        </div>
+                    </div>
+
+                    <br />
+                    <br />
                     <div class="row">
                         <div class="col-sm-12">
                             <label><input type="checkbox" value="" id="InEnableEntryPricePercent_v2"> Bật (entry theo %
@@ -776,6 +790,8 @@
             $('#InShadown2Percent_v2').val(InResistance.InShadown2Percent_v2);
             $('#InNumberOfBarTop_v2').val(InResistance.InNumberOfBarTop_v2);
             $('#InNumberOfBarExpired_v2').val(InResistance.InNumberOfBarExpired_v2);
+            $('#InMinAmpl_v2').val(InResistance.InMinAmpl_v2);
+            $('#InChangePerAmplPercent_v2').val(InResistance.InChangePerAmplPercent_v2);
 
             $('#InEnableEntryPricePercent_v2').prop('checked', InResistance.InEnableEntryPricePercent_v2);
 
@@ -852,6 +868,8 @@
             InResistance.InShadown2Percent_v2 = $('#InShadown2Percent_v2').val() * 1;
             InResistance.InNumberOfBarTop_v2 = $('#InNumberOfBarTop_v2').val() * 1;
             InResistance.InNumberOfBarExpired_v2 = $('#InNumberOfBarExpired_v2').val() * 1;
+            InResistance.InMinAmpl_v2 = $('#InMinAmpl_v2').val() * 1;
+            InResistance.InChangePerAmplPercent_v2 = $('#InChangePerAmplPercent_v2').val() * 1;
 
             InResistance.InEnableEntryPricePercent_v2 = $('#InEnableEntryPricePercent_v2').prop('checked');
 

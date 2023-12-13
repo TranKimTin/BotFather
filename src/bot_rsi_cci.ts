@@ -238,7 +238,8 @@ export default class BotRSI_CCI {
             if (!config) return;
 
             let { InVolumeUSD_v2, InShadown1Percent_v2, InShadown2Percent_v2, InNumberOfBarTop_v2, InNumberOfBarExpired_v2, InRSI_Value_v2, InEnableEntryPricePercent_v2, InEntry1Percent_v2, InEntry2Percent_v2, InSL_Percent_v2,
-                InTP1_Percent_v2, InTP2_Percent_v2, InTrendUpConfig_v2, InTrendDownConfig_v2, InConfigConditionBar_v2 } = config;
+                InMinAmpl_v2, InChangePerAmplPercent_v2, InTP1_Percent_v2, InTP2_Percent_v2, InTrendUpConfig_v2,
+                InTrendDownConfig_v2, InConfigConditionBar_v2 } = config;
 
             InVolumeUSD_v2 = 6;//fixed
 
@@ -249,6 +250,8 @@ export default class BotRSI_CCI {
             InSL_Percent_v2 /= 100;
             InTP1_Percent_v2 /= 100;
             InTP2_Percent_v2 /= 100;
+            InMinAmpl_v2 /= 100;
+            InChangePerAmplPercent_v2 /= 100;
 
             let rate = data[0];
             let rsi = util.iRSI(data, 14);
@@ -319,8 +322,12 @@ export default class BotRSI_CCI {
 
             let shadownTop2 = data[0].high - Math.max(data[0].open, data[0].close);
             let shadownBot2 = Math.min(data[0].open, data[0].close) - data[0].low;
-            // let ampl2 = Math.abs(data[0].high - data[0].low);
+            let ampl2 = Math.abs(data[0].high - data[0].low);
             let change2 = Math.abs(data[0].open - data[0].close);
+
+            //dieu kien than nen, bien do
+            if (ampl2 / data[0].open < InMinAmpl_v2) return;
+            if (change2 / data[0].open < InChangePerAmplPercent_v2) return;
 
             if (change1 == 0 || change2 == 0) return;
             if (side == 'sell' && shadownTop1 / change1 < InShadown1Percent_v2) return;
