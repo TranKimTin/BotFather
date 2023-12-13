@@ -238,7 +238,7 @@ export default class BotRSI_CCI {
             if (!config) return;
 
             let { InVolumeUSD_v2, InShadown1Percent_v2, InShadown2Percent_v2, InNumberOfBarTop_v2, InNumberOfBarExpired_v2, InRSI_Value_v2, InEnableEntryPricePercent_v2, InEntry1Percent_v2, InEntry2Percent_v2, InSL_Percent_v2,
-                InMinAmpl_v2, InChangePerAmplPercent_v2, InTP1_Percent_v2, InTP2_Percent_v2, InTrendUpConfig_v2,
+                InMinAmpl_v2 = 0, InChangePerAmplPercent_v2 = 0, InTP1_Percent_v2, InTP2_Percent_v2, InTrendUpConfig_v2,
                 InTrendDownConfig_v2, InConfigConditionBar_v2 } = config;
 
             InVolumeUSD_v2 = 6;//fixed
