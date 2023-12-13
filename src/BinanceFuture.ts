@@ -96,9 +96,9 @@ class BinanceFuture {
         this.onCloseCandle = params.onCloseCandle;
         this.onClosePosition = params.onClosePosition;
         this.onHandleError = params.onHandleError;
-        this.onInitStart = params.onInitStart,
-            this.onInitDone = params.onInitDone,
-            this.data = {};
+        this.onInitStart = params.onInitStart;
+        this.onInitDone = params.onInitDone;
+        this.data = {};
         this.digits = {};
         this.positions = {};
         this.minVolumes = {};
