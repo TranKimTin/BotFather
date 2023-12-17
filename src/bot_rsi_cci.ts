@@ -327,7 +327,7 @@ export default class BotRSI_CCI {
 
             //dieu kien than nen, bien do nen cuoi cung
             if (ampl2 / data[0].open < InMinAmpl_v2) return;
-            if (change2 / data[0].open < InChangePerAmplPercent_v2) return;
+            if (change2 / ampl2 < InChangePerAmplPercent_v2) return;
 
             if (change1 == 0 || change2 == 0) return;
             if (side == 'sell' && shadownTop1 / ampl1 < InShadown1Percent_v2) return;
