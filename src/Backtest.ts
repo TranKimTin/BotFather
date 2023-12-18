@@ -104,8 +104,34 @@ export default class Backtest {
         let startDate = moment.utc(from);
         let endDate = moment.utc(to);
 
+        while (startDate.valueOf() <= endDate.valueOf()) {
+            let today = startDate.format('YYYY-MM-DD');
+            console.log({ today })
+            let todayData: Array<RateData> = [];
+            for (let symbol of this.symbolList) {
+                todayData.push(...await util.getData_m1(symbol, today));
+            }
+            todayData.sort((a, b) => a.startTime - b.startTime);
+            for (let rate of todayData) {
+                this.timeCurrent = moment.utc(rate.startTime);
 
+                this.lastPrice[rate.symbol] = rate.open;
+                await this.updateCandle(rate.symbol, false);
 
+                this.lastPrice[rate.symbol] = (rate.close > rate.open ? rate.low : rate.high);
+                await this.updateCandle(rate.symbol, false);
+
+                this.lastPrice[rate.symbol] = (rate.close > rate.open ? rate.high : rate.low)
+                await this.updateCandle(rate.symbol, false);
+
+                this.lastPrice[rate.symbol] = rate.close;
+                await this.updateCandle(rate.symbol, true, rate.volume);
+
+            }
+            startDate.add(1, 'day');
+        }
+
+        console.log('backtest done.');
     }
 
     async getOpenOrders(symbol: string): Promise<Array<Order>> {
@@ -256,6 +282,46 @@ export default class Backtest {
         return result;
     }
 
+    private async updateCandle(symbol: string, close: boolean, volume: number = 0) {
+        await this.handleLogic();
+        let price = this.lastPrice[symbol];
+        for (let tf of this.timeframes) {
+            let data = this.data[symbol][tf];
+            if (data[0] && util.getStartTime(tf, this.timeCurrent.valueOf()) == data[0].startTime) {
+                data[0].high = Math.max(data[0].high, price);
+                data[0].low = Math.min(data[0].low, price);
+                data[0].close = price;
+                data[0].volume += volume;
+                data[0].change = (data[0].close - data[0].open) / data[0].open;
+                data[0].ampl = (data[0].high - data[0].low) / data[0].open;
+                if (close && util.getStartTime(tf, this.timeCurrent.valueOf() + 60000) != data[0].startTime) {
+                    data[0].isFinal = true;
+                    await this.onCloseCandle(symbol, tf, [...data]);
+                }
+            }
+            else {
+                data.unshift({
+                    symbol: symbol,
+                    startTime: util.getStartTime(tf, this.timeCurrent.valueOf()),
+                    timestring: moment(util.getStartTime(tf, this.timeCurrent.valueOf())).format('YYYY-MM-DD HH:mm:SS'),
+                    open: price,
+                    high: price,
+                    low: price,
+                    close: price,
+                    volume: volume,
+                    interval: tf,
+                    isFinal: false,
+                    change: 0,
+                    ampl: 0
+                });
+                if (data[1] && !data[1].isFinal) {
+                    data[1].isFinal = true;
+                    await this.onCloseCandle(symbol, tf, data.slice(1));
+                }
+            }
+        }
+    }
+
     private handleLogic() {
         let timestamp = this.timeCurrent;
         for (let i = 0; i < this.orders.length; i++) {
@@ -283,28 +349,28 @@ export default class Backtest {
     }
 
     private async mathOrder(symbol: string, price: number, type: string) {
-        
+
     }
 }
 
 async function main() {
-    let symbolList = await util.getSymbolList();
-    let ignoreList = ['BTCDOMUSDT', 'USDCUSDT', 'COCOSUSDT'];
-    symbolList = symbolList.filter(item => item.endsWith("USDT"))
-        .filter(item => !ignoreList.includes(item));
-
+    // let symbolList = await util.getSymbolList();
+    // let ignoreList = ['BTCDOMUSDT', 'USDCUSDT', 'COCOSUSDT'];
+    // symbolList = symbolList.filter(item => item.endsWith("USDT"))
+    //     .filter(item => !ignoreList.includes(item));
+    let symbolList = ['BTCUSDT', 'ETHUSDT'];
     let bot = new Backtest({
         symbolList: symbolList,
-        timeframes: [/*'1m', '3m', '5m',*/ '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'],
+        timeframes: ['4h', '12h'],
         onCloseCandle: onCloseCandle,
         onClosePosition: async (symbol: string) => { },
         onHandleError: async (err: any, symbol: string | undefined) => { },
     });
-    await bot.runBacktest('2023-10-19', '2023-11-19');
+    await bot.runBacktest('2023-12-17', '2023-12-18');
 }
 
 async function onCloseCandle(symbol: string, timeframe: string, data: Array<RateData>) {
-    // console.log({ symbol, timeframe, timestamp: data[0].timestring });
+    console.log({ symbol, timeframe, timestamp: data[0] });
 }
 
 main();

@@ -209,7 +209,7 @@ class BinanceFuture {
                     volume: +candle.volume,
                     interval: tf,
                     isFinal: candle.isFinal && util.checkFinal(tf, candle.startTime),
-                    change: (+candle.open - +candle.close) / +candle.open,
+                    change: (+candle.close - +candle.open) / +candle.open,
                     ampl: (+candle.high - +candle.low) / +candle.open
                 };
                 this.lastPrice[data.symbol] = data.close;
@@ -224,7 +224,7 @@ class BinanceFuture {
                     dataList[0].close = data.close;
                     dataList[0].volume += candle.isFinal ? data.volume : 0;
                     dataList[0].isFinal = data.isFinal;
-                    dataList[0].change = (dataList[0].open - dataList[0].close) / dataList[0].open;
+                    dataList[0].change = (dataList[0].close - dataList[0].open) / dataList[0].open;
                     dataList[0].ampl = (dataList[0].high - dataList[0].low) / dataList[0].open;
 
                     if (data.isFinal) {

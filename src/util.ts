@@ -300,8 +300,8 @@ export async function getData_m1(symbol: string, date: string): Promise<Array<Ra
         }
         if (data[0].startTime == startDate.valueOf()) {
             if (startDate.format('YYYY-MM-DD') != moment.utc().format('YYYY-MM-DD')) {
-                console.log('error', { symbol, startDate: startDate.format('YYYY-MM-DD'), length: data.length });
-                console.log(data[0], data[data.length - 1])
+                // console.log('error', { symbol, startDate: startDate.format('YYYY-MM-DD'), length: data.length });
+                // console.log(data[0], data[data.length - 1])
             }
         }
         else {

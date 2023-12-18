@@ -139,7 +139,7 @@ export default class BotRSI_CCI {
                 maxChangePercent /= 100;
 
                 if (rate.ampl > maxAmplPercent) return;
-                if (rate.change > maxChangePercent) return;
+                if (Math.abs(rate.change) > maxChangePercent) return;
                 if (side == 'buy' && barColorBuy == 'Xanh' && rate.close <= rate.open) return;
                 if (side == 'buy' && barColorBuy == 'Đỏ' && rate.close >= rate.open) return;
                 if (side == 'sell' && barColorSell == 'Xanh' && rate.close <= rate.open) return;
