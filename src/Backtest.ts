@@ -5,11 +5,11 @@ import fs from 'fs';
 import * as util from './util';
 
 enum OrderStatus {
-    ORDER_BOOKED,
-    ORDER_WAIT_LIMIT,
-    ORDER_WAIT_STOP,
-    ORDER_FILL,
-    ORDER_CANCLE
+    ORDER_BOOKED = 'ORDER_BOOKED',
+    ORDER_WAIT_LIMIT = 'ORDER_WAIT_LIMIT',
+    ORDER_WAIT_STOP = 'ORDER_WAIT_STOP',
+    ORDER_FILL = 'ORDER_FILL',
+    ORDER_CANCLE = 'ORDER_CANCLE'
 }
 
 interface Order {
@@ -561,11 +561,13 @@ async function onCloseCandle(symbol: string, timeframe: string, data: Array<Rate
 
     let curRSI = rsi[0];
     let preRSI = rsi[1];
+    let TP_Percent = 0.01;
+    let SL_Percent = 0.01;
     if (preRSI < 70 && curRSI > 70) {
-        bot.orderMarket(symbol, 'SELL', 1, { TP_Percent: 3, SL_Percent: 3 });
+        bot.orderMarket(symbol, 'SELL', 1, { TP_Percent, SL_Percent });
     }
     else if (preRSI > 30 && curRSI < 30) {
-        bot.orderMarket(symbol, 'BUY', 1, { TP_Percent: 3, SL_Percent: 3 });
+        bot.orderMarket(symbol, 'BUY', 1, { TP_Percent, SL_Percent });
     }
 }
 
