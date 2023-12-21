@@ -45,7 +45,9 @@ export interface Digit {
 export interface Position {
     symbol: string,
     side: string,
-    volume: number
+    volume: number,
+    entryPrice: number,
+    profit: number
 }
 
 export interface Order {
@@ -113,6 +115,20 @@ class BinanceFuture {
         }
     }
 
+    private async updatePosition() {
+        if (this.isReadOnly) return;
+        let balance = await this.binance.fetchBalance();
+        for (let position of balance.info.positions) {
+            let symbol = position.symbol;
+            let volume = position.positionAmt * 1;
+            let entryPrice = position.entryPrice * 1;
+            let profit = position.unrealizedProfit * 1;
+            let side = volume > 0 ? 'BUY' : volume < 0 ? 'SELL' : '';
+            this.positions[symbol] = { symbol, side, volume, entryPrice, profit };
+            if (volume != 0) console.log(position);
+        }
+    }
+
     async init(numbler_candle_load: number = 300): Promise<void> {
         // if (!this.isReadOnly)
         await this.onInitStart();
@@ -134,15 +150,7 @@ class BinanceFuture {
 
         if (!this.isReadOnly) {
             console.log('init balance...');
-
-            let balance = await this.binance.fetchBalance();
-            for (let position of balance.info.positions) {
-                let symbol = position.symbol;
-                let volume = position.positionAmt * 1;
-                let side = volume > 0 ? 'LONG' : volume < 0 ? 'SHORT' : '';
-                this.positions[symbol] = { symbol, side, volume };
-            }
-
+            await this.updatePosition();
             console.log('init user event...');
 
             await this.client.ws.futuresUser(async msg => {
@@ -151,11 +159,6 @@ class BinanceFuture {
                     let { positions } = msg;
                     for (let position of positions) {
                         let { symbol, positionAmount } = position;
-                        this.positions[symbol] = {
-                            symbol,
-                            side: (+positionAmount > 0) ? 'LONG' : +positionAmount < 0 ? 'SHORT' : '',
-                            volume: +positionAmount
-                        };
 
                         if (+positionAmount) continue;
 
@@ -172,7 +175,7 @@ class BinanceFuture {
                                 await this.onHandleError(err, symbol);
                             }
                         }
-                        await this.onClosePosition(symbol);
+                        // await this.onClosePosition(symbol);
                     }
                 }
                 else if (msg.eventType == 'ORDER_TRADE_UPDATE' && msg.timeInForce.toString() == 'GTD' && msg.executionType == 'CANCELED') {

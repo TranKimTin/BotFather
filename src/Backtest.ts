@@ -27,6 +27,16 @@ interface Order {
     closePosition?: boolean
 }
 
+interface OrderHistory {
+    symbol: string,
+    side: 'BUY' | 'SELL' | string,
+    volume: number,
+    openPrice: number,
+    closePrice: number,
+    profit: number,
+    closeTime: Date
+}
+
 interface IParam {
     symbolList: Array<string>,
     timeframes: Array<string>,
@@ -50,6 +60,7 @@ export default class Backtest {
     private minVolumes: { [key: string]: number };
     private lastPrice: { [key: string]: number };
     private timeCurrent: moment.Moment;
+    private orderHistory: Array<OrderHistory>;
 
     constructor(params: IParam) {
         moment()
@@ -66,6 +77,7 @@ export default class Backtest {
         this.lastPrice = {};
         this.orders = [];
         this.timeCurrent = moment();
+        this.orderHistory = [];
 
         for (let symbol of this.symbolList) {
             this.data[symbol] = {};
@@ -75,7 +87,9 @@ export default class Backtest {
             this.positions[symbol] = {
                 symbol: symbol,
                 side: '',
-                volume: 0
+                volume: 0,
+                entryPrice: 0,
+                profit: 0
             };
         }
 
@@ -130,6 +144,8 @@ export default class Backtest {
             }
             startDate.add(1, 'day');
         }
+
+        console.log(this.orderHistory);
 
         console.log('backtest done.');
     }
@@ -283,7 +299,7 @@ export default class Backtest {
     }
 
     private async updateCandle(symbol: string, close: boolean, volume: number = 0) {
-        await this.handleLogic();
+        this.handleLogic();
         let price = this.lastPrice[symbol];
         for (let tf of this.timeframes) {
             let data = this.data[symbol][tf];
@@ -323,54 +339,161 @@ export default class Backtest {
     }
 
     private handleLogic() {
-        let timestamp = this.timeCurrent;
         for (let i = 0; i < this.orders.length; i++) {
             let order = this.orders[i];
-            let { symbol } = order;
-            let curPrice = this.lastPrice[symbol];
             if (order.side == 'BUY') {
-                if (order.type == 'MARKET') {
-
-                }
-                else if (order.type == 'LIMIT') {
-
-                }
-                else if (order.type == 'STOP_LIMIT') {
-
-                }
-                else if (order.type == 'MARKET') {
-
-                }
+                this.handleBuy(order);
             }
-            else if (order.side == 'STOP_MARKET') {
-                //
+            else if (order.side == 'SELL') {
+                this.handleSell(order);
             }
         }
     }
 
-    private async mathOrder(symbol: string, price: number, type: string) {
+    private handleBuy(order: Order) {
+        let timeCurrent = this.timeCurrent.valueOf();
+        let { symbol } = order;
+        let lastPrice = this.lastPrice[symbol];
+        let position = this.positions[symbol];
 
+        if (order.type == 'MARKET') {
+            if (order.status == OrderStatus.ORDER_BOOKED) {
+                order.updateTime = timeCurrent;
+                order.status = OrderStatus.ORDER_FILL;
+                order.price = lastPrice;
+
+                if (position.volume >= 0) {//buy position
+                    position.entryPrice = (position.entryPrice * position.volume + order.price * order.volume) / (position.volume + order.volume);
+                    position.volume += order.volume;
+                    position.profit = position.volume * (lastPrice - position.entryPrice);
+                }
+                else {//sell position
+                    if (Math.abs(position.volume) >= order.volume) { //close partial
+                        this.orderHistory.push({
+                            symbol,
+                            openPrice: position.entryPrice,
+                            closePrice: lastPrice,
+                            side: position.side,
+                            volume: -order.volume,
+                            profit: -order.volume * (lastPrice - position.entryPrice),
+                            closeTime: new Date(timeCurrent)
+                        });
+                    }
+                    else { //reverse position 
+                        this.orderHistory.push({
+                            symbol,
+                            openPrice: position.entryPrice,
+                            closePrice: lastPrice,
+                            side: position.side,
+                            volume: position.volume,
+                            profit: position.volume * (lastPrice - position.entryPrice),
+                            closeTime: new Date(timeCurrent)
+                        });
+                    }
+                    position.volume += order.volume;
+                    position.profit = position.volume * (lastPrice - position.entryPrice);
+                    position.side = position.volume > 0 ? 'BUY' : position.volume < 0 ? 'SELL' : '';
+                }
+            }
+        }
+        else if (order.type == 'LIMIT') {
+
+        }
+        else if (order.type == 'STOP_LIMIT') {
+
+        }
+        else if (order.type == 'MARKET') {
+
+        }
+    }
+
+    private handleSell(order: Order) {
+        let timeCurrent = this.timeCurrent.valueOf();
+        let { symbol } = order;
+        let lastPrice = this.lastPrice[symbol];
+        let position = this.positions[symbol];
+        position.side = position.volume > 0 ? 'BUY' : position.volume < 0 ? 'SELL' : '';
+
+        if (order.type == 'MARKET') {
+            if (order.status == OrderStatus.ORDER_BOOKED) {
+                order.updateTime = timeCurrent;
+                order.status = OrderStatus.ORDER_FILL;
+                order.price = lastPrice;
+
+                if (position.volume <= 0) {//sell position
+                    position.entryPrice = (position.entryPrice * Math.abs(position.volume) + order.price * order.volume) / (Math.abs(position.volume) + order.volume);
+                    position.volume -= order.volume;
+                    position.profit = position.volume * (lastPrice - position.entryPrice);
+                }
+                else {//buy position
+                    if (Math.abs(position.volume) >= order.volume) { //close partial
+                        this.orderHistory.push({
+                            symbol,
+                            openPrice: position.entryPrice,
+                            closePrice: lastPrice,
+                            side: position.side,
+                            volume: order.volume,
+                            profit: order.volume * (lastPrice - position.entryPrice),
+                            closeTime: new Date(timeCurrent)
+                        });
+                    }
+                    else { //reverse position 
+                        this.orderHistory.push({
+                            symbol,
+                            openPrice: position.entryPrice,
+                            closePrice: lastPrice,
+                            side: position.side,
+                            volume: position.volume,
+                            profit: position.volume * (lastPrice - position.entryPrice),
+                            closeTime: new Date(timeCurrent)
+                        });
+                    }
+                    position.volume -= order.volume;
+                    position.profit = position.volume * (lastPrice - position.entryPrice);
+                    position.side = position.volume > 0 ? 'BUY' : position.volume < 0 ? 'SELL' : '';
+                }
+            }
+        }
+        else if (order.type == 'LIMIT') {
+
+        }
+        else if (order.type == 'STOP_LIMIT') {
+
+        }
+        else if (order.type == 'MARKET') {
+
+        }
     }
 }
+
+let bot: Backtest;
 
 async function main() {
     // let symbolList = await util.getSymbolList();
     // let ignoreList = ['BTCDOMUSDT', 'USDCUSDT', 'COCOSUSDT'];
     // symbolList = symbolList.filter(item => item.endsWith("USDT"))
     //     .filter(item => !ignoreList.includes(item));
-    let symbolList = ['BTCUSDT', 'ETHUSDT'];
-    let bot = new Backtest({
+    let symbolList = ['BTCUSDT'];
+    bot = new Backtest({
         symbolList: symbolList,
-        timeframes: ['4h', '12h'],
+        timeframes: ['15m'],
         onCloseCandle: onCloseCandle,
         onClosePosition: async (symbol: string) => { },
         onHandleError: async (err: any, symbol: string | undefined) => { },
     });
-    await bot.runBacktest('2023-12-17', '2023-12-18');
+    await bot.runBacktest('2023-12-01', '2023-12-20');
 }
 
+let x = 0;
 async function onCloseCandle(symbol: string, timeframe: string, data: Array<RateData>) {
-    console.log({ symbol, timeframe, timestamp: data[0] });
+    // console.log({ symbol, timeframe });
+    let rsi = util.iRSI(data, 14);
+
+    if (rsi[1] < 70 && rsi[0] > 70) {
+        console.log({
+            symbol, timestamp: data[0].startTime, rsi: rsi[0]
+        })
+    }
 }
 
 main();
