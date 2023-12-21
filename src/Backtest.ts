@@ -20,8 +20,8 @@ interface Order {
     price?: number,
     stopPrice?: number,
     status: OrderStatus,
-    createTime: number,
-    updateTime?: number,
+    createTime: moment.Moment,
+    updateTime?: moment.Moment,
     expiredTime?: number,
     reduceOnly?: boolean,
     closePosition?: boolean
@@ -34,7 +34,7 @@ interface PositionHistory {
     openPrice: number,
     closePrice: number,
     profit: number,
-    closeTime: Date
+    closeTime: moment.Moment
 }
 
 interface IParam {
@@ -146,7 +146,11 @@ export default class Backtest {
             startDate.add(1, 'day');
         }
 
+        console.log('position history:');
         console.log(this.positionsHistory);
+
+        console.log('\n\norder history:');
+        console.log(this.ordersHistory);
 
         console.log('backtest done.');
     }
@@ -170,8 +174,8 @@ export default class Backtest {
             side,
             volume,
             price,
-            createTime: this.timeCurrent.valueOf(),
-            updateTime: this.timeCurrent.valueOf(),
+            createTime: moment(this.timeCurrent.valueOf()),
+            updateTime: moment(this.timeCurrent.valueOf()),
             status: OrderStatus.ORDER_WAIT_STOP,
             type: 'STOP_MARKET',
             reduceOnly: closePosition,
@@ -200,8 +204,8 @@ export default class Backtest {
             volume,
             price: limitPrice,
             stopPrice,
-            createTime: this.timeCurrent.valueOf(),
-            updateTime: this.timeCurrent.valueOf(),
+            createTime: moment(this.timeCurrent.valueOf()),
+            updateTime: moment(this.timeCurrent.valueOf()),
             status: OrderStatus.ORDER_WAIT_STOP,
             type: 'STOP_LIMIT',
             reduceOnly
@@ -237,8 +241,8 @@ export default class Backtest {
             type: 'MARKET',
             volume,
             status: OrderStatus.ORDER_BOOKED,
-            createTime: this.timeCurrent.valueOf(),
-            updateTime: this.timeCurrent.valueOf(),
+            createTime: moment(this.timeCurrent.valueOf()),
+            updateTime: moment(this.timeCurrent.valueOf()),
         };
         this.orders.push(order);
         this.ordersHistory.push(order);
@@ -288,8 +292,8 @@ export default class Backtest {
             volume,
             price,
             status: OrderStatus.ORDER_WAIT_LIMIT,
-            createTime: this.timeCurrent.valueOf(),
-            updateTime: this.timeCurrent.valueOf(),
+            createTime: moment(this.timeCurrent.valueOf()),
+            updateTime: moment(this.timeCurrent.valueOf()),
             expiredTime: expiredTime || undefined
         };
         this.orders.push(order);
@@ -362,7 +366,7 @@ export default class Backtest {
         let position = this.positions[symbol];
 
         if (order.side == 'BUY') {
-            order.updateTime = timeCurrent;
+            order.updateTime = moment(timeCurrent);
             order.status = OrderStatus.ORDER_FILL;
             order.price = matchPrice;
 
@@ -384,7 +388,7 @@ export default class Backtest {
                         side: position.side,
                         volume: -order.volume,
                         profit: -order.volume * (matchPrice - position.entryPrice),
-                        closeTime: new Date(timeCurrent)
+                        closeTime: moment(timeCurrent)
                     });
                 }
                 else { //reverse position 
@@ -395,7 +399,7 @@ export default class Backtest {
                         side: position.side,
                         volume: position.volume,
                         profit: position.volume * (matchPrice - position.entryPrice),
-                        closeTime: new Date(timeCurrent)
+                        closeTime: moment(timeCurrent)
                     });
                     if (order.reduceOnly) {
                         order.status = OrderStatus.ORDER_FILL;
@@ -412,7 +416,7 @@ export default class Backtest {
             }
         }
         else if (order.side == 'SELL') {
-            order.updateTime = timeCurrent;
+            order.updateTime = moment(timeCurrent);
             order.status = OrderStatus.ORDER_FILL;
             order.price = matchPrice;
 
@@ -435,7 +439,7 @@ export default class Backtest {
                         side: position.side,
                         volume: order.volume,
                         profit: order.volume * (matchPrice - position.entryPrice),
-                        closeTime: new Date(timeCurrent)
+                        closeTime: moment(timeCurrent)
                     });
                 }
                 else { //reverse position 
@@ -446,7 +450,7 @@ export default class Backtest {
                         side: position.side,
                         volume: position.volume,
                         profit: position.volume * (matchPrice - position.entryPrice),
-                        closeTime: new Date(timeCurrent)
+                        closeTime: moment(timeCurrent)
                     });
 
                     if (order.reduceOnly) {
@@ -544,7 +548,7 @@ async function main() {
     let symbolList = ['BTCUSDT'];
     bot = new Backtest({
         symbolList: symbolList,
-        timeframes: ['15m'],
+        timeframes: ['4h'],
         onCloseCandle: onCloseCandle,
         onClosePosition: async (symbol: string) => { },
         onHandleError: async (err: any, symbol: string | undefined) => { },
@@ -553,7 +557,16 @@ async function main() {
 }
 
 async function onCloseCandle(symbol: string, timeframe: string, data: Array<RateData>) {
+    let rsi = util.iRSI(data, 14);
 
+    let curRSI = rsi[0];
+    let preRSI = rsi[1];
+    if (preRSI < 70 && curRSI > 70) {
+        bot.orderMarket(symbol, 'SELL', 1, { TP_Percent: 3, SL_Percent: 3 });
+    }
+    else if (preRSI > 30 && curRSI < 30) {
+        bot.orderMarket(symbol, 'BUY', 1, { TP_Percent: 3, SL_Percent: 3 });
+    }
 }
 
 main();
