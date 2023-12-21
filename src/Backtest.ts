@@ -27,7 +27,7 @@ interface Order {
     closePosition?: boolean
 }
 
-interface OrderHistory {
+interface PositionHistory {
     symbol: string,
     side: 'BUY' | 'SELL' | string,
     volume: number,
@@ -60,7 +60,7 @@ export default class Backtest {
     private minVolumes: { [key: string]: number };
     private lastPrice: { [key: string]: number };
     private timeCurrent: moment.Moment;
-    private orderHistory: Array<OrderHistory>;
+    private positionHistory: Array<PositionHistory>;
 
     constructor(params: IParam) {
         moment()
@@ -77,7 +77,7 @@ export default class Backtest {
         this.lastPrice = {};
         this.orders = [];
         this.timeCurrent = moment();
-        this.orderHistory = [];
+        this.positionHistory = [];
 
         for (let symbol of this.symbolList) {
             this.data[symbol] = {};
@@ -120,7 +120,6 @@ export default class Backtest {
 
         while (startDate.valueOf() <= endDate.valueOf()) {
             let today = startDate.format('YYYY-MM-DD');
-            console.log({ today })
             let todayData: Array<RateData> = [];
             for (let symbol of this.symbolList) {
                 todayData.push(...await util.getData_m1(symbol, today));
@@ -145,7 +144,7 @@ export default class Backtest {
             startDate.add(1, 'day');
         }
 
-        console.log(this.orderHistory);
+        console.log(this.positionHistory);
 
         console.log('backtest done.');
     }
@@ -348,120 +347,147 @@ export default class Backtest {
                 this.handleSell(order);
             }
         }
+        this.orders = this.orders.filter(order => order.status != OrderStatus.ORDER_FILL && order.status != OrderStatus.ORDER_CANCLE);
+    }
+
+    private fillOrder(order: Order, matchPrice: number) {
+        let timeCurrent = this.timeCurrent.valueOf();
+        let { symbol } = order;
+        let position = this.positions[symbol];
+
+        if (order.side == 'BUY') {
+            order.updateTime = timeCurrent;
+            order.status = OrderStatus.ORDER_FILL;
+            order.price = matchPrice;
+
+            if (position.volume >= 0) {//buy position
+                position.entryPrice = (position.entryPrice * position.volume + order.price * order.volume) / (position.volume + order.volume);
+                position.volume += order.volume;
+                position.profit = position.volume * (matchPrice - position.entryPrice);
+            }
+            else {//sell position
+                if (Math.abs(position.volume) >= order.volume) { //close partial
+                    this.positionHistory.push({
+                        symbol,
+                        openPrice: position.entryPrice,
+                        closePrice: matchPrice,
+                        side: position.side,
+                        volume: -order.volume,
+                        profit: -order.volume * (matchPrice - position.entryPrice),
+                        closeTime: new Date(timeCurrent)
+                    });
+                }
+                else { //reverse position 
+                    this.positionHistory.push({
+                        symbol,
+                        openPrice: position.entryPrice,
+                        closePrice: matchPrice,
+                        side: position.side,
+                        volume: position.volume,
+                        profit: position.volume * (matchPrice - position.entryPrice),
+                        closeTime: new Date(timeCurrent)
+                    });
+                }
+                position.volume += order.volume;
+                position.profit = position.volume * (matchPrice - position.entryPrice);
+                position.side = position.volume > 0 ? 'BUY' : position.volume < 0 ? 'SELL' : '';
+            }
+        }
+        else if (order.side == 'SELL') {
+            order.updateTime = timeCurrent;
+            order.status = OrderStatus.ORDER_FILL;
+            order.price = matchPrice;
+
+            if (position.volume <= 0) {//sell position
+                position.entryPrice = (position.entryPrice * Math.abs(position.volume) + order.price * order.volume) / (Math.abs(position.volume) + order.volume);
+                position.volume -= order.volume;
+                position.profit = position.volume * (matchPrice - position.entryPrice);
+            }
+            else {//buy position
+                if (Math.abs(position.volume) >= order.volume) { //close partial
+                    this.positionHistory.push({
+                        symbol,
+                        openPrice: position.entryPrice,
+                        closePrice: matchPrice,
+                        side: position.side,
+                        volume: order.volume,
+                        profit: order.volume * (matchPrice - position.entryPrice),
+                        closeTime: new Date(timeCurrent)
+                    });
+                }
+                else { //reverse position 
+                    this.positionHistory.push({
+                        symbol,
+                        openPrice: position.entryPrice,
+                        closePrice: matchPrice,
+                        side: position.side,
+                        volume: position.volume,
+                        profit: position.volume * (matchPrice - position.entryPrice),
+                        closeTime: new Date(timeCurrent)
+                    });
+                }
+                position.volume -= order.volume;
+                position.profit = position.volume * (matchPrice - position.entryPrice);
+                position.side = position.volume > 0 ? 'BUY' : position.volume < 0 ? 'SELL' : '';
+            }
+        }
     }
 
     private handleBuy(order: Order) {
-        let timeCurrent = this.timeCurrent.valueOf();
         let { symbol } = order;
         let lastPrice = this.lastPrice[symbol];
-        let position = this.positions[symbol];
 
-        if (order.type == 'MARKET') {
+        if (order.type == 'MARKET') { //buy market
             if (order.status == OrderStatus.ORDER_BOOKED) {
-                order.updateTime = timeCurrent;
-                order.status = OrderStatus.ORDER_FILL;
-                order.price = lastPrice;
-
-                if (position.volume >= 0) {//buy position
-                    position.entryPrice = (position.entryPrice * position.volume + order.price * order.volume) / (position.volume + order.volume);
-                    position.volume += order.volume;
-                    position.profit = position.volume * (lastPrice - position.entryPrice);
-                }
-                else {//sell position
-                    if (Math.abs(position.volume) >= order.volume) { //close partial
-                        this.orderHistory.push({
-                            symbol,
-                            openPrice: position.entryPrice,
-                            closePrice: lastPrice,
-                            side: position.side,
-                            volume: -order.volume,
-                            profit: -order.volume * (lastPrice - position.entryPrice),
-                            closeTime: new Date(timeCurrent)
-                        });
-                    }
-                    else { //reverse position 
-                        this.orderHistory.push({
-                            symbol,
-                            openPrice: position.entryPrice,
-                            closePrice: lastPrice,
-                            side: position.side,
-                            volume: position.volume,
-                            profit: position.volume * (lastPrice - position.entryPrice),
-                            closeTime: new Date(timeCurrent)
-                        });
-                    }
-                    position.volume += order.volume;
-                    position.profit = position.volume * (lastPrice - position.entryPrice);
-                    position.side = position.volume > 0 ? 'BUY' : position.volume < 0 ? 'SELL' : '';
-                }
+                this.fillOrder(order, lastPrice);
             }
         }
-        else if (order.type == 'LIMIT') {
-
+        else if (order.type == 'LIMIT') { //buy limit
+            if (order.status == OrderStatus.ORDER_WAIT_LIMIT && order.price && lastPrice <= order.price) {
+                this.fillOrder(order, order.price);
+            }
         }
-        else if (order.type == 'STOP_LIMIT') {
-
+        else if (order.type == 'STOP_LIMIT') { //buy stop limit
+            if (order.status == OrderStatus.ORDER_WAIT_STOP && order.stopPrice && lastPrice >= order.stopPrice) {
+                order.status = OrderStatus.ORDER_WAIT_LIMIT;
+            }
+            if (order.status == OrderStatus.ORDER_WAIT_LIMIT && order.price && lastPrice <= order.price) {
+                this.fillOrder(order, order.price);
+            }
         }
-        else if (order.type == 'MARKET') {
-
+        else if (order.type == 'STOP_MARKET') { //buy stop market
+            if (order.status == OrderStatus.ORDER_WAIT_STOP && order.stopPrice && lastPrice >= order.stopPrice) {
+                this.fillOrder(order, order.stopPrice);
+            }
         }
     }
 
     private handleSell(order: Order) {
-        let timeCurrent = this.timeCurrent.valueOf();
         let { symbol } = order;
         let lastPrice = this.lastPrice[symbol];
-        let position = this.positions[symbol];
-        position.side = position.volume > 0 ? 'BUY' : position.volume < 0 ? 'SELL' : '';
 
-        if (order.type == 'MARKET') {
+        if (order.type == 'MARKET') { //sell market
             if (order.status == OrderStatus.ORDER_BOOKED) {
-                order.updateTime = timeCurrent;
-                order.status = OrderStatus.ORDER_FILL;
-                order.price = lastPrice;
-
-                if (position.volume <= 0) {//sell position
-                    position.entryPrice = (position.entryPrice * Math.abs(position.volume) + order.price * order.volume) / (Math.abs(position.volume) + order.volume);
-                    position.volume -= order.volume;
-                    position.profit = position.volume * (lastPrice - position.entryPrice);
-                }
-                else {//buy position
-                    if (Math.abs(position.volume) >= order.volume) { //close partial
-                        this.orderHistory.push({
-                            symbol,
-                            openPrice: position.entryPrice,
-                            closePrice: lastPrice,
-                            side: position.side,
-                            volume: order.volume,
-                            profit: order.volume * (lastPrice - position.entryPrice),
-                            closeTime: new Date(timeCurrent)
-                        });
-                    }
-                    else { //reverse position 
-                        this.orderHistory.push({
-                            symbol,
-                            openPrice: position.entryPrice,
-                            closePrice: lastPrice,
-                            side: position.side,
-                            volume: position.volume,
-                            profit: position.volume * (lastPrice - position.entryPrice),
-                            closeTime: new Date(timeCurrent)
-                        });
-                    }
-                    position.volume -= order.volume;
-                    position.profit = position.volume * (lastPrice - position.entryPrice);
-                    position.side = position.volume > 0 ? 'BUY' : position.volume < 0 ? 'SELL' : '';
-                }
+                this.fillOrder(order, lastPrice);
             }
         }
-        else if (order.type == 'LIMIT') {
-
+        else if (order.type == 'LIMIT') { //sell limit
+            if (order.status == OrderStatus.ORDER_WAIT_LIMIT && order.price && lastPrice >= order.price) {
+                this.fillOrder(order, order.price);
+            }
         }
-        else if (order.type == 'STOP_LIMIT') {
-
+        else if (order.type == 'STOP_LIMIT') { //sell stop limit
+            if (order.status == OrderStatus.ORDER_WAIT_STOP && order.stopPrice && lastPrice <= order.stopPrice) {
+                order.status = OrderStatus.ORDER_WAIT_LIMIT;
+            }
+            if (order.status == OrderStatus.ORDER_WAIT_LIMIT && order.price && lastPrice >= order.price) {
+                this.fillOrder(order, order.price);
+            }
         }
-        else if (order.type == 'MARKET') {
-
+        else if (order.type == 'STOP_MARKET') { //sell stop market
+            if (order.status == OrderStatus.ORDER_WAIT_STOP && order.stopPrice && lastPrice <= order.stopPrice) {
+                this.fillOrder(order, order.stopPrice);
+            }
         }
     }
 }
@@ -484,16 +510,8 @@ async function main() {
     await bot.runBacktest('2023-12-01', '2023-12-20');
 }
 
-let x = 0;
 async function onCloseCandle(symbol: string, timeframe: string, data: Array<RateData>) {
-    // console.log({ symbol, timeframe });
-    let rsi = util.iRSI(data, 14);
 
-    if (rsi[1] < 70 && rsi[0] > 70) {
-        console.log({
-            symbol, timestamp: data[0].startTime, rsi: rsi[0]
-        })
-    }
 }
 
 main();
