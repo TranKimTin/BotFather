@@ -60,7 +60,8 @@ export default class Backtest {
     private minVolumes: { [key: string]: number };
     private lastPrice: { [key: string]: number };
     private timeCurrent: moment.Moment;
-    private positionHistory: Array<PositionHistory>;
+    private positionsHistory: Array<PositionHistory>;
+    private ordersHistory: Array<Order>;
 
     constructor(params: IParam) {
         moment()
@@ -77,7 +78,8 @@ export default class Backtest {
         this.lastPrice = {};
         this.orders = [];
         this.timeCurrent = moment();
-        this.positionHistory = [];
+        this.positionsHistory = [];
+        this.ordersHistory = [];
 
         for (let symbol of this.symbolList) {
             this.data[symbol] = {};
@@ -144,7 +146,7 @@ export default class Backtest {
             startDate.add(1, 'day');
         }
 
-        console.log(this.positionHistory);
+        console.log(this.positionsHistory);
 
         console.log('backtest done.');
     }
@@ -177,6 +179,7 @@ export default class Backtest {
         };
 
         this.orders.push(order);
+        this.ordersHistory.push(order);
         return order;
     }
 
@@ -204,6 +207,7 @@ export default class Backtest {
             reduceOnly
         };
         this.orders.push(order);
+        this.ordersHistory.push(order);
         return order;
     }
 
@@ -237,6 +241,7 @@ export default class Backtest {
             updateTime: this.timeCurrent.valueOf(),
         };
         this.orders.push(order);
+        this.ordersHistory.push(order);
 
         let result: Array<Order> = [order];
         if (TP) {
@@ -288,6 +293,7 @@ export default class Backtest {
             expiredTime: expiredTime || undefined
         };
         this.orders.push(order);
+        this.ordersHistory.push(order);
 
         let result: Array<Order> = [order];
         if (TP) {
@@ -361,13 +367,17 @@ export default class Backtest {
             order.price = matchPrice;
 
             if (position.volume >= 0) {//buy position
+                if (order.reduceOnly) {
+                    order.status = OrderStatus.ORDER_CANCLE;
+                    return;
+                }
                 position.entryPrice = (position.entryPrice * position.volume + order.price * order.volume) / (position.volume + order.volume);
                 position.volume += order.volume;
                 position.profit = position.volume * (matchPrice - position.entryPrice);
             }
             else {//sell position
                 if (Math.abs(position.volume) >= order.volume) { //close partial
-                    this.positionHistory.push({
+                    this.positionsHistory.push({
                         symbol,
                         openPrice: position.entryPrice,
                         closePrice: matchPrice,
@@ -378,7 +388,7 @@ export default class Backtest {
                     });
                 }
                 else { //reverse position 
-                    this.positionHistory.push({
+                    this.positionsHistory.push({
                         symbol,
                         openPrice: position.entryPrice,
                         closePrice: matchPrice,
@@ -387,6 +397,14 @@ export default class Backtest {
                         profit: position.volume * (matchPrice - position.entryPrice),
                         closeTime: new Date(timeCurrent)
                     });
+                    if (order.reduceOnly) {
+                        order.status = OrderStatus.ORDER_FILL;
+                        order.volume = position.volume;
+                        position.volume = 0;
+                        position.side = '';
+                        position.profit = 0;
+                        return;
+                    }
                 }
                 position.volume += order.volume;
                 position.profit = position.volume * (matchPrice - position.entryPrice);
@@ -399,13 +417,18 @@ export default class Backtest {
             order.price = matchPrice;
 
             if (position.volume <= 0) {//sell position
+                if (order.reduceOnly) {
+                    order.status = OrderStatus.ORDER_CANCLE;
+                    return;
+                }
+
                 position.entryPrice = (position.entryPrice * Math.abs(position.volume) + order.price * order.volume) / (Math.abs(position.volume) + order.volume);
                 position.volume -= order.volume;
                 position.profit = position.volume * (matchPrice - position.entryPrice);
             }
             else {//buy position
                 if (Math.abs(position.volume) >= order.volume) { //close partial
-                    this.positionHistory.push({
+                    this.positionsHistory.push({
                         symbol,
                         openPrice: position.entryPrice,
                         closePrice: matchPrice,
@@ -416,7 +439,7 @@ export default class Backtest {
                     });
                 }
                 else { //reverse position 
-                    this.positionHistory.push({
+                    this.positionsHistory.push({
                         symbol,
                         openPrice: position.entryPrice,
                         closePrice: matchPrice,
@@ -425,6 +448,15 @@ export default class Backtest {
                         profit: position.volume * (matchPrice - position.entryPrice),
                         closeTime: new Date(timeCurrent)
                     });
+
+                    if (order.reduceOnly) {
+                        order.status = OrderStatus.ORDER_FILL;
+                        order.volume = Math.abs(position.volume);
+                        position.volume = 0;
+                        position.side = '';
+                        position.profit = 0;
+                        return;
+                    }
                 }
                 position.volume -= order.volume;
                 position.profit = position.volume * (matchPrice - position.entryPrice);
@@ -436,6 +468,11 @@ export default class Backtest {
     private handleBuy(order: Order) {
         let { symbol } = order;
         let lastPrice = this.lastPrice[symbol];
+        let timeCurrent = this.timeCurrent.valueOf();
+        if (order.expiredTime && order.expiredTime <= timeCurrent) {
+            order.status = OrderStatus.ORDER_CANCLE;
+            return;
+        }
 
         if (order.type == 'MARKET') { //buy market
             if (order.status == OrderStatus.ORDER_BOOKED) {
@@ -465,6 +502,11 @@ export default class Backtest {
     private handleSell(order: Order) {
         let { symbol } = order;
         let lastPrice = this.lastPrice[symbol];
+        let timeCurrent = this.timeCurrent.valueOf();
+        if (order.expiredTime && order.expiredTime <= timeCurrent) {
+            order.status = OrderStatus.ORDER_CANCLE;
+            return;
+        }
 
         if (order.type == 'MARKET') { //sell market
             if (order.status == OrderStatus.ORDER_BOOKED) {
