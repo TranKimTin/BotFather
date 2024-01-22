@@ -349,9 +349,10 @@ export default class BotRSI_CCI {
             let entry1 = 0;
             let entry2: number | '' = 0;
             //entry 1 % so voi rau dai nhat, entry2 % so voi entry1
-            if (!InEnableEntryPricePercent_v2) { //entry theo rau nen
-                if (side == 'buy') entry1 = Math.min(r.open, r.close) - InEntry1Percent_v2 * botShadowLength;
-                if (side == 'sell') entry1 = Math.max(r.open, r.close) + InEntry1Percent_v2 * topShadowLength;
+            if (!InEnableEntryPricePercent_v2) { //entry ngay khi gia dong
+                // if (side == 'buy') entry1 = Math.min(r.open, r.close) - InEntry1Percent_v2 * botShadowLength;
+                // if (side == 'sell') entry1 = Math.max(r.open, r.close) + InEntry1Percent_v2 * topShadowLength;
+                entry1 = rate.close;
             }
             else { //entry theo gia
                 if (side == 'buy') entry1 = r.low * (1 - InEntry1Percent_v2);
