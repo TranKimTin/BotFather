@@ -363,7 +363,7 @@ export default class BotRSI_CCI {
 
 
             let TP1 = entry1 * (1 + (side == 'buy' ? InTP1_Percent_v2 : -InTP1_Percent_v2));
-            let TP2: number | '' = (entry1 + entry2) / 2 * (1 + (side == 'buy' ? InTP1_Percent_v2 : -InTP1_Percent_v2));
+            let TP2: number | '' = (entry1 + entry2) / 2 * (1 + (side == 'buy' ? InTP2_Percent_v2 : -InTP2_Percent_v2));
             let SL = entry1 * (1 + (side == 'buy' ? -InSL_Percent_v2 : InSL_Percent_v2));
             let volume = InVolumeUSD_v2 / curPrice;
 
