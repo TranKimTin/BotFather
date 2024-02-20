@@ -354,9 +354,14 @@ export default class BotRSI_CCI {
                 // if (side == 'sell') entry1 = Math.max(r.open, r.close) + InEntry1Percent_v2 * topShadowLength;
                 entry1 = rate.close;
             }
-            else { //entry theo gia
-                if (side == 'buy') entry1 = r.low * (1 - InEntry1Percent_v2);
-                if (side == 'sell') entry1 = r.high * (1 + InEntry1Percent_v2);
+            else {
+                //entry theo % gia
+                // if (side == 'buy') entry1 = r.low * (1 - InEntry1Percent_v2);
+                // if (side == 'sell') entry1 = r.high * (1 + InEntry1Percent_v2);
+
+                //entry theo % rau nen
+                if (side == 'buy') entry1 = Math.min(r.open, r.close) - InEntry1Percent_v2 * botShadowLength;
+                if (side == 'sell') entry1 = Math.max(r.open, r.close) + InEntry1Percent_v2 * topShadowLength;
             }
             if (side == 'buy') entry2 = entry1 * (1 - InEntry2Percent_v2);
             if (side == 'sell') entry2 = entry1 * (1 + InEntry2Percent_v2);
