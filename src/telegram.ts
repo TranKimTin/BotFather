@@ -6,9 +6,9 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '../.env' });
 
 const token: any = process.env.TELEGRAM_TOKEN;
-const chatID = '@tintk_RSI_CCI'; //'@tintk_RSI_CCI'
-const errorChatID = '@tintk_RSI_CCI'; //'@tintk_RSI_CCI'
-const tinID = 1833284254;
+let chatID: string | number = '@tintk_RSI_CCI'; //'@tintk_RSI_CCI'
+let errorChatID: string | number = '@tintk_RSI_CCI'; //'@tintk_RSI_CCI'
+const tinID: string | number = 1833284254;
 
 let bot = new TelegramBot(token, { polling: false });
 
@@ -26,6 +26,11 @@ export default class Telegram {
         this.listErr = [];
         this.list = [];
         this.TAG = tag ? `${tag}\n` : '';
+    }
+
+    setChatID(id: string | number) {
+        chatID = id;
+        errorChatID = id;
     }
 
     async sendMessage(mess: string, sendTin = false) {
