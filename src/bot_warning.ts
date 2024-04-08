@@ -4,14 +4,14 @@ import * as util from './util';
 
 
 let telegram = new Telegram("");
-telegram.setChatID('@trankimtin');
+telegram.setChatID(1833284254);
 
 async function main() {
     console.log('Bot warning');
     let binance = new BinanceFuture({
         apiKey: process.env.API_KEY,
         secretKey: process.env.SECRET_KEY,
-        symbolList: ['BTCUSDT', 'LTCUSDT', 'ALTUSDT', 'JUPUSDT', 'ETHUSDT', 'AEVOUSDT'],
+        symbolList: ['BTCUSDT', 'LTCUSDT', 'ALTUSDT', 'JUPUSDT', 'ETHUSDT'],
         timeframes: ['15m'],
         onCloseCandle: onCloseCandle,
         onClosePosition: async (symbol: string) => { },
