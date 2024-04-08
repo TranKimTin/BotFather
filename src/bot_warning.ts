@@ -4,7 +4,7 @@ import * as util from './util';
 
 
 let telegram = new Telegram("");
-telegram.setChatID(1833284254);
+telegram.setChatID('@trankimtin');
 
 async function main() {
     console.log('Bot warning');
