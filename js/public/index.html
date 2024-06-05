@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Tree Chart with Cytoscape.js</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.js"></script>
+    <script src="cytoscape-edgehandles.js"></script>
+
+    <!-- for popper handles -->
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/cytoscape-popper@2.0.0/cytoscape-popper.js"></script>
+    <script src="index.js"></script>
+
+    <style>
+        #cy {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+        }
+
+        .groupBtn {
+            position: absolute;
+            z-index: 99999;
+        }
+    </style>
+</head>
+
+
+<body>
+    <div id="cy"></div>
+    <div class="groupBtn">
+        <button id="addNode">Thêm điều kiện</button>
+        <button id="draw-on">Draw mode on</button>
+        <button id="draw-off">Draw mode off</button>
+        <button id="editNode">Sửa điều kiện</button>
+        <button id="removeNode">Xóa</button>
+        <button id="save">Lưu</button>
+    </div>
+
+
+</body>
+
+</html>

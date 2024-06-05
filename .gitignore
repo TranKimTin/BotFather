@@ -138,3 +138,5 @@ js/config81.txt
 js/config82.txt
 data/*
 js/config83.txt
+!cytoscape-edgehandles.js
+!index.js

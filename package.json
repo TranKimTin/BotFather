@@ -11,21 +11,29 @@
     "start": "node js/BinanceFuture.js"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/cytoscape-edgehandles": "^4.0.4",
     "@types/delay": "^3.1.0",
     "@types/dotenv": "^8.2.0",
+    "@types/express": "^4.17.21",
     "@types/lodash": "^4.14.201",
     "@types/moment": "^2.13.0",
+    "@types/morgan": "^1.9.9",
     "@types/node-telegram-bot-api": "^0.63.1"
   },
   "dependencies": {
     "binance-api-node": "^0.12.7",
+    "body-parser": "^1.20.2",
     "ccxt": "^4.1.43",
+    "cors": "^2.8.5",
     "delay": "^5.0.0",
     "dotenv": "^16.3.1",
+    "express": "^4.19.2",
     "google-auth-library": "^9.2.0",
     "google-spreadsheet": "^4.1.1",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
+    "morgan": "^1.10.0",
     "node-telegram-bot-api": "^0.64.0",
     "zlib": "^1.0.5"
   }

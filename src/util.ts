@@ -85,7 +85,7 @@ export async function getDigitsFuture() {
         "body": null,
         "method": "GET"
     });
-    let data = await res.json();
+    let data : any = await res.json();
     let digits: { [key: string]: { price: number, volume: number } } = {};
     for (let item of data.symbols) {
         digits[item.symbol] = {
