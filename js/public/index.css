@@ -12,6 +12,7 @@
 .alwaysOnTop {
     position: absolute;
     z-index: 99999;
+    width: 100%;
 }
 
 .padding10 {

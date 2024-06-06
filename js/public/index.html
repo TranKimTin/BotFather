@@ -28,40 +28,47 @@
 
 
 <body>
-    <div id="cy"></div>
-    <div class="alwaysOnTop">
-        <div class="padding10">
-            <b>Bot: </b>
-            <input id="botName" type="text" placeholder="Nhập tên bot" />
-        </div>
-        <div class="padding10">
-            <b>Khung thời gian: </b>
-            <select id="timeframes" class="selectpicker" multiple data-live-search="true">
-                <option>1m</option>
-                <option>3m</option>
-                <option>5m</option>
-                <option>15m</option>
-                <option>30m</option>
-                <option>1h</option>
-                <option>2h</option>
-                <option>4h</option>
-                <option>6h</option>
-                <option>8h</option>
-                <option>12</option>
-                <option>1d</option>
-            </select>
-        </div>
+    <div class="container-fluid">
+        <div id="cy"></div>
+        <div class="alwaysOnTop">
+            <div class="row">
+                <div class="col-3"><b>Tên bot</b></div>
+                <div class="col-5"><b>Khung thời gian</b></div>
+            </div>
+            <div class="row">
+                <div class="col-3">
+                    <input id="botName" class="form-control" type="text" placeholder="Nhập tên bot" />
+                </div>
+                <div class="col-5">
+                    <select id="timeframes" class="selectpicker form-control" multiple data-live-search="true">
+                        <option>1m</option>
+                        <option>3m</option>
+                        <option>5m</option>
+                        <option>15m</option>
+                        <option>30m</option>
+                        <option>1h</option>
+                        <option>2h</option>
+                        <option>4h</option>
+                        <option>6h</option>
+                        <option>8h</option>
+                        <option>12h</option>
+                        <option>1d</option>
+                    </select>
+                </div>
+            </div>
+            <div class="padding10">
 
-        <div class="padding10">
-            <button id="addNode">Thêm điều kiện</button>
-            <button id="draw-on">Draw mode on</button>
-            <button id="draw-off">Draw mode off</button>
-            <button id="editNode">Sửa điều kiện</button>
-            <button id="removeNode">Xóa</button>
-            <button id="save">Lưu</button>
+            </div>
+            <div>
+                <button id="addNode">Thêm điều kiện</button>
+                <button id="draw-on">Draw mode on</button>
+                <button id="draw-off">Draw mode off</button>
+                <button id="editNode">Sửa điều kiện</button>
+                <button id="removeNode">Xóa</button>
+                <button id="save">Lưu</button>
+            </div>
         </div>
     </div>
-
 
 </body>
 

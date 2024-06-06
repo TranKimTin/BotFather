@@ -1,6 +1,6 @@
 $(document).ready(function () {
     const URL = 'http://127.0.0.1:8080';
-    let botName = localStorage.getItem('botName') || '';
+    let botName = $.cookie("botName") || '';
     $('#botName').val(botName);
 
 
@@ -255,10 +255,6 @@ $(document).ready(function () {
         removeAllSelected();
     });
 
-    $(document).keypress(function (e) {
-        console.log(e.which);
-    });
-
     $(document).on('keydown', function (event) {
         if (event.key === "Delete" || event.keyCode === 46) {
             removeAllSelected();
@@ -296,7 +292,8 @@ $(document).ready(function () {
         });
     });
 
-    function loadData() {
+    function loadData(botName) {
+        if (!botName) return;
         $.ajax({
             type: "GET",
             contentType: "application/json",
@@ -311,7 +308,7 @@ $(document).ready(function () {
                     cy.json(treeData);
                 }
                 else {
-                    alert('có lỗi');  
+                    alert('có lỗi');
                 }
             },
             error: function (request, status, error) {
@@ -320,4 +317,11 @@ $(document).ready(function () {
         });
     }
 
+    $('#botName').on('keydown', function (event) {
+        clearTimeout(this.timeout);
+        this.timeout = setTimeout(() => {
+            let botName = $('#botName').val();
+            loadData(botName);
+        }, 500);
+    });
 });
