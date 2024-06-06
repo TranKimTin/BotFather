@@ -1,15 +1,16 @@
 $(document).ready(function () {
     const URL = 'http://127.0.0.1:8080';
-    var savedData = localStorage.getItem('savedTree');
-    var treeData = JSON.parse(savedData) || {};
-    console.log(treeData)
-    treeData.elements = treeData.elements || {};
-    treeData.elements.nodes = treeData.elements.nodes || [];
-    treeData.elements.edges = treeData.elements.edges || [];
+    let botName = localStorage.getItem('botName') || '';
+    $('#botName').val(botName);
+
+
+    var treeData = { elements: { nodes: [], edges: [] } };
+
+    loadData(botName);
+
     if (treeData.elements.nodes.filter(item => item.id != 'start').length == 0) {
         treeData.elements.nodes.push({ data: { id: 'start', name: 'Start' }, position: { x: 100, y: 100 } });
     }
-    console.log(treeData.elements);
 
     var cy = cytoscape({
         container: document.getElementById('cy'),
@@ -99,7 +100,10 @@ $(document).ready(function () {
             name: 'preset',
             directed: true,
             padding: 10
-        }
+        },
+        zoomingEnabled: true,
+        maxZoom: 3,
+        minZoom: 0.3
     });
 
     var eh = cy.edgehandles({
@@ -230,11 +234,6 @@ $(document).ready(function () {
         });
     });
 
-    function checkValid(s) {
-        if (!s) return false;
-        return true;
-    }
-
     $('#draw-on').click(function () {
         eh.enableDrawMode();
         eh.stop();
@@ -267,20 +266,27 @@ $(document).ready(function () {
     });
 
     $('#save').click(function () {
-        let data = JSON.stringify(cy.json());
-        console.log(cy.json())
+        let timeframes = $('#timeframes').val() || [];
+        let botName = $('#botName').val();
+        let data = {
+            treeData: cy.json(),
+            timeframes,
+            botName
+        };
+
+        console.log(JSON.stringify(data))
 
 
         $.ajax({
             type: "POST",
             contentType: "application/json",
             url: `${URL}/save`,
-            data: data,
+            data: JSON.stringify(data),
             dataType: "json",
             success: function (response) {
                 if (response.code == 200) {
-                    localStorage.setItem('savedTree', data);
                     alert(response.message);
+                    $.cookie("botName", data.botName);
                 }
                 else {
                     alert(response.message);
@@ -290,6 +296,28 @@ $(document).ready(function () {
         });
     });
 
-
+    function loadData() {
+        $.ajax({
+            type: "GET",
+            contentType: "application/json",
+            url: `${URL}/getBotInfo?botName=${botName}`,
+            data: "",
+            dataType: "json",
+            success: function (response) {
+                console.log(response);
+                if (response.code == 200) {
+                    let { timeframes, treeData } = response.data;
+                    $('#timeframes').val(timeframes);
+                    cy.json(treeData);
+                }
+                else {
+                    alert('có lỗi');  
+                }
+            },
+            error: function (request, status, error) {
+                alert("có lỗi");
+            }
+        });
+    }
 
 });

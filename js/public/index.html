@@ -3,45 +3,63 @@
 
 <head>
     <title>Tree Chart with Cytoscape.js</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.js"></script>
     <script src="cytoscape-edgehandles.js"></script>
+
+    <!-- boostrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/js/bootstrap-select.min.js"></script>
+
+    <!-- jquery cookie -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
 
     <!-- for popper handles -->
     <script src="https://unpkg.com/@popperjs/core@2"></script>
     <script src="https://unpkg.com/cytoscape-popper@2.0.0/cytoscape-popper.js"></script>
     <script src="index.js"></script>
 
-    <style>
-        #cy {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            left: 0;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            margin: auto;
-        }
-
-        .groupBtn {
-            position: absolute;
-            z-index: 99999;
-        }
-    </style>
+    <link rel="stylesheet" href="index.css">
 </head>
 
 
 <body>
     <div id="cy"></div>
-    <div class="groupBtn">
-        <button id="addNode">Thêm điều kiện</button>
-        <button id="draw-on">Draw mode on</button>
-        <button id="draw-off">Draw mode off</button>
-        <button id="editNode">Sửa điều kiện</button>
-        <button id="removeNode">Xóa</button>
-        <button id="save">Lưu</button>
+    <div class="alwaysOnTop">
+        <div class="padding10">
+            <b>Bot: </b>
+            <input id="botName" type="text" placeholder="Nhập tên bot" />
+        </div>
+        <div class="padding10">
+            <b>Khung thời gian: </b>
+            <select id="timeframes" class="selectpicker" multiple data-live-search="true">
+                <option>1m</option>
+                <option>3m</option>
+                <option>5m</option>
+                <option>15m</option>
+                <option>30m</option>
+                <option>1h</option>
+                <option>2h</option>
+                <option>4h</option>
+                <option>6h</option>
+                <option>8h</option>
+                <option>12</option>
+                <option>1d</option>
+            </select>
+        </div>
+
+        <div class="padding10">
+            <button id="addNode">Thêm điều kiện</button>
+            <button id="draw-on">Draw mode on</button>
+            <button id="draw-off">Draw mode off</button>
+            <button id="editNode">Sửa điều kiện</button>
+            <button id="removeNode">Xóa</button>
+            <button id="save">Lưu</button>
+        </div>
     </div>
 
 

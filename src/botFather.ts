@@ -8,35 +8,44 @@ import EH from "cytoscape-edgehandles";
 import CY from "cytoscape";
 import path from "path";
 
-interface CytoscapeJson {
-    elements: {
-        nodes: Array<{
-            data: {
-                id: string;
-                [key: string]: any;
-            };
-            position?: {
-                x: number;
-                y: number;
-            };
-            removed?: boolean;
-        }>;
-        edges: Array<{
-            data: {
-                id: string;
-                source: string;
-                target: string;
-                [key: string]: any;
-            };
-            removed?: boolean;
-        }>;
+const BOT_DATA_DIR = './botData';
+if (!fs.existsSync(BOT_DATA_DIR)) {
+    fs.mkdirSync(BOT_DATA_DIR);
+}
+
+interface BotInfo {
+    treeData: {
+        elements: {
+            nodes?: Array<{
+                data: {
+                    id: string;
+                    [key: string]: any;
+                };
+                position?: {
+                    x: number;
+                    y: number;
+                };
+                removed?: boolean;
+            }>;
+            edges?: Array<{
+                data: {
+                    id: string;
+                    source: string;
+                    target: string;
+                    [key: string]: any;
+                };
+                removed?: boolean;
+            }>;
+        };
+        style?: Array<any>;
+        zoom?: number;
+        pan?: {
+            x: number;
+            y: number;
+        };
     };
-    style?: Array<any>;
-    zoom?: number;
-    pan?: {
-        x: number;
-        y: number;
-    };
+    timeframes: Array<string>;
+    botName: string
 }
 
 const app = express();
@@ -90,11 +99,21 @@ function check(condition: string) {
 
 }
 
-app.post("/save", (req, res) => {
-    let data : CytoscapeJson = req.body;
+function validatekBotName(botName: string) {
+    const invalidChars = /[\/\\:*?"<>|]/;
+    return botName && botName.length < 50 && !invalidChars.test(botName);
+}
 
-    let edges = data.elements.edges.filter(item => !item.removed).map(item => item.data) || []; //{source, target, id}
-    let nodes = data.elements.nodes.filter(item => !item.removed).map(item => item.data) || []; //{id, name}
+app.post("/save", (req, res) => {
+    let data: BotInfo = req.body;
+
+    let botName = data.botName;
+    if (!validatekBotName(botName)) {
+        return res.json({ code: 400, message: 'Tên bot không hợp lệ ' + botName });
+    }
+
+    let edges = data.treeData.elements.edges?.filter(item => !item.removed).map(item => item.data) || []; //{source, target, id}
+    let nodes = data.treeData.elements.nodes?.filter(item => !item.removed).map(item => item.data) || []; //{id, name}
 
     console.log({ edges, nodes });
 
@@ -103,6 +122,8 @@ app.post("/save", (req, res) => {
             return res.json({ code: 400, message: 'Điều kiện không hợp lệ ' + node.name });
         }
     }
+
+    fs.writeFileSync(`${BOT_DATA_DIR}/${data.botName}.json`, JSON.stringify(data));
 
     res.json({ code: 200, message: "Lưu thành công" });
 });
@@ -115,7 +136,23 @@ app.post("/check", (req, res) => {
         return res.json({ code: 400, message: `Điều kiện không hợp lệ ${data.name}` });
     }
 
-    res.json({ code: 200, message: "OK" });
+    res.json({ code: 200, message: "ok" });
+});
+
+app.get("/getBotInfo", (req, res) => {
+    let botName: any = req.query.botName;
+    if (!validatekBotName(botName)) {
+        return res.json({ code: 400, message: 'Tên bot không hợp lệ ' + botName });
+    }
+    let data: BotInfo = { treeData: { elements: { nodes: [], edges: [] } }, timeframes: [], botName: '' };
+    if (fs.existsSync(`${BOT_DATA_DIR}/${botName}.json`)) {
+        data = JSON.parse(fs.readFileSync(`${BOT_DATA_DIR}/${botName}.json`).toString());
+    }
+    res.json({
+        code: 200,
+        message: "ok",
+        data
+    });
 });
 
 const port = 8080;
