@@ -6,7 +6,31 @@ $(document).ready(function () {
 
     var treeData = { elements: { nodes: [], edges: [] } };
 
-    loadData(botName);
+    $.ajax({
+        type: "GET",
+        contentType: "application/json",
+        url: `${URL}/getSymbolList`,
+        data: "",
+        dataType: "json",
+        success: function (response) {
+            console.log(response)
+            if (response.code == 200) {
+                $('#symbolList').empty();
+                let symbolList = response.data;
+                for (let symbol of symbolList) {
+                    $('#symbolList').append($('<option>', {
+                        value: symbol,
+                        text: symbol
+                    }));
+                }
+                $('#symbolList').selectpicker('refresh');
+                loadData(botName);
+            }
+            else {
+                alert('Lỗi');
+            }
+        }
+    });
 
     if (treeData.elements.nodes.filter(item => item.id != 'start').length == 0) {
         treeData.elements.nodes.push({ data: { id: 'start', name: 'Start' }, position: { x: 100, y: 100 } });
@@ -263,10 +287,12 @@ $(document).ready(function () {
 
     $('#save').click(function () {
         let timeframes = $('#timeframes').val() || [];
+        let symbolList = $('#symbolList').val() || [];
         let botName = $('#botName').val();
         let data = {
             treeData: cy.json(),
             timeframes,
+            symbolList,
             botName
         };
 
@@ -303,8 +329,14 @@ $(document).ready(function () {
             success: function (response) {
                 console.log(response);
                 if (response.code == 200) {
-                    let { timeframes, treeData } = response.data;
+                    let { timeframes, treeData, symbolList } = response.data;
                     $('#timeframes').val(timeframes);
+                    $('#symbolList').val(symbolList);
+                    $('#timeframes').selectpicker('refresh');
+                    $('#symbolList').selectpicker('refresh');
+                    if (treeData.elements.nodes.filter(item => item.id != 'start').length == 0) {
+                        treeData.elements.nodes.push({ data: { id: 'start', name: 'Start' }, position: { x: 100, y: 100 } });
+                    }
                     cy.json(treeData);
                 }
                 else {
@@ -323,5 +355,18 @@ $(document).ready(function () {
             let botName = $('#botName').val();
             loadData(botName);
         }, 500);
+    });
+
+    $('#toogleAllSymbol').click(function () {
+        this.temp = this.temp || 1;
+        $('.selectpicker').selectpicker('toggle');
+        if(this.temp++ % 2){
+            $('#symbolList').selectpicker('selectAll');
+        }
+        else {
+            $('#symbolList').selectpicker('deselectAll');
+        }
+        $('#symbolList').selectpicker('refresh');
+
     });
 });

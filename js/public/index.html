@@ -32,14 +32,15 @@
         <div id="cy"></div>
         <div class="alwaysOnTop">
             <div class="row">
-                <div class="col-3"><b>Tên bot</b></div>
-                <div class="col-5"><b>Khung thời gian</b></div>
+                <div class="col-2"><b>Tên bot</b></div>
+                <div class="col-4"><b>Khung thời gian</b></div>
+                <div class="col-6"><b>Coin</b> <button id="toogleAllSymbol">Chọn / bỏ toàn bộ</button> </div>
             </div>
             <div class="row">
-                <div class="col-3">
+                <div class="col-2">
                     <input id="botName" class="form-control" type="text" placeholder="Nhập tên bot" />
                 </div>
-                <div class="col-5">
+                <div class="col-4">
                     <select id="timeframes" class="selectpicker form-control" multiple data-live-search="true">
                         <option>1m</option>
                         <option>3m</option>
@@ -53,6 +54,11 @@
                         <option>8h</option>
                         <option>12h</option>
                         <option>1d</option>
+                    </select>
+                </div>
+                <div class="col-6">
+                    <select id="symbolList" class="selectpicker form-control" multiple data-live-search="true">
+
                     </select>
                 </div>
             </div>
