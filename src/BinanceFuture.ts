@@ -262,7 +262,6 @@ class BinanceFuture {
             await delay(5000);
         }
         console.log('init done.');
-        // if (!this.isReadOnly)
         await this.onInitDone();
     }
 

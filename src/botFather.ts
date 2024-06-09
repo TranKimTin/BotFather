@@ -75,6 +75,14 @@ import path from 'path';
 
 // client
 import net from 'net';
+interface ParsedData {
+    cmd: string;
+    data: {
+        symbol: string;
+        timeframe: string;
+        data: Array<RateData>;
+    };
+}
 
 let timeout: NodeJS.Timeout;
 function connectTradeDataServer() {
@@ -82,10 +90,6 @@ function connectTradeDataServer() {
 
     client.connect(8081, "localhost", () => {
         console.log('connected to server');
-    });
-
-    client.on('data', data => {
-        console.log(data.toString());
     });
 
     client.on('end', () => {
@@ -104,6 +108,19 @@ function connectTradeDataServer() {
             console.log('reconect...');
             connectTradeDataServer();
         }, 2000);
+    });
+
+    client.on('data', stringData => {
+        try {
+            let { cmd, data } = JSON.parse(stringData.toString()) as ParsedData;
+            switch (cmd) {
+                case 'onCloseCandle':
+                    break;
+            }
+        }
+        catch (err) {
+            console.log(err);
+        }
     });
 }
 connectTradeDataServer();
