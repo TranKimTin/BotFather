@@ -11,30 +11,37 @@ if (!fs.existsSync(BOT_DATA_DIR)) {
     fs.mkdirSync(BOT_DATA_DIR);
 }
 
+export interface Node {
+    logic: string;
+    id: string;
+    next: Array<Node>;
+};
+
+export interface Elements {
+    nodes?: Array<{
+        data: {
+            id: string;
+            [key: string]: any;
+        };
+        position?: {
+            x: number;
+            y: number;
+        };
+        removed?: boolean;
+    }>;
+    edges?: Array<{
+        data: {
+            id: string;
+            source: string;
+            target: string;
+            [key: string]: any;
+        };
+        removed?: boolean;
+    }>;
+}
 export interface BotInfo {
     treeData: {
-        elements: {
-            nodes?: Array<{
-                data: {
-                    id: string;
-                    [key: string]: any;
-                };
-                position?: {
-                    x: number;
-                    y: number;
-                };
-                removed?: boolean;
-            }>;
-            edges?: Array<{
-                data: {
-                    id: string;
-                    source: string;
-                    target: string;
-                    [key: string]: any;
-                };
-                removed?: boolean;
-            }>;
-        };
+        elements: Elements;
         style?: Array<any>;
         zoom?: number;
         pan?: {
@@ -44,7 +51,8 @@ export interface BotInfo {
     };
     timeframes: Array<string>;
     symbolList: Array<string>;
-    botName: string
+    botName: string;
+    route: Node;
 }
 
 
@@ -106,6 +114,46 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
         return botName && botName.length < 50 && !invalidChars.test(botName);
     }
 
+    function buildRoute(botInfo: BotInfo): boolean {
+        let elements = botInfo.treeData.elements;
+        let nodes = elements.nodes?.map(item => item.data) || [];
+        let edges = elements.edges?.map(item => item.data) || [];
+
+        let nodeList: { [key: string]: Node } = {};
+        for (let node of nodes) {
+            let { id, name } = node;
+            nodeList[id] = { logic: name, id, next: [] };
+        }
+
+        for (let edge of edges) {
+            let { source, target } = edge;
+            nodeList[source].next.push(nodeList[target]);
+        }
+
+        if (!nodeList['start']) return false;
+
+        let visited: { [key: string]: boolean } = {};
+        let ret = true;
+
+        let dfs = (node: Node) => {
+            if (visited[node.id]) ret = false;
+            if (!ret) return;
+
+            visited[node.id] = true;
+            for (let child of node.next) {
+                dfs(child);
+            }
+            visited[node.id] = false;
+        }
+        dfs(nodeList['start']);
+        if (!ret) return false;
+
+        nodeList['start'].logic = 'true';
+        botInfo.route = nodeList['start'];
+
+        return true;
+    }
+
     app.post("/save", (req, res) => {
         let data: BotInfo = req.body;
 
@@ -123,6 +171,10 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
             if (!check(node.name)) {
                 return res.json({ code: 400, message: 'Điều kiện không hợp lệ ' + node.name });
             }
+        }
+
+        if (!buildRoute(data)) {
+            return res.json({ code: 400, message: 'Điều kiện vòng tròn' });
         }
 
         let botPath = path.join(BOT_DATA_DIR, `${data.botName}.json`);
@@ -148,7 +200,7 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
         if (!validatekBotName(botName)) {
             return res.json({ code: 400, message: 'Tên bot không hợp lệ ' + botName });
         }
-        let data: BotInfo = { treeData: { elements: { nodes: [], edges: [] } }, timeframes: [], symbolList: [], botName: '' };
+        let data: BotInfo = { treeData: { elements: { nodes: [], edges: [] } }, timeframes: [], symbolList: [], botName: '', route: { logic: "true", id: 'start', next: [] } };
         if (fs.existsSync(`${BOT_DATA_DIR}/${botName}.json`)) {
             data = JSON.parse(fs.readFileSync(`${BOT_DATA_DIR}/${botName}.json`).toString());
         }

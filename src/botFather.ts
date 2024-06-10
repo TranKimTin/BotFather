@@ -5,122 +5,82 @@ import moment from 'moment';
 import delay from 'delay';
 import fs from 'fs';
 import path from 'path';
+const io = require('socket.io-client');
 
-// export class BotFather {
-//     private binance?: BinanceFuture;
-//     private isReadOnly: boolean;
-//     private botChildren: Array<BotInfo>;
+export class BotFather {
+    private sockerTradeServerPort: number;
+    private webConfigServerPort: number;
+    private botChildren: Array<BotInfo>;
 
-//     constructor() {
-//         this.isReadOnly = true;
-//         this.botChildren = [];
+    constructor() {
+        this.sockerTradeServerPort = 8081;
+        this.webConfigServerPort = 8080;
+        this.botChildren = [];
 
-//         let fileList = fs.readdirSync(BOT_DATA_DIR);
-//         for (let botFile of fileList) {
-//             let botPath = path.join(BOT_DATA_DIR, botFile);
-//             let botInfo: BotInfo = JSON.parse(fs.readFileSync(botPath).toString());
-//             this.botChildren.push(botInfo);
-//         }
+        this.connectTradeDataServer(this.sockerTradeServerPort);
+        CreateWebConfig(this.webConfigServerPort, this.initBotChildren.bind(this));
+        this.initBotChildren();
+    }
 
-//         this.botChildren = this.botChildren.filter(item => item.timeframes.length > 0);
+    private connectTradeDataServer(port: number) {
+        let client = io(`http://localhost:${port}`, {
+            reconnection: true,              // Bật tính năng tự động kết nối lại (mặc định là true)
+            reconnectionAttempts: Infinity,  // Số lần thử kết nối lại tối đa (mặc định là vô hạn)
+            reconnectionDelay: 1000,         // Thời gian chờ ban đầu trước khi thử kết nối lại (ms)
+            reconnectionDelayMax: 5000,      // Thời gian chờ tối đa giữa các lần thử kết nối lại (ms)
+            randomizationFactor: 0.5         // Yếu tố ngẫu nhiên trong thời gian chờ kết nối lại
+        });
 
-//         CreateWebConfig(8080, (botName: string) => {
-//             let botPath = path.join(BOT_DATA_DIR, `${botName}.json`);
-//             let botInfo: BotInfo = JSON.parse(fs.readFileSync(botPath).toString());
+        client.on('connect', () => {
+            console.log('Connected to server');
 
-//             this.botChildren = this.botChildren.filter(item => item.botName != botName);
+            client.on('disconnect', (reason: string) => {
+                console.log(`onDisconnect - Disconnected from server. reason: ${reason}`);
+                if (reason === 'io server disconnect') {
+                    // Server ngắt kết nối, cần phải kết nối lại thủ công
+                    client.connect();
+                }
+            });
 
-//             if (botInfo.timeframes.length > 0) {
-//                 this.botChildren.push(botInfo);
-//             }
-//         });
+            client.on('reconnect', () => {
+                console.log('Attempting to reconnect');
+            });
 
-//     }
+            client.on('onCloseCandle', (msg: string) => {
+                try {
+                    let { symbol, timeframe, data } = JSON.parse(msg.toString());
+                    this.onCloseCandle(symbol, timeframe, data);
+                }
+                catch (err) {
+                    console.log(err);
+                }
+            })
+        });
+    }
 
-//     async init() {
-//         let symbolList = await util.getSymbolList();
-//         let ignoreList = ['BTCDOMUSDT', 'USDCUSDT', 'BTCUSDT', 'COCOSUSDT'];
-//         symbolList = symbolList.filter(item => item.endsWith("USDT"))
-//             .filter(item => !ignoreList.includes(item));
-//         // console.log(symbolList.join(' '));
-//         console.log(`Total ${symbolList.length} symbols`);
-
-//         let timeframes = ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'];
-//         // timeframes = [];
-
-
-//         this.binance = new BinanceFuture({
-//             apiKey: process.env.API_KEY,
-//             secretKey: process.env.SECRET_KEY,
-//             symbolList: symbolList,
-//             timeframes: timeframes,
-//             onCloseCandle: this.onCloseCandle.bind(this),
-//             onClosePosition: async (symbol: string) => { },
-//             onHandleError: async (err: any, symbol: string | undefined) => { },
-//             onInitStart: async () => { },
-//             onInitDone: async () => { },
-//             isReadOnly: this.isReadOnly
-//         });
-
-//         await this.binance.init();
-//     }
-
-//     async onCloseCandle(symbol: string, timeframe: string, data: Array<RateData>) {
-
-//     }
-// }
-
-// let botFather = new BotFather();
-// botFather.init();
-
-// client
-import net from 'net';
-interface ParsedData {
-    cmd: string;
-    data: {
-        symbol: string;
-        timeframe: string;
-        data: Array<RateData>;
-    };
-}
-
-let timeout: NodeJS.Timeout;
-function connectTradeDataServer() {
-    let client = new net.Socket();
-
-    client.connect(8081, "localhost", () => {
-        console.log('connected to server');
-    });
-
-    client.on('end', () => {
-        console.log('onEnd - Server ended the connection');
-        clearTimeout(timeout);
-        timeout = setTimeout(() => {
-            console.log('reconect...');
-            connectTradeDataServer();
-        }, 2000);
-    });
-
-    client.on('error', () => {
-        console.log('onError - Disconnected socket server');
-        clearTimeout(timeout);
-        timeout = setTimeout(() => {
-            console.log('reconect...');
-            connectTradeDataServer();
-        }, 2000);
-    });
-
-    client.on('data', stringData => {
-        try {
-            let { cmd, data } = JSON.parse(stringData.toString()) as ParsedData;
-            switch (cmd) {
-                case 'onCloseCandle':
-                    break;
+    private initBotChildren(botName?: string) {
+        this.botChildren = [];
+        let botFileList = fs.readdirSync(BOT_DATA_DIR);
+        for (let botFile of botFileList) {
+            if (botFile.endsWith('.json')) {
+                let botInfo: BotInfo = JSON.parse(fs.readFileSync(`${BOT_DATA_DIR}/${botFile}`).toString());
+                this.botChildren.push(botInfo);
             }
         }
-        catch (err) {
-            console.log(err);
+    }
+
+    public async init() {
+        console.log('BotFather init');
+    }
+
+    private async onCloseCandle(symbol: string, timeframe: string, data: Array<RateData>) {
+        for (let botInfo of this.botChildren) {
+            let { botName, symbolList, timeframes, treeData } = botInfo;
+            if (!symbolList.includes(symbol) || !timeframes.includes(timeframe)) continue;
         }
-    });
-}
-connectTradeDataServer();
+    }
+
+};
+
+let botFather = new BotFather();
+botFather.init();

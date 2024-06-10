@@ -22,6 +22,7 @@
     "@types/node-telegram-bot-api": "^0.63.1"
   },
   "dependencies": {
+    "@types/socket.io": "^3.0.2",
     "binance-api-node": "^0.12.7",
     "body-parser": "^1.20.2",
     "ccxt": "^4.1.43",
@@ -35,6 +36,8 @@
     "moment": "^2.29.4",
     "morgan": "^1.10.0",
     "node-telegram-bot-api": "^0.64.0",
+    "socket.io": "^4.7.5",
+    "socket.io-client": "^4.7.5",
     "zlib": "^1.0.5"
   }
 }

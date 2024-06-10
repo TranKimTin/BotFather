@@ -1,5 +1,6 @@
 // server
-import * as net from 'net';
+import http from 'http';
+import { Server, Socket } from "socket.io";
 import BinanceFuture, { RateData } from './BinanceFuture';
 import * as util from './util';
 import IBinance, { Binance } from 'binance-api-node';
@@ -7,7 +8,7 @@ import moment from 'moment';
 import delay from 'delay';
 
 const port = 8081;
-let clientList: Array<net.Socket> = [];
+// let clientList: Array<Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>> = [];
 let gBinance: Binance = IBinance({});
 let gData: { [key: string]: { [key: string]: Array<RateData> } } = {};
 let gLastPrice: { [key: string]: number } = {};
@@ -90,53 +91,26 @@ async function main(numbler_candle_load = 300) {
         await delay(5000);
     }
 }
-main();
+
 
 
 function onCloseCandle(symbol: string, timeframe: string, data: Array<RateData>) {
-    let stringData = JSON.stringify({ cmd: "onCloseCandle", data: { symbol, timeframe, data } });
-    for (let client of clientList) {
-        client.write(stringData);
-    }
+    let stringData = JSON.stringify({ symbol, timeframe, data });
+    io.emit('onCloseCandle', stringData);
 }
 
-net.createServer((client) => {
-    console.log("client connected");
-    console.log(clientList.length)
+const server = http.createServer();
+const io = new Server(server);
 
-    clientList.push(client);
+let cnt = 0;
+io.on('connection', client => {
+    cnt++;
+    console.log(`client connected. total: ${cnt} connection`);
 
-    client.on('data', function (data) {
-        console.log(data.toString());
+    client.on('disconnect', () => {
+        cnt--;
+        console.log(`onDisconnect - Client disconnected. total: ${cnt} connection`);
     });
-
-    client.on('close', () => {
-        console.log('onClose - Client disconnected');
-        clientList = clientList.filter(s => s !== client);
-    });
-
-    client.on('end', () => {
-        console.log('onEnd - Client disconnected');
-        clientList = clientList.filter(s => s !== client);
-    });
-
-    client.on('error', error => {
-        console.error('Error:', error);
-        clientList = clientList.filter(s => s !== client);
-        client.destroy();
-    });
-
-
-}).listen(port);
-
-
-
-
-
-
-// client
-// var s = new net.Socket();
-// s.connect(8080);
-// s.on('data', data => {
-//     console.log('a', data.toString());
-// })
+});
+server.listen(port);
+main();
