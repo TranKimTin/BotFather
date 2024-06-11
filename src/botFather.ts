@@ -5,17 +5,21 @@ import moment from 'moment';
 import delay from 'delay';
 import fs from 'fs';
 import path from 'path';
-const io = require('socket.io-client');
+import Telegram from './telegram';
+import io from 'socket.io-client';
 
 export class BotFather {
     private sockerTradeServerPort: number;
     private webConfigServerPort: number;
     private botChildren: Array<BotInfo>;
+    private telegram: Telegram;
 
     constructor() {
         this.sockerTradeServerPort = 8081;
         this.webConfigServerPort = 8080;
         this.botChildren = [];
+        this.telegram = new Telegram();
+        this.telegram.setChatID('@tintk_RSI_CCI'); //group chat
 
         this.connectTradeDataServer(this.sockerTradeServerPort);
         CreateWebConfig(this.webConfigServerPort, this.initBotChildren.bind(this));
@@ -99,12 +103,6 @@ export class BotFather {
     private handleLogic(condition: string, symbol: string, timeframe: string, data: RateData[]): boolean {
         condition = condition.toLowerCase().replaceAll(/\s/gi, '').replace(/(?<![\=<>])\=(?![\=<>])/g, '==');
 
-        if (condition.startsWith('telegram:')) {
-            console.log({ condition, symbol, timeframe });
-            return true;
-        }
-
-
         let stringRSIs = findRSI(condition);
 
         for (let stringRSI of stringRSIs) {
@@ -115,6 +113,17 @@ export class BotFather {
             condition = condition.replaceAll(stringRSI, `${RSIs[shift]}`);
             // console.log({ symbol, timeframe, rsi: RSIs[shift] });
 
+        }
+
+
+        if (condition.startsWith('telegram:')) {
+            condition = condition.slice("telegram:".length).trim().replaceAll('==', '=');
+
+            console.log({ condition, symbol, timeframe });
+            let mess = `<b>${symbol} ${timeframe}</b>`
+            mess += `</br>${condition}`;
+            this.telegram.sendMessage(mess);
+            return true;
         }
 
         try {
