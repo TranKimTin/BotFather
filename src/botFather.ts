@@ -1,4 +1,4 @@
-import { BotInfo, CreateWebConfig, BOT_DATA_DIR } from './botFatherConfig';
+import { BotInfo, CreateWebConfig, BOT_DATA_DIR, Node, findRSI, extractParamsRSI, checkEval } from './botFatherConfig';
 import BinanceFuture, { RateData } from './BinanceFuture';
 import * as util from './util';
 import moment from 'moment';
@@ -36,14 +36,6 @@ export class BotFather {
 
             client.on('disconnect', (reason: string) => {
                 console.log(`onDisconnect - Disconnected from server. reason: ${reason}`);
-                if (reason === 'io server disconnect') {
-                    // Server ngắt kết nối, cần phải kết nối lại thủ công
-                    client.connect();
-                }
-            });
-
-            client.on('reconnect', () => {
-                console.log('Attempting to reconnect');
             });
 
             client.on('onCloseCandle', (msg: string) => {
@@ -55,6 +47,18 @@ export class BotFather {
                     console.log(err);
                 }
             })
+        });
+
+        client.on("connect_error", (error: { message: any; }) => {
+            console.log('connect_error - Attempting to reconnect');
+            if (client.active) {
+                // temporary failure, the socket will automatically try to reconnect
+            } else {
+                // the connection was denied by the server
+                // in that case, `socket.connect()` must be manually called in order to reconnect
+                console.log(error.message);
+                client.connect();
+            }
         });
     }
 
@@ -75,8 +79,49 @@ export class BotFather {
 
     private async onCloseCandle(symbol: string, timeframe: string, data: Array<RateData>) {
         for (let botInfo of this.botChildren) {
-            let { botName, symbolList, timeframes, treeData } = botInfo;
+            let { botName, symbolList, timeframes, treeData, route } = botInfo;
             if (!symbolList.includes(symbol) || !timeframes.includes(timeframe)) continue;
+
+            this.dfs_handleLogic(route, symbol, timeframe, data);
+
+        }
+    }
+
+    private dfs_handleLogic(node: Node, symbol: string, timeframe: string, data: RateData[]) {
+        let { logic, next } = node;
+        if (this.handleLogic(logic, symbol, timeframe, data)) {
+            for (let child of next) {
+                this.dfs_handleLogic(child, symbol, timeframe, data);
+            }
+        }
+    }
+
+    private handleLogic(condition: string, symbol: string, timeframe: string, data: RateData[]): boolean {
+        condition = condition.toLowerCase().replaceAll(/\s/gi, '').replace(/(?<![\=<>])\=(?![\=<>])/g, '==');
+
+        if (condition.startsWith('telegram:')) {
+            console.log({ condition, symbol, timeframe });
+            return true;
+        }
+
+
+        let stringRSIs = findRSI(condition);
+
+        for (let stringRSI of stringRSIs) {
+            let [period, shift] = extractParamsRSI(stringRSI);
+            let RSIs = util.iRSI(data, period);
+
+            if (RSIs.length <= period) return false;
+            condition = condition.replaceAll(stringRSI, `${RSIs[shift]}`);
+            // console.log({ symbol, timeframe, rsi: RSIs[shift] });
+
+        }
+
+        try {
+            return checkEval(condition);
+        }
+        catch (err) {
+            return false;
         }
     }
 

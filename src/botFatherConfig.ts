@@ -55,7 +55,43 @@ export interface BotInfo {
     route: Node;
 }
 
+export function checkValidExpression(condition: string) {
+    const validExpression = /^[\d+\-*/%().\s><=]*$/;
+    return validExpression.test(condition);
+}
 
+export function checkEval(condition: string): boolean {
+    try {
+        if (checkValidExpression(condition)) {
+            let ret = eval(condition);
+            // console.log({ condition, ret })
+            return !!ret;
+        }
+        else {
+            console.log('condition invalid: ', condition);
+            return false;
+        }
+    }
+    catch (err) {
+        console.log(condition, err);
+        throw err;
+    }
+}
+
+export function findRSI(inputString: string) {
+    const regex = /rsi\([^)]*\)/g;
+    return inputString.match(regex) || [];
+}
+
+export function extractParamsRSI(s: string): [number, number] {
+    const regex = /rsi\((\d+)(?:,(\d+))?\)/;
+    const match = s.match(regex);
+
+    let period = match ? parseInt(match[1], 10) : 0;
+    let shift = match && match[2] ? parseInt(match[2], 10) : 0;
+
+    return [period, shift];
+}
 
 export function CreateWebConfig(port: number, onChangeConfig: (botName: string) => void) {
     const app = express();
@@ -72,12 +108,6 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
     app.use(body_parser.urlencoded({ extended: false, limit: "50mb" }));
     app.use(express.static(path.join(__dirname, 'public')));
 
-    function findRSI(inputString: string) {
-        const regex = /rsi\([^)]*\)/g;
-        return inputString.match(regex) || [];
-    }
-
-
     function check(condition: string) {
         try {
             if (!condition) return false;
@@ -85,24 +115,23 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
             condition = condition.toLowerCase().replaceAll(/\s/gi, '').replace(/(?<![\=<>])\=(?![\=<>])/g, '==');
 
             if (condition == 'start') return true;
+            if (condition.startsWith('telegram:')) return true;
             if (!(/[<>=]/.test(condition))) return false;
 
             let RSIs = findRSI(condition);
             for (let rsi of RSIs) {
+                let [period, shift] = extractParamsRSI(rsi);
+                console.log([period, shift]);
+                if (period == 0) return false;
+
                 condition = condition.replaceAll(rsi, '1');
             }
 
-            //check eval safe and ok
-            const validExpression = /^[\d+\-*/%().\s><=]*$/;
-            if (!/([><=]=?){2,}/.test(condition) && validExpression.test(condition)) {
-                eval(condition);
-            }
-
+            if (!checkValidExpression(condition)) return false;
+            checkEval(condition);
             return true;
         }
         catch (err) {
-            console.log(condition)
-
             return false;
         }
 
@@ -148,7 +177,7 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
         dfs(nodeList['start']);
         if (!ret) return false;
 
-        nodeList['start'].logic = 'true';
+        nodeList['start'].logic = '1==1';
         botInfo.route = nodeList['start'];
 
         return true;
@@ -200,7 +229,7 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
         if (!validatekBotName(botName)) {
             return res.json({ code: 400, message: 'Tên bot không hợp lệ ' + botName });
         }
-        let data: BotInfo = { treeData: { elements: { nodes: [], edges: [] } }, timeframes: [], symbolList: [], botName: '', route: { logic: "true", id: 'start', next: [] } };
+        let data: BotInfo = { treeData: { elements: { nodes: [], edges: [] } }, timeframes: [], symbolList: [], botName: '', route: { logic: "1==1", id: 'start', next: [] } };
         if (fs.existsSync(`${BOT_DATA_DIR}/${botName}.json`)) {
             data = JSON.parse(fs.readFileSync(`${BOT_DATA_DIR}/${botName}.json`).toString());
         }
