@@ -20,7 +20,7 @@ async function main(numbler_candle_load = 300) {
     console.log(`Total ${symbolList.length} symbols`);
 
     let timeframes = ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'];
-    timeframes = ['5m', '15m', '1h', '4h'];
+    timeframes = ['1m', '5m', '15m'];
     for (let symbol of symbolList) {
         gData[symbol] = {};
         for (let tf of timeframes) {

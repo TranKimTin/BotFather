@@ -120,8 +120,8 @@ export class BotFather {
             condition = condition.slice("telegram:".length).trim().replaceAll('==', '=');
 
             console.log({ condition, symbol, timeframe });
-            let mess = `<b>${symbol} ${timeframe}</b>`
-            mess += `</br>${condition}`;
+            let mess = `${symbol} ${timeframe}`
+            mess += `\n${condition}`;
             this.telegram.sendMessage(mess);
             return true;
         }
