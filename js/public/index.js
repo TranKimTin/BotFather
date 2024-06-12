@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    const URL = 'http://127.0.0.1:8080';
+    const URL = '';
     let botName = $.cookie("botName") || '';
     $('#botName').val(botName);
 
