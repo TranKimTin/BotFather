@@ -141,3 +141,4 @@ js/config83.txt
 !cytoscape-edgehandles.js
 !index.js
 js/botData/*
+.vscode/*
