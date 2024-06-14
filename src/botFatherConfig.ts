@@ -21,6 +21,7 @@ export interface Elements {
     nodes?: Array<{
         data: {
             id: string;
+            name: string;
             [key: string]: any;
         };
         position?: {
@@ -55,13 +56,23 @@ export interface BotInfo {
     route: Node;
 }
 
+export const indicatorSupported: Array<string> = ['rsi', 'change', 'change%'];
+export const paramsValidate: { [key: string]: Array<number> } = {
+    // indicator : [leng>=, leng<=, value >=]
+    'rsi': [1, 2, 0],
+    'change': [0, 1],
+    'change%': [0, 1]
+};
+
 export function checkValidExpression(condition: string) {
-    const validExpression = /^[\d+\-*/%().\s><=]*$/;
+    //check condition only include number, operator +/*/%, space, e (1.5212e-9)
+    const validExpression = /^[\d+\-*/%().\s><=e]*$/;
     return validExpression.test(condition);
 }
 
 export function checkEval(condition: string): boolean {
     try {
+        // console.log({ condition })
         if (checkValidExpression(condition)) {
             let ret = eval(condition);
             // console.log({ condition, ret })
@@ -80,19 +91,30 @@ export function checkEval(condition: string): boolean {
 
 export function findIndicator(inputString: string, indicator: string) {
     // const regex = /rsi\([^)]*\)/g;
-    const regex = new RegExp(indicator + '\\([^)]*\\)', 'g');
+    const regex = new RegExp(`${indicator}\\([^)]*\\)`, 'g');
 
     return inputString.match(regex) || [];
 }
 
-export function extractParamsRSI(s: string): [number, number] {
-    const regex = /rsi\((\d+)(?:,(\d+))?\)/;
-    const match = s.match(regex);
+export function extractParams(s: string, indicator: string): Array<number> {
+    const regex = new RegExp(`${indicator}\\((\\d+)(?:,(\\d+))?\\)`, '');
 
-    let period = match ? parseInt(match[1], 10) : 0;
-    let shift = match && match[2] ? parseInt(match[2], 10) : 0;
+    // const regex = /rsi\((\d+)(?:,(\d+))?\)/;
+    const match = s.match(regex) || [];
 
-    return [period, shift];
+    return match.map(item => +item);
+}
+
+export function checkParams(indicator: string, params: Array<number>): boolean {
+    let paramsCheck = paramsValidate[indicator];
+    if (!paramsCheck) return false;
+    if (params.length < paramsCheck[0]) return false;
+    if (params.length > paramsCheck[1]) return false;
+    for (let i = 2; i <= paramsCheck.length; i++) {
+        if (params[i - 2] < paramsCheck[i])
+            return false;
+    }
+    return true;
 }
 
 export function CreateWebConfig(port: number, onChangeConfig: (botName: string) => void) {
@@ -120,17 +142,21 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
             if (condition.startsWith('telegram:')) return true;
             if (!(/[<>=]/.test(condition))) return false;
 
-            let RSIs = findIndicator(condition, 'rsi');
-            for (let rsi of RSIs) {
-                let [period, shift] = extractParamsRSI(rsi);
-                console.log([period, shift]);
-                if (period == 0) return false;
-
-                condition = condition.replaceAll(rsi, '1');
+            for (let indicator of indicatorSupported) {
+                let fomulas = findIndicator(condition, indicator);
+                for (let f of fomulas) {
+                    let params = extractParams(f, indicator);
+                    if (!checkParams(indicator, params)) {
+                        console.log('invalid params', { indicator, condition, params })
+                        return false;
+                    }
+                    condition = condition.replaceAll(f, '1');
+                }
             }
 
             if (!checkValidExpression(condition)) return false;
             checkEval(condition);
+
             return true;
         }
         catch (err) {
@@ -200,6 +226,7 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
 
         for (let node of nodes) {
             if (!check(node.name)) {
+                console.log('invalid condition ', node.name);
                 return res.json({ code: 400, message: 'Điều kiện không hợp lệ ' + node.name });
             }
         }

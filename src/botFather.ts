@@ -1,4 +1,4 @@
-import { BotInfo, CreateWebConfig, BOT_DATA_DIR, Node, findIndicator, extractParamsRSI, checkEval } from './botFatherConfig';
+import { BotInfo, CreateWebConfig, BOT_DATA_DIR, Node, findIndicator, extractParams, checkEval, indicatorSupported, checkParams } from './botFatherConfig';
 import BinanceFuture, { RateData } from './BinanceFuture';
 import * as util from './util';
 import moment from 'moment';
@@ -103,16 +103,54 @@ export class BotFather {
     private handleLogic(condition: string, symbol: string, timeframe: string, data: RateData[]): boolean {
         condition = condition.toLowerCase().replaceAll(/\s/gi, '').replace(/(?<![\=<>])\=(?![\=<>])/g, '==');
 
-        let stringRSIs = findIndicator(condition, 'rsi');
+        // let stringRSIs = findIndicator(condition, 'rsi');
 
-        for (let stringRSI of stringRSIs) {
-            let [period, shift] = extractParamsRSI(stringRSI);
-            let RSIs = util.iRSI(data, period);
+        // for (let stringRSI of stringRSIs) {
+        //     let [period, shift] = extractParams(stringRSI, 'rsi');
+        //     let RSIs = util.iRSI(data, period);
 
-            if (RSIs.length <= period) return false;
-            condition = condition.replaceAll(stringRSI, `${RSIs[shift]}`);
-            // console.log({ symbol, timeframe, rsi: RSIs[shift] });
+        //     if (RSIs.length <= period) return false;
+        //     condition = condition.replaceAll(stringRSI, `${RSIs[shift]}`);
+        //     // console.log({ symbol, timeframe, rsi: RSIs[shift] });
+        // }
 
+        for (let indicator of indicatorSupported) {
+            let fomulas = findIndicator(condition, indicator);
+            for (let f of fomulas) {
+                let params = extractParams(f, indicator);
+                if (!checkParams(indicator, params)) return false;
+
+                let value = undefined;
+                switch (indicator) {
+                    case 'rsi': {
+                        let [period, shift = 0] = params;
+                        let RSIs = util.iRSI(data, params[0]);
+                        if (period >= RSIs.length) return false;
+                        value = RSIs[shift];
+                        break;
+                    }
+                    case 'change': {
+                        let [shift = 0] = params;
+                        let change: number = data[shift].close - data[shift].open;
+                        value = change;
+                        break;
+                    }
+                    case 'change%': {
+                        let [shift = 0] = params;
+                        let change: number = data[shift].close - data[shift].open;
+                        value = change / data[shift].open * 100;
+                        if (symbol == 'BTCUSDT') {
+                            console.log({ symbol, condition, value, rate: data[0] });
+                        }
+                        break;
+                    }
+                }
+
+                if (value === undefined) return false;
+
+
+                condition = condition.replaceAll(f, `${value}`);
+            }
         }
 
 

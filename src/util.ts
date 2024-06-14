@@ -45,7 +45,7 @@ export function iRSI(data: Array<RateData>, period: number) {
     let avgGain = 0;
     let avgLoss = 0;
     let rs = 0;
-    let RSI = [];
+    let RSI: Array<number> = [];
 
     for (let i = 1; i < prices.length; i++) {
         let delta = prices[i] - prices[i - 1];
@@ -73,7 +73,7 @@ export function iRSI(data: Array<RateData>, period: number) {
         }
     }
 
-    return RSI.reverse();
+    return RSI.reverse().map(item => +item.toFixed(2));
 }
 
 export async function getDigitsFuture() {
@@ -85,7 +85,7 @@ export async function getDigitsFuture() {
         "body": null,
         "method": "GET"
     });
-    let data : any = await res.json();
+    let data: any = await res.json();
     let digits: { [key: string]: { price: number, volume: number } } = {};
     for (let item of data.symbols) {
         digits[item.symbol] = {
@@ -97,7 +97,18 @@ export async function getDigitsFuture() {
 }
 
 export async function getSymbolList() {
-    let res = await fetch("https://fapi.binance.com/fapi/v1/ticker/24hr", {
+    // let res = await fetch("https://fapi.binance.com/fapi/v1/ticker/24hr", {
+    //     "headers": {
+    //         "accept": "*/*",
+    //         "content-type": "application/json",
+    //     },
+    //     "body": null,
+    //     "method": "GET"
+    // });
+    // let data = await res.json() as Array<{ symbol: string }>;
+    // return data.map(item => item.symbol);
+
+    let res = await fetch("https://fapi.binance.com/fapi/v1/exchangeInfo", {
         "headers": {
             "accept": "*/*",
             "content-type": "application/json",
@@ -105,8 +116,9 @@ export async function getSymbolList() {
         "body": null,
         "method": "GET"
     });
-    let data = await res.json() as Array<{ symbol: string }>;
-    return data.map(item => item.symbol);
+
+    let data = await res.json() as { symbols: Array<{ symbol: string; status: string }> };
+    return data.symbols.filter((item: { status: string }) => item.status == 'TRADING').map((item: { symbol: any; }) => item.symbol);
 }
 
 export function checkFinal(tf: string, startTime: number) {
