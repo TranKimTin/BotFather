@@ -1,4 +1,4 @@
-import { BotInfo, CreateWebConfig, BOT_DATA_DIR, Node, findRSI, extractParamsRSI, checkEval } from './botFatherConfig';
+import { BotInfo, CreateWebConfig, BOT_DATA_DIR, Node, findIndicator, extractParamsRSI, checkEval } from './botFatherConfig';
 import BinanceFuture, { RateData } from './BinanceFuture';
 import * as util from './util';
 import moment from 'moment';
@@ -103,7 +103,7 @@ export class BotFather {
     private handleLogic(condition: string, symbol: string, timeframe: string, data: RateData[]): boolean {
         condition = condition.toLowerCase().replaceAll(/\s/gi, '').replace(/(?<![\=<>])\=(?![\=<>])/g, '==');
 
-        let stringRSIs = findRSI(condition);
+        let stringRSIs = findIndicator(condition, 'rsi');
 
         for (let stringRSI of stringRSIs) {
             let [period, shift] = extractParamsRSI(stringRSI);

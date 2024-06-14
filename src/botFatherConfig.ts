@@ -78,8 +78,10 @@ export function checkEval(condition: string): boolean {
     }
 }
 
-export function findRSI(inputString: string) {
-    const regex = /rsi\([^)]*\)/g;
+export function findIndicator(inputString: string, indicator: string) {
+    // const regex = /rsi\([^)]*\)/g;
+    const regex = new RegExp(indicator + '\\([^)]*\\)', 'g');
+
     return inputString.match(regex) || [];
 }
 
@@ -118,7 +120,7 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
             if (condition.startsWith('telegram:')) return true;
             if (!(/[<>=]/.test(condition))) return false;
 
-            let RSIs = findRSI(condition);
+            let RSIs = findIndicator(condition, 'rsi');
             for (let rsi of RSIs) {
                 let [period, shift] = extractParamsRSI(rsi);
                 console.log([period, shift]);
