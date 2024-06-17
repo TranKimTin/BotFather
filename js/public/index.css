@@ -22,4 +22,5 @@
 .justify-center {
     display: flex;
     justify-content: center;
+    z-index: 88888;
 }
