@@ -123,6 +123,9 @@ export function checkParams(indicator: string, params: Array<number>): boolean {
     if (!paramsCheck) return false;
     if (params.length < paramsCheck[0]) return false;
     if (params.length > paramsCheck[1]) return false;
+    for (let value of params) {
+        if (isNaN(value)) return false;
+    }
     for (let i = 2; i <= paramsCheck.length; i++) {
         if (params[i - 2] < paramsCheck[i])
             return false;
