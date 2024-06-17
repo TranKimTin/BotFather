@@ -117,7 +117,7 @@ export class BotFather {
         for (let indicator of indicatorSupported) {
             let fomulas = findIndicator(condition, indicator);
             for (let f of fomulas) {
-                let params = extractParams(f, indicator);
+                let params = extractParams(f);
                 if (!checkParams(indicator, params)) return false;
 
                 let value = undefined;

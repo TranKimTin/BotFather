@@ -102,13 +102,20 @@ export function findIndicator(inputString: string, indicator: string) {
     return inputString.match(regex) || [];
 }
 
-export function extractParams(s: string, indicator: string): Array<number> {
-    const regex = new RegExp(`${indicator}\\((\\d+)(?:,(\\d+))?\\)`, '');
+export function extractParams(s: string): Array<number> {
+    // const regex = new RegExp(`\\((\\d+)(?:,(\\d+))?\\)`, '');
 
-    // const regex = /rsi\((\d+)(?:,(\d+))?\)/;
-    const match = s.match(regex) || [];
+    // const regex = /([\d\.]+)/;
+    // const match = regex.exec(s) || [];
+    // console.log(match)
+    // return match.map(item => +item);
 
-    return match.map(item => +item);
+    let i = s.indexOf('(');
+    let j = s.indexOf(')');
+    if (i == -1 || j == -1 || i == j) return [];
+
+    let arr: Array<number> = s.slice(s.indexOf('(') + 1, s.lastIndexOf(')')).split(',').map(item => +item);
+    return arr;
 }
 
 export function checkParams(indicator: string, params: Array<number>): boolean {
@@ -151,7 +158,7 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
             for (let indicator of indicatorSupported) {
                 let fomulas = findIndicator(condition, indicator);
                 for (let f of fomulas) {
-                    let params = extractParams(f, indicator);
+                    let params = extractParams(f);
                     if (!checkParams(indicator, params)) {
                         console.log('invalid params', { indicator, condition, params })
                         return false;
