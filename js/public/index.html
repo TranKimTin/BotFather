@@ -23,6 +23,10 @@
     <script src="https://unpkg.com/cytoscape-popper@2.0.0/cytoscape-popper.js"></script>
     <script src="index.js"></script>
 
+    <!-- for auto complete -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.3/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.13.3/jquery-ui.js"></script>
+
     <link rel="stylesheet" href="index.css">
 </head>
 
@@ -65,13 +69,92 @@
             <div class="padding10">
 
             </div>
-            <div>
-                <button id="addNode">Thêm điều kiện</button>
-                <button id="draw-on">Draw mode on</button>
-                <button id="draw-off">Draw mode off</button>
-                <button id="editNode">Sửa điều kiện</button>
-                <button id="removeNode">Xóa</button>
-                <button id="save">Lưu</button>
+            <div class="justify-center">
+                <button class="btn btn-outline-primary mr-1" id="addNode">Thêm điều kiện</button>
+                <button class="btn btn-outline-primary mr-1" id="draw-on">Draw mode on</button>
+                <button class="btn btn-outline-primary mr-1" id="draw-off">Draw mode off</button>
+                <button class="btn btn-outline-primary mr-1" id="editNode">Sửa điều kiện</button>
+                <button class="btn btn-outline-danger mr-1" id="removeNode">Xóa</button>
+                <button class="btn btn-outline-success mr-1" id="save">Lưu</button>
+                <button class="btn btn-outline-info mr-1" data-toggle="modal" data-target="#instructionModal">Hướng
+                    dẫn</button>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade alwaysOnTop" id="instructionModal" tabindex="-1" role="dialog"
+        aria-labelledby="instructionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="instructionModalLabel">Hướng dẫn</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div>Khi viết công thức, thêm tham số x nếu muốn xét nến thứ x trở về trước. nến hiện
+                        tại x = 0</div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Chỉ báo</th>
+                                <th scope="col">cách viết</th>
+                                <th scope="col">Giải thích</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>rsi</td>
+                                <td>rsi(14) / rsi(14, x)</td>
+                                <td>chỉ số rsi 14</td>
+                            </tr>
+                            <tr>
+                                <td>thân nến</td>
+                                <td>change() / change(x)</td>
+                                <td>giá thay đổi (giá đóng trừ giá mở)</td>
+                            </tr>
+                            <tr>
+                                <td>thân nến</td>
+                                <td>change%() / change%(x)</td>
+                                <td>giá thay đổi (giá đóng trừ giá mở) tính theo %</td>
+                            </tr>
+                            <tr>
+                                <td>biên độ nến</td>
+                                <td>ampl() / ampl(x)</td>
+                                <td>biên độ nến (giá max trừ giá min)</td>
+                            </tr>
+                            <tr>
+                                <td>biên độ nến</td>
+                                <td>ampl%() / ampl%(x)</td>
+                                <td>biên độ nến (giá max trừ giá min) tính theo %</td>
+                            </tr>
+                            <tr>
+                                <td>râu nến</td>
+                                <td>upper_shadow() / upper_shadow(x)</td>
+                                <td>râu nến trên</td>
+                            </tr>
+                            <tr>
+                                <td>râu nến</td>
+                                <td>upper_shadow%() / upper_shadow%(x)</td>
+                                <td>râu nến trên tính theo %</td>
+                            </tr>
+                            <tr>
+                                <td>râu nến</td>
+                                <td>lower_shadow() / lower_shadow(x)</td>
+                                <td>râu nến dưới</td>
+                            </tr>
+                            <tr>
+                                <td>râu nến</td>
+                                <td>lower_shadow%() / lower_shadow%(x)</td>
+                                <td>râu nến dưới tính theo %</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>

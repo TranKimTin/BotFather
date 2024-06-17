@@ -139,9 +139,42 @@ export class BotFather {
                         let [shift = 0] = params;
                         let change: number = data[shift].close - data[shift].open;
                         value = change / data[shift].open * 100;
-                        if (symbol == 'BTCUSDT') {
-                            console.log({ symbol, condition, value, rate: data[0] });
-                        }
+                        break;
+                    }
+                    case 'ampl': {
+                        let [shift = 0] = params;
+                        let ampl: number = data[shift].high - data[shift].low;
+                        value = ampl;
+                        break;
+                    }
+                    case 'ampl%': {
+                        let [shift = 0] = params;
+                        let ampl: number = data[shift].high - data[shift].low;
+                        value = ampl / data[shift].open * 100;
+                        break;
+                    }
+                    case 'upper_shadow': {
+                        let [shift = 0] = params;
+                        let diff: number = data[shift].high - Math.max(data[shift].open, data[shift].close);
+                        value = diff
+                        break;
+                    }
+                    case 'upper_shadow%': {
+                        let [shift = 0] = params;
+                        let diff: number = data[shift].high - Math.max(data[shift].open, data[shift].close);
+                        value = diff / data[shift].open * 100;
+                        break;
+                    }
+                    case 'lower_shadow': {
+                        let [shift = 0] = params;
+                        let diff: number = Math.min(data[shift].open, data[shift].close) - data[shift].low;
+                        value = diff
+                        break;
+                    }
+                    case 'lower_shadow%': {
+                        let [shift = 0] = params;
+                        let diff: number = Math.min(data[shift].open, data[shift].close) - data[shift].low;
+                        value = diff / data[shift].open * 100;
                         break;
                     }
                 }

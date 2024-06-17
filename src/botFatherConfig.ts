@@ -56,12 +56,18 @@ export interface BotInfo {
     route: Node;
 }
 
-export const indicatorSupported: Array<string> = ['rsi', 'change', 'change%'];
+export const indicatorSupported: Array<string> = ['rsi', 'change', 'change%', 'ampl', 'ampl%', 'upper_shadow', 'upper_shadow%', 'lower_shadow', 'lower_shadow%'];
 export const paramsValidate: { [key: string]: Array<number> } = {
     // indicator : [leng>=, leng<=, value >=]
     'rsi': [1, 2, 0],
     'change': [0, 1],
-    'change%': [0, 1]
+    'change%': [0, 1],
+    'ampl': [0, 1],
+    'ampl%': [0, 1],
+    'upper_shadow': [0, 1],
+    'upper_shadow%': [0, 1],
+    'lower_shadow': [0, 1],
+    'lower_shadow%': [0, 1]
 };
 
 export function checkValidExpression(condition: string) {
@@ -272,6 +278,12 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
     app.get('/getSymbolList', async (req, res) => {
         let symbolList = await util.getSymbolList();
         res.json({ code: 200, message: "ok", data: symbolList });
+    });
+
+    app.get('/getBotList', (req, res) => {
+        let botList = fs.readdirSync(BOT_DATA_DIR);
+        let data = botList.map(item => item.replace('.json', '')) || [];
+        res.json({ code: 200, message: "ok", data });
     })
 
     app.listen(port, () => {

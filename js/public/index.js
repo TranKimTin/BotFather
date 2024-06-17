@@ -360,7 +360,7 @@ $(document).ready(function () {
     $('#toogleAllSymbol').click(function () {
         this.temp = this.temp || 1;
         $('.selectpicker').selectpicker('toggle');
-        if(this.temp++ % 2){
+        if (this.temp++ % 2) {
             $('#symbolList').selectpicker('selectAll');
         }
         else {
@@ -369,4 +369,30 @@ $(document).ready(function () {
         $('#symbolList').selectpicker('refresh');
 
     });
+
+    function getBotList() {
+        $.ajax({
+            type: "GET",
+            contentType: "application/json",
+            url: `${URL}/getBotList`,
+            data: "",
+            dataType: "json",
+            success: function (response) {
+                console.log(response);
+                if (response.code == 200) {
+                    $("#botName").autocomplete({
+                        source: response.data,
+                        minLength: 0
+                    }).focus(function () {
+                        // Bất kỳ khi nào trường này nhận focus, ngay cả khi không có nhập liệu
+                        $(this).autocomplete("search", "");
+                    });;
+                }
+                else {
+                    alert('có lỗi');
+                }
+            }
+        });
+    }
+    getBotList();
 });

@@ -18,3 +18,8 @@
 .padding10 {
     padding: 10px;
 }
+
+.justify-center {
+    display: flex;
+    justify-content: center;
+}
