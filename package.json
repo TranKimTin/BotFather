@@ -42,11 +42,13 @@
     "google-auth-library": "^9.2.0",
     "google-spreadsheet": "^4.1.1",
     "lodash": "^4.17.21",
+    "mocha": "^10.4.0",
     "moment": "^2.29.4",
     "morgan": "^1.10.0",
     "node-telegram-bot-api": "^0.64.0",
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",
+    "ts-node": "^10.9.2",
     "zlib": "^1.0.5"
   }
 }
