@@ -70,7 +70,7 @@ export const paramsValidate: { [key: string]: Array<number> } = {
     'lower_shadow%': [0, 1]
 };
 
-export function checkValidExpression(condition: string) {
+export function checkValidExpression(condition: string) : boolean {
     //check condition only include number, operator +/*/%, space, e (1.5212e-9)
     const validExpression = /^[\d+\-*/%().\s><=e]*$/;
     return validExpression.test(condition);
@@ -133,6 +133,38 @@ export function checkParams(indicator: string, params: Array<number>): boolean {
     return true;
 }
 
+export function checkCondition(condition: string) {
+    try {
+        if (!condition) return false;
+
+        condition = condition.toLowerCase().replaceAll(/\s/gi, '').replace(/(?<![\=<>])\=(?![\=<>])/g, '==');
+
+        if (condition == 'start') return true;
+        if (condition.startsWith('telegram:')) return true;
+        if (!(/[<>=]/.test(condition))) return false;
+
+        for (let indicator of indicatorSupported) {
+            let fomulas = findIndicator(condition, indicator);
+            for (let f of fomulas) {
+                let params = extractParams(f);
+                if (!checkParams(indicator, params)) {
+                    console.log('invalid params', { indicator, condition, params })
+                    return false;
+                }
+                condition = condition.replaceAll(f, '1');
+            }
+        }
+
+        if (!checkValidExpression(condition)) return false;
+        checkEval(condition);
+
+        return true;
+    }
+    catch (err) {
+        return false;
+    }
+}
+
 export function CreateWebConfig(port: number, onChangeConfig: (botName: string) => void) {
     const app = express();
 
@@ -147,40 +179,6 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
     app.use(body_parser.json({ limit: "50mb" }));
     app.use(body_parser.urlencoded({ extended: false, limit: "50mb" }));
     app.use(express.static(path.join(__dirname, 'public')));
-
-    function check(condition: string) {
-        try {
-            if (!condition) return false;
-
-            condition = condition.toLowerCase().replaceAll(/\s/gi, '').replace(/(?<![\=<>])\=(?![\=<>])/g, '==');
-
-            if (condition == 'start') return true;
-            if (condition.startsWith('telegram:')) return true;
-            if (!(/[<>=]/.test(condition))) return false;
-
-            for (let indicator of indicatorSupported) {
-                let fomulas = findIndicator(condition, indicator);
-                for (let f of fomulas) {
-                    let params = extractParams(f);
-                    if (!checkParams(indicator, params)) {
-                        console.log('invalid params', { indicator, condition, params })
-                        return false;
-                    }
-                    condition = condition.replaceAll(f, '1');
-                }
-            }
-
-            if (!checkValidExpression(condition)) return false;
-            checkEval(condition);
-
-            return true;
-        }
-        catch (err) {
-            return false;
-        }
-
-
-    }
 
     function validatekBotName(botName: string) {
         const invalidChars = /[\/\\:*?"<>|]/;
@@ -241,7 +239,7 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
         console.log({ edges, nodes });
 
         for (let node of nodes) {
-            if (!check(node.name)) {
+            if (!checkCondition(node.name)) {
                 console.log('invalid condition ', node.name);
                 return res.json({ code: 400, message: 'Điều kiện không hợp lệ ' + node.name });
             }
@@ -262,7 +260,7 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
         let data = req.body;
         console.log('check', data);
 
-        if (!data.id || !check(data.name)) {
+        if (!data.id || !checkCondition(data.name)) {
             return res.json({ code: 400, message: `Điều kiện không hợp lệ ${data.name}` });
         }
 
