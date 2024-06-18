@@ -59,7 +59,7 @@ export interface BotInfo {
 export const indicatorSupported: Array<string> = ['rsi', 'change', 'change%', 'ampl', 'ampl%', 'upper_shadow', 'upper_shadow%', 'lower_shadow', 'lower_shadow%'];
 export const paramsValidate: { [key: string]: Array<number> } = {
     // indicator : [leng>=, leng<=, value >=]
-    'rsi': [1, 2, 0],
+    'rsi': [1, 2, 1],
     'change': [0, 1],
     'change%': [0, 1],
     'ampl': [0, 1],
@@ -67,10 +67,12 @@ export const paramsValidate: { [key: string]: Array<number> } = {
     'upper_shadow': [0, 1],
     'upper_shadow%': [0, 1],
     'lower_shadow': [0, 1],
-    'lower_shadow%': [0, 1]
+    'lower_shadow%': [0, 1],
+    'ma': [1, 2, 1],
+    'ema': [1, 2, 1]
 };
 
-export function checkValidExpression(condition: string) : boolean {
+export function checkValidExpression(condition: string): boolean {
     //check condition only include number, operator +/*/%, space, e (1.5212e-9)
     const validExpression = /^[\d+\-*/%().\s><=e]*$/;
     return validExpression.test(condition);

@@ -3,6 +3,7 @@ import { RateData } from './BinanceFuture';
 import zlib from 'zlib';
 import fs from 'fs';
 import * as ccxt from 'ccxt'
+import indicator from 'technicalindicators';
 
 let binance = new ccxt.binanceusdm({});
 
@@ -339,4 +340,22 @@ export async function getData_m1(symbol: string, date: string): Promise<Array<Ra
         change: (item.close - item.open) / item.open,
         ampl: (item.high - item.low) / item.open
     }));
+}
+
+export function iMA(data: Array<RateData>, period: number) {
+    let prices = data.map(item => item.close).reverse();
+    let MAs = indicator.SMA.calculate({
+        period,
+        values: prices
+    });
+    return MAs.reverse();
+}
+
+export function iEMA(data: Array<RateData>, period: number) {
+    let prices = data.map(item => item.close).reverse();
+    let EMAs = indicator.EMA.calculate({
+        period,
+        values: prices
+    });
+    return EMAs.reverse();
 }

@@ -122,13 +122,6 @@ export class BotFather {
 
                 let value = undefined;
                 switch (indicator) {
-                    case 'rsi': {
-                        let [period, shift = 0] = params;
-                        let RSIs = util.iRSI(data, params[0]);
-                        if (period >= RSIs.length) return false;
-                        value = RSIs[shift];
-                        break;
-                    }
                     case 'change': {
                         let [shift = 0] = params;
                         let change: number = data[shift].close - data[shift].open;
@@ -175,6 +168,27 @@ export class BotFather {
                         let [shift = 0] = params;
                         let diff: number = Math.min(data[shift].open, data[shift].close) - data[shift].low;
                         value = diff / data[shift].open * 100;
+                        break;
+                    }
+                    case 'rsi': {
+                        let [period, shift = 0] = params;
+                        let values = util.iRSI(data, period);
+                        if (shift >= values.length) return false;
+                        value = values[shift];
+                        break;
+                    }
+                    case 'ma': {
+                        let [period, shift = 0] = params;
+                        let values = util.iMA(data, period);
+                        if (shift >= values.length) return false;
+                        value = values[shift];
+                        break;
+                    }
+                    case 'ema': {
+                        let [period, shift = 0] = params;
+                        let values = util.iEMA(data, period);
+                        if (shift >= values.length) return false;
+                        value = values[shift];
                         break;
                     }
                 }
