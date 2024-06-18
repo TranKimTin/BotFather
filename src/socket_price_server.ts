@@ -12,7 +12,7 @@ const port = 8081;
 let gBinance: Binance = IBinance({});
 let gData: { [key: string]: { [key: string]: Array<RateData> } } = {};
 let gLastPrice: { [key: string]: number } = {};
-
+let gLastUpdated: { [key: string]: number } = {};
 
 async function main(numbler_candle_load = 300) {
     let symbolList = await util.getSymbolList();
@@ -30,6 +30,7 @@ async function main(numbler_candle_load = 300) {
 
     console.log('init timeframe', timeframes);
     gBinance.ws.futuresCandles(symbolList, '1m', candle => {
+        gLastUpdated[candle.symbol] = new Date().getTime();
         for (let tf of timeframes) {
             let data = {
                 symbol: candle.symbol,
@@ -93,8 +94,6 @@ async function main(numbler_candle_load = 300) {
     }
 }
 
-
-
 function onCloseCandle(symbol: string, timeframe: string, data: Array<RateData>) {
     let stringData = JSON.stringify({ symbol, timeframe, data });
     io.emit('onCloseCandle', stringData);
@@ -115,3 +114,14 @@ io.on('connection', client => {
 });
 server.listen(port);
 main();
+
+const timeInterval = 10 * 60 * 1000;
+setInterval(() => {
+    let now = new Date().getTime();
+    for (let symbol in gLastUpdated) {
+        let lastTimeUpdated = gLastUpdated[symbol];
+        if (now - lastTimeUpdated > timeInterval) {
+            console.log(`${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`);
+        }
+    }
+}, timeInterval)
