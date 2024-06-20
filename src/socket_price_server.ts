@@ -20,7 +20,7 @@ async function main(numbler_candle_load = 300) {
     console.log(`Total ${symbolList.length} symbols`);
 
     let timeframes = ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'];
-    timeframes = ['1m', '4d', '1d'];
+    timeframes = ['1m', '4h', '1d'];
     for (let symbol of symbolList) {
         gData[symbol] = {};
         for (let tf of timeframes) {
@@ -57,17 +57,18 @@ async function main(numbler_candle_load = 300) {
                 dataList[0].low = Math.min(dataList[0].low, data.low);
                 dataList[0].close = data.close;
                 dataList[0].volume += candle.isFinal ? data.volume : 0;
-                dataList[0].isFinal = data.isFinal;
                 dataList[0].change = (dataList[0].close - dataList[0].open) / dataList[0].open;
                 dataList[0].ampl = (dataList[0].high - dataList[0].low) / dataList[0].open;
 
-                if (data.isFinal) {
+                if (data.isFinal && !dataList[0].isFinal) {
+                    dataList[0].isFinal = data.isFinal;
                     onCloseCandle(data.symbol, data.interval, [...dataList]);
                 }
             }
-            else {
+            else if (dataList[0].startTime < data.startTime) {
                 dataList.unshift(data);
                 if (dataList[1] && !dataList[1].isFinal) {
+                    dataList[1].isFinal = true;
                     onCloseCandle(data.symbol, data.interval, dataList.slice(1));
                 }
             }
