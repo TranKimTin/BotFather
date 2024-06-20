@@ -400,7 +400,7 @@ export function iMACD(data: Array<RateData>, fastEMA: number, slowEMA: number, s
         });
     }
 
-    return result;
+    return result.reverse();
 }
 
 function getEMA(prices: Array<number>, period: number) {
