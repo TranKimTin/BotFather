@@ -47,6 +47,16 @@ describe('BotFather', function () {
             assert.equal(indicators.length, 1);
             assert.equal(indicators[0], 'ampl()');
         });
+
+        it('telegram: ma14: ma(14,0) ma(14,1) ma(14,2)', function () {
+            let s = 'telegram: ma14: ma(14,0) ma(14,1) ma(14,2)';
+            let indicators = findIndicator(s, 'ma');
+            assert.equal(indicators.length, 3);
+            assert.equal(indicators[0], 'ma(14,0)');
+            assert.equal(indicators[1], 'ma(14,1)');
+            assert.equal(indicators[2], 'ma(14,2)');
+
+        });
     });
 
 

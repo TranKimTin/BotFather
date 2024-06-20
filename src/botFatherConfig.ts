@@ -56,7 +56,6 @@ export interface BotInfo {
     route: Node;
 }
 
-export const indicatorSupported: Array<string> = ['rsi', 'change', 'change%', 'ampl', 'ampl%', 'upper_shadow', 'upper_shadow%', 'lower_shadow', 'lower_shadow%'];
 export const paramsValidate: { [key: string]: Array<number> } = {
     // indicator : [leng>=, leng<=, value >=]
     'rsi': [1, 2, 1],
@@ -71,6 +70,8 @@ export const paramsValidate: { [key: string]: Array<number> } = {
     'ma': [1, 2, 1],
     'ema': [1, 2, 1]
 };
+export const indicatorSupported: Array<string> = Object.keys(paramsValidate);
+
 
 export function checkValidExpression(condition: string): boolean {
     //check condition only include number, operator +/*/%, space, e (1.5212e-9)
