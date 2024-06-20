@@ -3,7 +3,7 @@ import { RateData } from './BinanceFuture';
 import zlib from 'zlib';
 import fs from 'fs';
 import * as ccxt from 'ccxt'
-import indicator from 'technicalindicators';
+import * as indicator from 'technicalindicators';
 
 let binance = new ccxt.binanceusdm({});
 
@@ -19,7 +19,6 @@ interface OHLCV {
 
 export function iCCI(data: Array<RateData>, period: number) {
     let prices = data.map(item => ({ high: item.high, low: item.low, close: item.close })).reverse();
-
     const sma = (data: Array<number>) => data.reduce((sum, value) => sum + value, 0) / data.length;
 
     let typicalPrices = [];

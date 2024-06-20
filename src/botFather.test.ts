@@ -1,6 +1,7 @@
 var assert = require('assert');
 import * as util from './util';
 import { BotInfo, CreateWebConfig, BOT_DATA_DIR, Node, findIndicator, extractParams, checkEval, checkCondition, indicatorSupported, checkParams } from './botFatherConfig';
+import { RateData } from './BinanceFuture';
 
 
 describe('BotFather', function () {
@@ -33,29 +34,18 @@ describe('BotFather', function () {
         it('rsi(14) >= rsi(14,1) * 0.3', function () {
             let s = 'rsi(14) >= rsi(14,1) * 0.3';
             let indicators = findIndicator(s, 'rsi');
-            assert.equal(indicators.length, 2);
-            assert.equal(indicators[0], 'rsi(14)');
-            assert.equal(indicators[1], 'rsi(14,1)');
+            assert.deepStrictEqual(indicators, ['rsi(14)', 'rsi(14,1)'])
         });
         it('upper_shadow() >= ampl() * 0.3', function () {
             let s = 'upper_shadow() >= ampl() * 0.3';
-            let indicators = findIndicator(s, 'upper_shadow');
-            assert.equal(indicators.length, 1);
-            assert.equal(indicators[0], 'upper_shadow()');
 
-            indicators = findIndicator(s, 'ampl');
-            assert.equal(indicators.length, 1);
-            assert.equal(indicators[0], 'ampl()');
+            assert.deepStrictEqual(findIndicator(s, 'upper_shadow'), ['upper_shadow()'])
+            assert.deepStrictEqual(findIndicator(s, 'ampl'), ['ampl()'])
         });
 
         it('telegram: ma14: ma(14,0) ma(14,1) ma(14,2)', function () {
             let s = 'telegram: ma14: ma(14,0) ma(14,1) ma(14,2)';
-            let indicators = findIndicator(s, 'ma');
-            assert.equal(indicators.length, 3);
-            assert.equal(indicators[0], 'ma(14,0)');
-            assert.equal(indicators[1], 'ma(14,1)');
-            assert.equal(indicators[2], 'ma(14,2)');
-
+            assert.deepStrictEqual(findIndicator(s, 'ma'), ['ma(14,0)', 'ma(14,1)', 'ma(14,2)'])
         });
     });
 
@@ -64,22 +54,22 @@ describe('BotFather', function () {
         it('rsi(14,5) > 70', function () {
             let s = 'rsi(14,5) > 70';
             let value = checkCondition(s);
-            assert.equal(value, true);
+            assert.strictEqual(value, true);
         });
         it('console.log(123)', function () {
             let s = 'console.log(123)';
             let value = checkCondition(s);
-            assert.equal(value, false);
+            assert.strictEqual(value, false);
         });
         it('rsi(14) >= rsi(14,1)', function () {
             let s = 'rsi(14) >= rsi(14,1)';
             let value = checkCondition(s);
-            assert.equal(value, true);
+            assert.strictEqual(value, true);
         });
         it('change() >= ampl() * 0.3', function () {
             let s = 'change() >= ampl() * 0.3';
             let value = checkCondition(s);
-            assert.equal(value, true);
+            assert.strictEqual(value, true);
         });
         it('rsi(14,5,5) > 70', function () {
             let s = 'rsi(14,5,5) > 70';
@@ -89,7 +79,7 @@ describe('BotFather', function () {
         it('telegram: send tele', function () {
             let s = 'telegram: send tele';
             let value = checkCondition(s);
-            assert.equal(value, true);
+            assert.strictEqual(value, true);
         })
     });
 
@@ -98,3 +88,17 @@ describe('BotFather', function () {
     //     });
     // });
 });
+
+
+describe('util', function () {
+    describe('indicator', function () {
+        it('iMA', function () {
+            let period = 8;
+            let values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+            let data = values.map(item => ({ close: item } as RateData));
+            let ma = util.iMA(data, period);
+            let expected = [4.5, 5.5, 6.5, 7.5, 8.5, 9.5];
+            assert.deepStrictEqual(ma, expected);
+        });
+    });
+})
