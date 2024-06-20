@@ -142,3 +142,4 @@ js/config83.txt
 !index.js
 js/botData/*
 .vscode/*
+src/test.ts
