@@ -101,7 +101,7 @@ export class BotFather {
     }
 
     private handleLogic(condition: string, symbol: string, timeframe: string, data: RateData[]): boolean {
-        condition = condition.toLowerCase().replaceAll(/\s/gi, '').replace(/(?<![\=<>])\=(?![\=<>])/g, '==');
+        condition = condition.toLowerCase().trim().replace(/(?<![\=<>])\=(?![\=<>])/g, '==');
 
         // let stringRSIs = findIndicator(condition, 'rsi');
 
@@ -210,6 +210,27 @@ export class BotFather {
                         let values = util.iMACD(data, fastPeriod, slowPeriod, signalPeriod);
                         if (shift >= values.length) return false;
                         value = values[shift].histogram;
+                        break;
+                    }
+                    case 'bb_upper': {
+                        let [period, multiplier, shift = 0] = params;
+                        let values = util.iBB(data, period, multiplier);
+                        if (shift >= values.length) return false;
+                        value = values[shift].upper;
+                        break;
+                    }
+                    case 'bb_middle': {
+                        let [period, multiplier, shift = 0] = params;
+                        let values = util.iBB(data, period, multiplier);
+                        if (shift >= values.length) return false;
+                        value = values[shift].middle;
+                        break;
+                    }
+                    case 'bb_lower': {
+                        let [period, multiplier, shift = 0] = params;
+                        let values = util.iBB(data, period, multiplier);
+                        if (shift >= values.length) return false;
+                        value = values[shift].lower;
                         break;
                     }
                 }

@@ -371,3 +371,13 @@ export function iMACD(data: Array<RateData>, fastPeriod: number, slowPeriod: num
     });
     return EMAs.reverse();
 }
+
+export function iBB(data: Array<RateData>, period: number, multiplier: number) {
+    let values = data.map(item => item.close).reverse();
+    let EMAs = indicator.BollingerBands.calculate({
+        period,
+        values,
+        stdDev: multiplier
+    });
+    return EMAs.reverse();
+}

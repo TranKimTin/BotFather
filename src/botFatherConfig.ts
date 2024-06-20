@@ -69,9 +69,12 @@ export const paramsValidate: { [key: string]: Array<number> } = {
     'lower_shadow%': [0, 1],
     'ma': [1, 2, 1],
     'ema': [1, 2, 1],
-    'macd_value': [3, 4, 1],
-    'macd_signal': [3, 4, 1],
-    'macd_histogram': [3, 4, 1]
+    'macd_value': [3, 4, 1, 2, 1],
+    'macd_signal': [3, 4, 1, 2, 3],
+    'macd_histogram': [3, 4, 1, 2, 1],
+    'bb_upper': [2, 3, 1, 0],
+    'bb_middle': [2, 3, 1, 0],
+    'bb_lower': [2, 3, 1, 0]
 };
 export const indicatorSupported: Array<string> = Object.keys(paramsValidate);
 
