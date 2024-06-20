@@ -367,7 +367,7 @@ export function iMACD(data: Array<RateData>, fastPeriod: number, slowPeriod: num
         slowPeriod,
         signalPeriod,
         SimpleMAOscillator: false,
-        SimpleMASignal: false
+        SimpleMASignal: true
     });
     return EMAs.reverse();
 }
