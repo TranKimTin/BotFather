@@ -342,19 +342,32 @@ export async function getData_m1(symbol: string, date: string): Promise<Array<Ra
 }
 
 export function iMA(data: Array<RateData>, period: number) {
-    let prices = data.map(item => item.close).reverse();
+    let values = data.map(item => item.close).reverse();
     let MAs = indicator.SMA.calculate({
         period,
-        values: prices
+        values
     });
     return MAs.reverse();
 }
 
 export function iEMA(data: Array<RateData>, period: number) {
-    let prices = data.map(item => item.close).reverse();
+    let values = data.map(item => item.close).reverse();
     let EMAs = indicator.EMA.calculate({
         period,
-        values: prices
+        values
+    });
+    return EMAs.reverse();
+}
+
+export function iMACD(data: Array<RateData>, fastPeriod: number, slowPeriod: number, signalPeriod: number) {
+    let values = data.map(item => item.close).reverse();
+    let EMAs = indicator.MACD.calculate({
+        values,
+        fastPeriod,
+        slowPeriod,
+        signalPeriod,
+        SimpleMAOscillator: false,
+        SimpleMASignal: false
     });
     return EMAs.reverse();
 }

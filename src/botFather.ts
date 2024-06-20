@@ -191,6 +191,27 @@ export class BotFather {
                         value = values[shift];
                         break;
                     }
+                    case 'macd_value': {
+                        let [fastPeriod, slowPeriod, signalPeriod, shift = 0] = params;
+                        let values = util.iMACD(data, fastPeriod, slowPeriod, signalPeriod);
+                        if (shift >= values.length) return false;
+                        value = values[shift].MACD;
+                        break;
+                    }
+                    case 'macd_signal': {
+                        let [fastPeriod, slowPeriod, signalPeriod, shift = 0] = params;
+                        let values = util.iMACD(data, fastPeriod, slowPeriod, signalPeriod);
+                        if (shift >= values.length) return false;
+                        value = values[shift].signal;
+                        break;
+                    }
+                    case 'macd_histogram': {
+                        let [fastPeriod, slowPeriod, signalPeriod, shift = 0] = params;
+                        let values = util.iMACD(data, fastPeriod, slowPeriod, signalPeriod);
+                        if (shift >= values.length) return false;
+                        value = values[shift].histogram;
+                        break;
+                    }
                 }
 
                 if (value === undefined) return false;
