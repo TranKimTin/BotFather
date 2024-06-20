@@ -47,6 +47,12 @@ describe('BotFather', function () {
             let s = 'telegram: ma14: ma(14,0) ma(14,1) ma(14,2)';
             assert.deepStrictEqual(findIndicator(s, 'ma'), ['ma(14,0)', 'ma(14,1)', 'ma(14,2)'])
         });
+
+        it('telegram: ema(14,0) ma(14,1) ema(14,2)', function () {
+            let s = 'telegram: ema(14,0) ma(14,1) ema(14,2)';
+            assert.deepStrictEqual(findIndicator(s, 'ma'), ['ma(14,1)']);
+            assert.deepStrictEqual(findIndicator(s, 'ema'), ['ema(14,0)', 'ema(14,2)']);
+        });
     });
 
 

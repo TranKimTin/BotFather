@@ -100,7 +100,7 @@ export function checkEval(condition: string): boolean {
 
 export function findIndicator(inputString: string, indicator: string) {
     // const regex = /rsi\([^)]*\)/g;
-    const regex = new RegExp(`${indicator}\\([^)]*\\)`, 'g');
+    const regex = new RegExp(`\\b${indicator}\\([^)]*\\)`, 'g');
 
     return inputString.match(regex) || [];
 }
