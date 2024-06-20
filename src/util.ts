@@ -359,15 +359,60 @@ export function iEMA(data: Array<RateData>, period: number) {
     return EMAs.reverse();
 }
 
-export function iMACD(data: Array<RateData>, fastPeriod: number, slowPeriod: number, signalPeriod: number) {
-    let values = data.map(item => item.close).reverse();
-    let EMAs = indicator.MACD.calculate({
-        values,
-        fastPeriod,
-        slowPeriod,
-        signalPeriod,
-        SimpleMAOscillator: false,
-        SimpleMASignal: true
-    });
-    return EMAs.reverse();
+// export function iMACD(data: Array<RateData>, fastPeriod: number, slowPeriod: number, signalPeriod: number) {
+//     let values = data.map(item => item.close).reverse();
+//     let EMAs = indicator.MACD.calculate({
+//         values,
+//         fastPeriod,
+//         slowPeriod,
+//         signalPeriod,
+//         SimpleMAOscillator: false,
+//         SimpleMASignal: false
+//     });
+//     return EMAs.reverse();
+// }
+
+
+export function iMACD(data: Array<RateData>, fastEMA: number, slowEMA: number, signalPeriod: number) {
+    //Khi đường MACD cắt qua đường tín hiệu (EMA9) từ dưới lên, đó là tín hiệu mua (histogram từ âm chuyển sang dương)
+    //khi đường MACD cắt qua đường tín hiệu từ trên xuống, đó là tín hiệu bán. 
+
+    let prices = data.map(item => item.close).reverse();
+
+
+    let macdValues = [];
+
+    let slowEMAValues = getEMA(prices, slowEMA);
+    let fastEMAValues = getEMA(prices, fastEMA);
+
+    for (let i = 0; i < prices.length; i++) {
+        macdValues[i] = (fastEMAValues[i] - slowEMAValues[i]);
+    }
+
+    let signalSMAValues = getEMA(macdValues, signalPeriod);
+
+    let result = [];
+    for (let i = 0; i < macdValues.length; i++) {
+        result.push({
+            MACD: macdValues[i],
+            signal: signalSMAValues[i],
+            histogram: (macdValues[i] - signalSMAValues[i])
+        });
+    }
+
+    return result;
+}
+
+function getEMA(prices: Array<number>, period: number) {
+    // Trong đó, prices là mảng chứa giá trị của cổ phiếu hoặc chứng khoán mà bạn muốn tính EMA
+    // và period là khoảng thời gian tính EMA (thông thường là 10, 20, 50 hoặc 200). 
+    // Hàm sẽ trả về một mảng chứa các giá trị EMA tương ứng với mỗi ngày trong khoảng thời gian được xem xét.
+    let emaValues = [0];
+    let multiplier = 2 / (period + 1);
+    let ema = prices[0];
+    for (let i = 1; i < prices.length; i++) {
+        ema = (prices[i] - ema) * multiplier + ema;
+        emaValues[i] = ema;
+    }
+    return emaValues;
 }
