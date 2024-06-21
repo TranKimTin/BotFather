@@ -86,6 +86,8 @@ export class BotFather {
             let { botName, symbolList, timeframes, treeData, route } = botInfo;
             if (!symbolList.includes(symbol) || !timeframes.includes(timeframe)) continue;
 
+            console.log("onCloseCandle", { symbol, timeframe });
+
             this.dfs_handleLogic(route, symbol, timeframe, data);
 
         }
