@@ -58,7 +58,11 @@ export interface BotInfo {
 
 export const paramsValidate: { [key: string]: Array<number> } = {
     // indicator : [leng>=, leng<=, value >=]
-    'rsi': [1, 2, 1],
+    'open': [0, 1],
+    'high': [0, 1],
+    'low': [0, 1],
+    'close': [0, 1],
+    'volume': [0, 1],
     'change': [0, 1],
     'change%': [0, 1],
     'ampl': [0, 1],
@@ -67,6 +71,7 @@ export const paramsValidate: { [key: string]: Array<number> } = {
     'upper_shadow%': [0, 1],
     'lower_shadow': [0, 1],
     'lower_shadow%': [0, 1],
+    'rsi': [1, 2, 1],
     'ma': [1, 2, 1],
     'ema': [1, 2, 1],
     'macd_value': [3, 4, 1, 2, 1],
@@ -74,7 +79,7 @@ export const paramsValidate: { [key: string]: Array<number> } = {
     'macd_histogram': [3, 4, 1, 2, 1],
     'bb_upper': [2, 3, 1, 0],
     'bb_middle': [2, 3, 1, 0],
-    'bb_lower': [2, 3, 1, 0]
+    'bb_lower': [2, 3, 1, 0],
 };
 export const indicatorSupported: Array<string> = Object.keys(paramsValidate);
 
@@ -135,7 +140,7 @@ export function checkParams(indicator: string, params: Array<number>): boolean {
     for (let value of params) {
         if (isNaN(value)) return false;
     }
-    for (let i = 2; i <= paramsCheck.length; i++) {
+    for (let i = 2; i < paramsCheck.length; i++) {
         if (params[i - 2] < paramsCheck[i])
             return false;
     }

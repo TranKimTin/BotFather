@@ -124,6 +124,31 @@ export class BotFather {
 
                 let value = undefined;
                 switch (indicator) {
+                    case 'open': {
+                        let [shift = 0] = params;
+                        value = data[shift].open;
+                        break;
+                    }
+                    case 'high': {
+                        let [shift = 0] = params;
+                        value = data[shift].high;
+                        break;
+                    }
+                    case 'low': {
+                        let [shift = 0] = params;
+                        value = data[shift].low;
+                        break;
+                    }
+                    case 'close': {
+                        let [shift = 0] = params;
+                        value = data[shift].close;
+                        break;
+                    }
+                    case 'volume': {
+                        let [shift = 0] = params;
+                        value = data[shift].volume;
+                        break;
+                    }
                     case 'change': {
                         let [shift = 0] = params;
                         let change: number = data[shift].close - data[shift].open;
@@ -197,6 +222,7 @@ export class BotFather {
                         let [fastPeriod, slowPeriod, signalPeriod, shift = 0] = params;
                         let values = util.iMACD(data, fastPeriod, slowPeriod, signalPeriod);
                         if (shift >= values.length) return false;
+                        if (fastPeriod >= slowPeriod) return false;
                         value = values[shift].MACD;
                         break;
                     }
@@ -204,6 +230,7 @@ export class BotFather {
                         let [fastPeriod, slowPeriod, signalPeriod, shift = 0] = params;
                         let values = util.iMACD(data, fastPeriod, slowPeriod, signalPeriod);
                         if (shift >= values.length) return false;
+                        if (fastPeriod >= slowPeriod) return false;
                         value = values[shift].signal;
                         break;
                     }
@@ -211,6 +238,7 @@ export class BotFather {
                         let [fastPeriod, slowPeriod, signalPeriod, shift = 0] = params;
                         let values = util.iMACD(data, fastPeriod, slowPeriod, signalPeriod);
                         if (shift >= values.length) return false;
+                        if (fastPeriod >= slowPeriod) return false;
                         value = values[shift].histogram;
                         break;
                     }
