@@ -37,20 +37,20 @@ export class BotFather {
 
         client.on('connect', () => {
             console.log('Connected to server');
+        });
 
-            client.on('disconnect', (reason: string) => {
-                console.log(`onDisconnect - Disconnected from server. reason: ${reason}`);
-            });
+        client.on('onCloseCandle', (msg: string) => {
+            try {
+                let { symbol, timeframe, data } = JSON.parse(msg.toString());
+                this.onCloseCandle(symbol, timeframe, data);
+            }
+            catch (err) {
+                console.log(err);
+            }
+        });
 
-            client.on('onCloseCandle', (msg: string) => {
-                try {
-                    let { symbol, timeframe, data } = JSON.parse(msg.toString());
-                    this.onCloseCandle(symbol, timeframe, data);
-                }
-                catch (err) {
-                    console.log(err);
-                }
-            })
+        client.on('disconnect', (reason: string) => {
+            console.log(`onDisconnect - Disconnected from server. reason: ${reason}`);
         });
 
         client.on("connect_error", (error: { message: any; }) => {

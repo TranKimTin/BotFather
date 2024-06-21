@@ -96,9 +96,6 @@ async function main(numbler_candle_load = 300) {
 }
 
 function onCloseCandle(symbol: string, timeframe: string, data: Array<RateData>) {
-    if (symbol == 'BTCUSDT') {
-        console.log('onCloseCandle', { symbol, timeframe, data: data[0] })
-    }
     let stringData = JSON.stringify({ symbol, timeframe, data });
     io.emit('onCloseCandle', stringData);
 }
