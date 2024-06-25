@@ -301,6 +301,7 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
 
     app.get('/getSymbolList', async (req, res) => {
         let symbolList = await util.getSymbolList();
+        symbolList = symbolList.filter(item => item.endsWith('USDT'));
         res.json({ code: 200, message: "ok", data: symbolList });
     });
 

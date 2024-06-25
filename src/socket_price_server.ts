@@ -18,6 +18,7 @@ let gLastUpdated: { [key: string]: number } = {};
 
 async function main(numbler_candle_load = 300) {
     let symbolList = await util.getSymbolList();
+    symbolList = symbolList.filter(item => item.endsWith('USDT'));
     // console.log(symbolList.join(' '));
     console.log(`Total ${symbolList.length} symbols`);
 
@@ -95,10 +96,10 @@ async function main(numbler_candle_load = 300) {
         let promiseList = [];
         for (let symbol of symbolList) {
             promiseList.push(initCandle(symbol, tf));
-            if (promiseList.length >= 5) {
+            if (promiseList.length >= 100) {
                 await Promise.all(promiseList);
                 promiseList = [];
-                await delay(50);
+                await delay(5000);
             }
         }
         await Promise.all(promiseList);
