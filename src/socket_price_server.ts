@@ -88,7 +88,7 @@ async function main(numbler_candle_load = 300) {
         let rates = await util.getOHLCV(symbol, tf, numbler_candle_load);
         gData[symbol][tf] = rates;
         gLastPrice[symbol] = gData[symbol][tf][0]?.close || 0;
-        console.log('init candle', { symbol, tf })
+        // console.log('init candle', { symbol, tf })
     }
 
     for (let tf of timeframes) {
