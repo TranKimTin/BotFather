@@ -6,6 +6,8 @@ import fs from "fs";
 import path from "path";
 import * as util from './util'
 
+util.useSport();
+
 export const BOT_DATA_DIR = './botData';
 if (!fs.existsSync(BOT_DATA_DIR)) {
     fs.mkdirSync(BOT_DATA_DIR);
