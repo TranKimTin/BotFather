@@ -95,10 +95,10 @@ async function main(numbler_candle_load = 300) {
         let promiseList = [];
         for (let symbol of symbolList) {
             promiseList.push(initCandle(symbol, tf));
-            if (promiseList.length >= 100) {
+            if (promiseList.length >= 5) {
                 await Promise.all(promiseList);
                 promiseList = [];
-                await delay(5000);
+                await delay(50);
             }
         }
         await Promise.all(promiseList);
