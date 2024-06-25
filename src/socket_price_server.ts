@@ -7,7 +7,7 @@ import IBinance, { Binance, Candle } from 'binance-api-node';
 import moment from 'moment';
 import delay from 'delay';
 
-util.useSport();
+// util.useSport();
 
 const port = 8081;
 // let clientList: Array<Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>> = [];
