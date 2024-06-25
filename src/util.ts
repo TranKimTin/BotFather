@@ -7,7 +7,7 @@ import * as indicator from 'technicalindicators';
 import _ from 'lodash';
 
 let useFuture = true;
-let binance: ccxt.binance | ccxt.binanceusdm = new ccxt.binanceusdm({});
+let binance: ccxt.binance | ccxt.binanceusdm = new ccxt.binanceusdm({ 'timeout': 30000 });
 
 interface OHLCV {
     symbol: string,
@@ -21,7 +21,7 @@ interface OHLCV {
 
 export function useSport() {
     useFuture = false;
-    binance = new ccxt.binance({});
+    binance = new ccxt.binance({ 'timeout': 30000 });
 }
 
 export function isFuture() {
