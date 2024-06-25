@@ -3,9 +3,11 @@ import http from 'http';
 import { Server, Socket } from "socket.io";
 import BinanceFuture, { RateData } from './BinanceFuture';
 import * as util from './util';
-import IBinance, { Binance } from 'binance-api-node';
+import IBinance, { Binance, Candle } from 'binance-api-node';
 import moment from 'moment';
 import delay from 'delay';
+
+util.useSport();
 
 const port = 8081;
 // let clientList: Array<Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>> = [];
@@ -29,7 +31,7 @@ async function main(numbler_candle_load = 300) {
     }
 
     console.log('init timeframe', timeframes);
-    gBinance.ws.futuresCandles(symbolList, '1m', candle => {
+    const fetchCandles = (candle: Candle) => {
         gLastUpdated[candle.symbol] = new Date().getTime();
         for (let tf of timeframes) {
             let data = {
@@ -73,24 +75,34 @@ async function main(numbler_candle_load = 300) {
                 }
             }
         }
-    });
+    }
+    if (util.isFuture()) {
+        gBinance.ws.futuresCandles(symbolList, '1m', fetchCandles);
+    }
+    else {
+        gBinance.ws.candles(symbolList, '1m', fetchCandles);
+    }
+
+    let initCandle = async function (symbol: string, tf: string) {
+        let rates = await util.getOHLCV(symbol, tf, numbler_candle_load);
+        gData[symbol][tf] = rates;
+        gLastPrice[symbol] = gData[symbol][tf][0]?.close || 0;
+        // console.log('init candle', { symbol, tf })
+    }
 
     for (let tf of timeframes) {
         console.log(`init candle ${tf}...`);
         let promiseList = [];
         for (let symbol of symbolList) {
-            promiseList.push(util.getOHLCV(symbol, tf, numbler_candle_load));
-            // promiseList.push(util.getOHLCVFromCache(symbol, tf, numbler_candle_load));
-            // promiseList.push(fetch(`http://localhost:${process.env.PORT_DATA_SERVER}/?symbol=${symbol}&timeframe=${tf}&limit=${numbler_candle_load}`));
+            promiseList.push(initCandle(symbol, tf));
+            if (promiseList.length >= 500) {
+                await Promise.all(promiseList);
+                promiseList = [];
+                await delay(5000);
+            }
         }
-        // let responses = await Promise.all(promiseList);
-        // let rates = await Promise.all(responses.map(item => item.json()));
-        let rates = await Promise.all(promiseList);
-        let i = 0;
-        for (let symbol of symbolList) {
-            gData[symbol][tf] = rates[i++];
-            gLastPrice[symbol] = gData[symbol][tf][0]?.close || 0;
-        }
+        await Promise.all(promiseList);
+
         await delay(5000);
     }
 }

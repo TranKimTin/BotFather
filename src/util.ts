@@ -4,8 +4,10 @@ import zlib from 'zlib';
 import fs from 'fs';
 import * as ccxt from 'ccxt'
 import * as indicator from 'technicalindicators';
+import _ from 'lodash';
 
-let binance = new ccxt.binanceusdm({});
+let useFuture = true;
+let binance: ccxt.binance | ccxt.binanceusdm = new ccxt.binanceusdm({});
 
 interface OHLCV {
     symbol: string,
@@ -15,6 +17,15 @@ interface OHLCV {
     low: number,
     close: number,
     volume: number
+}
+
+export function useSport() {
+    useFuture = false;
+    binance = new ccxt.binance({});
+}
+
+export function isFuture() {
+    return useFuture;
 }
 
 export function iCCI(data: Array<RateData>, period: number) {
@@ -77,7 +88,8 @@ export function iRSI(data: Array<RateData>, period: number) {
 }
 
 export async function getDigitsFuture() {
-    let res = await fetch("https://fapi.binance.com/fapi/v1/exchangeInfo", {
+    let url = useFuture ? 'https://fapi.binance.com/fapi/v1/exchangeInfo' : 'https://api.binance.com/api/v1/exchangeInfo'
+    let res = await fetch(url, {
         "headers": {
             "accept": "*/*",
             "content-type": "application/json",
@@ -97,18 +109,8 @@ export async function getDigitsFuture() {
 }
 
 export async function getSymbolList() {
-    // let res = await fetch("https://fapi.binance.com/fapi/v1/ticker/24hr", {
-    //     "headers": {
-    //         "accept": "*/*",
-    //         "content-type": "application/json",
-    //     },
-    //     "body": null,
-    //     "method": "GET"
-    // });
-    // let data = await res.json() as Array<{ symbol: string }>;
-    // return data.map(item => item.symbol);
-
-    let res = await fetch("https://fapi.binance.com/fapi/v1/exchangeInfo", {
+    let url = useFuture ? 'https://fapi.binance.com/fapi/v1/exchangeInfo' : 'https://api.binance.com/api/v1/exchangeInfo';
+    let res = await fetch(url, {
         "headers": {
             "accept": "*/*",
             "content-type": "application/json",
@@ -380,4 +382,18 @@ export function iBB(data: Array<RateData>, period: number, multiplier: number) {
         stdDev: multiplier
     });
     return EMAs.reverse();
+}
+
+export function iZigZag(data: Array<RateData>, deviation: number, depth: number, period: number = 30) {
+    let min: Array<number> = [];
+    let max: Array<number> = [];
+
+    for (let i = 0; i < data.length - period; i++) {
+        let arr = data.slice(i, i + period);
+        min.push(Math.min(...arr.map(item => item.low)));
+        min.push(Math.min(...arr.map(item => item.high)));
+    }
+
+
+
 }
