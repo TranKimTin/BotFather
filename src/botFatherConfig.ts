@@ -312,7 +312,7 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
     })
 
     app.listen(port, () => {
-        console.log(`\nStart server at: ${new Date()}
+    console.log(`\nStart server at: ${new Date()}
                     HTTP server is listening at: ${"localhost"}:${port}
         `);
     });

@@ -384,16 +384,94 @@ export function iBB(data: Array<RateData>, period: number, multiplier: number) {
     return EMAs.reverse();
 }
 
-export function iZigZag(data: Array<RateData>, deviation: number, depth: number, period: number = 30) {
-    let min: Array<number> = [];
-    let max: Array<number> = [];
+export function iZigZag(data: Array<RateData>, deviation: number, depth: number, byPercent: boolean) {
+    if (data.length == 0) return [];
 
-    for (let i = 0; i < data.length - period; i++) {
-        let arr = data.slice(i, i + period);
-        min.push(Math.min(...arr.map(item => item.low)));
-        min.push(Math.min(...arr.map(item => item.high)));
+    const NO_TREND = null;
+    const UP_TREND = 1;
+    const DOWN_TREND = -1;
+
+    let trend: typeof NO_TREND | typeof UP_TREND | typeof DOWN_TREND = NO_TREND;
+    let result: Array<{ trend: typeof NO_TREND | typeof UP_TREND | typeof DOWN_TREND, highIndex: number, lowIndex: number }> = [];
+
+    let lastHighIndex = data.length - 1;
+    let lastLowIndex = data.length - 1;
+    let lastHigh = data[lastHighIndex].high;
+    let lastLow = data[lastLowIndex].low;
+
+
+    for (let i = data.length - 2; i >= 0; i--) {
+        let rate = data[i];
+
+        if (trend == NO_TREND) {
+            if (rate.high > lastHigh) {
+                lastHigh = rate.high;
+                lastHighIndex = i;
+            }
+            if (rate.low < lastLow) {
+                lastLow = rate.low;
+                lastLowIndex = i;
+            }
+
+            let diff = lastHigh - lastLow;
+            if (byPercent && lastHighIndex < lastLowIndex) diff = diff / lastHigh * 100; //down
+            if (byPercent && lastHighIndex > lastLowIndex) diff = diff / lastLow * 100; //up
+
+            if (Math.abs(diff) >= deviation && Math.abs(lastHighIndex - lastLowIndex) >= depth) {
+                trend = lastHighIndex < lastLowIndex ? DOWN_TREND : UP_TREND;
+                result.unshift({
+                    trend: trend,
+                    highIndex: lastHighIndex,
+                    lowIndex: lastLowIndex
+                });
+            }
+        }
+        else {
+            if (trend == UP_TREND && rate.high > lastHigh) {
+                lastHigh = rate.high;
+                lastHighIndex = i;
+                result[0].highIndex = lastHighIndex;
+            }
+            else if (trend == DOWN_TREND && rate.low < lastLow) {
+                lastLow = rate.low;
+                lastLowIndex = i;
+                result[0].lowIndex = lastLowIndex;
+            }
+            else {
+                if (trend == UP_TREND) {
+                    let diff = lastHigh - rate.low;
+                    if (byPercent) diff = diff / lastHigh * 100; //down
+
+                    if (Math.abs(diff) >= deviation && Math.abs(lastHighIndex - i) >= depth) {
+                        trend = DOWN_TREND;
+                        lastLow = rate.low;
+                        lastLowIndex = i;
+                        result.unshift({
+                            trend: trend,
+                            highIndex: lastHighIndex,
+                            lowIndex: lastLowIndex
+                        });
+                    }
+                }
+                else {
+                    let diff = rate.high - lastLow;
+                    if (byPercent) diff = diff / lastLow * 100; //up
+
+                    if (Math.abs(diff) >= deviation && Math.abs(lastLowIndex - i) >= depth) {
+                        trend = UP_TREND;
+                        lastHigh = rate.high;
+                        lastHighIndex = i;
+                        result.unshift({
+                            trend: trend,
+                            highIndex: lastHighIndex,
+                            lowIndex: lastLowIndex
+                        });
+                    }
+                }
+            }
+        }
+
     }
 
-
-
+    return result;
 }
