@@ -270,7 +270,8 @@ export class BotFather {
                         let [period, deviation, depth, numberOfPeaks, shift = 0] = params;
                         let rates = data.slice(shift);
                         let RSIs = util.iRSI(data, period);
-                        let fakeData = RSIs.map(item => ({ high: item, low: item } as RateData));
+                        let fakeData = RSIs.filter(item => item).map(item => ({ high: item, low: item } as RateData));
+                        
                         let zigzag = util.iZigZag(fakeData, deviation, depth, false);
 
                         //downtrend
