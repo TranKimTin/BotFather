@@ -82,14 +82,14 @@ export class BotFather {
     }
 
     private async onCloseCandle(symbol: string, timeframe: string, data: Array<RateData>) {
-        if (symbol == 'BTCUSDT') {
-            console.log({ symbol, timeframe }, JSON.stringify(data));
-        }
+        // if (symbol == 'BTCUSDT') {
+        //     console.log({ symbol, timeframe }, JSON.stringify(data));
+        // }
         for (let botInfo of this.botChildren) {
             let { botName, symbolList, timeframes, treeData, route } = botInfo;
             if (!symbolList.includes(symbol) || !timeframes.includes(timeframe)) continue;
 
-            console.log("onCloseCandle", { symbol, timeframe });
+            // console.log("onCloseCandle", { symbol, timeframe });
 
             this.dfs_handleLogic(route, symbol, timeframe, data);
 
