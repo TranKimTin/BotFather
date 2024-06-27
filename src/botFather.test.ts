@@ -120,6 +120,25 @@ describe('util', function () {
                 '2024-06-25 21:29:00',
                 '2024-06-25 20:35:00'
             ]);
+
+            let zigzag_price = util.iZigZag(data, 1, 10, false);
+
+            let verticalTime_price = zigzag_price.map(item => item.trend == 1 ? data[item.highIndex].timestring : data[item.lowIndex].timestring);
+            assert.deepStrictEqual(verticalTime_price, [
+                '2024-06-26 01:03:00',
+                '2024-06-26 00:28:00',
+                '2024-06-26 00:01:00',
+                '2024-06-25 23:03:00',
+                '2024-06-25 22:48:00',
+                '2024-06-25 22:35:00',
+                '2024-06-25 22:14:00',
+                '2024-06-25 21:29:00',
+                '2024-06-25 21:04:00',
+                '2024-06-25 20:50:00',
+                '2024-06-25 20:40:00',
+                '2024-06-25 20:29:00',
+                '2024-06-25 20:05:00'
+            ]);
         });
     });
 })

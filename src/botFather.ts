@@ -266,6 +266,28 @@ export class BotFather {
                         value = values[shift].lower;
                         break;
                     }
+                    case 'rsi_phan_ki':
+                        let [period, deviation, depth, numberOfPeaks, shift = 0] = params;
+                        let rates = data.slice(shift);
+                        let RSIs = util.iRSI(data, period);
+                        let fakeData = RSIs.map(item => ({ high: item, low: item } as RateData));
+                        let zigzag = util.iZigZag(fakeData, deviation, depth, false);
+
+                        //downtrend
+                        //rsi đáy sau cao hơn đáy trước
+                        //giá sau thấp hơn giá trước
+                        //tạo đủ numberOfPeaks đáy thỏa mãn
+                        if (zigzag[0].trend != -1) return false;
+                        if (zigzag.length < numberOfPeaks * 2) return false;
+                        if (zigzag[0].lowIndex != 1) return false;
+                        for (let i = 0; i < numberOfPeaks - 1; i++) {
+                            let lowIndex = zigzag[i * 2].lowIndex;
+                            let preLowIndex = zigzag[(i + 1) * 2].lowIndex;
+                            if (RSIs[lowIndex] <= RSIs[preLowIndex]) return false;
+                            if (rates[lowIndex].close >= rates[preLowIndex].close) return false;
+                        }
+                        value = true;
+                        break;
                 }
 
                 if (value === undefined) return false;

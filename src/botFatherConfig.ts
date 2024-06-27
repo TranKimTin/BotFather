@@ -82,6 +82,7 @@ export const paramsValidate: { [key: string]: Array<number> } = {
     'bb_upper': [2, 3, 1, 0],
     'bb_middle': [2, 3, 1, 0],
     'bb_lower': [2, 3, 1, 0],
+    'rsi_phan_ki': [4, 5, 1, 1, 1, 2]
 };
 export const indicatorSupported: Array<string> = Object.keys(paramsValidate);
 
@@ -157,7 +158,7 @@ export function checkCondition(condition: string) {
 
         if (condition == 'start') return true;
         if (condition.startsWith('telegram:')) return true;
-        if (!(/[<>=]/.test(condition))) return false;
+        if (!(/[<>=]|rsi_phan_ki/.test(condition))) return false;
 
         for (let indicator of indicatorSupported) {
             let fomulas = findIndicator(condition, indicator);
@@ -312,7 +313,7 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
     })
 
     app.listen(port, () => {
-    console.log(`\nStart server at: ${new Date()}
+        console.log(`\nStart server at: ${new Date()}
                     HTTP server is listening at: ${"localhost"}:${port}
         `);
     });
