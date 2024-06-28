@@ -278,6 +278,7 @@ export class BotFather {
                         //rsi đáy sau cao hơn đáy trước
                         //giá sau thấp hơn giá trước
                         //tạo đủ numberOfPeaks đáy thỏa mãn
+                        //rsi <= 30
                         if (zigzag[0].trend != -1) return false;
                         if (zigzag.length < numberOfPeaks * 2) return false;
                         if (zigzag[0].lowIndex != 1) return false;
@@ -285,6 +286,7 @@ export class BotFather {
                             let lowIndex = zigzag[i * 2].lowIndex;
                             let preLowIndex = zigzag[(i + 1) * 2].lowIndex;
                             if (RSIs[lowIndex] <= RSIs[preLowIndex]) return false;
+                            if (RSIs[lowIndex] > 30) return false;
                             if (rates[lowIndex].close >= rates[preLowIndex].close) return false;
                         }
                         value = 1;
