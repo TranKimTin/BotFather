@@ -287,9 +287,16 @@ export class BotFather {
                             let preLowIndex = zigzag[(i + 1) * 2].lowIndex;
                             if (RSIs[lowIndex] <= RSIs[preLowIndex]) return false;
                             if (RSIs[lowIndex] > 30) return false;
+                            if (RSIs[preLowIndex] > 30) return false;
                             if (rates[lowIndex].close >= rates[preLowIndex].close) return false;
                         }
                         value = 1;
+                        console.log('rsi phan ki', { symbol, timeframe });
+                        for (let i = 0; i < numberOfPeaks - 1; i++) {
+                            let lowIndex = zigzag[i * 2].lowIndex;
+                            let preLowIndex = zigzag[(i + 1) * 2].lowIndex;
+                            console.log(rates[lowIndex].timestring, rates[preLowIndex].timestring);
+                        }
                         break;
                 }
 
