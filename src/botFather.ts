@@ -271,7 +271,7 @@ export class BotFather {
                         let rates = data.slice(shift);
                         let RSIs = util.iRSI(data, period);
                         let fakeData = RSIs.filter(item => item).map(item => ({ high: item, low: item } as RateData));
-                        
+
                         let zigzag = util.iZigZag(fakeData, deviation, depth, false);
 
                         //downtrend
@@ -287,7 +287,7 @@ export class BotFather {
                             if (RSIs[lowIndex] <= RSIs[preLowIndex]) return false;
                             if (rates[lowIndex].close >= rates[preLowIndex].close) return false;
                         }
-                        value = true;
+                        value = 1;
                         break;
                 }
 
