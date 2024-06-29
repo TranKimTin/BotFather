@@ -279,8 +279,8 @@ export class BotFather {
                         //giá sau thấp hơn giá trước
                         //tạo đủ numberOfPeaks đáy thỏa mãn
                         //rsi <= 30
-                        if (zigzag[0].trend != -1) return false;
                         if (zigzag.length < numberOfPeaks * 2) return false;
+                        if (zigzag[0].trend != -1) return false;
                         if (zigzag[0].lowIndex != 1) return false;
                         for (let i = 0; i < numberOfPeaks - 1; i++) {
                             let lowIndex = zigzag[i * 2].lowIndex;
