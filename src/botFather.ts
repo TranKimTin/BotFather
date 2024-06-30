@@ -292,10 +292,15 @@ export class BotFather {
                         }
                         value = 1;
                         console.log('rsi phan ki', { symbol, timeframe });
-                        for (let i = 0; i < numberOfPeaks - 1; i++) {
-                            let lowIndex = zigzag[i * 2].lowIndex;
-                            let preLowIndex = zigzag[(i + 1) * 2].lowIndex;
-                            console.log(rates[lowIndex].timestring, rates[preLowIndex].timestring);
+                        for (let i = 0; i < numberOfPeaks; i++) {
+                            let lowIndex = zigzag[i].lowIndex;
+                            let highIndex = zigzag[i].highIndex;
+                            if (zigzag[i].trend == 1) {
+                                console.log(`${rates[lowIndex].timestring} => ${rates[highIndex].timestring}`);
+                            }
+                            else {
+                                console.log(`${rates[highIndex].timestring} => ${rates[lowIndex].timestring}`);
+                            }
                         }
                         break;
                 }

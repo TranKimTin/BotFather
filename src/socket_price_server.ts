@@ -16,7 +16,7 @@ let gData: { [key: string]: { [key: string]: Array<RateData> } } = {};
 let gLastPrice: { [key: string]: number } = {};
 let gLastUpdated: { [key: string]: number } = {};
 
-async function main(numbler_candle_load = 300) {
+async function main(numbler_candle_load = 500) {
     let symbolList = await util.getSymbolList();
     symbolList = symbolList.filter(item => item.endsWith('USDT'));
     // console.log(symbolList.join(' '));
