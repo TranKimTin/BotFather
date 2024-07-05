@@ -136,6 +136,7 @@ setInterval(() => {
         let lastTimeUpdated = gLastUpdated[symbol];
         if (now - lastTimeUpdated > timeInterval) {
             console.log(`${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`);
+            throw `${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`;
         }
     }
 }, timeInterval)
