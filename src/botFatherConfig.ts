@@ -82,7 +82,7 @@ export const paramsValidate: { [key: string]: Array<number> } = {
     'bb_upper': [2, 3, 1, 0],
     'bb_middle': [2, 3, 1, 0],
     'bb_lower': [2, 3, 1, 0],
-    'rsi_phan_ki': [4, 5, 1, 1, 1, 2]
+    'rsi_phan_ki': [6, 7, 1, 1, 1, 0, 1, 2]
 };
 export const indicatorSupported: Array<string> = Object.keys(paramsValidate);
 

@@ -267,7 +267,7 @@ export class BotFather {
                         break;
                     }
                     case 'rsi_phan_ki':
-                        let [period, deviation, depth, numberOfPeaks, shift = 0] = params;
+                        let [period, deviation, depth, numberOfPeaks, minhDiff, maxRSI, shift = 0] = params;
                         let rates = data.slice(shift);
                         let RSIs = util.iRSI(data, period);
                         let fakeData = RSIs.filter(item => item).map(item => ({ high: item, low: item } as RateData));
@@ -285,9 +285,9 @@ export class BotFather {
                         for (let i = 0; i < numberOfPeaks - 1; i++) {
                             let lowIndex = zigzag[i * 2].lowIndex;
                             let preLowIndex = zigzag[(i + 1) * 2].lowIndex;
-                            if (RSIs[lowIndex] <= RSIs[preLowIndex]) return false;
-                            if (RSIs[lowIndex] > 30) return false;
-                            if (RSIs[preLowIndex] > 30) return false;
+                            if (RSIs[lowIndex] - RSIs[preLowIndex] <= minhDiff) return false;
+                            if (RSIs[lowIndex] > maxRSI) return false;
+                            if (RSIs[preLowIndex] > maxRSI) return false;
                             if (rates[lowIndex].close >= rates[preLowIndex].close) return false;
                         }
                         value = 1;
