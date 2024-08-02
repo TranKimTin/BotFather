@@ -91,16 +91,19 @@ export class BotFather {
 
             // console.log("onCloseCandle", { symbol, timeframe });
 
-            this.dfs_handleLogic(route, symbol, timeframe, data, idTelegram);
+            let visited: { [key: string]: boolean } = {};
+            this.dfs_handleLogic(route, symbol, timeframe, data, idTelegram, visited);
 
         }
     }
 
-    private dfs_handleLogic(node: Node, symbol: string, timeframe: string, data: RateData[], idTelegram: TelegramIdType) {
-        let { logic, next } = node;
+    private dfs_handleLogic(node: Node, symbol: string, timeframe: string, data: RateData[], idTelegram: TelegramIdType, visited: { [key: string]: boolean }) {
+        let { logic, id, next } = node;
+        if (visited[id] === true) return;
+        visited[id] = true;
         if (this.handleLogic(logic, symbol, timeframe, data, idTelegram)) {
             for (let child of next) {
-                this.dfs_handleLogic(child, symbol, timeframe, data, idTelegram);
+                this.dfs_handleLogic(child, symbol, timeframe, data, idTelegram, visited);
             }
         }
     }
