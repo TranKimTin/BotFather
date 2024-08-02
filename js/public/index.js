@@ -286,11 +286,13 @@ $(document).ready(function () {
     });
 
     $('#save').click(function () {
+        let idTelegram = $('#idTelegram').val();
         let timeframes = $('#timeframes').val() || [];
         let symbolList = $('#symbolList').val() || [];
         let botName = $('#botName').val();
         let data = {
             treeData: cy.json(),
+            idTelegram,
             timeframes,
             symbolList,
             botName
@@ -329,7 +331,8 @@ $(document).ready(function () {
             success: function (response) {
                 console.log(response);
                 if (response.code == 200) {
-                    let { timeframes, treeData, symbolList } = response.data;
+                    let { idTelegram, timeframes, treeData, symbolList } = response.data;
+                    $('#idTelegram').val(idTelegram);
                     $('#timeframes').val(timeframes);
                     $('#symbolList').val(symbolList);
                     $('#timeframes').selectpicker('refresh');

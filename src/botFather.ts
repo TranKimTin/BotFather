@@ -5,7 +5,7 @@ import moment from 'moment';
 import delay from 'delay';
 import fs from 'fs';
 import path from 'path';
-import Telegram from './telegram';
+import Telegram, { TelegramIdType } from './telegram';
 import io from 'socket.io-client';
 
 export class BotFather {
@@ -86,26 +86,26 @@ export class BotFather {
         //     console.log({ symbol, timeframe }, JSON.stringify(data));
         // }
         for (let botInfo of this.botChildren) {
-            let { botName, symbolList, timeframes, treeData, route } = botInfo;
+            let { botName, idTelegram, symbolList, timeframes, treeData, route } = botInfo;
             if (!symbolList.includes(symbol) || !timeframes.includes(timeframe)) continue;
 
             // console.log("onCloseCandle", { symbol, timeframe });
 
-            this.dfs_handleLogic(route, symbol, timeframe, data);
+            this.dfs_handleLogic(route, symbol, timeframe, data, idTelegram);
 
         }
     }
 
-    private dfs_handleLogic(node: Node, symbol: string, timeframe: string, data: RateData[]) {
+    private dfs_handleLogic(node: Node, symbol: string, timeframe: string, data: RateData[], idTelegram: TelegramIdType) {
         let { logic, next } = node;
-        if (this.handleLogic(logic, symbol, timeframe, data)) {
+        if (this.handleLogic(logic, symbol, timeframe, data, idTelegram)) {
             for (let child of next) {
-                this.dfs_handleLogic(child, symbol, timeframe, data);
+                this.dfs_handleLogic(child, symbol, timeframe, data, idTelegram);
             }
         }
     }
 
-    private handleLogic(condition: string, symbol: string, timeframe: string, data: RateData[]): boolean {
+    private handleLogic(condition: string, symbol: string, timeframe: string, data: RateData[], idTelegram: TelegramIdType): boolean {
         condition = condition.toLowerCase().trim().replace(/(?<![\=<>])\=(?![\=<>])/g, '==');
 
         // let stringRSIs = findIndicator(condition, 'rsi');
@@ -319,7 +319,7 @@ export class BotFather {
             console.log({ condition, symbol, timeframe });
             let mess = `${symbol} ${timeframe}`
             mess += `\n${condition}`;
-            this.telegram.sendMessage(mess);
+            this.telegram.sendMessage(mess, idTelegram);
             return true;
         }
 

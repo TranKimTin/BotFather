@@ -5,6 +5,7 @@ import body_parser from "body-parser";
 import fs from "fs";
 import path from "path";
 import * as util from './util'
+import { TelegramIdType } from "./telegram";
 
 util.useSport();
 
@@ -56,6 +57,7 @@ export interface BotInfo {
     symbolList: Array<string>;
     botName: string;
     route: Node;
+    idTelegram: TelegramIdType;
 }
 
 export const paramsValidate: { [key: string]: Array<number> } = {
@@ -289,7 +291,7 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
         if (!validatekBotName(botName)) {
             return res.json({ code: 400, message: 'Tên bot không hợp lệ ' + botName });
         }
-        let data: BotInfo = { treeData: { elements: { nodes: [], edges: [] } }, timeframes: [], symbolList: [], botName: '', route: { logic: "1==1", id: 'start', next: [] } };
+        let data: BotInfo = { treeData: { elements: { nodes: [], edges: [] } }, timeframes: [], symbolList: [], botName: '', idTelegram: '', route: { logic: "1==1", id: 'start', next: [] } };
         if (fs.existsSync(`${BOT_DATA_DIR}/${botName}.json`)) {
             data = JSON.parse(fs.readFileSync(`${BOT_DATA_DIR}/${botName}.json`).toString());
         }

@@ -5,13 +5,15 @@ import dotenv from 'dotenv';
 
 dotenv.config({ path: '../.env' });
 
-let chatID: string | number = '@tintk_RSI_CCI'; //'@tintk_RSI_CCI'
-let errorChatID: string | number = '@tintk_RSI_CCI'; //'@tintk_RSI_CCI'
-const tinID: string | number = 1833284254;
+export type TelegramIdType = string | number;
+
+let chatID: TelegramIdType = '@tintk_RSI_CCI'; //'@tintk_RSI_CCI'
+let errorChatID: TelegramIdType = '@tintk_RSI_CCI'; //'@tintk_RSI_CCI'
+const tinID: TelegramIdType = 1833284254;
 
 export default class Telegram {
-    private listMess: Array<string>;
-    private timeoutMess: any;
+    private listMess: { [key: TelegramIdType]: Array<string> };
+    private timeoutMess: { [key: TelegramIdType]: any };
     private listErr: Array<string>;
     private timeoutErr: any;
     private list: Array<Array<Array<number | string>>>;
@@ -23,7 +25,8 @@ export default class Telegram {
     constructor(tag?: string, token?: string, polling?: boolean) {
         let botToken: any = token || process.env.TELEGRAM_TOKEN;
 
-        this.listMess = [];
+        this.timeoutMess = {};
+        this.listMess = {};
         this.listErr = [];
         this.list = [];
         this.TAG = tag ? `${tag}\n` : '';
@@ -42,16 +45,18 @@ export default class Telegram {
         errorChatID = id;
     }
 
-    sendMessage(mess: string, sendTin = false) {
+    sendMessage(mess: string, id: TelegramIdType = '') {
         try {
             console.log(this.TAG, 'Send message telegram', mess);
+            id = id || chatID;
+
             mess = this.encodeHTML(mess);
-            this.listMess.push(mess);
-            clearTimeout(this.timeoutMess);
-            this.timeoutMess = setTimeout(() => {
-                let s = this.TAG + this.listMess.join('\n\n\n');
-                this.bot.sendMessage(sendTin ? tinID : chatID, s, { parse_mode: 'HTML' });
-                this.listMess = [];
+            this.listMess[id].push(mess);
+            clearTimeout(this.timeoutMess[id]);
+            this.timeoutMess[id] = setTimeout(() => {
+                let s = this.TAG + this.listMess[id].join('\n\n\n');
+                this.bot.sendMessage(id, s, { parse_mode: 'HTML' });
+                this.listMess[id] = [];
             }, 1000);
         }
         catch (err: any) {
