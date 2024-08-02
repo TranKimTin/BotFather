@@ -51,6 +51,7 @@ export default class Telegram {
             id = id || chatID;
 
             mess = this.encodeHTML(mess);
+            this.listMess[id] = this.listMess[id] || [];
             this.listMess[id].push(mess);
             clearTimeout(this.timeoutMess[id]);
             this.timeoutMess[id] = setTimeout(() => {
