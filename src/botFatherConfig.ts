@@ -312,7 +312,16 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
         let botList = fs.readdirSync(BOT_DATA_DIR);
         let data = botList.map(item => item.replace('.json', '')) || [];
         res.json({ code: 200, message: "ok", data });
-    })
+    });
+
+    app.put('/delete', (req, res) => {
+        let { botName } = req.query;
+        let botFile = path.join(BOT_DATA_DIR, `${botName}.json`);
+        if (fs.existsSync(botFile)) {
+            fs.unlinkSync(botFile);
+        }
+        res.json({ code: 200, message: "Xóa thành công", data: [] });
+    });
 
     app.listen(port, () => {
         console.log(`\nStart server at: ${new Date()}

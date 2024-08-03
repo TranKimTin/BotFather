@@ -279,6 +279,22 @@ $(document).ready(function () {
         removeAllSelected();
     });
 
+    $('#removeBot').click(function () {
+        let botName = $('#botName').val();
+        $.ajax({
+            type: "PUT",
+            contentType: "application/json",
+            url: `${URL}/delete?botName=${botName}`,
+            data: [],
+            dataType: "json",
+            success: function (response) {
+                alert(response.message);
+                $.cookie("botName", '');
+                window.location.reload();
+            }
+        });
+    });
+
     $(document).on('keydown', function (event) {
         if (event.key === "Delete" || event.keyCode === 46) {
             removeAllSelected();
