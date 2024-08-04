@@ -28,7 +28,8 @@
     "@types/mocha": "^10.0.6",
     "@types/moment": "^2.13.0",
     "@types/morgan": "^1.9.9",
-    "@types/node-telegram-bot-api": "^0.63.1"
+    "@types/node-telegram-bot-api": "^0.63.1",
+    "@types/ws": "^8.5.12"
   },
   "dependencies": {
     "@types/socket.io": "^3.0.2",
@@ -50,6 +51,7 @@
     "socket.io-client": "^4.7.5",
     "technicalindicators": "^3.1.0",
     "ts-node": "^10.9.2",
+    "ws": "^8.18.0",
     "zlib": "^1.0.5"
   }
 }

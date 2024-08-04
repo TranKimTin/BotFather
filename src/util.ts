@@ -120,11 +120,14 @@ export async function getBinanceSymbolList() {
     });
 
     let data = await res.json() as { symbols: Array<{ symbol: string; status: string }> };
-    return data.symbols.filter((item: { status: string }) => item.status == 'TRADING').map((item: { symbol: any; }) => item.symbol);
+    return data.symbols
+        .filter((item: { status: string }) => item.status == 'TRADING')
+        .map((item: { symbol: any; }) => item.symbol)
+        .filter(item => item.endsWith('USDT'));
 }
 
 export async function getBybitSymbolList() {
-    let url = `https://api-testnet.bybit.com/v5/market/tickers?category=spot`;
+    let url = `https://api.bybit.com/v5/market/tickers?category=spot`;
     let res = await fetch(url, {
         "headers": {
             "accept": "*/*",
@@ -135,7 +138,9 @@ export async function getBybitSymbolList() {
     });
 
     let data = await res.json() as { result: { list: Array<{ symbol: string }> } };
-    return data.result.list.map((item: { symbol: string; }) => item.symbol);
+    return data.result.list
+        .map((item: { symbol: string; }) => item.symbol)
+        .filter(item => item.endsWith('USDT'));
 }
 
 export function checkFinal(tf: string, startTime: number) {
@@ -273,7 +278,7 @@ export async function getBybitOHLCV(symbol: string, timeframe: string, limit: nu
             break;
     }
 
-    let url = `https://api-testnet.bybit.com/v5/market/kline?category=spot&symbol=${symbol}&interval=${tf}&limit=${limit}`;
+    let url = `https://api.bybit.com/v5/market/kline?category=spot&symbol=${symbol}&interval=${tf}&limit=${limit}`;
     let res = await fetch(url, {
         "headers": {
             "accept": "*/*",
@@ -284,7 +289,6 @@ export async function getBybitOHLCV(symbol: string, timeframe: string, limit: nu
     });
 
     let data = await res.json() as { result: { list: Array<string> } };
-
     let result = data.result.list.map(item => {
         let startTime = +item[0] || 0;
         let open = +item[1] || 0;

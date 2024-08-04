@@ -7,6 +7,7 @@ import path from "path";
 import * as util from './util'
 import { TelegramIdType } from "./telegram";
 import { BinanceSocket } from "./socket_binance";
+import { BybitSocket } from "./socket_bybit";
 
 util.useSport();
 
@@ -305,9 +306,12 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
 
     app.get('/getSymbolList', async (req, res) => {
         let binanceSymbolList = await util.getBinanceSymbolList();
-        binanceSymbolList = binanceSymbolList.filter(item => item.endsWith('USDT')).map(item => `${BinanceSocket.broker}:${item}`);
+        binanceSymbolList = binanceSymbolList.map(item => `${BinanceSocket.broker}:${item}`);
 
-        let symbolList = binanceSymbolList;
+        let bybitSymbolList = await util.getBybitSymbolList();
+        bybitSymbolList = bybitSymbolList.map(item => `${BybitSocket.broker}:${item}`);
+
+        let symbolList = [...binanceSymbolList, ...bybitSymbolList];
         res.json({ code: 200, message: "ok", data: symbolList });
     });
 

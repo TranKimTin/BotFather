@@ -1,30 +1,42 @@
-import IBinance, { Binance, Candle } from 'binance-api-node';
-import { RateData } from './BinanceFuture';
+import { RateData } from "./BinanceFuture";
 import * as util from './util';
 import moment from 'moment';
 import delay from 'delay';
+import WebSocket from 'ws';
 
-export class BinanceSocket {
-    public static readonly broker = 'binance';
+interface BybitCandle {
+    start: number,
+    end: number,
+    interval: string,
+    open: string,
+    close: string,
+    high: string,
+    low: string,
+    volume: string,
+    turnover: string,
+    confirm: boolean,
+    timestamp: number
+};
 
-    private gBinance: Binance;
+export class BybitSocket {
+    public static readonly broker = 'bybit'
+
     private gData: { [key: string]: { [key: string]: Array<RateData> } };
     private gLastPrice: { [key: string]: number };
     private gLastUpdated: { [key: string]: number };
 
     constructor() {
-        this.gBinance = IBinance({});
         this.gData = {};
         this.gLastPrice = {};
         this.gLastUpdated = {};
     }
 
     async init(numbler_candle_load: number, onCloseCandle: (broker: string, symbol: string, timeframe: string, data: Array<RateData>) => void) {
-        let symbolList = await util.getBinanceSymbolList();
+        let symbolList = await util.getBybitSymbolList();
         // console.log(symbolList.join(' '));
-        console.log(`binance: Total ${symbolList.length} symbols`);
+        console.log(`bybit: Total ${symbolList.length} symbols`);
 
-        let timeframes = ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'];
+        let timeframes = ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '12h', '1d'];
         // timeframes = ['1m', '15m', '4h', '1d'];
         for (let symbol of symbolList) {
             this.gData[symbol] = {};
@@ -33,21 +45,35 @@ export class BinanceSocket {
             }
         }
 
-        console.log('binance: init timeframe', timeframes);
-        const fetchCandles = (candle: Candle) => {
-            this.gLastUpdated[candle.symbol] = new Date().getTime();
+        const ws = new WebSocket('wss://stream.bybit.com/v5/public/spot');
+
+        ws.on('open', async function open() {
+            console.log('bybit: WebSocket connection opened');
+
+            for (let i = 0; i < symbolList.length; i += 10) {
+                ws.send(JSON.stringify({
+                    op: 'subscribe',
+                    args: symbolList.slice(i, i + 10).map(item => `kline.1.${item}`)
+                }));
+                await delay(50);
+            }
+
+        });
+
+        const fetchCandles = (symbol: string, candle: BybitCandle) => {
+            this.gLastUpdated[symbol] = new Date().getTime();
             for (let tf of timeframes) {
                 let data: RateData = {
-                    symbol: candle.symbol,
-                    startTime: util.getStartTime(tf, candle.startTime),
-                    timestring: moment(util.getStartTime(tf, candle.startTime)).format('YYYY-MM-DD HH:mm:SS'),
+                    symbol: symbol,
+                    startTime: util.getStartTime(tf, candle.timestamp),
+                    timestring: moment(util.getStartTime(tf, candle.timestamp)).format('YYYY-MM-DD HH:mm:SS'),
                     open: +candle.open,
                     high: +candle.high,
                     low: +candle.low,
                     close: +candle.close,
                     volume: +candle.volume,
                     interval: tf,
-                    isFinal: candle.isFinal && util.checkFinal(tf, candle.startTime),
+                    isFinal: candle.confirm && util.checkFinal(tf, candle.timestamp),
                     change: (+candle.close - +candle.open) / +candle.open,
                     ampl: (+candle.high - +candle.low) / +candle.open
                 };
@@ -61,40 +87,54 @@ export class BinanceSocket {
                     dataList[0].high = Math.max(dataList[0].high, data.high);
                     dataList[0].low = Math.min(dataList[0].low, data.low);
                     dataList[0].close = data.close;
-                    dataList[0].volume += candle.isFinal ? data.volume : 0;
+                    dataList[0].volume += candle.confirm ? data.volume : 0;
                     dataList[0].change = (dataList[0].close - dataList[0].open) / dataList[0].open;
                     dataList[0].ampl = (dataList[0].high - dataList[0].low) / dataList[0].open;
 
                     if (data.isFinal && !dataList[0].isFinal) {
                         dataList[0].isFinal = data.isFinal;
-                        onCloseCandle(BinanceSocket.broker, data.symbol, data.interval, [...dataList]);
+                        onCloseCandle(BybitSocket.broker, data.symbol, data.interval, [...dataList]);
                     }
                 }
                 else if (dataList[0].startTime < data.startTime) {
                     dataList.unshift(data);
                     if (dataList[1] && !dataList[1].isFinal) {
                         dataList[1].isFinal = true;
-                        onCloseCandle(BinanceSocket.broker, data.symbol, data.interval, dataList.slice(1));
+                        onCloseCandle(BybitSocket.broker, data.symbol, data.interval, dataList.slice(1));
                     }
                 }
             }
         }
-        if (util.isFuture()) {
-            this.gBinance.ws.futuresCandles(symbolList, '1m', fetchCandles);
-        }
-        else {
-            this.gBinance.ws.candles(symbolList, '1m', fetchCandles);
-        }
+
+        ws.on('message', function incoming(mess) {
+            const data: { type: string, topic: string, data: BybitCandle } = JSON.parse(mess.toString());
+
+            if (!data || data.type !== 'snapshot') return;
+            let symbol = data.topic.split('.')[2];
+            fetchCandles(symbol, data.data);
+
+        });
+
+        ws.on('close', function close() {
+            console.log('WebSocket connection closed');
+            throw 'bybit: WebSocket connection closed';
+        });
+
+        ws.on('error', function error(err) {
+            console.error('bybit: WebSocket error: ', err);
+            throw err;
+        });
+
 
         let initCandle = async (symbol: string, tf: string) => {
-            let rates = await util.getOHLCV(symbol, tf, numbler_candle_load);
+            let rates = await util.getBybitOHLCV(symbol, tf, numbler_candle_load);
             this.gData[symbol][tf] = rates;
             this.gLastPrice[symbol] = this.gData[symbol][tf][0]?.close || 0;
-            // console.log('binance: init candle', { symbol, tf })
+            // console.log('init candle', { symbol, tf })
         }
 
         for (let tf of timeframes) {
-            console.log(`binance: init candle ${tf}...`);
+            console.log(`bybit: init candle ${tf}...`);
             let promiseList = [];
             for (let symbol of symbolList) {
                 promiseList.push(initCandle(symbol, tf));
@@ -115,8 +155,8 @@ export class BinanceSocket {
             for (let symbol in this.gLastUpdated) {
                 let lastTimeUpdated = this.gLastUpdated[symbol];
                 if (now - lastTimeUpdated > timeInterval) {
-                    console.log(`binance: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`);
-                    throw `binance: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`;
+                    console.log(`bybit: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`);
+                    throw `bybit: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`;
                 }
             }
         }, timeInterval);

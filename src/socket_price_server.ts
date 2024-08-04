@@ -7,6 +7,7 @@ import IBinance, { Binance, Candle } from 'binance-api-node';
 import moment from 'moment';
 import delay from 'delay';
 import { BinanceSocket } from './socket_binance';
+import { BybitSocket } from './socket_bybit';
 
 util.useSport();
 
@@ -14,10 +15,12 @@ const port = 8081;
 // let clientList: Array<Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>> = [];
 
 
-async function main(numbler_candle_load = 500) {
-
+async function main(numbler_candle_load = 300) {
     let binanceSocket = new BinanceSocket();
+    let bybitSocket = new BybitSocket();
+
     binanceSocket.init(numbler_candle_load, onCloseCandle);
+    bybitSocket.init(numbler_candle_load, onCloseCandle);
 
 }
 
