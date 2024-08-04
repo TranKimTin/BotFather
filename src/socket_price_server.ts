@@ -19,7 +19,7 @@ async function main(numbler_candle_load = 300) {
     let binanceSocket = new BinanceSocket();
     let bybitSocket = new BybitSocket();
 
-    // binanceSocket.init(numbler_candle_load, onCloseCandle);
+    binanceSocket.init(numbler_candle_load, onCloseCandle);
     bybitSocket.init(numbler_candle_load, onCloseCandle);
 
 }
