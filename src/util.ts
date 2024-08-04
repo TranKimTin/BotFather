@@ -108,7 +108,7 @@ export async function getDigitsFuture() {
     return digits;
 }
 
-export async function getSymbolList() {
+export async function getBinanceSymbolList() {
     let url = useFuture ? 'https://fapi.binance.com/fapi/v1/exchangeInfo' : 'https://api.binance.com/api/v1/exchangeInfo';
     let res = await fetch(url, {
         "headers": {
@@ -121,6 +121,21 @@ export async function getSymbolList() {
 
     let data = await res.json() as { symbols: Array<{ symbol: string; status: string }> };
     return data.symbols.filter((item: { status: string }) => item.status == 'TRADING').map((item: { symbol: any; }) => item.symbol);
+}
+
+export async function getBybitSymbolList() {
+    let url = `https://api-testnet.bybit.com/v5/market/tickers?category=spot`;
+    let res = await fetch(url, {
+        "headers": {
+            "accept": "*/*",
+            "content-type": "application/json",
+        },
+        "body": null,
+        "method": "GET"
+    });
+
+    let data = await res.json() as { result: { list: Array<{ symbol: string }> } };
+    return data.result.list.map((item: { symbol: string; }) => item.symbol);
 }
 
 export function checkFinal(tf: string, startTime: number) {
@@ -230,6 +245,63 @@ export async function getOHLCV(symbol: string, timeframe: string, limit: number)
     result.sort((a, b) => b.startTime - a.startTime);
 
     if (result.length) result[0].isFinal = false;
+    return result;
+}
+
+export async function getBybitOHLCV(symbol: string, timeframe: string, limit: number): Promise<Array<RateData>> {
+    // https://bybit-exchange.github.io/docs/v5/market/kline
+    let tf: string | number = timeframe;
+    switch (timeframe) {
+        case '1m':
+        case '3m':
+        case '5m':
+        case '15m':
+        case '30m':
+            tf = timeframe.slice(0, timeframe.length - 1);
+            break;
+        case '1h':
+        case '2h':
+        case '4h':
+        case '6h':
+        case '8h':
+        case '12h':
+            tf = +timeframe.slice(0, timeframe.length - 1) * 60;
+            break;
+        case '1d': tf = 'D';
+            break;
+        default:
+            break;
+    }
+
+    let url = `https://api-testnet.bybit.com/v5/market/kline?category=spot&symbol=${symbol}&interval=${tf}&limit=${limit}`;
+    let res = await fetch(url, {
+        "headers": {
+            "accept": "*/*",
+            "content-type": "application/json",
+        },
+        "body": null,
+        "method": "GET"
+    });
+
+    let data = await res.json() as { result: { list: Array<string> } };
+
+    let result = data.result.list.map(item => {
+        let startTime = +item[0] || 0;
+        let open = +item[1] || 0;
+        let high = +item[2] || 0;
+        let low = +item[3] || 0;
+        let close = +item[4] || 0;
+        let volume = +item[5] || 0;
+        let interval = timeframe;
+        let isFinal = true;
+        let change = (close - open) / open;
+        let ampl = (high - low) / open;
+        let timestring = moment(startTime).format('YYYY-MM-DD HH:mm:SS');
+        return { symbol, startTime, timestring, open, high, low, close, volume, interval, isFinal, change, ampl };
+    });
+    result.sort((a, b) => b.startTime - a.startTime);
+    if (result.length) result[0].isFinal = false;
+
     return result;
 }
 

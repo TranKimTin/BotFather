@@ -27,7 +27,7 @@ export default class BotRSI_CCI {
     async init(initDelay: number = 0) {
         await delay(initDelay);
 
-        let symbolList = await util.getSymbolList();
+        let symbolList = await util.getBinanceSymbolList();
         let ignoreList = ['BTCDOMUSDT', 'USDCUSDT', 'BTCUSDT', 'COCOSUSDT'];
         symbolList = symbolList.filter(item => item.endsWith("USDT"))
             .filter(item => !ignoreList.includes(item));

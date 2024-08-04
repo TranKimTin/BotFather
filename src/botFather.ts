@@ -41,8 +41,8 @@ export class BotFather {
 
         client.on('onCloseCandle', (msg: string) => {
             try {
-                let { symbol, timeframe, data } = JSON.parse(msg.toString());
-                this.onCloseCandle(symbol, timeframe, data);
+                let { broker, symbol, timeframe, data } = JSON.parse(msg.toString());
+                this.onCloseCandle(broker, symbol, timeframe, data);
             }
             catch (err) {
                 console.log(err);
@@ -81,34 +81,35 @@ export class BotFather {
         console.log('BotFather init');
     }
 
-    private async onCloseCandle(symbol: string, timeframe: string, data: Array<RateData>) {
+    private async onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
         // if (symbol == 'BTCUSDT') {
         //     console.log({ symbol, timeframe }, JSON.stringify(data));
         // }
         for (let botInfo of this.botChildren) {
             let { botName, idTelegram, symbolList, timeframes, treeData, route } = botInfo;
-            if (!symbolList.includes(symbol) || !timeframes.includes(timeframe)) continue;
+
+            if (!symbolList.includes(`${broker}:${symbol}`) || !timeframes.includes(timeframe)) continue;
 
             // console.log("onCloseCandle", { symbol, timeframe });
 
             let visited: { [key: string]: boolean } = {};
-            this.dfs_handleLogic(route, symbol, timeframe, data, idTelegram, visited);
+            this.dfs_handleLogic(route, broker, symbol, timeframe, data, idTelegram, visited);
 
         }
     }
 
-    private dfs_handleLogic(node: Node, symbol: string, timeframe: string, data: RateData[], idTelegram: TelegramIdType, visited: { [key: string]: boolean }) {
+    private dfs_handleLogic(node: Node, broker: string, symbol: string, timeframe: string, data: RateData[], idTelegram: TelegramIdType, visited: { [key: string]: boolean }) {
         let { logic, id, next } = node;
         if (visited[id] === true) return;
         visited[id] = true;
-        if (this.handleLogic(logic, symbol, timeframe, data, idTelegram)) {
+        if (this.handleLogic(logic, broker, symbol, timeframe, data, idTelegram)) {
             for (let child of next) {
-                this.dfs_handleLogic(child, symbol, timeframe, data, idTelegram, visited);
+                this.dfs_handleLogic(child, broker, symbol, timeframe, data, idTelegram, visited);
             }
         }
     }
 
-    private handleLogic(condition: string, symbol: string, timeframe: string, data: RateData[], idTelegram: TelegramIdType): boolean {
+    private handleLogic(condition: string, broker: string, symbol: string, timeframe: string, data: RateData[], idTelegram: TelegramIdType): boolean {
         condition = condition.toLowerCase().trim().replace(/(?<![\=<>])\=(?![\=<>])/g, '==');
 
         // let stringRSIs = findIndicator(condition, 'rsi');
@@ -320,7 +321,7 @@ export class BotFather {
             condition = condition.slice("telegram:".length).trim().replaceAll('==', '=');
 
             console.log({ condition, symbol, timeframe });
-            let mess = `${symbol} ${timeframe}`
+            let mess = `${broker}:${symbol} ${timeframe}`
             mess += `\n${condition}`;
             this.telegram.sendMessage(mess, idTelegram);
             return true;

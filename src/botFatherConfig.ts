@@ -6,6 +6,7 @@ import fs from "fs";
 import path from "path";
 import * as util from './util'
 import { TelegramIdType } from "./telegram";
+import { BinanceSocket } from "./socket_binance";
 
 util.useSport();
 
@@ -303,8 +304,10 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
     });
 
     app.get('/getSymbolList', async (req, res) => {
-        let symbolList = await util.getSymbolList();
-        symbolList = symbolList.filter(item => item.endsWith('USDT'));
+        let binanceSymbolList = await util.getBinanceSymbolList();
+        binanceSymbolList = binanceSymbolList.filter(item => item.endsWith('USDT')).map(item => `${BinanceSocket.broker}:${item}`);
+
+        let symbolList = binanceSymbolList;
         res.json({ code: 200, message: "ok", data: symbolList });
     });
 
