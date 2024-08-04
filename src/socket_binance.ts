@@ -22,6 +22,7 @@ export class BinanceSocket {
     async init(numbler_candle_load: number, onCloseCandle: (broker: string, symbol: string, timeframe: string, data: Array<RateData>) => void) {
         let symbolList = await util.getBinanceSymbolList();
         // console.log(symbolList.join(' '));
+        symbolList = symbolList.slice(0,5);
         console.log(`binance: Total ${symbolList.length} symbols`);
 
         let timeframes = ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'];
