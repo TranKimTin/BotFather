@@ -65,15 +65,15 @@ export class BybitSocket {
             for (let tf of timeframes) {
                 let data: RateData = {
                     symbol: symbol,
-                    startTime: util.getStartTime(tf, candle.timestamp),
-                    timestring: moment(util.getStartTime(tf, candle.timestamp)).format('YYYY-MM-DD HH:mm:SS'),
+                    startTime: candle.start,
+                    timestring: moment(candle.start).format('YYYY-MM-DD HH:mm:SS'),
                     open: +candle.open,
                     high: +candle.high,
                     low: +candle.low,
                     close: +candle.close,
                     volume: +candle.volume,
                     interval: tf,
-                    isFinal: candle.confirm && util.checkFinal(tf, candle.timestamp),
+                    isFinal: candle.confirm && util.checkFinal(tf, candle.start),
                     change: (+candle.close - +candle.open) / +candle.open,
                     ampl: (+candle.high - +candle.low) / +candle.open
                 };
@@ -107,12 +107,13 @@ export class BybitSocket {
         }
 
         ws.on('message', function incoming(mess) {
-            const data: { type: string, topic: string, data: BybitCandle } = JSON.parse(mess.toString());
-
+            const data: { type: string, topic: string, data: Array<BybitCandle> } = JSON.parse(mess.toString());
             if (!data || data.type !== 'snapshot') return;
             let symbol = data.topic.split('.')[2];
-            fetchCandles(symbol, data.data);
 
+            for (let candle of data.data) {
+                fetchCandles(symbol, candle);
+            }
         });
 
         ws.on('close', function close() {
