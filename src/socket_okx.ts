@@ -22,7 +22,7 @@ export class OkxSocket {
         // console.log(symbolList.join(' '));
         console.log(`okx: Total ${symbolList.length} symbols`);
 
-        let timeframes = ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'];
+        let timeframes = ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '12h', '1d'];
         // timeframes = ['1m', '15m', '4h', '1d'];
         for (let symbol of symbolList) {
             this.gData[symbol] = {};
