@@ -65,8 +65,8 @@ export class BybitSocket {
             for (let tf of timeframes) {
                 let data: RateData = {
                     symbol: symbol,
-                    startTime: candle.start,
-                    timestring: moment(candle.start).format('YYYY-MM-DD HH:mm:SS'),
+                    startTime: util.getStartTime(tf, candle.start),
+                    timestring: moment(util.getStartTime(tf, candle.start)).format('YYYY-MM-DD HH:mm:SS'),
                     open: +candle.open,
                     high: +candle.high,
                     low: +candle.low,
