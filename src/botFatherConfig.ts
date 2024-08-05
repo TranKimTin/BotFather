@@ -322,10 +322,11 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
     });
 
     app.put('/delete', (req, res) => {
-        let { botName } = req.query;
+        let { botName } = req.query as { botName: string };
         let botFile = path.join(BOT_DATA_DIR, `${botName}.json`);
         if (fs.existsSync(botFile)) {
             fs.unlinkSync(botFile);
+            onChangeConfig(botName);
         }
         res.json({ code: 200, message: "Xóa thành công", data: [] });
     });
