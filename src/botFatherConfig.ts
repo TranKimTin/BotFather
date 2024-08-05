@@ -8,6 +8,7 @@ import * as util from './util'
 import { TelegramIdType } from "./telegram";
 import { BinanceSocket } from "./socket_binance";
 import { BybitSocket } from "./socket_bybit";
+import { OkxSocket } from "./socket_okx";
 
 util.useSport();
 
@@ -311,7 +312,10 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
         let bybitSymbolList = await util.getBybitSymbolList();
         bybitSymbolList = bybitSymbolList.map(item => `${BybitSocket.broker}:${item}`);
 
-        let symbolList = [...binanceSymbolList, ...bybitSymbolList];
+        let okxSymbolList = await util.getOkxSymbolList();
+        okxSymbolList = okxSymbolList.map(item => `${OkxSocket.broker}:${item}`);
+
+        let symbolList = [...binanceSymbolList, ...bybitSymbolList, ...okxSymbolList];
         res.json({ code: 200, message: "ok", data: symbolList });
     });
 

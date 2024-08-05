@@ -8,6 +8,7 @@ import moment from 'moment';
 import delay from 'delay';
 import { BinanceSocket } from './socket_binance';
 import { BybitSocket } from './socket_bybit';
+import { OkxSocket } from './socket_okx';
 
 util.useSport();
 
@@ -18,9 +19,11 @@ const port = 8081;
 async function main(numbler_candle_load = 300) {
     let binanceSocket = new BinanceSocket();
     let bybitSocket = new BybitSocket();
+    let okxSocket = new OkxSocket();
 
     binanceSocket.init(numbler_candle_load, onCloseCandle);
     bybitSocket.init(numbler_candle_load, onCloseCandle);
+    okxSocket.init(numbler_candle_load, onCloseCandle);
 
 }
 

@@ -143,6 +143,23 @@ export async function getBybitSymbolList() {
         .filter(item => item.endsWith('USDT'));
 }
 
+export async function getOkxSymbolList() {
+    let url = `https://www.okx.com/api/v5/public/instruments?instType=SPOT`;
+    let res = await fetch(url, {
+        "headers": {
+            "accept": "*/*",
+            "content-type": "application/json",
+        },
+        "body": null,
+        "method": "GET"
+    });
+
+    let data = await res.json() as { data: Array<{ baseCcy: string, quoteCcy: string, instId: string }> };
+    return data.data
+        .filter(item => item.quoteCcy === 'USDT')
+        .map((item) => item.instId);
+}
+
 export function checkFinal(tf: string, startTime: number) {
     let nextTime = startTime / 1000 + 60;
     switch (tf) {
@@ -290,6 +307,62 @@ export async function getBybitOHLCV(symbol: string, timeframe: string, limit: nu
 
     let data = await res.json() as { result: { list: Array<string> } };
     let result = data.result.list.map(item => {
+        let startTime = +item[0] || 0;
+        let open = +item[1] || 0;
+        let high = +item[2] || 0;
+        let low = +item[3] || 0;
+        let close = +item[4] || 0;
+        let volume = +item[5] || 0;
+        let interval = timeframe;
+        let isFinal = true;
+        let change = (close - open) / open;
+        let ampl = (high - low) / open;
+        let timestring = moment(startTime).format('YYYY-MM-DD HH:mm:SS');
+        return { symbol, startTime, timestring, open, high, low, close, volume, interval, isFinal, change, ampl };
+    });
+    result.sort((a, b) => b.startTime - a.startTime);
+    if (result.length) result[0].isFinal = false;
+
+    return result;
+}
+
+export async function getOkxOHLCV(symbol: string, timeframe: string, limit: number): Promise<Array<RateData>> {
+    //max limit: 300
+    let tf: string = timeframe;
+    switch (timeframe) {
+        case '1m':
+        case '3m':
+        case '5m':
+        case '15m':
+        case '30m':
+            break;
+        case '1h':
+        case '2h':
+        case '4h':
+        case '6h':
+        case '8h':
+        case '12h':
+            tf = timeframe.replace('h', 'H');
+            break;
+        case '1d':
+            tf = timeframe.replace('d', 'D');
+            break;
+        default:
+            break;
+    }
+
+    let url = `https://www.okx.com/api/v5/market/candles?instId=${symbol}&bar=${tf}&limit=${limit}`;
+    let res = await fetch(url, {
+        "headers": {
+            "accept": "*/*",
+            "content-type": "application/json",
+        },
+        "body": null,
+        "method": "GET"
+    });
+
+    let data = await res.json() as { data: Array<string> };
+    let result = data.data.map(item => {
         let startTime = +item[0] || 0;
         let open = +item[1] || 0;
         let high = +item[2] || 0;
