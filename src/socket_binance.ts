@@ -80,17 +80,12 @@ export class BinanceSocket {
             }
         }
 
-        for (let i = 0; i < symbolList.length; i += 10) {
-            if (util.isFuture()) {
-                this.gBinance.ws.futuresCandles(symbolList.slice(i, i + 10), '1m', fetchCandles);
-            }
-            else {
-                this.gBinance.ws.candles(symbolList.slice(i, i + 10), '1m', fetchCandles);
-            }
-            await delay(50);
+        if (util.isFuture()) {
+            this.gBinance.ws.futuresCandles(symbolList, '1m', fetchCandles);
         }
-
-
+        else {
+            this.gBinance.ws.candles(symbolList, '1m', fetchCandles);
+        }
 
         let initCandle = async (symbol: string, tf: string) => {
             let rates = await util.getOHLCV(symbol, tf, numbler_candle_load);
