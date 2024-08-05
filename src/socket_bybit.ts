@@ -116,7 +116,7 @@ export class BybitSocket {
         });
 
         ws.on('close', function close() {
-            console.log('WebSocket connection closed');
+            console.log('bybit: WebSocket connection closed');
             throw 'bybit: WebSocket connection closed';
         });
 

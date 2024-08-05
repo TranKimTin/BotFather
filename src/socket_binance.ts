@@ -3,6 +3,7 @@ import { RateData } from './BinanceFuture';
 import * as util from './util';
 import moment from 'moment';
 import delay from 'delay';
+import WebSocket from 'ws';
 
 export class BinanceSocket {
     public static readonly broker = 'binance';
@@ -80,11 +81,61 @@ export class BinanceSocket {
             }
         }
 
-        if (util.isFuture()) {
-            this.gBinance.ws.futuresCandles(symbolList, '1m', fetchCandles);
-        }
-        else {
-            this.gBinance.ws.candles(symbolList, '1m', fetchCandles);
+        // if (util.isFuture()) {
+        //     this.gBinance.ws.futuresCandles(symbolList, '1m', fetchCandles);
+        // }
+        // else {
+        //     this.gBinance.ws.candles(symbolList, '1m', fetchCandles);
+        // }
+        for (let symbol of symbolList) {
+            let url = '';
+            if (util.isFuture()) {
+                url = `wss://fstream.binance.com/ws/${symbol.toLowerCase()}@kline_1m`;
+            }
+            else {
+                url = `wss://stream.binance.com/ws/${symbol.toLowerCase()}@kline_1m`;
+            }
+            const ws = new WebSocket(url);
+            ws.on('open', () => {
+                // console.log(`binance: Connected to ${url}`);
+            });
+            ws.on('message', (mess) => {
+                const data = JSON.parse(mess.toString());
+                const kline = data.k;
+                let candle: Candle = {
+                    eventType: data.e,
+                    eventTime: data.E,
+                    symbol: symbol,
+                    startTime: kline.t,
+                    closeTime: kline.T,
+                    firstTradeId: kline.f,
+                    lastTradeId: kline.L,
+                    open: kline.o,
+                    high: kline.h,
+                    low: kline.l,
+                    close: kline.c,
+                    volume: kline.v,
+                    trades: kline.n,
+                    interval: kline.i,
+                    isFinal: kline.x,
+                    quoteVolume: kline.q,
+                    buyVolume: kline.V,
+                    quoteBuyVolume: kline.Q
+                };
+
+                fetchCandles(candle);
+            });
+
+            ws.on('error', (error) => {
+                console.error(`binance: WebSocket error ${symbol}`, error);
+                throw error;
+            });
+
+            ws.on('close', () => {
+                console.log(`binance: WebSocket connection closed ${symbol}`);
+                throw 'binance: socket close';
+            });
+            await delay(10);
         }
 
         let initCandle = async (symbol: string, tf: string) => {
