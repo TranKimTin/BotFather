@@ -112,17 +112,6 @@ export class BotFather {
     private handleLogic(condition: string, broker: string, symbol: string, timeframe: string, data: RateData[], idTelegram: TelegramIdType): boolean {
         condition = condition.toLowerCase().trim().replace(/(?<![\=<>])\=(?![\=<>])/g, '==');
 
-        // let stringRSIs = findIndicator(condition, 'rsi');
-
-        // for (let stringRSI of stringRSIs) {
-        //     let [period, shift] = extractParams(stringRSI, 'rsi');
-        //     let RSIs = util.iRSI(data, period);
-
-        //     if (RSIs.length <= period) return false;
-        //     condition = condition.replaceAll(stringRSI, `${RSIs[shift]}`);
-        //     // console.log({ symbol, timeframe, rsi: RSIs[shift] });
-        // }
-
         for (let indicator of indicatorSupported) {
             let fomulas = findIndicator(condition, indicator);
             for (let f of fomulas) {
@@ -156,7 +145,7 @@ export class BotFather {
                         value = data[shift].volume;
                         break;
                     }
-                    case 'volume24h_in_USD': {
+                    case 'volume24h_in_usd': {
                         let volume: number = 0;
                         for (let i = 0; i < data.length; i++) {
                             volume += data[i].volume * data[i].close;
