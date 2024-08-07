@@ -146,6 +146,7 @@ export class BotFather {
                         break;
                     }
                     case 'volume24h_in_usd': {
+                        console.log(condition, symbol, timeframe);
                         let volume: number = 0;
                         for (let i = 0; i < data.length; i++) {
                             volume += data[i].volume * data[i].close;
