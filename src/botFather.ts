@@ -156,6 +156,17 @@ export class BotFather {
                         value = data[shift].volume;
                         break;
                     }
+                    case 'volume24h_in_USD': {
+                        let volume: number = 0;
+                        for (let i = 0; i < data.length; i++) {
+                            volume += data[i].volume * data[i].close;
+                            if ((data[i].startTime - data[0].startTime) / (24 * 60 * 60 * 1000) >= 24) {
+                                break;
+                            }
+                        }
+                        value = volume;
+                        break;
+                    }
                     case 'change': {
                         let [shift = 0] = params;
                         let change: number = data[shift].close - data[shift].open;

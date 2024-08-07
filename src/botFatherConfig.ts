@@ -70,6 +70,7 @@ export const paramsValidate: { [key: string]: Array<number> } = {
     'low': [0, 1],
     'close': [0, 1],
     'volume': [0, 1],
+    'volume24h_in_USD': [0,0],
     'change': [0, 1],
     'change%': [0, 1],
     'ampl': [0, 1],
