@@ -114,6 +114,10 @@ export class BotFather {
 
         for (let indicator of indicatorSupported) {
             let fomulas = findIndicator(condition, indicator);
+            if(symbol === 'BTCUSDT' && indicator === 'volume24h_in_usd'){
+                console.log(condition, condition, fomulas);
+            }
+            
             for (let f of fomulas) {
                 let params = extractParams(f);
                 if (!checkParams(indicator, params)) return false;
@@ -146,7 +150,6 @@ export class BotFather {
                         break;
                     }
                     case 'volume24h_in_usd': {
-                        console.log(condition, symbol, timeframe);
                         let volume: number = 0;
                         for (let i = 0; i < data.length; i++) {
                             volume += data[i].volume * data[i].close;
