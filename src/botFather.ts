@@ -160,7 +160,7 @@ export class BotFather {
                         let volume: number = 0;
                         for (let i = 0; i < data.length; i++) {
                             volume += data[i].volume * data[i].close;
-                            if ((data[i].startTime - data[0].startTime) / (24 * 60 * 60 * 1000) >= 24) {
+                            if ((data[i].startTime - data[0].startTime) / (60 * 60 * 1000) >= 24) {
                                 break;
                             }
                         }
