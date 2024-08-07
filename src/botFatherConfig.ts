@@ -70,7 +70,7 @@ export const paramsValidate: { [key: string]: Array<number> } = {
     'low': [0, 1],
     'close': [0, 1],
     'volume': [0, 1],
-    'volume24h_in_usd': [0,0],
+    'volume24h_in_usd': [0, 0],
     'change': [0, 1],
     'change%': [0, 1],
     'ampl': [0, 1],
@@ -135,7 +135,7 @@ export function extractParams(s: string): Array<number> {
 
     let i = s.indexOf('(');
     let j = s.indexOf(')');
-    if (i == -1 || j == -1 || i == j) return [];
+    if (i == -1 || j == -1 || i == j - 1) return [];
 
     let arr: Array<number> = s.slice(s.indexOf('(') + 1, s.lastIndexOf(')')).split(',').map(item => +item);
     return arr;

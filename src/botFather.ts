@@ -117,9 +117,6 @@ export class BotFather {
             
             for (let f of fomulas) {
                 let params = extractParams(f);
-                if(f == 'volume24h_in_usd()'){
-                    console.log(f, params, checkParams(indicator, params))
-                }
 
                 if (!checkParams(indicator, params)) return false;
 
