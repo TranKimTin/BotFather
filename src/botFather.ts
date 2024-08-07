@@ -114,12 +114,13 @@ export class BotFather {
 
         for (let indicator of indicatorSupported) {
             let fomulas = findIndicator(condition, indicator);
-            if(symbol === 'BTCUSDT' && indicator === 'volume24h_in_usd'){
-                console.log(condition, condition, fomulas);
-            }
             
             for (let f of fomulas) {
                 let params = extractParams(f);
+                if(f == 'volume24h_in_usd()'){
+                    console.log(f, params, checkParams(indicator, params))
+                }
+
                 if (!checkParams(indicator, params)) return false;
 
                 let value = undefined;
