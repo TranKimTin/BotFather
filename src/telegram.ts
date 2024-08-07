@@ -47,7 +47,7 @@ export default class Telegram {
 
     sendMessage(mess: string, id: TelegramIdType = '') {
         try {
-            console.log(this.TAG, 'Send message telegram', mess);
+            console.log(this.TAG, 'Send message telegram',id, mess);
             id = id || chatID;
 
             mess = this.encodeHTML(mess);

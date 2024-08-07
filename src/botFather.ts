@@ -331,6 +331,7 @@ export class BotFather {
             return checkEval(condition);
         }
         catch (err) {
+            console.error(err);
             return false;
         }
     }
