@@ -339,13 +339,15 @@ export async function getOkxOHLCV(symbol: string, timeframe: string, limit: numb
         case '1h':
         case '2h':
         case '4h':
+            tf = timeframe.replace('h', 'H');
+            break;
         case '6h':
         case '8h':
         case '12h':
-            tf = timeframe.replace('h', 'H');
+            tf = timeframe.replace('h', 'Hutc');
             break;
         case '1d':
-            tf = timeframe.replace('d', 'D');
+            tf = timeframe.replace('d', 'Dutc');
             break;
         default:
             break;
