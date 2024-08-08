@@ -35,7 +35,7 @@ export default class Telegram {
         if (polling) {
             this.bot.on('message', (msg) => {
                 const chatId = msg.chat.id;
-                this.bot.sendMessage(chatId, `ID của bạn là ${chatID}`);
+                this.bot.sendMessage(chatId, `ID của bạn là ${chatId}`);
             });
             this.bot.on("polling_error", (msg) => console.log(msg));
         }
