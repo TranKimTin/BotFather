@@ -31,6 +31,14 @@ export default class Telegram {
         this.list = [];
         this.TAG = tag ? `${tag}\n` : '';
         this.bot = new TelegramBot(botToken, { polling: !!polling });
+
+        if (polling) {
+            this.bot.on('message', (msg) => {
+                const chatId = msg.chat.id;
+                this.bot.sendMessage(chatId, `ID của bạn là ${chatID}`);
+            });
+            this.bot.on("polling_error", (msg) => console.log(msg));
+        }
     }
 
     private encodeHTML(str: string) {
@@ -47,7 +55,7 @@ export default class Telegram {
 
     sendMessage(mess: string, id: TelegramIdType = '') {
         try {
-            console.log(this.TAG, 'Send message telegram',id, mess);
+            console.log(this.TAG, 'Send message telegram', id, mess);
             id = id || chatID;
 
             mess = this.encodeHTML(mess);

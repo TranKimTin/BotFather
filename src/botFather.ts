@@ -18,7 +18,7 @@ export class BotFather {
         this.sockerTradeServerPort = 8081;
         this.webConfigServerPort = 8080;
         this.botChildren = [];
-        this.telegram = new Telegram();
+        this.telegram = new Telegram(undefined, undefined, true);
         this.telegram.setChatID('@tintk_RSI_CCI'); //group chat
 
         this.connectTradeDataServer(this.sockerTradeServerPort);
@@ -114,7 +114,7 @@ export class BotFather {
 
         for (let indicator of indicatorSupported) {
             let fomulas = findIndicator(condition, indicator);
-            
+
             for (let f of fomulas) {
                 let params = extractParams(f);
 
