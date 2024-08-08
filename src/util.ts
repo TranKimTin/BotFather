@@ -1,4 +1,4 @@
-import moment, { DurationInputArg2, utc } from 'moment';
+import moment, { DurationInputArg2 } from 'moment';
 import { RateData } from './BinanceFuture';
 import zlib from 'zlib';
 import fs from 'fs';
@@ -242,7 +242,7 @@ export async function getOHLCV(symbol: string, timeframe: string, limit: number)
         if (limit > maxCall) console.log(`getOHLCV pending ${symbol} ${timeframe} ${limit}`);
         let ohlcv = await binance.fetchOHLCV(symbol, timeframe, since, Math.min(limit, maxCall));
         let data = ohlcv.filter(item => item[0] !== undefined && item[1] !== undefined && item[2] !== undefined && item[3] !== undefined && item[4] !== undefined && item[5] !== undefined).map(item => {
-            let startTime = getStartTime(timeframe, item[0] || 0);
+            let startTime = item[0] || 0;
             let open = item[1] || 0;
             let high = item[2] || 0;
             let low = item[3] || 0;
@@ -252,7 +252,7 @@ export async function getOHLCV(symbol: string, timeframe: string, limit: number)
             let isFinal = true;
             let change = (close - open) / open;
             let ampl = (high - low) / open;
-            let timestring = moment(getStartTime(timeframe, item[0] || 0)).format('YYYY-MM-DD HH:mm:SS');
+            let timestring = moment(startTime).format('YYYY-MM-DD HH:mm:SS');
             return { symbol, startTime, timestring, open, high, low, close, volume, interval, isFinal, change, ampl };
         }).filter(item => !check[item.startTime]);
         if (data.length == 0) break;
@@ -307,7 +307,7 @@ export async function getBybitOHLCV(symbol: string, timeframe: string, limit: nu
 
     let data = await res.json() as { result: { list: Array<string> } };
     let result = data.result.list.map(item => {
-        let startTime = getStartTime(timeframe, +item[0] || 0);
+        let startTime = +item[0] || 0;
         let open = +item[1] || 0;
         let high = +item[2] || 0;
         let low = +item[3] || 0;
@@ -317,7 +317,7 @@ export async function getBybitOHLCV(symbol: string, timeframe: string, limit: nu
         let isFinal = true;
         let change = (close - open) / open;
         let ampl = (high - low) / open;
-        let timestring = moment(getStartTime(timeframe, +item[0] || 0)).format('YYYY-MM-DD HH:mm:SS');
+        let timestring = moment(startTime).format('YYYY-MM-DD HH:mm:SS');
         return { symbol, startTime, timestring, open, high, low, close, volume, interval, isFinal, change, ampl };
     });
     result.sort((a, b) => b.startTime - a.startTime);
@@ -363,7 +363,7 @@ export async function getOkxOHLCV(symbol: string, timeframe: string, limit: numb
 
     let data = await res.json() as { data: Array<string> };
     let result = data.data.map(item => {
-        let startTime = getStartTime(timeframe, +item[0] || 0);
+        let startTime = +item[0] || 0;
         let open = +item[1] || 0;
         let high = +item[2] || 0;
         let low = +item[3] || 0;
@@ -373,7 +373,7 @@ export async function getOkxOHLCV(symbol: string, timeframe: string, limit: numb
         let isFinal = true;
         let change = (close - open) / open;
         let ampl = (high - low) / open;
-        let timestring = moment(getStartTime(timeframe, +item[0] || 0)).format('YYYY-MM-DD HH:mm:SS');
+        let timestring = moment(startTime).format('YYYY-MM-DD HH:mm:SS');
         return { symbol, startTime, timestring, open, high, low, close, volume, interval, isFinal, change, ampl };
     });
     result.sort((a, b) => b.startTime - a.startTime);
