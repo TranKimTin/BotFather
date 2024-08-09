@@ -36,7 +36,7 @@ export class BybitSocket {
         // console.log(symbolList.join(' '));
         console.log(`bybit: Total ${symbolList.length} symbols`);
 
-        let timeframes = ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '12h', '1d'];
+        let timeframes = ['15m', '30m', '1h', '2h', '4h', '6h', '12h', '1d', '1m', '3m', '5m'];
         // timeframes = ['1m', '15m', '4h', '1d'];
         for (let symbol of symbolList) {
             this.gData[symbol] = {};
