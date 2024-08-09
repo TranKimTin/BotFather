@@ -231,10 +231,21 @@
                                     <div>RSI(14) phân kì với điều kiện:</div>
                                     <div>- 2 đỉnh-đáy rsi liền nhau chênh nhau tối thiểu 20</div>
                                     <div>- 2 đỉnh-đáy rsi liền nhau cách nhau tối thiểu 10 nến</div>
-                                    <div>- đường rsi tạo thành 3 đáy thỏa mãn: đáy rsi sau cao hơn đáy rsi trước, giá tại đáy sau thấp hơn giá tại đáy trước</div>
+                                    <div>- đường rsi tạo thành 3 đáy thỏa mãn: đáy rsi sau cao hơn đáy rsi trước, giá
+                                        tại đáy sau thấp hơn giá tại đáy trước</div>
                                     <div>- 2 đáy cách nhau tối thiểu 5 rsi</div>
                                     <div>- rsi phải nhở hơn 35</div>
-                                </tr>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>MACD n đỉnh</td>
+                                <td>macd_n_dinh(9, 12, 3, 2) / macd_n_dinh(9, 12, 3, 3, x)</td>
+                                <td>
+                                    <div>Chỉ báo MACD(9, 12, 3) với số nến tối thiểu giữa 2 đỉnh là 2.</div>
+                                    <div>Trả về số đỉnh</div>
+                                    <div>Ví dụ muốn bot báo khi xuất hiện 3 đỉnh: macd_n_dinh(9, 12, 3, 2) = 3</div>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>

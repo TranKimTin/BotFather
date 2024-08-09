@@ -273,7 +273,7 @@ export class BotFather {
                         value = values[shift].lower;
                         break;
                     }
-                    case 'rsi_phan_ki':
+                    case 'rsi_phan_ki': {
                         let [period, deviation, depth, numberOfPeaks, minhDiff, maxRSI, shift = 0] = params;
                         let rates = data.slice(shift);
                         let RSIs = util.iRSI(data, period);
@@ -309,6 +309,60 @@ export class BotFather {
                                 console.log(`${rates[highIndex].timestring} => ${rates[lowIndex].timestring}`);
                             }
                         }
+                        break;
+                    }
+
+                    case 'macd_n_dinh': {
+                        let [fastPeriod, slowPeriod, signalPeriod, depth, shift = 0] = params;
+                        let values = util.iMACD(data, fastPeriod, slowPeriod, signalPeriod);
+                        if (shift >= values.length - 1) return false;
+                        if (fastPeriod >= slowPeriod) return false;
+
+                        if (values[shift].MACD <= 0) { value = 0; break; };
+                        if (values[shift].signal <= 0) { value = 0; break; };
+                        if (values[shift].histogram <= 0) { value = 0; break; }; //G-R-G-R-G => histogram[shift] = G
+                        if (values[shift + 1].histogram >= 0) { value = 0; break; }; //G-R-G-R-G => histogram[shift+1] = R
+
+                        let n = 0;
+                        for (let i = shift + 1; i < values.length - 1; i++) {
+
+                            let cnt = 0;
+                            let check = true;
+                            while (i < values.length - 1) {
+                                if (values[i].MACD <= 0) { check = false; break; };
+                                if (values[i].signal <= 0) { check = false; break; };
+                                if (values[i].histogram >= 0) break;
+                                if (values[i].histogram < 0) {
+                                    cnt++;
+                                    i++;
+                                }
+                            }
+                            if (cnt < depth) check = false;
+
+                            cnt = 0;
+                            while (i < values.length - 1) {
+                                if (values[i].MACD <= 0) { check = false; break; }
+                                if (values[i].signal <= 0) { check = false; break; }
+                                if (values[i].histogram <= 0) break;
+                                if (values[i].histogram > 0) {
+                                    cnt++;
+                                    i++;
+                                }
+                            }
+                            if (cnt < depth) check = false;
+
+                            if (check === false) {
+                                value = n;
+                                break;
+                            }
+
+                            n++;
+                        }
+
+                        break;
+                    }
+
+                    default:
                         break;
                 }
 

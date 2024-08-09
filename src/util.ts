@@ -522,7 +522,11 @@ export function iMACD(data: Array<RateData>, fastPeriod: number, slowPeriod: num
         SimpleMAOscillator: false,
         SimpleMASignal: false
     });
-    return EMAs.reverse();
+    return EMAs.reverse().map(item => ({
+        MACD: item.MACD || 0,
+        signal: item.signal || 0,
+        histogram: item.histogram || 0
+    }));
 }
 
 export function iBB(data: Array<RateData>, period: number, multiplier: number) {

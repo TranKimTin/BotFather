@@ -1,11 +1,8 @@
 // server
 import http from 'http';
-import { Server, Socket } from "socket.io";
+import { Server } from "socket.io";
 import { RateData } from './BinanceFuture';
 import * as util from './util';
-import IBinance, { Binance, Candle } from 'binance-api-node';
-import moment from 'moment';
-import delay from 'delay';
 import { BinanceSocket } from './socket_binance';
 import { BybitSocket } from './socket_bybit';
 import { OkxSocket } from './socket_okx';
