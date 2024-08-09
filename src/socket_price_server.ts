@@ -28,8 +28,7 @@ async function main(numbler_candle_load = 300) {
 }
 
 function onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
-    let stringData = JSON.stringify({ broker, symbol, timeframe, data });
-    io.emit('onCloseCandle', stringData);
+    io.emit('onCloseCandle', { broker, symbol, timeframe, data });
 }
 
 const server = http.createServer();

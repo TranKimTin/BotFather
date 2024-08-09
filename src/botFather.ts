@@ -39,9 +39,10 @@ export class BotFather {
             console.log('Connected to server');
         });
 
-        client.on('onCloseCandle', (msg: string) => {
+        client.on('onCloseCandle', (msg: { broker: string, symbol: string, timeframe: string, data: Array<RateData> }) => {
             try {
-                let { broker, symbol, timeframe, data } = JSON.parse(msg.toString());
+                let { broker, symbol, timeframe, data } = msg;
+                if (!broker || !symbol || !timeframe || !data) return;
                 this.onCloseCandle(broker, symbol, timeframe, data);
             }
             catch (err) {
