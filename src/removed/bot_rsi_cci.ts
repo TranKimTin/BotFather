@@ -1,10 +1,10 @@
-import BinanceFuture, { RateData } from './BinanceFuture';
+import BinanceFuture, { RateData } from '../BinanceFuture';
 import dotenv from 'dotenv';
-import * as util from './util';
-import SetupConfig from './setupConfig';
+import * as util from '../util';
+import SetupConfig from '../setupConfig';
 import moment from 'moment';
 import { GoogleSheet } from './GoogleSheet';
-import Telegram from './telegram';
+import Telegram from '../telegram';
 import updateSheet from './updateSheet';
 import delay from 'delay';
 

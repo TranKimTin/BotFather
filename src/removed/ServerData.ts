@@ -1,7 +1,7 @@
 import http from 'http';
 import fs from 'fs';
-import * as util from './util';
-import { RateData } from './BinanceFuture';
+import * as util from '../util';
+import { RateData } from '../BinanceFuture';
 
 export default class ServerData {
     private queue: { [key: string]: Array<(data: Array<RateData>) => {}> };

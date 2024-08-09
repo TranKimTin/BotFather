@@ -4,7 +4,6 @@ import IBinance, { Binance } from 'binance-api-node';
 import moment from 'moment';
 import delay from 'delay';
 import * as util from './util';
-import ServerData from './ServerData';
 import dotenv from 'dotenv';
 
 dotenv.config({ path: '../.env' });
