@@ -105,13 +105,17 @@ export class OkxSocket {
         });
 
         ws.on('close', function close() {
-            console.log('okx: WebSocket connection closed');
-            throw 'okx: WebSocket connection closed';
+            console.error('okx: WebSocket connection closed');
+            setTimeout(() => {
+                throw 'okx: WebSocket connection closed';
+            }, 5000);
         });
 
         ws.on('error', function error(err) {
             console.error('okx: WebSocket error: ', err);
-            throw err;
+            setTimeout(() => {
+                throw err;
+            }, 5000);
         });
 
 

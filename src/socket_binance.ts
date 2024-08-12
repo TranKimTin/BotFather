@@ -128,12 +128,16 @@ export class BinanceSocket {
 
             ws.on('error', (error) => {
                 console.error(`binance: WebSocket error ${symbol}`, error);
-                throw error;
+                setTimeout(() => {
+                    throw error;
+                }, 5000);
             });
 
             ws.on('close', () => {
-                console.log(`binance: WebSocket connection closed ${symbol}`);
-                throw 'binance: socket close';
+                console.error(`binance: WebSocket connection closed ${symbol}`);
+                setTimeout(() => {
+                    throw 'binance: socket close';
+                }, 5000);
             });
             await delay(10);
         }

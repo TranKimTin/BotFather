@@ -117,13 +117,17 @@ export class BybitSocket {
         });
 
         ws.on('close', function close() {
-            console.log('bybit: WebSocket connection closed');
-            throw 'bybit: WebSocket connection closed';
+            console.error('bybit: WebSocket connection closed');
+            setTimeout(() => {
+                throw 'bybit: WebSocket connection closed';
+            }, 5000);
         });
 
         ws.on('error', function error(err) {
             console.error('bybit: WebSocket error: ', err);
-            throw err;
+            setTimeout(() => {
+                throw err;
+            }, 5000);
         });
 
 
