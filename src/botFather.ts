@@ -327,32 +327,56 @@ export class BotFather {
                         for (let i = shift + 1; i < values.length - 1; i++) {
 
                             let cnt = 0;
-                            let check = true;
+                            let check = 0;
                             while (i < values.length - 1) {
-                                if (values[i].MACD <= 0) { check = false; break; };
-                                if (values[i].signal <= 0) { check = false; break; };
+                                if (values[i].MACD <= 0) { check = 1; break; };
+                                if (values[i].signal <= 0) { check = 1; break; };
                                 if (values[i].histogram >= 0) break;
-                                if (values[i].histogram < 0) {
-                                    cnt++;
-                                    i++;
-                                }
+
+                                cnt++;
+                                i++;
+
                             }
-                            if (cnt < depth) check = false;
+                            if (cnt < depth) check = 2;
+
+                            if (check === 1) {
+                                value = n;
+                                break;
+                            }
+                            if (check === 2) {
+                                value = 0;
+                                break;
+                            }
 
                             cnt = 0;
                             while (i < values.length - 1) {
-                                if (values[i].MACD <= 0) { check = false; break; }
-                                if (values[i].signal <= 0) { check = false; break; }
+                                if (values[i].MACD <= 0) { check = 3; break; }
+                                if (values[i].signal <= 0) { check = 3; break; }
                                 if (values[i].histogram <= 0) break;
-                                if (values[i].histogram > 0) {
+
+                                cnt++;
+                                i++;
+
+                            }
+
+                            if (check === 3) {
+                                while (i < values.length - 1) {
+                                    if (values[i].histogram <= 0) break;
                                     cnt++;
                                     i++;
+
                                 }
                             }
-                            if (cnt < depth) check = false;
 
-                            if (check === false) {
+                            if (cnt < depth) check = 4;
+
+
+                            if (check === 3) {
                                 value = n;
+                                break;
+                            }
+                            if (check === 4) {
+                                value = 0;
                                 break;
                             }
 
