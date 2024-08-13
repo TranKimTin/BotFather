@@ -344,7 +344,7 @@ export class BotFather {
                                 break;
                             }
                             if (check === 2) {
-                                value = 0;
+                                value = n;
                                 break;
                             }
 
@@ -376,7 +376,7 @@ export class BotFather {
                                 break;
                             }
                             if (check === 4) {
-                                value = 0;
+                                value = n;
                                 break;
                             }
 
