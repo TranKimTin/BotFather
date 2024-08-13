@@ -174,3 +174,28 @@ export class BybitSocket {
         }, timeInterval);
     }
 };
+
+
+import http from 'http';
+import { Server } from "socket.io";
+const server = http.createServer();
+const io = new Server(server);
+const port = 8082;
+let cnt = 0;
+io.on('connection', client => {
+    cnt++;
+    console.log(`client connected. total: ${cnt} connection`);
+
+    client.on('disconnect', () => {
+        cnt--;
+        console.log(`onDisconnect - Client disconnected. total: ${cnt} connection`);
+    });
+});
+server.listen(port);
+
+function onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
+    io.emit('onCloseCandle', { broker, symbol, timeframe, data });
+}
+
+const bybitSocket = new BybitSocket();
+bybitSocket.init(300, onCloseCandle);

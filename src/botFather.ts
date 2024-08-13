@@ -1,27 +1,31 @@
 import { BotInfo, CreateWebConfig, BOT_DATA_DIR, Node, findIndicator, extractParams, checkEval, indicatorSupported, checkParams } from './botFatherConfig';
-import BinanceFuture, { RateData } from './BinanceFuture';
+import { RateData } from './BinanceFuture';
 import * as util from './util';
-import moment from 'moment';
-import delay from 'delay';
 import fs from 'fs';
-import path from 'path';
 import Telegram, { TelegramIdType } from './telegram';
 import io from 'socket.io-client';
 
 export class BotFather {
-    private sockerTradeServerPort: number;
+    private binanceSocketPort: number;
+    private bybitSocketPort: number;
+    private okxSocketPort: number;
     private webConfigServerPort: number;
     private botChildren: Array<BotInfo>;
     private telegram: Telegram;
 
     constructor() {
-        this.sockerTradeServerPort = 8081;
+        this.binanceSocketPort = 8081;
+        this.bybitSocketPort = 8082;
+        this.okxSocketPort = 8083;
         this.webConfigServerPort = 8080;
         this.botChildren = [];
         this.telegram = new Telegram(undefined, undefined, true);
         this.telegram.setChatID('@tintk_RSI_CCI'); //group chat
 
-        this.connectTradeDataServer(this.sockerTradeServerPort);
+        this.connectTradeDataServer(this.binanceSocketPort);
+        this.connectTradeDataServer(this.bybitSocketPort);
+        this.connectTradeDataServer(this.okxSocketPort);
+
         CreateWebConfig(this.webConfigServerPort, this.initBotChildren.bind(this));
         this.initBotChildren();
     }
@@ -36,7 +40,7 @@ export class BotFather {
         });
 
         client.on('connect', () => {
-            console.log('Connected to server');
+            console.log(`Connected to server ${port}`);
         });
 
         client.on('onCloseCandle', (msg: { broker: string, symbol: string, timeframe: string, data: Array<RateData> }) => {
@@ -51,11 +55,11 @@ export class BotFather {
         });
 
         client.on('disconnect', (reason: string) => {
-            console.log(`onDisconnect - Disconnected from server. reason: ${reason}`);
+            console.log(`onDisconnect - Disconnected from server ${port}. reason: ${reason}`);
         });
 
         client.on("connect_error", (error: { message: any; }) => {
-            console.log('connect_error - Attempting to reconnect');
+            console.log(`connect_error - Attempting to reconnect ${port}`);
             if (client.active) {
                 // temporary failure, the socket will automatically try to reconnect
             } else {
@@ -83,9 +87,6 @@ export class BotFather {
     }
 
     private async onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
-        // if (symbol == 'BTCUSDT') {
-        //     console.log({ symbol, timeframe }, JSON.stringify(data));
-        // }
         for (const botInfo of this.botChildren) {
             const { botName, idTelegram, symbolList, timeframes, treeData, route } = botInfo;
 

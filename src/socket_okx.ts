@@ -5,7 +5,6 @@ import delay from 'delay';
 import WebSocket from 'ws';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 
-
 export class OkxSocket {
     public static readonly broker = 'okx'
 
@@ -163,3 +162,27 @@ export class OkxSocket {
         }, timeInterval);
     }
 };
+
+import http from 'http';
+import { Server } from "socket.io";
+const server = http.createServer();
+const io = new Server(server);
+const port = 8083;
+let cnt = 0;
+io.on('connection', client => {
+    cnt++;
+    console.log(`client connected. total: ${cnt} connection`);
+
+    client.on('disconnect', () => {
+        cnt--;
+        console.log(`onDisconnect - Client disconnected. total: ${cnt} connection`);
+    });
+});
+server.listen(port);
+
+function onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
+    io.emit('onCloseCandle', { broker, symbol, timeframe, data });
+}
+
+const okxSocket = new OkxSocket();
+okxSocket.init(300, onCloseCandle);

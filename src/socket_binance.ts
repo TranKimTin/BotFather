@@ -19,6 +19,7 @@ export class BinanceSocket {
         this.gData = {};
         this.gLastPrice = {};
         this.gLastUpdated = {};
+        util.useSport();
     }
 
     async init(numbler_candle_load: number, onCloseCandle: (broker: string, symbol: string, timeframe: string, data: Array<RateData>) => void) {
@@ -187,3 +188,29 @@ export class BinanceSocket {
         }, timeInterval);
     }
 };
+
+
+
+import http from 'http';
+import { Server } from "socket.io";
+const server = http.createServer();
+const io = new Server(server);
+const port = 8081;
+let cnt = 0;
+io.on('connection', client => {
+    cnt++;
+    console.log(`client connected. total: ${cnt} connection`);
+
+    client.on('disconnect', () => {
+        cnt--;
+        console.log(`onDisconnect - Client disconnected. total: ${cnt} connection`);
+    });
+});
+server.listen(port);
+
+function onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
+    io.emit('onCloseCandle', { broker, symbol, timeframe, data });
+}
+
+const binanceSocket = new BinanceSocket();
+binanceSocket.init(300, onCloseCandle);
