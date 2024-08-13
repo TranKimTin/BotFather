@@ -3,6 +3,7 @@ import * as util from './util';
 import moment from 'moment';
 import delay from 'delay';
 import WebSocket from 'ws';
+import ReconnectingWebSocket from 'reconnecting-websocket';
 
 interface BybitCandle {
     start: number,
@@ -45,17 +46,19 @@ export class BybitSocket {
             }
         }
 
-        const ws = new WebSocket('wss://stream.bybit.com/v5/public/spot');
+        // const ws = new WebSocket('wss://stream.bybit.com/v5/public/spot');
+        const rws = new ReconnectingWebSocket('wss://stream.bybit.com/v5/public/spot', [], { WebSocket: WebSocket });
 
-        ws.on('open', async function open() {
+        // ws.on('open', async function open() {
+        rws.addEventListener('open', () => {
             console.log('bybit: WebSocket connection opened');
 
             for (let i = 0; i < symbolList.length; i += 10) {
-                ws.send(JSON.stringify({
+                rws.send(JSON.stringify({
                     op: 'subscribe',
                     args: symbolList.slice(i, i + 10).map(item => `kline.1.${item}`)
                 }));
-                await delay(50);
+                // await delay(50);
             }
 
         });
@@ -106,7 +109,9 @@ export class BybitSocket {
             }
         }
 
-        ws.on('message', function incoming(mess) {
+        // ws.on('message', function incoming(mess) {
+        rws.addEventListener('message', (event) => {
+            const mess = event.data;
             const data: { type: string, topic: string, data: Array<BybitCandle> } = JSON.parse(mess.toString());
             if (!data || data.type !== 'snapshot') return;
             const symbol = data.topic.split('.')[2];
@@ -116,14 +121,16 @@ export class BybitSocket {
             }
         });
 
-        ws.on('close', function close() {
-            console.error('bybit: WebSocket connection closed');
+        // ws.on('close', function close() {
+        rws.addEventListener('close', (event) => {
+            console.error(`bybit: WebSocket connection closed ${event.code} ${event.reason}`);
             setTimeout(() => {
-                throw 'bybit: WebSocket connection closed';
+                throw `bybit: WebSocket connection closed ${event.code} ${event.reason}`;
             }, 5000);
         });
 
-        ws.on('error', function error(err) {
+        // ws.on('error', function error(err) {
+        rws.addEventListener('error', (err) => {``
             console.error('bybit: WebSocket error: ', err);
             setTimeout(() => {
                 throw err;

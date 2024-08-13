@@ -3,6 +3,8 @@ import * as util from './util';
 import moment from 'moment';
 import delay from 'delay';
 import WebSocket from 'ws';
+import ReconnectingWebSocket from 'reconnecting-websocket';
+
 
 export class OkxSocket {
     public static readonly broker = 'okx'
@@ -31,12 +33,14 @@ export class OkxSocket {
             }
         }
 
-        const ws = new WebSocket('wss://ws.okx.com:8443/ws/v5/business');
+        // const ws = new WebSocket('wss://ws.okx.com:8443/ws/v5/business');
+        const rws = new ReconnectingWebSocket('wss://ws.okx.com:8443/ws/v5/business', [], { WebSocket: WebSocket });
 
-        ws.on('open', async function open() {
+        // ws.on('open', async function open() {
+        rws.addEventListener('open', () => {
             console.log('okx: WebSocket connection opened');
 
-            ws.send(JSON.stringify({
+            rws.send(JSON.stringify({
                 op: "subscribe",
                 args:
                     symbolList.map(symbol => ({
@@ -93,7 +97,9 @@ export class OkxSocket {
             }
         }
 
-        ws.on('message', function incoming(mess) {
+        // ws.on('message', function incoming(mess) {
+        rws.addEventListener('message', (event) => {
+            const mess = event.data;
             const data = JSON.parse(mess.toString()) as { event: string, arg: { channel: string, instId: string }, data: Array<Array<string>> };
             if (data.arg.channel !== 'candle1m' || data.event === 'subscribe') return;
 
@@ -104,14 +110,16 @@ export class OkxSocket {
             }
         });
 
-        ws.on('close', function close() {
-            console.error('okx: WebSocket connection closed');
+        // ws.on('close', function close() {
+        rws.addEventListener('close', (event) => {
+            console.error(`okx: WebSocket connection closed ${event.code} ${event.reason}`);
             setTimeout(() => {
-                throw 'okx: WebSocket connection closed';
+                throw `okx: WebSocket connection closed ${event.code} ${event.reason}`;
             }, 5000);
         });
 
-        ws.on('error', function error(err) {
+        // ws.on('error', function error(err) {
+        rws.addEventListener('error', (err) => {
             console.error('okx: WebSocket error: ', err);
             setTimeout(() => {
                 throw err;

@@ -4,6 +4,7 @@ import * as util from './util';
 import moment from 'moment';
 import delay from 'delay';
 import WebSocket from 'ws';
+import ReconnectingWebSocket from 'reconnecting-websocket';
 
 export class BinanceSocket {
     public static readonly broker = 'binance';
@@ -95,11 +96,17 @@ export class BinanceSocket {
             else {
                 url = `wss://stream.binance.com/ws/${symbol.toLowerCase()}@kline_1m`;
             }
-            const ws = new WebSocket(url);
-            ws.on('open', () => {
+            // const ws = new WebSocket(url);
+            const rws = new ReconnectingWebSocket(url, [], { WebSocket: WebSocket });
+
+            // ws.on('open', () => {
+            rws.addEventListener('open', () => {
                 // console.log(`binance: Connected to ${url}`);
             });
-            ws.on('message', (mess) => {
+
+            // ws.on('message', (mess) => {
+            rws.addEventListener('message', (event) => {
+                const mess = event.data;
                 const data = JSON.parse(mess.toString());
                 const kline = data.k;
                 const candle: Candle = {
@@ -126,17 +133,19 @@ export class BinanceSocket {
                 fetchCandles(candle);
             });
 
-            ws.on('error', (error) => {
-                console.error(`binance: WebSocket error ${symbol}`, error);
+            // ws.on('error', (err) => {
+            rws.addEventListener('error', (err) => {
+                console.error(`binance: WebSocket error ${symbol}`, err);
                 setTimeout(() => {
-                    throw error;
+                    throw err;
                 }, 5000);
             });
 
-            ws.on('close', () => {
-                console.error(`binance: WebSocket connection closed ${symbol}`);
+            // ws.on('close', () => {
+            rws.addEventListener('close', (event) => {
+                console.error(`binance: WebSocket connection closed ${symbol}, ${event.code} ${event.reason}`);
                 setTimeout(() => {
-                    throw 'binance: socket close';
+                    throw `binance: WebSocket connection closed ${symbol}, ${event.code} ${event.reason}`;
                 }, 5000);
             });
             await delay(10);
