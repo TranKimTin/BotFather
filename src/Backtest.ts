@@ -81,9 +81,9 @@ export default class Backtest {
         this.positionsHistory = [];
         this.ordersHistory = [];
 
-        for (let symbol of this.symbolList) {
+        for (const symbol of this.symbolList) {
             this.data[symbol] = {};
-            for (let tf of this.timeframes) {
+            for (const tf of this.timeframes) {
                 this.data[symbol][tf] = [];
             }
             this.positions[symbol] = {
@@ -102,12 +102,12 @@ export default class Backtest {
 
     async runBacktest(from: string, to: string) {
         console.log('init digits...');
-        let market = await this.binance.loadMarkets(true);
-        for (let key in market) {
-            let item = market[key];
+        const market = await this.binance.loadMarkets(true);
+        for (const key in market) {
+            const item = market[key];
             if (!item) continue;
-            let symbol = item.info.symbol.replace('/', '');
-            let precision = item.precision;
+            const symbol = item.info.symbol.replace('/', '');
+            const precision = item.precision;
             this.digits[symbol] = {
                 volume: precision.amount,
                 price: precision.price
@@ -117,17 +117,17 @@ export default class Backtest {
             this.minVolumes[symbol] = item.limits.amount?.min || 0;
         }
 
-        let startDate = moment.utc(from);
-        let endDate = moment.utc(to);
+        const startDate = moment.utc(from);
+        const endDate = moment.utc(to);
 
         while (startDate.valueOf() <= endDate.valueOf()) {
-            let today = startDate.format('YYYY-MM-DD');
-            let todayData: Array<RateData> = [];
-            for (let symbol of this.symbolList) {
+            const today = startDate.format('YYYY-MM-DD');
+            const todayData: Array<RateData> = [];
+            for (const symbol of this.symbolList) {
                 todayData.push(...await util.getData_m1(symbol, today));
             }
             todayData.sort((a, b) => a.startTime - b.startTime);
-            for (let rate of todayData) {
+            for (const rate of todayData) {
                 this.timeCurrent = moment.utc(rate.startTime);
 
                 this.lastPrice[rate.symbol] = rate.open;
@@ -169,7 +169,7 @@ export default class Backtest {
 
         console.log('orderStopMarket', { symbol, side, volume, price, isTakeProfit, closePosition, workingType });
 
-        let order = {
+        const order = {
             symbol,
             side,
             volume,
@@ -198,7 +198,7 @@ export default class Backtest {
 
         console.log('orderStopLimit', { symbol, side, volume, stopPrice, limitPrice, isTakeProfit, reduceOnly, workingType })
 
-        let order: Order = {
+        const order: Order = {
             symbol,
             side,
             volume,
@@ -218,7 +218,7 @@ export default class Backtest {
     async orderMarket(symbol: string, side: string, volume: number, options: { TP?: number, SL?: number, TP_Percent?: number, SL_Percent?: number } = {}): Promise<Array<Order>> {
         let { TP, SL, TP_Percent, SL_Percent } = options;
 
-        let lastPrice = this.lastPrice[symbol];
+        const lastPrice = this.lastPrice[symbol];
         volume = Math.max(volume, this.minVolumes[symbol]);
         volume = +volume.toFixed(this.digits[symbol].volume);
 
@@ -231,11 +231,11 @@ export default class Backtest {
         TP = TP ? +TP?.toFixed(this.digits[symbol].price) : 0;
         SL = SL ? +SL.toFixed(this.digits[symbol].price) : 0;
 
-        let sideClose = (side == 'BUY') ? 'SELL' : 'BUY';
+        const sideClose = (side == 'BUY') ? 'SELL' : 'BUY';
 
         console.log('orderMarket', { symbol, side, volume, TP, SL });
 
-        let order: Order = {
+        const order: Order = {
             symbol,
             side,
             type: 'MARKET',
@@ -247,7 +247,7 @@ export default class Backtest {
         this.orders.push(order);
         this.ordersHistory.push(order);
 
-        let result: Array<Order> = [order];
+        const result: Array<Order> = [order];
         if (TP) {
             result.push(((await this.orderLimit(symbol, sideClose, volume, TP)))[0]);
             result.push(await this.orderStopMarket(symbol, sideClose, volume, SL, false, true));
@@ -271,9 +271,9 @@ export default class Backtest {
         TP = TP ? +TP.toFixed(this.digits[symbol].price) : 0;
         SL = SL ? +SL.toFixed(this.digits[symbol].price) : 0;
 
-        let sideClose = (side == 'BUY') ? 'SELL' : 'BUY';
+        const sideClose = (side == 'BUY') ? 'SELL' : 'BUY';
 
-        let option = {
+        const option = {
             timeInForce: 'GTC',
             goodTillDate: 0
         };
@@ -285,7 +285,7 @@ export default class Backtest {
 
         console.log('orderLimit', { symbol, side, volume, price, TP, SL, option });
 
-        let order: Order = {
+        const order: Order = {
             symbol,
             side,
             type: 'LIMIT',
@@ -299,7 +299,7 @@ export default class Backtest {
         this.orders.push(order);
         this.ordersHistory.push(order);
 
-        let result: Array<Order> = [order];
+        const result: Array<Order> = [order];
         if (TP) {
             result.push(await this.orderStopLimit(symbol, sideClose, volume, price, TP, true, true));
             result.push(await this.orderStopMarket(symbol, sideClose, volume, SL, false, true));
@@ -309,9 +309,9 @@ export default class Backtest {
 
     private async updateCandle(symbol: string, close: boolean, volume: number = 0) {
         this.handleLogic();
-        let price = this.lastPrice[symbol];
-        for (let tf of this.timeframes) {
-            let data = this.data[symbol][tf];
+        const price = this.lastPrice[symbol];
+        for (const tf of this.timeframes) {
+            const data = this.data[symbol][tf];
             if (data[0] && util.getStartTime(tf, this.timeCurrent.valueOf()) == data[0].startTime) {
                 data[0].high = Math.max(data[0].high, price);
                 data[0].low = Math.min(data[0].low, price);
@@ -349,7 +349,7 @@ export default class Backtest {
 
     private handleLogic() {
         for (let i = 0; i < this.orders.length; i++) {
-            let order = this.orders[i];
+            const order = this.orders[i];
             if (order.side == 'BUY') {
                 this.handleBuy(order);
             }
@@ -361,9 +361,9 @@ export default class Backtest {
     }
 
     private fillOrder(order: Order, matchPrice: number) {
-        let timeCurrent = this.timeCurrent.valueOf();
-        let { symbol } = order;
-        let position = this.positions[symbol];
+        const timeCurrent = this.timeCurrent.valueOf();
+        const { symbol } = order;
+        const position = this.positions[symbol];
 
         if (order.side == 'BUY') {
             order.updateTime = moment(timeCurrent);
@@ -470,9 +470,9 @@ export default class Backtest {
     }
 
     private handleBuy(order: Order) {
-        let { symbol } = order;
-        let lastPrice = this.lastPrice[symbol];
-        let timeCurrent = this.timeCurrent.valueOf();
+        const { symbol } = order;
+        const lastPrice = this.lastPrice[symbol];
+        const timeCurrent = this.timeCurrent.valueOf();
         if (order.expiredTime && order.expiredTime <= timeCurrent) {
             order.status = OrderStatus.ORDER_CANCLE;
             return;
@@ -504,9 +504,9 @@ export default class Backtest {
     }
 
     private handleSell(order: Order) {
-        let { symbol } = order;
-        let lastPrice = this.lastPrice[symbol];
-        let timeCurrent = this.timeCurrent.valueOf();
+        const { symbol } = order;
+        const lastPrice = this.lastPrice[symbol];
+        const timeCurrent = this.timeCurrent.valueOf();
         if (order.expiredTime && order.expiredTime <= timeCurrent) {
             order.status = OrderStatus.ORDER_CANCLE;
             return;
@@ -541,11 +541,11 @@ export default class Backtest {
 let bot: Backtest;
 
 async function main() {
-    // let symbolList = await util.getSymbolList();
-    // let ignoreList = ['BTCDOMUSDT', 'USDCUSDT', 'COCOSUSDT'];
+    // const symbolList = await util.getSymbolList();
+    // const ignoreList = ['BTCDOMUSDT', 'USDCUSDT', 'COCOSUSDT'];
     // symbolList = symbolList.filter(item => item.endsWith("USDT"))
     //     .filter(item => !ignoreList.includes(item));
-    let symbolList = ['BTCUSDT'];
+    const symbolList = ['BTCUSDT'];
     bot = new Backtest({
         symbolList: symbolList,
         timeframes: ['4h'],
@@ -557,12 +557,12 @@ async function main() {
 }
 
 async function onCloseCandle(symbol: string, timeframe: string, data: Array<RateData>) {
-    let rsi = util.iRSI(data, 14);
+    const rsi = util.iRSI(data, 14);
 
-    let curRSI = rsi[0];
-    let preRSI = rsi[1];
-    let TP_Percent = 0.01;
-    let SL_Percent = 0.01;
+    const curRSI = rsi[0];
+    const preRSI = rsi[1];
+    const TP_Percent = 0.01;
+    const SL_Percent = 0.01;
     if (preRSI < 70 && curRSI > 70) {
         bot.orderMarket(symbol, 'SELL', 1, { TP_Percent, SL_Percent });
     }

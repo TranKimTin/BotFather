@@ -32,15 +32,15 @@ export class BybitSocket {
     }
 
     async init(numbler_candle_load: number, onCloseCandle: (broker: string, symbol: string, timeframe: string, data: Array<RateData>) => void) {
-        let symbolList = await util.getBybitSymbolList();
+        const symbolList = await util.getBybitSymbolList();
         // console.log(symbolList.join(' '));
         console.log(`bybit: Total ${symbolList.length} symbols`);
 
-        let timeframes = ['15m', '30m', '1h', '2h', '4h', '6h', '12h', '1d', '1m', '3m', '5m'];
+        const timeframes = ['15m', '30m', '1h', '2h', '4h', '6h', '12h', '1d', '1m', '3m', '5m'];
         // timeframes = ['1m', '15m', '4h', '1d'];
-        for (let symbol of symbolList) {
+        for (const symbol of symbolList) {
             this.gData[symbol] = {};
-            for (let tf of timeframes) {
+            for (const tf of timeframes) {
                 this.gData[symbol][tf] = [];
             }
         }
@@ -62,8 +62,8 @@ export class BybitSocket {
 
         const fetchCandles = (symbol: string, candle: BybitCandle) => {
             this.gLastUpdated[symbol] = new Date().getTime();
-            for (let tf of timeframes) {
-                let data: RateData = {
+            for (const tf of timeframes) {
+                const data: RateData = {
                     symbol: symbol,
                     startTime: util.getStartTime(tf, candle.start),
                     timestring: moment(util.getStartTime(tf, candle.start)).format('YYYY-MM-DD HH:mm:SS'),
@@ -79,7 +79,7 @@ export class BybitSocket {
                 };
                 this.gLastPrice[data.symbol] = data.close;
 
-                let dataList = this.gData[data.symbol][data.interval];
+                const dataList = this.gData[data.symbol][data.interval];
                 if (!dataList[0]) return;
 
                 if (dataList[0].startTime == data.startTime) {
@@ -109,9 +109,9 @@ export class BybitSocket {
         ws.on('message', function incoming(mess) {
             const data: { type: string, topic: string, data: Array<BybitCandle> } = JSON.parse(mess.toString());
             if (!data || data.type !== 'snapshot') return;
-            let symbol = data.topic.split('.')[2];
+            const symbol = data.topic.split('.')[2];
 
-            for (let candle of data.data) {
+            for (const candle of data.data) {
                 fetchCandles(symbol, candle);
             }
         });
@@ -131,17 +131,17 @@ export class BybitSocket {
         });
 
 
-        let initCandle = async (symbol: string, tf: string) => {
-            let rates = await util.getBybitOHLCV(symbol, tf, numbler_candle_load);
+        const initCandle = async (symbol: string, tf: string) => {
+            const rates = await util.getBybitOHLCV(symbol, tf, numbler_candle_load);
             this.gData[symbol][tf] = rates;
             this.gLastPrice[symbol] = this.gData[symbol][tf][0]?.close || 0;
             // console.log('init candle', { symbol, tf })
         }
 
-        for (let tf of timeframes) {
+        for (const tf of timeframes) {
             console.log(`bybit: init candle ${tf}...`);
             let promiseList = [];
-            for (let symbol of symbolList) {
+            for (const symbol of symbolList) {
                 promiseList.push(initCandle(symbol, tf));
                 if (promiseList.length >= 100) {
                     await Promise.all(promiseList);
@@ -156,9 +156,9 @@ export class BybitSocket {
 
         const timeInterval = 10 * 60 * 1000;
         setInterval(() => {
-            let now = new Date().getTime();
-            for (let symbol in this.gLastUpdated) {
-                let lastTimeUpdated = this.gLastUpdated[symbol];
+            const now = new Date().getTime();
+            for (const symbol in this.gLastUpdated) {
+                const lastTimeUpdated = this.gLastUpdated[symbol];
                 if (now - lastTimeUpdated > timeInterval) {
                     console.log(`bybit: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`);
                     throw `bybit: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`;

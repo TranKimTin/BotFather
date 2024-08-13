@@ -85,7 +85,7 @@ class BinanceFuture {
     constructor(params: IParamsConstructor) {
         // new ServerData(process.env.PORT_DATA_SERVER);
 
-        let key = {
+        const key = {
             apiKey: params.isReadOnly ? undefined : params.apiKey,
             secret: params.isReadOnly ? undefined : params.secretKey,
             apiSecret: params.isReadOnly ? undefined : params.secretKey
@@ -106,9 +106,9 @@ class BinanceFuture {
         this.lastPrice = {};
         this.isReadOnly = params.isReadOnly || false;
 
-        for (let symbol of this.symbolList) {
+        for (const symbol of this.symbolList) {
             this.data[symbol] = {};
-            for (let tf of this.timeframes) {
+            for (const tf of this.timeframes) {
                 this.data[symbol][tf] = [];
             }
         }
@@ -116,13 +116,13 @@ class BinanceFuture {
 
     private async updatePosition() {
         if (this.isReadOnly) return;
-        let balance = await this.binance.fetchBalance();
-        for (let position of balance.info.positions) {
-            let symbol = position.symbol;
-            let volume = position.positionAmt * 1;
-            let entryPrice = position.entryPrice * 1;
-            let profit = position.unrealizedProfit * 1;
-            let side = volume > 0 ? 'BUY' : volume < 0 ? 'SELL' : '';
+        const balance = await this.binance.fetchBalance();
+        for (const position of balance.info.positions) {
+            const symbol = position.symbol;
+            const volume = position.positionAmt * 1;
+            const entryPrice = position.entryPrice * 1;
+            const profit = position.unrealizedProfit * 1;
+            const side = volume > 0 ? 'BUY' : volume < 0 ? 'SELL' : '';
             this.positions[symbol] = { symbol, side, volume, entryPrice, profit };
             if (volume != 0) console.log(position);
         }
@@ -132,12 +132,12 @@ class BinanceFuture {
         // if (!this.isReadOnly)
         await this.onInitStart();
         console.log('init digits...');
-        let market = await this.binance.loadMarkets(true);
-        for (let key in market) {
-            let item = market[key];
+        const market = await this.binance.loadMarkets(true);
+        for (const key in market) {
+            const item = market[key];
             if (!item) continue;
-            let symbol = item.info.symbol.replace('/', '');
-            let precision = item.precision;
+            const symbol = item.info.symbol.replace('/', '');
+            const precision = item.precision;
             this.digits[symbol] = {
                 volume: precision.amount,
                 price: precision.price
@@ -155,15 +155,15 @@ class BinanceFuture {
             await this.client.ws.futuresUser(async msg => {
                 console.log(msg);
                 if (msg.eventType == 'ACCOUNT_UPDATE') {
-                    let { positions } = msg;
-                    for (let position of positions) {
-                        let { symbol, positionAmount } = position;
+                    const { positions } = msg;
+                    for (const position of positions) {
+                        const { symbol, positionAmount } = position;
 
                         if (+positionAmount) continue;
 
-                        let orders = await this.getOpenOrders(symbol);
-                        for (let order of orders) {
-                            let { id, reduceOnly, closePosition } = order;
+                        const orders = await this.getOpenOrders(symbol);
+                        for (const order of orders) {
+                            const { id, reduceOnly, closePosition } = order;
                             // if (!reduceOnly && !closePosition) continue;
                             try {
                                 console.log('cancel order', { id, symbol });
@@ -178,10 +178,10 @@ class BinanceFuture {
                     }
                 }
                 else if (msg.eventType == 'ORDER_TRADE_UPDATE' && msg.timeInForce.toString() == 'GTD' && msg.executionType == 'CANCELED') {
-                    let { symbol } = msg;
-                    let orders = await this.getOpenOrders(symbol);
-                    for (let order of orders) {
-                        let { id, reduceOnly, closePosition } = order;
+                    const { symbol } = msg;
+                    const orders = await this.getOpenOrders(symbol);
+                    for (const order of orders) {
+                        const { id, reduceOnly, closePosition } = order;
                         // if (!reduceOnly && !closePosition) continue;
                         try {
                             console.log('cancel order', { id, symbol });
@@ -199,8 +199,8 @@ class BinanceFuture {
 
         console.log('init timeframe', this.timeframes);
         this.client.ws.futuresCandles(this.symbolList, '1m', candle => {
-            for (let tf of this.timeframes) {
-                let data = {
+            for (const tf of this.timeframes) {
+                const data = {
                     symbol: candle.symbol,
                     startTime: util.getStartTime(tf, candle.startTime),
                     timestring: moment(util.getStartTime(tf, candle.startTime)).format('YYYY-MM-DD HH:mm:SS'),
@@ -216,7 +216,7 @@ class BinanceFuture {
                 };
                 this.lastPrice[data.symbol] = data.close;
 
-                let dataList = this.data[data.symbol][data.interval];
+                const dataList = this.data[data.symbol][data.interval];
                 if (!dataList[0]) return;
 
                 if (dataList[0].startTime == data.startTime) {
@@ -242,19 +242,19 @@ class BinanceFuture {
             }
         });
 
-        for (let tf of this.timeframes) {
+        for (const tf of this.timeframes) {
             console.log(`init candle ${tf}...`);
-            let promiseList = [];
-            for (let symbol of this.symbolList) {
+            const promiseList = [];
+            for (const symbol of this.symbolList) {
                 promiseList.push(util.getOHLCV(symbol, tf, numbler_candle_load));
                 // promiseList.push(util.getOHLCVFromCache(symbol, tf, numbler_candle_load));
                 // promiseList.push(fetch(`http://localhost:${process.env.PORT_DATA_SERVER}/?symbol=${symbol}&timeframe=${tf}&limit=${numbler_candle_load}`));
             }
-            // let responses = await Promise.all(promiseList);
-            // let rates = await Promise.all(responses.map(item => item.json()));
-            let rates = await Promise.all(promiseList);
+            // const responses = await Promise.all(promiseList);
+            // const rates = await Promise.all(responses.map(item => item.json()));
+            const rates = await Promise.all(promiseList);
             let i = 0;
-            for (let symbol of this.symbolList) {
+            for (const symbol of this.symbolList) {
                 this.data[symbol][tf] = rates[i++];
                 this.lastPrice[symbol] = this.data[symbol][tf][0]?.close || 0;
             }
@@ -267,8 +267,8 @@ class BinanceFuture {
     async getOpenOrders(symbol: string): Promise<Array<Order>> {
         if (this.isReadOnly) return [];
 
-        let orders = await this.binance.fetchOpenOrders(symbol);
-        let result = orders.map(item => (
+        const orders = await this.binance.fetchOpenOrders(symbol);
+        const result = orders.map(item => (
             {
                 id: item.id,
                 symbol: item.info.symbol,
@@ -339,7 +339,7 @@ class BinanceFuture {
     async orderMarket(symbol: string, side: string, volume: number, options: { TP?: number, SL?: number, TP_Percent?: number, SL_Percent?: number } = {}) {
         let { TP, SL, TP_Percent, SL_Percent } = options;
 
-        let lastPrice = this.lastPrice[symbol];
+        const lastPrice = this.lastPrice[symbol];
         volume = Math.max(volume, this.minVolumes[symbol]);
         volume = +volume.toFixed(this.digits[symbol].volume);
 
@@ -352,26 +352,26 @@ class BinanceFuture {
         TP = TP ? +TP?.toFixed(this.digits[symbol].price) : 0;
         SL = SL ? +SL.toFixed(this.digits[symbol].price) : 0;
 
-        let sideClose = (side == 'BUY') ? 'SELL' : 'BUY';
+        const sideClose = (side == 'BUY') ? 'SELL' : 'BUY';
 
         console.log('orderMarket', { symbol, side, volume, TP, SL });
         if (this.isReadOnly) return;
 
-        let promiseList = [this.binance.createMarketOrder(symbol, side, volume)];
+        const promiseList = [this.binance.createMarketOrder(symbol, side, volume)];
         if (TP) promiseList.push(this.binance.createLimitOrder(symbol, sideClose, volume, TP, { 'reduceOnly': false }))
         if (SL) promiseList.push(this.orderStopMarket(symbol, sideClose, volume, SL, false, true));
 
 
-        let result = await Promise.allSettled(promiseList);
-        for (let res of result) {
+        const result = await Promise.allSettled(promiseList);
+        for (const res of result) {
             if (res.status == 'rejected') {
-                for (let res of result) {
+                for (const res of result) {
                     if (res.status == 'fulfilled') {
-                        let { id, orderId, symbol } = <any>res.value;
+                        const { id, orderId, symbol } = <any>res.value;
                         await this.binance.cancelOrder(id || orderId, symbol);
                     }
                     else {
-                        let reason = res.reason;
+                        const reason = res.reason;
                         console.log('ERROR', reason);
                         await this.onHandleError(reason, symbol);
                     }
@@ -398,9 +398,9 @@ class BinanceFuture {
         TP = TP ? +TP.toFixed(this.digits[symbol].price) : 0;
         SL = SL ? +SL.toFixed(this.digits[symbol].price) : 0;
 
-        let sideClose = (side == 'BUY') ? 'SELL' : 'BUY';
+        const sideClose = (side == 'BUY') ? 'SELL' : 'BUY';
 
-        let option = {
+        const option = {
             timeInForce: 'GTC',
             goodTillDate: 0
         };
@@ -413,20 +413,20 @@ class BinanceFuture {
         console.log('orderLimit', { symbol, side, volume, price, TP, SL, option });
         if (this.isReadOnly) return;
 
-        let promiseList = [this.binance.createLimitOrder(symbol, side, volume, price, option)];
+        const promiseList = [this.binance.createLimitOrder(symbol, side, volume, price, option)];
         if (TP) promiseList.push(this.orderStopLimit(symbol, sideClose, volume, price, TP, false, false))
         if (SL) promiseList.push(this.orderStopMarket(symbol, sideClose, volume, SL, false, true));
 
-        let result = await Promise.allSettled(promiseList);
-        for (let res of result) {
+        const result = await Promise.allSettled(promiseList);
+        for (const res of result) {
             if (res.status == 'rejected') {
-                for (let res of result) {
+                for (const res of result) {
                     if (res.status == 'fulfilled') {
-                        let { id, orderId, symbol } = <any>res.value;
+                        const { id, orderId, symbol } = <any>res.value;
                         await this.binance.cancelOrder(id || orderId, symbol);
                     }
                     else {
-                        let reason = res.reason;
+                        const reason = res.reason;
                         console.log('ERROR', reason);
                         await this.onHandleError(reason, symbol);
                     }

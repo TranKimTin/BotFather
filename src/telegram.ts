@@ -23,7 +23,7 @@ export default class Telegram {
 
 
     constructor(tag?: string, token?: string, polling?: boolean) {
-        let botToken: any = token || process.env.TELEGRAM_TOKEN;
+        const botToken: any = token || process.env.TELEGRAM_TOKEN;
 
         this.timeoutMess = {};
         this.listMess = {};
@@ -64,13 +64,13 @@ export default class Telegram {
             this.listMess[id].push(mess);
             clearTimeout(this.timeoutMess[id]);
             this.timeoutMess[id] = setTimeout(() => {
-                let s = this.TAG + this.listMess[id].join('\n\n\n');
+                const s = this.TAG + this.listMess[id].join('\n\n\n');
                 this.bot.sendMessage(id, s, { parse_mode: 'HTML' });
                 this.listMess[id] = [];
             }, 1000);
         }
         catch (err: any) {
-            let logError = `${this.TAG}${moment().format('DD/MM/YYYY HH:mm:ss')} ____ ${err.message}`;
+            const logError = `${this.TAG}${moment().format('DD/MM/YYYY HH:mm:ss')} ____ ${err.message}`;
             console.log('sendTelegram ERROR', logError);
         }
     }
@@ -81,13 +81,13 @@ export default class Telegram {
             this.listErr.push(mess);
             clearTimeout(this.timeoutErr);
             this.timeoutErr = setTimeout(() => {
-                let s = this.TAG + this.listErr.join('\n\n\n');
+                const s = this.TAG + this.listErr.join('\n\n\n');
                 this.bot.sendMessage(errorChatID, s, { parse_mode: 'HTML' });
                 this.listErr = [];
             }, 1000);
         }
         catch (err: any) {
-            let logError = `${this.TAG}${moment().format('DD/MM/YYYY HH:mm:ss')} ____ ${err.message}`;
+            const logError = `${this.TAG}${moment().format('DD/MM/YYYY HH:mm:ss')} ____ ${err.message}`;
             console.log('sendTelegram ERROR', logError);
         }
     }
@@ -97,11 +97,11 @@ export default class Telegram {
             clearTimeout(this.timeout);
             const sendTele = async () => {
                 let mess = '';
-                for (let data of this.list) {
-                    let rows = data.length;
-                    let cols = data[0].length;
+                for (const data of this.list) {
+                    const rows = data.length;
+                    const cols = data[0].length;
 
-                    let genarateString = (char: string, length: number) => {
+                    const genarateString = (char: string, length: number) => {
                         let s = '';
                         for (let i = 0; i < length; i++) s += char;
                         return s;
@@ -116,11 +116,11 @@ export default class Telegram {
                         }
                     }
 
-                    let table = data.map(item => `|${item.join('| ')}|`);
-                    let tableToText = `\n${genarateString('-', table[0].length)}\n${table.map(item => `${item}\n${genarateString('-', item.length)}\n`).join('').trim()}\n`
+                    const table = data.map(item => `|${item.join('| ')}|`);
+                    const tabconstoText = `\n${genarateString('-', table[0].length)}\n${table.map(item => `${item}\n${genarateString('-', item.length)}\n`).join('').trim()}\n`
 
-                    mess += tableToText + '\n\n\n';
-                    console.log(this.TAG, 'Send table telegram', tableToText);
+                    mess += tabconstoText + '\n\n\n';
+                    console.log(this.TAG, 'Send table telegram', tabconstoText);
                 }
                 this.list = [];
                 mess = `\`\`\`\n${this.TAG}${mess}\n\`\`\``;
@@ -130,7 +130,7 @@ export default class Telegram {
             else this.timeout = setTimeout(sendTele, 1000)
         }
         catch (err: any) {
-            let logError = `${this.TAG}${moment().format('DD/MM/YYYY HH:mm:ss')} ____ ${err.message}`;
+            const logError = `${this.TAG}${moment().format('DD/MM/YYYY HH:mm:ss')} ____ ${err.message}`;
             console.log('sendTelegram ERROR', logError);
         }
     }
@@ -140,7 +140,7 @@ export default class Telegram {
             await this.bot.sendPhoto(chatID, path, { caption });
         }
         catch (err: any) {
-            let logError = `${this.TAG}${moment().format('DD/MM/YYYY HH:mm:ss')} ____ ${err.message} `;
+            const logError = `${this.TAG}${moment().format('DD/MM/YYYY HH:mm:ss')} ____ ${err.message} `;
             console.log('sendPhotoTelegram ERROR', logError);
         }
     }

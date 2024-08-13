@@ -132,7 +132,7 @@ export default class SetupConfig {
                     console.log(requestBody);
                     try {
                         requestBody = requestBody.toString();
-                        let config = JSON.parse(requestBody);
+                        const config = JSON.parse(requestBody);
                         fs.writeFileSync(fileConfig, JSON.stringify(config));
                         this.InConfig = config;
 
@@ -148,7 +148,7 @@ export default class SetupConfig {
             }
             else if (req.url == '/') {
                 try {
-                    let html = fs.readFileSync('./config.html').toString();
+                    const html = fs.readFileSync('./config.html').toString();
                     return res.end(html);
                 }
                 catch (err: any) {

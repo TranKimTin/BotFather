@@ -18,15 +18,15 @@ export class OkxSocket {
     }
 
     async init(numbler_candle_load: number, onCloseCandle: (broker: string, symbol: string, timeframe: string, data: Array<RateData>) => void) {
-        let symbolList = await util.getOkxSymbolList();
+        const symbolList = await util.getOkxSymbolList();
         // console.log(symbolList.join(' '));
         console.log(`okx: Total ${symbolList.length} symbols`);
 
-        let timeframes = ['15m', '30m', '1h', '2h', '4h', '6h', '12h', '1d', '1m', '3m', '5m'];
+        const timeframes = ['15m', '30m', '1h', '2h', '4h', '6h', '12h', '1d', '1m', '3m', '5m'];
         // timeframes = ['1m', '15m', '4h', '1d'];
-        for (let symbol of symbolList) {
+        for (const symbol of symbolList) {
             this.gData[symbol] = {};
-            for (let tf of timeframes) {
+            for (const tf of timeframes) {
                 this.gData[symbol][tf] = [];
             }
         }
@@ -49,8 +49,8 @@ export class OkxSocket {
 
         const fetchCandles = (symbol: string, candle: Array<string>) => {
             this.gLastUpdated[symbol] = new Date().getTime();
-            for (let tf of timeframes) {
-                let data: RateData = {
+            for (const tf of timeframes) {
+                const data: RateData = {
                     symbol: symbol,
                     startTime: util.getStartTime(tf, +candle[0]),
                     timestring: moment(util.getStartTime(tf, +candle[0])).format('YYYY-MM-DD HH:mm:SS'),
@@ -66,7 +66,7 @@ export class OkxSocket {
                 };
                 this.gLastPrice[data.symbol] = data.close;
 
-                let dataList = this.gData[data.symbol][data.interval];
+                const dataList = this.gData[data.symbol][data.interval];
                 if (!dataList[0]) return;
 
                 if (dataList[0].startTime == data.startTime) {
@@ -94,12 +94,12 @@ export class OkxSocket {
         }
 
         ws.on('message', function incoming(mess) {
-            let data = JSON.parse(mess.toString()) as { event: string, arg: { channel: string, instId: string }, data: Array<Array<string>> };
+            const data = JSON.parse(mess.toString()) as { event: string, arg: { channel: string, instId: string }, data: Array<Array<string>> };
             if (data.arg.channel !== 'candle1m' || data.event === 'subscribe') return;
 
 
-            let symbol = data.arg.instId;
-            for (let candle of data.data) {
+            const symbol = data.arg.instId;
+            for (const candle of data.data) {
                 fetchCandles(symbol, candle);
             }
         });
@@ -119,17 +119,17 @@ export class OkxSocket {
         });
 
 
-        let initCandle = async (symbol: string, tf: string) => {
-            let rates = await util.getOkxOHLCV(symbol, tf, numbler_candle_load);
+        const initCandle = async (symbol: string, tf: string) => {
+            const rates = await util.getOkxOHLCV(symbol, tf, numbler_candle_load);
             this.gData[symbol][tf] = rates;
             this.gLastPrice[symbol] = this.gData[symbol][tf][0]?.close || 0;
             // console.log('init candle', { symbol, tf })
         }
 
-        for (let tf of timeframes) {
+        for (const tf of timeframes) {
             console.log(`okx: init candle ${tf}...`);
             let promiseList = [];
-            for (let symbol of symbolList) {
+            for (const symbol of symbolList) {
                 promiseList.push(initCandle(symbol, tf));
                 if (promiseList.length >= 20) {
                     await Promise.all(promiseList);
@@ -144,9 +144,9 @@ export class OkxSocket {
 
         const timeInterval = 10 * 60 * 1000;
         setInterval(() => {
-            let now = new Date().getTime();
-            for (let symbol in this.gLastUpdated) {
-                let lastTimeUpdated = this.gLastUpdated[symbol];
+            const now = new Date().getTime();
+            for (const symbol in this.gLastUpdated) {
+                const lastTimeUpdated = this.gLastUpdated[symbol];
                 if (now - lastTimeUpdated > timeInterval) {
                     console.log(`okx: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`);
                     throw `okx: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`;

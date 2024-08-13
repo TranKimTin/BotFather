@@ -104,7 +104,7 @@ export function checkEval(condition: string): boolean {
     try {
         // console.log({ condition })
         if (checkValidExpression(condition)) {
-            let ret = eval(condition);
+            const ret = eval(condition);
             // console.log({ condition, ret })
             return !!ret;
         }
@@ -134,16 +134,16 @@ export function extractParams(s: string): Array<number> {
     // console.log(match)
     // return match.map(item => +item);
 
-    let i = s.indexOf('(');
-    let j = s.indexOf(')');
+    const i = s.indexOf('(');
+    const j = s.indexOf(')');
     if (i == -1 || j == -1 || i == j - 1) return [];
 
-    let arr: Array<number> = s.slice(s.indexOf('(') + 1, s.lastIndexOf(')')).split(',').map(item => +item);
+    const arr: Array<number> = s.slice(s.indexOf('(') + 1, s.lastIndexOf(')')).split(',').map(item => +item);
     return arr;
 }
 
 export function checkParams(indicator: string, params: Array<number>): boolean {
-    let paramsCheck = paramsValidate[indicator];
+    const paramsCheck = paramsValidate[indicator];
     if (!paramsCheck) return false;
     if (params.length < paramsCheck[0]) return false;
     if (params.length > paramsCheck[1]) return false;
@@ -168,9 +168,9 @@ export function checkCondition(condition: string) {
         if (!(/[<>=]|rsi_phan_ki/.test(condition))) return false;
 
         for (let indicator of indicatorSupported) {
-            let fomulas = findIndicator(condition, indicator);
+            const fomulas = findIndicator(condition, indicator);
             for (let f of fomulas) {
-                let params = extractParams(f);
+                const params = extractParams(f);
                 if (!checkParams(indicator, params)) {
                     console.log('invalid params', { indicator, condition, params })
                     return false;
@@ -210,27 +210,27 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
     }
 
     function buildRoute(botInfo: BotInfo): boolean {
-        let elements = botInfo.treeData.elements;
-        let nodes = elements.nodes?.map(item => item.data) || [];
-        let edges = elements.edges?.map(item => item.data) || [];
+        const elements = botInfo.treeData.elements;
+        const nodes = elements.nodes?.map(item => item.data) || [];
+        const edges = elements.edges?.map(item => item.data) || [];
 
-        let nodeList: { [key: string]: Node } = {};
+        const nodeList: { [key: string]: Node } = {};
         for (let node of nodes) {
-            let { id, name } = node;
+            const { id, name } = node;
             nodeList[id] = { logic: name, id, next: [] };
         }
 
         for (let edge of edges) {
-            let { source, target } = edge;
+            const { source, target } = edge;
             nodeList[source].next.push(nodeList[target]);
         }
 
         if (!nodeList['start']) return false;
 
-        let visited: { [key: string]: boolean } = {};
+        const visited: { [key: string]: boolean } = {};
         let ret = true;
 
-        let dfs = (node: Node) => {
+        const dfs = (node: Node) => {
             if (visited[node.id]) ret = false;
             if (!ret) return;
 
@@ -250,15 +250,15 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
     }
 
     app.post("/save", (req, res) => {
-        let data: BotInfo = req.body;
+        const data: BotInfo = req.body;
 
-        let botName = data.botName;
+        const botName = data.botName;
         if (!validatekBotName(botName)) {
             return res.json({ code: 400, message: 'Tên bot không hợp lệ ' + botName });
         }
 
-        let edges = data.treeData.elements.edges?.filter(item => !item.removed).map(item => item.data) || []; //{source, target, id}
-        let nodes = data.treeData.elements.nodes?.filter(item => !item.removed).map(item => item.data) || []; //{id, name}
+        const edges = data.treeData.elements.edges?.filter(item => !item.removed).map(item => item.data) || []; //{source, target, id}
+        const nodes = data.treeData.elements.nodes?.filter(item => !item.removed).map(item => item.data) || []; //{id, name}
 
         console.log({ edges, nodes });
 
@@ -273,7 +273,7 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
             return res.json({ code: 400, message: 'Điều kiện vòng tròn' });
         }
 
-        let botPath = path.join(BOT_DATA_DIR, `${data.botName}.json`);
+        const botPath = path.join(BOT_DATA_DIR, `${data.botName}.json`);
         fs.writeFileSync(botPath, JSON.stringify(data));
         onChangeConfig(data.botName);
 
@@ -281,7 +281,7 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
     });
 
     app.post("/check", (req, res) => {
-        let data = req.body;
+        const data = req.body;
         console.log('check', data);
 
         if (!data.id || !checkCondition(data.name)) {
@@ -292,7 +292,7 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
     });
 
     app.get("/getBotInfo", (req, res) => {
-        let botName: any = req.query.botName;
+        const botName: any = req.query.botName;
         if (!validatekBotName(botName)) {
             return res.json({ code: 400, message: 'Tên bot không hợp lệ ' + botName });
         }
@@ -317,19 +317,19 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
         let okxSymbolList = await util.getOkxSymbolList();
         okxSymbolList = okxSymbolList.map(item => `${OkxSocket.broker}:${item}`);
 
-        let symbolList = [...binanceSymbolList, ...bybitSymbolList, ...okxSymbolList];
+        const symbolList = [...binanceSymbolList, ...bybitSymbolList, ...okxSymbolList];
         res.json({ code: 200, message: "ok", data: symbolList });
     });
 
     app.get('/getBotList', (req, res) => {
-        let botList = fs.readdirSync(BOT_DATA_DIR);
-        let data = botList.map(item => item.replace('.json', '')) || [];
+        const botList = fs.readdirSync(BOT_DATA_DIR);
+        const data = botList.map(item => item.replace('.json', '')) || [];
         res.json({ code: 200, message: "ok", data });
     });
 
-    app.put('/delete', (req, res) => {
-        let { botName } = req.query as { botName: string };
-        let botFile = path.join(BOT_DATA_DIR, `${botName}.json`);
+    app.put('/deconste', (req, res) => {
+        const { botName } = req.query as { botName: string };
+        const botFile = path.join(BOT_DATA_DIR, `${botName}.json`);
         if (fs.existsSync(botFile)) {
             fs.unlinkSync(botFile);
             onChangeConfig(botName);

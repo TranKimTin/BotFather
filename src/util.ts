@@ -29,20 +29,20 @@ export function isFuture() {
 }
 
 export function iCCI(data: Array<RateData>, period: number) {
-    let prices = data.map(item => ({ high: item.high, low: item.low, close: item.close })).reverse();
+    const prices = data.map(item => ({ high: item.high, low: item.low, close: item.close })).reverse();
     const sma = (data: Array<number>) => data.reduce((sum, value) => sum + value, 0) / data.length;
 
-    let typicalPrices = [];
+    const typicalPrices = [];
     for (let i = 0; i < prices.length; i++) {
-        let { high, low, close } = prices[i];
+        const { high, low, close } = prices[i];
         typicalPrices.push((high + low + close) / 3);
     }
 
-    let ccis = [];
+    const ccis = [];
     for (let i = 0; i <= typicalPrices.length - period; i++) {
-        let slice = typicalPrices.slice(i, i + period);
-        let avg = sma(slice);
-        let meanDeviation = sma(slice.map(tp => Math.abs(tp - avg)));
+        const slice = typicalPrices.slice(i, i + period);
+        const avg = sma(slice);
+        const meanDeviation = sma(slice.map(tp => Math.abs(tp - avg)));
         ccis.push((typicalPrices[i + period - 1] - avg) / (0.015 * meanDeviation));
     }
 
@@ -50,16 +50,16 @@ export function iCCI(data: Array<RateData>, period: number) {
 }
 
 export function iRSI(data: Array<RateData>, period: number) {
-    let prices = data.map(item => item.close).reverse();
-    let gains = [];
-    let losses = [];
+    const prices = data.map(item => item.close).reverse();
+    const gains = [];
+    const losses = [];
     let avgGain = 0;
     let avgLoss = 0;
     let rs = 0;
-    let RSI: Array<number> = [];
+    const RSI: Array<number> = [];
 
     for (let i = 1; i < prices.length; i++) {
-        let delta = prices[i] - prices[i - 1];
+        const delta = prices[i] - prices[i - 1];
 
         if (delta > 0) {
             gains.push(delta);
@@ -88,8 +88,8 @@ export function iRSI(data: Array<RateData>, period: number) {
 }
 
 export async function getDigitsFuture() {
-    let url = useFuture ? 'https://fapi.binance.com/fapi/v1/exchangeInfo' : 'https://api.binance.com/api/v1/exchangeInfo'
-    let res = await fetch(url, {
+    const url = useFuture ? 'https://fapi.binance.com/fapi/v1/exchangeInfo' : 'https://api.binance.com/api/v1/exchangeInfo'
+    const res = await fetch(url, {
         "headers": {
             "accept": "*/*",
             "content-type": "application/json",
@@ -97,9 +97,9 @@ export async function getDigitsFuture() {
         "body": null,
         "method": "GET"
     });
-    let data: any = await res.json();
-    let digits: { [key: string]: { price: number, volume: number } } = {};
-    for (let item of data.symbols) {
+    const data: any = await res.json();
+    const digits: { [key: string]: { price: number, volume: number } } = {};
+    for (const item of data.symbols) {
         digits[item.symbol] = {
             price: item.pricePrecision,
             volume: item.quantityPrecision
@@ -109,8 +109,8 @@ export async function getDigitsFuture() {
 }
 
 export async function getBinanceSymbolList() {
-    let url = useFuture ? 'https://fapi.binance.com/fapi/v1/exchangeInfo' : 'https://api.binance.com/api/v1/exchangeInfo';
-    let res = await fetch(url, {
+    const url = useFuture ? 'https://fapi.binance.com/fapi/v1/exchangeInfo' : 'https://api.binance.com/api/v1/exchangeInfo';
+    const res = await fetch(url, {
         "headers": {
             "accept": "*/*",
             "content-type": "application/json",
@@ -119,7 +119,7 @@ export async function getBinanceSymbolList() {
         "method": "GET"
     });
 
-    let data = await res.json() as { symbols: Array<{ symbol: string; status: string }> };
+    const data = await res.json() as { symbols: Array<{ symbol: string; status: string }> };
     return data.symbols
         .filter((item: { status: string }) => item.status == 'TRADING')
         .map((item: { symbol: any; }) => item.symbol)
@@ -127,8 +127,8 @@ export async function getBinanceSymbolList() {
 }
 
 export async function getBybitSymbolList() {
-    let url = `https://api.bybit.com/v5/market/tickers?category=spot`;
-    let res = await fetch(url, {
+    const url = `https://api.bybit.com/v5/market/tickers?category=spot`;
+    const res = await fetch(url, {
         "headers": {
             "accept": "*/*",
             "content-type": "application/json",
@@ -137,15 +137,15 @@ export async function getBybitSymbolList() {
         "method": "GET"
     });
 
-    let data = await res.json() as { result: { list: Array<{ symbol: string }> } };
+    const data = await res.json() as { result: { list: Array<{ symbol: string }> } };
     return data.result.list
         .map((item: { symbol: string; }) => item.symbol)
         .filter(item => item.endsWith('USDT'));
 }
 
 export async function getOkxSymbolList() {
-    let url = `https://www.okx.com/api/v5/public/instruments?instType=SPOT`;
-    let res = await fetch(url, {
+    const url = `https://www.okx.com/api/v5/public/instruments?instType=SPOT`;
+    const res = await fetch(url, {
         "headers": {
             "accept": "*/*",
             "content-type": "application/json",
@@ -154,14 +154,14 @@ export async function getOkxSymbolList() {
         "method": "GET"
     });
 
-    let data = await res.json() as { data: Array<{ baseCcy: string, quoteCcy: string, instId: string }> };
+    const data = await res.json() as { data: Array<{ baseCcy: string, quoteCcy: string, instId: string }> };
     return data.data
         .filter(item => item.quoteCcy === 'USDT')
         .map((item) => item.instId);
 }
 
 export function checkFinal(tf: string, startTime: number) {
-    let nextTime = startTime / 1000 + 60;
+    const nextTime = startTime / 1000 + 60;
     switch (tf) {
         case '1m': return nextTime % 60 == 0;
         case '3m': return nextTime % 180 == 0;
@@ -234,31 +234,31 @@ export async function decompress(data: Buffer): Promise<Buffer> {
 }
 
 export async function getOHLCV(symbol: string, timeframe: string, limit: number): Promise<Array<RateData>> {
-    let result = [];
-    let maxCall = 1000;
-    let check: { [key: number]: boolean } = {};
+    const result = [];
+    const maxCall = 1000;
+    const check: { [key: number]: boolean } = {};
     let since: number | undefined = undefined;
     while (limit > 0) {
         if (limit > maxCall) console.log(`getOHLCV pending ${symbol} ${timeframe} ${limit}`);
-        let ohlcv = await binance.fetchOHLCV(symbol, timeframe, since, Math.min(limit, maxCall));
-        let data = ohlcv.filter(item => item[0] !== undefined && item[1] !== undefined && item[2] !== undefined && item[3] !== undefined && item[4] !== undefined && item[5] !== undefined).map(item => {
-            let startTime = item[0] || 0;
-            let open = item[1] || 0;
-            let high = item[2] || 0;
-            let low = item[3] || 0;
-            let close = item[4] || 0;
-            let volume = item[5] || 0;
-            let interval = timeframe;
-            let isFinal = true;
-            let change = (close - open) / open;
-            let ampl = (high - low) / open;
-            let timestring = moment(startTime).format('YYYY-MM-DD HH:mm:SS');
+        const ohlcv = await binance.fetchOHLCV(symbol, timeframe, since, Math.min(limit, maxCall));
+        const data = ohlcv.filter(item => item[0] !== undefined && item[1] !== undefined && item[2] !== undefined && item[3] !== undefined && item[4] !== undefined && item[5] !== undefined).map(item => {
+            const startTime = item[0] || 0;
+            const open = item[1] || 0;
+            const high = item[2] || 0;
+            const low = item[3] || 0;
+            const close = item[4] || 0;
+            const volume = item[5] || 0;
+            const interval = timeframe;
+            const isFinal = true;
+            const change = (close - open) / open;
+            const ampl = (high - low) / open;
+            const timestring = moment(startTime).format('YYYY-MM-DD HH:mm:SS');
             return { symbol, startTime, timestring, open, high, low, close, volume, interval, isFinal, change, ampl };
         }).filter(item => !check[item.startTime]);
         if (data.length == 0) break;
         data.sort((a, b) => a.startTime - b.startTime);
         result.push(...data);
-        for (let item of data) {
+        for (const item of data) {
             check[item.startTime] = true;
         }
         limit -= Math.min(limit, maxCall);
@@ -295,8 +295,8 @@ export async function getBybitOHLCV(symbol: string, timeframe: string, limit: nu
             break;
     }
 
-    let url = `https://api.bybit.com/v5/market/kline?category=spot&symbol=${symbol}&interval=${tf}&limit=${limit}`;
-    let res = await fetch(url, {
+    const url = `https://api.bybit.com/v5/market/kline?category=spot&symbol=${symbol}&interval=${tf}&limit=${limit}`;
+    const res = await fetch(url, {
         "headers": {
             "accept": "*/*",
             "content-type": "application/json",
@@ -305,19 +305,19 @@ export async function getBybitOHLCV(symbol: string, timeframe: string, limit: nu
         "method": "GET"
     });
 
-    let data = await res.json() as { result: { list: Array<string> } };
-    let result = data.result.list.map(item => {
-        let startTime = +item[0] || 0;
-        let open = +item[1] || 0;
-        let high = +item[2] || 0;
-        let low = +item[3] || 0;
-        let close = +item[4] || 0;
-        let volume = +item[5] || 0;
-        let interval = timeframe;
-        let isFinal = true;
-        let change = (close - open) / open;
-        let ampl = (high - low) / open;
-        let timestring = moment(startTime).format('YYYY-MM-DD HH:mm:SS');
+    const data = await res.json() as { result: { list: Array<string> } };
+    const result = data.result.list.map(item => {
+        const startTime = +item[0] || 0;
+        const open = +item[1] || 0;
+        const high = +item[2] || 0;
+        const low = +item[3] || 0;
+        const close = +item[4] || 0;
+        const volume = +item[5] || 0;
+        const interval = timeframe;
+        const isFinal = true;
+        const change = (close - open) / open;
+        const ampl = (high - low) / open;
+        const timestring = moment(startTime).format('YYYY-MM-DD HH:mm:SS');
         return { symbol, startTime, timestring, open, high, low, close, volume, interval, isFinal, change, ampl };
     });
     result.sort((a, b) => b.startTime - a.startTime);
@@ -353,8 +353,8 @@ export async function getOkxOHLCV(symbol: string, timeframe: string, limit: numb
             break;
     }
 
-    let url = `https://www.okx.com/api/v5/market/candles?instId=${symbol}&bar=${tf}&limit=${limit}`;
-    let res = await fetch(url, {
+    const url = `https://www.okx.com/api/v5/market/candles?instId=${symbol}&bar=${tf}&limit=${limit}`;
+    const res = await fetch(url, {
         "headers": {
             "accept": "*/*",
             "content-type": "application/json",
@@ -363,19 +363,19 @@ export async function getOkxOHLCV(symbol: string, timeframe: string, limit: numb
         "method": "GET"
     });
 
-    let data = await res.json() as { data: Array<string> };
-    let result = data.data.map(item => {
-        let startTime = +item[0] || 0;
-        let open = +item[1] || 0;
-        let high = +item[2] || 0;
-        let low = +item[3] || 0;
-        let close = +item[4] || 0;
-        let volume = +item[5] || 0;
-        let interval = timeframe;
-        let isFinal = true;
-        let change = (close - open) / open;
-        let ampl = (high - low) / open;
-        let timestring = moment(startTime).format('YYYY-MM-DD HH:mm:SS');
+    const data = await res.json() as { data: Array<string> };
+    const result = data.data.map(item => {
+        const startTime = +item[0] || 0;
+        const open = +item[1] || 0;
+        const high = +item[2] || 0;
+        const low = +item[3] || 0;
+        const close = +item[4] || 0;
+        const volume = +item[5] || 0;
+        const interval = timeframe;
+        const isFinal = true;
+        const change = (close - open) / open;
+        const ampl = (high - low) / open;
+        const timestring = moment(startTime).format('YYYY-MM-DD HH:mm:SS');
         return { symbol, startTime, timestring, open, high, low, close, volume, interval, isFinal, change, ampl };
     });
     result.sort((a, b) => b.startTime - a.startTime);
@@ -385,10 +385,10 @@ export async function getOkxOHLCV(symbol: string, timeframe: string, limit: numb
 }
 
 export async function getOHLCVFromCache(symbol: string, timeframe: string, limit: number): Promise<Array<RateData>> {
-    let date = moment.utc();
-    let dataM1: Array<RateData> = [];
+    const date = moment.utc();
+    const dataM1: Array<RateData> = [];
     while (dataM1.length < limit * timeframeToNumberMinutes(timeframe)) {
-        let data = await getData_m1(symbol, date.format('YYYY-MM-DD'));
+        const data = await getData_m1(symbol, date.format('YYYY-MM-DD'));
         if (data.length == 0) break;
         dataM1.unshift(...data);
         date.subtract(1, 'day');
@@ -397,7 +397,7 @@ export async function getOHLCVFromCache(symbol: string, timeframe: string, limit
     dataM1.sort((a, b) => a.startTime - b.startTime);
 
     let data: Array<RateData> = [];
-    for (let candle of dataM1) {
+    for (const candle of dataM1) {
         candle.timestring = moment(getStartTime(timeframe, candle.startTime)).format('YYYY-MM-DD HH:mm:SS');
         candle.startTime = getStartTime(timeframe, candle.startTime);
 
@@ -423,25 +423,25 @@ export async function getOHLCVFromCache(symbol: string, timeframe: string, limit
 }
 
 async function getOHLCV_m1(symbol: string, limit: number, since: number): Promise<Array<OHLCV>> {
-    let result = [];
-    let maxCall = 1000;
-    let check: { [key: number]: boolean } = {};
+    const result = [];
+    const maxCall = 1000;
+    const check: { [key: number]: boolean } = {};
     while (limit > 0) {
         // if (limit > maxCall) console.log(`getOHLCV pending ${symbol} ${timeframe} ${limit}`);
-        let ohlcv = await binance.fetchOHLCV(symbol, '1m', since, Math.min(limit, maxCall));
-        let data = ohlcv.filter(item => item[0] !== undefined && item[1] !== undefined && item[2] !== undefined && item[3] !== undefined && item[4] !== undefined && item[5] !== undefined).map(item => {
-            let startTime = item[0] || 0;
-            let open = item[1] || 0;
-            let high = item[2] || 0;
-            let low = item[3] || 0;
-            let close = item[4] || 0;
-            let volume = item[5] || 0;
+        const ohlcv = await binance.fetchOHLCV(symbol, '1m', since, Math.min(limit, maxCall));
+        const data = ohlcv.filter(item => item[0] !== undefined && item[1] !== undefined && item[2] !== undefined && item[3] !== undefined && item[4] !== undefined && item[5] !== undefined).map(item => {
+            const startTime = item[0] || 0;
+            const open = item[1] || 0;
+            const high = item[2] || 0;
+            const low = item[3] || 0;
+            const close = item[4] || 0;
+            const volume = item[5] || 0;
             return { symbol, startTime, open, high, low, close, volume };
         }).filter(item => !check[item.startTime]);
         if (data.length == 0) break;
         data.sort((a, b) => a.startTime - b.startTime);
         result.push(...data);
-        for (let item of data) {
+        for (const item of data) {
             check[item.startTime] = true;
         }
         limit -= Math.min(limit, maxCall);
@@ -452,14 +452,14 @@ async function getOHLCV_m1(symbol: string, limit: number, since: number): Promis
 }
 
 export async function getData_m1(symbol: string, date: string): Promise<Array<RateData>> {
-    let startDate = moment.utc(date);
+    const startDate = moment.utc(date);
     let data: Array<OHLCV> = [];
 
-    let filename = `../data/${symbol}_${startDate.format('YYYY-MM-DD')}.data`;
+    const filename = `../data/${symbol}_${startDate.format('YYYY-MM-DD')}.data`;
     if (!fs.existsSync(filename)) {
         data = await getOHLCV_m1(symbol, 1440, startDate.valueOf());
         if (data.length == 1440 && data[0].startTime == startDate.valueOf() && data[data.length - 1].startTime + 60000 == startDate.valueOf() + 86400000) {
-            let compressData = await compress(JSON.stringify(data));
+            const compressData = await compress(JSON.stringify(data));
             fs.writeFileSync(filename, compressData);
             console.log(`update data ${symbol} ${startDate.format('YYYY-MM-DD')}`);
         }
@@ -474,7 +474,7 @@ export async function getData_m1(symbol: string, date: string): Promise<Array<Ra
         }
     }
     else {
-        let dataDecompress = await decompress(fs.readFileSync(filename));
+        const dataDecompress = await decompress(fs.readFileSync(filename));
         data = JSON.parse(dataDecompress.toString());
     }
 
@@ -495,8 +495,8 @@ export async function getData_m1(symbol: string, date: string): Promise<Array<Ra
 }
 
 export function iMA(data: Array<RateData>, period: number) {
-    let values = data.map(item => item.close).reverse();
-    let MAs = indicator.SMA.calculate({
+    const values = data.map(item => item.close).reverse();
+    const MAs = indicator.SMA.calculate({
         period,
         values
     });
@@ -504,8 +504,8 @@ export function iMA(data: Array<RateData>, period: number) {
 }
 
 export function iEMA(data: Array<RateData>, period: number) {
-    let values = data.map(item => item.close).reverse();
-    let EMAs = indicator.EMA.calculate({
+    const values = data.map(item => item.close).reverse();
+    const EMAs = indicator.EMA.calculate({
         period,
         values
     });
@@ -513,8 +513,8 @@ export function iEMA(data: Array<RateData>, period: number) {
 }
 
 export function iMACD(data: Array<RateData>, fastPeriod: number, slowPeriod: number, signalPeriod: number) {
-    let values = data.map(item => item.close).reverse();
-    let EMAs = indicator.MACD.calculate({
+    const values = data.map(item => item.close).reverse();
+    const EMAs = indicator.MACD.calculate({
         values,
         fastPeriod,
         slowPeriod,
@@ -530,8 +530,8 @@ export function iMACD(data: Array<RateData>, fastPeriod: number, slowPeriod: num
 }
 
 export function iBB(data: Array<RateData>, period: number, multiplier: number) {
-    let values = data.map(item => item.close).reverse();
-    let EMAs = indicator.BollingerBands.calculate({
+    const values = data.map(item => item.close).reverse();
+    const EMAs = indicator.BollingerBands.calculate({
         period,
         values,
         stdDev: multiplier
@@ -547,7 +547,7 @@ export function iZigZag(data: Array<RateData>, deviation: number, depth: number,
     const DOWN_TREND = -1;
 
     let trend: typeof NO_TREND | typeof UP_TREND | typeof DOWN_TREND = NO_TREND;
-    let result: Array<{ trend: typeof NO_TREND | typeof UP_TREND | typeof DOWN_TREND, highIndex: number, lowIndex: number }> = [];
+    const result: Array<{ trend: typeof NO_TREND | typeof UP_TREND | typeof DOWN_TREND, highIndex: number, lowIndex: number }> = [];
 
     let lastHighIndex = data.length - 1;
     let lastLowIndex = data.length - 1;
@@ -556,7 +556,7 @@ export function iZigZag(data: Array<RateData>, deviation: number, depth: number,
 
 
     for (let i = data.length - 2; i >= 0; i--) {
-        let rate = data[i];
+        const rate = data[i];
 
         if (trend == NO_TREND) {
             if (rate.high > lastHigh) {

@@ -10,13 +10,13 @@ import { OkxSocket } from './socket_okx';
 util.useSport();
 
 const port = 8081;
-// let clientList: Array<Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>> = [];
+// const clientList: Array<Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>> = [];
 
 
 async function main(numbler_candle_load = 300) {
-    let binanceSocket = new BinanceSocket();
-    let bybitSocket = new BybitSocket();
-    let okxSocket = new OkxSocket();
+    const binanceSocket = new BinanceSocket();
+    const bybitSocket = new BybitSocket();
+    const okxSocket = new OkxSocket();
 
     binanceSocket.init(numbler_candle_load, onCloseCandle);
     bybitSocket.init(numbler_candle_load, onCloseCandle);
