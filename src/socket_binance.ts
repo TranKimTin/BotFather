@@ -195,7 +195,7 @@ import http from 'http';
 import { Server } from "socket.io";
 const server = http.createServer();
 const io = new Server(server);
-const port = 8081;
+const port = 81;
 let cnt = 0;
 io.on('connection', client => {
     cnt++;

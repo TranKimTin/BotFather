@@ -14,9 +14,9 @@ export class BotFather {
     private telegram: Telegram;
 
     constructor() {
-        this.binanceSocketPort = 8081;
-        this.bybitSocketPort = 8082;
-        this.okxSocketPort = 8083;
+        this.binanceSocketPort = 81;
+        this.bybitSocketPort = 82;
+        this.okxSocketPort = 83;
         this.webConfigServerPort = 8080;
         this.botChildren = [];
         this.telegram = new Telegram(undefined, undefined, true);
