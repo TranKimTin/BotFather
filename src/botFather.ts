@@ -175,7 +175,7 @@ export class BotFather {
                     case 'change%': {
                         const [shift = 0] = params;
                         const change: number = data[shift].close - data[shift].open;
-                        value = change / data[shift].open * 100;
+                        value = +(change / data[shift].open * 100).toFixed(2);
                         break;
                     }
                     case 'ampl': {
