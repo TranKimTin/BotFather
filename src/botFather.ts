@@ -188,7 +188,7 @@ export class BotFather {
                     case 'ampl%': {
                         const [shift = 0] = params;
                         const ampl: number = data[shift].high - data[shift].low;
-                        value = ampl / data[shift].open * 100;
+                        value = +(ampl / data[shift].open * 100).toFixed(2);
                         break;
                     }
                     case 'upper_shadow': {
@@ -200,7 +200,7 @@ export class BotFather {
                     case 'upper_shadow%': {
                         const [shift = 0] = params;
                         const diff: number = data[shift].high - Math.max(data[shift].open, data[shift].close);
-                        value = diff / data[shift].open * 100;
+                        value = +(diff / data[shift].open * 100).toFixed(2);
                         break;
                     }
                     case 'lower_shadow': {
@@ -212,7 +212,7 @@ export class BotFather {
                     case 'lower_shadow%': {
                         const [shift = 0] = params;
                         const diff: number = Math.min(data[shift].open, data[shift].close) - data[shift].low;
-                        value = diff / data[shift].open * 100;
+                        value = +(diff / data[shift].open * 100).toFixed(2);
                         break;
                     }
                     case 'rsi': {
@@ -379,7 +379,7 @@ export class BotFather {
                             if (cnt < depth) check = 4;
 
                             n++;
-                            
+
                             if (check === 3) {
                                 value = n;
                                 break;
