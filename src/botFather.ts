@@ -133,15 +133,15 @@ export class BotFather {
                 let value = undefined;
                 switch (indicator) {
                     case 'broker': {
-                        value = `'${broker}'`;
+                        value = `'${broker.toLocaleLowerCase()}'`;
                         break;
                     }
                     case 'symbol': {
-                        value = `'${symbol}'`;
+                        value = `'${symbol.toLocaleLowerCase()}'`;
                         break;
                     }
                     case 'timeframe': {
-                        value = `'${timeframe}'`;
+                        value = `'${timeframe.toLocaleLowerCase()}'`;
                         break;
                     }
                     case 'hour': {
