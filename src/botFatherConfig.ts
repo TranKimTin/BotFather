@@ -62,6 +62,11 @@ export interface BotInfo {
 
 export const paramsValidate: { [key: string]: Array<number> } = {
     // indicator : [leng>=, leng<=, value >=]
+    'broker': [0,0],
+    'symbol': [0,0],
+    'timeframe': [0,0],
+    'hour': [0,0],
+    'minute': [0,0],
     'open': [0, 1],
     'high': [0, 1],
     'low': [0, 1],

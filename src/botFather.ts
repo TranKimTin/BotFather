@@ -4,6 +4,7 @@ import * as util from './util';
 import fs from 'fs';
 import Telegram, { TelegramIdType } from './telegram';
 import io from 'socket.io-client';
+import moment from 'moment';
 
 export class BotFather {
     private binanceSocketPort: number;
@@ -131,6 +132,26 @@ export class BotFather {
 
                 let value = undefined;
                 switch (indicator) {
+                    case 'broker': {
+                        value = broker;
+                        break;
+                    }
+                    case 'symbol': {
+                        value = symbol;
+                        break;
+                    }
+                    case 'timeframe': {
+                        value = timeframe;
+                        break;
+                    }
+                    case 'hour': {
+                        value = moment.utc(data[0].startTime).format('HH');
+                        break;
+                    }
+                    case 'minute': {
+                        value = moment.utc(data[0].startTime).format('mm');
+                        break;
+                    }
                     case 'open': {
                         const [shift = 0] = params;
                         value = data[shift].open;
