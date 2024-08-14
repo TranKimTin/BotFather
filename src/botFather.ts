@@ -331,7 +331,7 @@ export class BotFather {
                         if (values[shift].histogram <= 0) { value = 0; break; }; //G-R-G-R-G => histogram[shift] = G
                         if (values[shift + 1].histogram >= 0) { value = 0; break; }; //G-R-G-R-G => histogram[shift+1] = R
 
-                        let n = 1;
+                        let n = 0;
                         for (let i = shift + 1; i < values.length - 1; i++) {
 
                             let cnt = 0;
@@ -378,7 +378,8 @@ export class BotFather {
 
                             if (cnt < depth) check = 4;
 
-
+                            n++;
+                            
                             if (check === 3) {
                                 value = n;
                                 break;
@@ -388,7 +389,6 @@ export class BotFather {
                                 break;
                             }
 
-                            n++;
                         }
 
                         break;
