@@ -441,6 +441,8 @@ export class BotFather {
             let mess = emoji[broker];
             mess += `\n${broker}:${symbol} ${timeframe}`
             mess += `\n${condition}`;
+
+            if (condition === '<--->') mess = '--------------------';
             this.telegram.sendMessage(mess, idTelegram);
             return true;
         }
