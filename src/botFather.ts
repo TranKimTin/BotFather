@@ -410,7 +410,15 @@ export class BotFather {
             condition = condition.slice("telegram:".length).trim().replaceAll('==', '=');
 
             console.log({ condition, symbol, timeframe });
-            let mess = `${broker}:${symbol} ${timeframe}`
+
+            const emoji: { [key: string]: string } = {
+                'binance': '🥇🥇🥇',
+                'bybit': '🥑🥑🥑',
+                'okx': '⚽⚽⚽'
+            }
+            
+            let mess = emoji[broker];
+            mess += `\n${broker}:${symbol} ${timeframe}`
             mess += `\n${condition}`;
             this.telegram.sendMessage(mess, idTelegram);
             return true;
