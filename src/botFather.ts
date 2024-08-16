@@ -145,11 +145,11 @@ export class BotFather {
                         break;
                     }
                     case 'hour': {
-                        value = moment.utc(data[0].startTime).format('HH');
+                        value = +moment.utc(data[0].startTime).format('HH');
                         break;
                     }
                     case 'minute': {
-                        value = moment.utc(data[0].startTime).format('mm');
+                        value = +moment.utc(data[0].startTime).format('mm');
                         break;
                     }
                     case 'open': {
