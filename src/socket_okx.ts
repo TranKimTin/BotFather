@@ -166,7 +166,10 @@ export class OkxSocket {
 import http from 'http';
 import { Server } from "socket.io";
 const server = http.createServer();
-const io = new Server(server);
+const io = new Server(server, {
+    pingInterval: 25000,
+    pingTimeout: 60000
+});
 const port = 83;
 let cnt = 0;
 io.on('connection', client => {
