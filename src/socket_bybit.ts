@@ -187,11 +187,11 @@ const port = 82;
 let cnt = 0;
 io.on('connection', client => {
     cnt++;
-    console.log(`client connected. total: ${cnt} connection`);
+    console.log(`bybit: client connected. total: ${cnt} connection`);
 
     client.on('disconnect', () => {
         cnt--;
-        console.log(`onDisconnect - Client disconnected. total: ${cnt} connection`);
+        console.log(`bybit: onDisconnect - Client disconnected. total: ${cnt} connection`);
     });
 });
 server.listen(port);
