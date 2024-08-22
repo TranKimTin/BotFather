@@ -347,10 +347,10 @@ export class BotFather {
                         if (shift >= values.length - 1) return false;
                         if (fastPeriod >= slowPeriod) return false;
 
-                        if (values[shift].MACD <= 0) { value = 0; break; };
-                        if (values[shift].signal <= 0) { value = 0; break; };
-                        if (values[shift].histogram <= 0) { value = 0; break; }; //G-R-G-R-G => histogram[shift] = G
-                        if (values[shift + 1].histogram >= 0) { value = 0; break; }; //G-R-G-R-G => histogram[shift+1] = R
+                        // if (values[shift].MACD <= 0) { value = 0; break; };
+                        // if (values[shift].signal <= 0) { value = 0; break; };
+                        // if (values[shift].histogram <= 0) { value = 0; break; }; //G-R-G-R-G => histogram[shift] = G
+                        // if (values[shift + 1].histogram >= 0) { value = 0; break; }; //G-R-G-R-G => histogram[shift+1] = R
 
                         let i = shift;
                         {
