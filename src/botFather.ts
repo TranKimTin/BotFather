@@ -51,7 +51,7 @@ export class BotFather {
                 this.onCloseCandle(broker, symbol, timeframe, data);
             }
             catch (err) {
-                console.log(err);
+                console.error(err);
             }
         });
 
@@ -91,7 +91,7 @@ export class BotFather {
         for (const botInfo of this.botChildren) {
             const { botName, idTelegram, symbolList, timeframes, treeData, route } = botInfo;
 
-            if (!symbolList.includes(`${broker}:${symbol}`) || !timeframes.includes(timeframe)) continue;
+            if (!timeframes.includes(timeframe) || !symbolList.includes(`${broker}:${symbol}`)) continue;
 
             // console.log("onCloseCandle", { symbol, timeframe });
 

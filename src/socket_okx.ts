@@ -88,6 +88,9 @@ export class OkxSocket {
                 }
                 else if (dataList[0].startTime < data.startTime) {
                     dataList.unshift(data);
+                    if (dataList.length > numbler_candle_load) {
+                        dataList.pop();
+                    }
                     if (dataList[1] && !dataList[1].isFinal) {
                         dataList[1].isFinal = true;
                         onCloseCandle(OkxSocket.broker, data.symbol, data.interval, dataList.slice(1));
@@ -155,7 +158,7 @@ export class OkxSocket {
             for (const symbol in this.gLastUpdated) {
                 const lastTimeUpdated = this.gLastUpdated[symbol];
                 if (now - lastTimeUpdated > timeInterval) {
-                    console.log(`okx: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`);
+                    console.error(`okx: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`);
                     throw `okx: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`;
                 }
             }

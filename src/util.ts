@@ -9,6 +9,14 @@ import _ from 'lodash';
 let useFuture = true;
 let binance: ccxt.binance | ccxt.binanceusdm = new ccxt.binanceusdm({ 'timeout': 30000 });
 
+const LogError = console.error.bind(console);
+console.error = function () {
+    if (arguments.length) {
+        LogError(...arguments);
+        console.log('APP_ERROR', ...arguments);
+    }
+};
+
 interface OHLCV {
     symbol: string,
     startTime: number,

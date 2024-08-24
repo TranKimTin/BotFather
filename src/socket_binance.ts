@@ -75,6 +75,9 @@ export class BinanceSocket {
                 }
                 else if (dataList[0].startTime < data.startTime) {
                     dataList.unshift(data);
+                    if (dataList.length > numbler_candle_load) {
+                        dataList.pop();
+                    }
                     if (dataList[1] && !dataList[1].isFinal) {
                         dataList[1].isFinal = true;
                         onCloseCandle(BinanceSocket.broker, data.symbol, data.interval, dataList.slice(1));
@@ -181,7 +184,7 @@ export class BinanceSocket {
             for (const symbol in this.gLastUpdated) {
                 const lastTimeUpdated = this.gLastUpdated[symbol];
                 if (now - lastTimeUpdated > timeInterval) {
-                    console.log(`binance: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`);
+                    console.error(`binance: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`);
                     throw `binance: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`;
                 }
             }

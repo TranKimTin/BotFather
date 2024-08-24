@@ -101,6 +101,9 @@ export class BybitSocket {
                 }
                 else if (dataList[0].startTime < data.startTime) {
                     dataList.unshift(data);
+                    if (dataList.length > numbler_candle_load) {
+                        dataList.pop();
+                    }
                     if (dataList[1] && !dataList[1].isFinal) {
                         dataList[1].isFinal = true;
                         onCloseCandle(BybitSocket.broker, data.symbol, data.interval, dataList.slice(1));
@@ -130,7 +133,8 @@ export class BybitSocket {
         });
 
         // ws.on('error', function error(err) {
-        rws.addEventListener('error', (err) => {``
+        rws.addEventListener('error', (err) => {
+            ``
             console.error('bybit: WebSocket error: ', err);
             setTimeout(() => {
                 throw err;
@@ -167,7 +171,7 @@ export class BybitSocket {
             for (const symbol in this.gLastUpdated) {
                 const lastTimeUpdated = this.gLastUpdated[symbol];
                 if (now - lastTimeUpdated > timeInterval) {
-                    console.log(`bybit: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`);
+                    console.error(`bybit: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`);
                     throw `bybit: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`;
                 }
             }
