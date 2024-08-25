@@ -347,12 +347,9 @@ export class BotFather {
                         if (shift >= values.length - 1) return false;
                         if (fastPeriod >= slowPeriod) return false;
 
-                        // if (values[shift].MACD <= 0) { value = 0; break; };
-                        // if (values[shift].signal <= 0) { value = 0; break; };
-                        // if (values[shift].histogram <= 0) { value = 0; break; }; //G-R-G-R-G => histogram[shift] = G
-                        // if (values[shift + 1].histogram >= 0) { value = 0; break; }; //G-R-G-R-G => histogram[shift+1] = R
-
                         let i = shift;
+                        let cnt = 0;
+                        let n = 0;
                         {
                             while (i < values.length - 1) {
                                 if (values[i].MACD <= 0) { break; };
@@ -361,7 +358,7 @@ export class BotFather {
                                 i++;
                             }
 
-                            let cnt = 0;
+                            cnt = 0;
                             let check = 0;
                             while (i < values.length - 1) {
                                 if (values[i].MACD <= 0) { check = 3; break; }
@@ -372,16 +369,14 @@ export class BotFather {
                                 i++;
 
                             }
+                            n++;
                             if (cnt < depth) {
-                                value = 0;
-                                break;
+                                n--;
                             }
                         }
 
-                        let n = 1;
                         for (; i < values.length - 1; i++) {
-
-                            let cnt = 0;
+                            cnt = 0;
                             let check = 0;
                             while (i < values.length - 1) {
                                 if (values[i].MACD <= 0) { check = 1; break; };
@@ -398,10 +393,10 @@ export class BotFather {
                                 value = n;
                                 break;
                             }
-                            if (check === 2) {
-                                value = 0;
-                                break;
-                            }
+                            // if (check === 2) {
+                            //     value = 0;
+                            //     break;
+                            // }
 
                             cnt = 0;
                             while (i < values.length - 1) {
@@ -419,7 +414,6 @@ export class BotFather {
                                     if (values[i].histogram < 0) break;
                                     cnt++;
                                     i++;
-
                                 }
                             }
 
@@ -432,8 +426,7 @@ export class BotFather {
                                 break;
                             }
                             if (check === 4) {
-                                value = 0;
-                                break;
+                                n--;
                             }
 
                         }
