@@ -70,7 +70,7 @@ export default class Telegram {
         }
         catch (err: any) {
             const logError = `${this.TAG}${moment().format('DD/MM/YYYY HH:mm:ss')} ____ ${err.message}`;
-            console.log('sendTelegram ERROR', logError);
+            console.error('sendTelegram ERROR', logError);
         }
     }
     sendError(mess: string) {
@@ -87,7 +87,7 @@ export default class Telegram {
         }
         catch (err: any) {
             const logError = `${this.TAG}${moment().format('DD/MM/YYYY HH:mm:ss')} ____ ${err.message}`;
-            console.log('sendTelegram ERROR', logError);
+            console.error('sendTelegram ERROR', logError);
         }
     }
     sendTable(_data: Array<Array<number | string>>) {
@@ -130,7 +130,7 @@ export default class Telegram {
         }
         catch (err: any) {
             const logError = `${this.TAG}${moment().format('DD/MM/YYYY HH:mm:ss')} ____ ${err.message}`;
-            console.log('sendTelegram ERROR', logError);
+            console.error('sendTelegram ERROR', logError);
         }
     }
     async sendPhoto(path: string, caption = '') {
@@ -140,7 +140,7 @@ export default class Telegram {
         }
         catch (err: any) {
             const logError = `${this.TAG}${moment().format('DD/MM/YYYY HH:mm:ss')} ____ ${err.message} `;
-            console.log('sendPhotoTelegram ERROR', logError);
+            console.error('sendPhotoTelegram ERROR', logError);
         }
     }
 };
