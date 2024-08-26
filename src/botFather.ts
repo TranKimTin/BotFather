@@ -369,9 +369,21 @@ export class BotFather {
                                 i++;
 
                             }
+                            if (check === 3) {
+                                while (i < values.length - 1) {
+                                    if (values[i].histogram < 0) break;
+                                    cnt++;
+                                    i++;
+                                }
+                            }
+
                             n++;
                             if (cnt < depth) {
                                 n--;
+                            }
+                            if (check === 3) {
+                                value = n;
+                                break;
                             }
                         }
 
@@ -417,18 +429,16 @@ export class BotFather {
                                 }
                             }
 
-                            if (cnt < depth) check = 4;
 
                             n++;
+                            if (cnt < depth) {
+                                n--;
+                            }
 
                             if (check === 3) {
                                 value = n;
                                 break;
                             }
-                            if (check === 4) {
-                                n--;
-                            }
-
                         }
 
                         break;
