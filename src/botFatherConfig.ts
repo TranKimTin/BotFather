@@ -331,7 +331,7 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
         res.json({ code: 200, message: "ok", data });
     });
 
-    app.put('/deconste', (req, res) => {
+    app.put('/delete', (req, res) => {
         const { botName } = req.query as { botName: string };
         const botFile = path.join(BOT_DATA_DIR, `${botName}.json`);
         if (fs.existsSync(botFile)) {
