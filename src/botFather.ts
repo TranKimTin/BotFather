@@ -443,6 +443,27 @@ export class BotFather {
 
                         break;
                     }
+                    case 'macd_slope': {
+                        const [fastPeriod, slowPeriod, signalPeriod, shift = 0] = params;
+                        const MACDs = util.iMACD(data, fastPeriod, slowPeriod, signalPeriod);
+                        if (shift >= MACDs.length) return false;
+                        if (fastPeriod >= slowPeriod) return false;
+
+                        const fastATRs = util.iATR(data, fastPeriod);
+                        const slowATRs = util.iATR(data, slowPeriod);
+
+                        if (shift >= fastATRs.length - 1) return false;
+                        if (shift >= slowATRs.length - 1) return false;
+
+                        const diffMACD = MACDs[shift].MACD - MACDs[shift + 1].MACD;
+                        const diffATR = Math.abs((fastATRs[shift] - slowATRs[shift]) - (fastATRs[shift + 1] - slowATRs[shift + 1]));
+
+                        const tan = diffMACD / diffATR;
+                        const slope = Math.atan(tan);
+                        value = Math.round(slope / Math.PI * 180);
+
+                        break;
+                    }
 
                     default:
                         break;

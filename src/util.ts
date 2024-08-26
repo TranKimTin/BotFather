@@ -638,3 +638,14 @@ export function iZigZag(data: Array<RateData>, deviation: number, depth: number,
 
     return result;
 }
+
+export function iATR(data: Array<RateData>, period: number) {
+    const values = data.reverse();
+    const ATRs = indicator.ATR.calculate({
+        high: values.map(item => item.high),
+        low: values.map(item => item.low),
+        close: values.map(item => item.close),
+        period
+    });
+    return ATRs.reverse();
+}
