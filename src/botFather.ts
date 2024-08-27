@@ -449,17 +449,13 @@ export class BotFather {
                         if (shift >= MACDs.length) return false;
                         if (fastPeriod >= slowPeriod) return false;
 
-                        // const fastMAs = util.iMA(data, fastPeriod);
-                        // const slowMAs = util.iMA(data, slowPeriod);
-
-                        // if (shift >= fastMAs.length - 1) return false;
-                        // if (shift >= slowMAs.length - 1) return false;
+                        const MASignals = util.iMA(MACDs.map(item => ({close: item.MACD} as RateData)), slowPeriod);
+                        if (shift >= MASignals.length - 1) return false;
 
                         const diffMACD = MACDs[shift].MACD - MACDs[shift + 1].MACD;
-                        // const diffATR = Math.abs((fastMAs[shift] - slowMAs[shift]) - (fastMAs[shift + 1] - slowMAs[shift + 1]));
-                        const diffSignal = Math.abs(MACDs[shift].signal - MACDs[shift + 1].signal)
+                        const diffMASignal = Math.abs(MASignals[shift] - MASignals[shift + 1])
 
-                        const tan = diffMACD / diffSignal;
+                        const tan = diffMACD / diffMASignal;
                         const slope = Math.atan(tan);
                         value = Math.round(slope / Math.PI * 180);
 
