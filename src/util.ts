@@ -12,7 +12,7 @@ let binance: ccxt.binance | ccxt.binanceusdm = new ccxt.binanceusdm({ 'timeout':
 const LogError = console.error.bind(console);
 console.error = function () {
     if (arguments.length) {
-        LogError(...arguments);
+        LogError('APP_ERROR', ...arguments);
         console.log('APP_ERROR', ...arguments);
     }
 };
@@ -145,8 +145,9 @@ export async function getBybitSymbolList() {
         "method": "GET"
     });
 
-    const data = await res.json() as { result: { list: Array<{ symbol: string }> } };
+    const data = await res.json() as { result: { list: Array<{ symbol: string, volume24h: string }> } };
     return data.result.list
+        .filter(item => +item.volume24h > 0)
         .map((item: { symbol: string; }) => item.symbol)
         .filter(item => item.endsWith('USDT'));
 }
