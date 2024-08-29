@@ -135,7 +135,8 @@ export async function getBinanceSymbolList() {
 }
 
 export async function getBybitSymbolList() {
-    const url = `https://api.bybit.com/v5/market/tickers?category=spot`;
+    // const url = `https://api.bybit.com/v5/market/tickers?category=spot`;
+    const url = `https://api.bybit.com/spot/v3/public/symbols`;
     const res = await fetch(url, {
         "headers": {
             "accept": "*/*",
@@ -145,11 +146,10 @@ export async function getBybitSymbolList() {
         "method": "GET"
     });
 
-    const data = await res.json() as { result: { list: Array<{ symbol: string, volume24h: string }> } };
+    const data = await res.json() as { result: { list: Array<{ name: string, quoteCoin: string }> } };
     return data.result.list
-        .filter(item => +item.volume24h > 0)
-        .map((item: { symbol: string; }) => item.symbol)
-        .filter(item => item.endsWith('USDT'));
+        .filter(item => item.quoteCoin === 'USDT')
+        .map((item) => item.name);
 }
 
 export async function getOkxSymbolList() {
