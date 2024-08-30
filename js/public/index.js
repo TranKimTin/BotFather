@@ -392,7 +392,6 @@ $(document).ready(function () {
     $('#filterDuplicate').click(function () {
         let symbolList = $('#symbolList').val() || [];
         symbolList = symbolList.map(item => item.split(':')).map(item => ({ broker: item[0], symbol: item[1] }));
-        console.log(symbolList);
 
         for (let i = 0; i < symbolList.length; i++) {
             if (!symbolList[i]) continue;
