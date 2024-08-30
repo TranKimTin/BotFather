@@ -389,6 +389,42 @@ $(document).ready(function () {
 
     });
 
+    $('#filterDuplicate').click(function () {
+        let symbolList = $('#symbolList').val() || [];
+        symbolList = symbolList.map(item => item.split(':')).map(item => ({ broker: item[0], symbol: item[1] }));
+        console.log(symbolList);
+
+        for (let i = 0; i < symbolList.length; i++) {
+            if (!symbolList[i]) continue;
+            let { symbol, broker } = symbolList[i];
+            if (broker === 'bybit') {
+                for (let item of symbolList) {
+                    if (!item) continue;
+                    if (item.symbol.replace('-', '') === symbol && (item.broker === 'binance' || item.broker === 'okx')) {
+                        symbolList[i] = null;
+                        break;
+                    }
+                }
+            }
+        }
+        for (let i = 0; i < symbolList.length; i++) {
+            if (!symbolList[i]) continue;
+            let { symbol, broker } = symbolList[i];
+            if (broker === 'okx') {
+                for (let item of symbolList) {
+                    if (!item) continue;
+                    if (item.symbol === symbol.replace('-', '') && item.broker === 'binance') {
+                        symbolList[i] = null;
+                        break;
+                    }
+                }
+            }
+        }
+        symbolList = symbolList.filter(item => item).map(item => `${item.broker}:${item.symbol}`);
+        $('#symbolList').val(symbolList);
+        alert('Đã lọc coin trùng nhau');
+    });
+
     function getBotList() {
         $.ajax({
             type: "GET",
