@@ -414,6 +414,7 @@ export class BotFather {
                         }
 
                         preIndexMaxMACD = i;
+                        preIndexMaxPrice = i;
                         for (; i < values.length - 1; i++) {
                             cnt = 0;
                             let cntRed = 0;
