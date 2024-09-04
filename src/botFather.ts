@@ -489,6 +489,9 @@ export class BotFather {
                             indexMaxMACD = preIndexMaxMACD;
                             indexMaxPrice = preIndexMaxPrice;
 
+                            preIndexMaxMACD = i;
+                            preIndexMaxPrice = i;
+
                             n++;
                             if (cnt < depth || cntRed < redDepth) {
                                 n--;
