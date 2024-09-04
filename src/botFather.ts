@@ -342,7 +342,12 @@ export class BotFather {
                     }
 
                     case 'macd_n_dinh': {
-                        const [fastPeriod, slowPeriod, signalPeriod, depth, shift = 0] = params;
+                        //macd sau < macd trước
+                        //giá sai > giá trước
+                        const [fastPeriod, slowPeriod, signalPeriod, depth, redDepth, enableDivergence, shift] = params;
+                        const diffPercents = params.slice(7);
+                        if (diffPercents.length === 0) diffPercents.push(-99999);
+
                         const values = util.iMACD(data, fastPeriod, slowPeriod, signalPeriod);
                         if (shift >= values.length - 1) return false;
                         if (fastPeriod >= slowPeriod) return false;
@@ -350,11 +355,20 @@ export class BotFather {
                         let i = shift;
                         let cnt = 0;
                         let n = 0;
+                        let indexMaxMACD = i, preIndexMaxMACD = i;
+                        let indexMaxPrice = i, preIndexMaxPrice = i;
+
                         {
                             while (i < values.length - 1) {
                                 if (values[i].MACD <= 0) { break; };
                                 if (values[i].signal <= 0) { break; };
                                 if (values[i].histogram >= 0) break;
+                                if (values[i].MACD > values[indexMaxMACD].MACD) {
+                                    indexMaxMACD = i;
+                                }
+                                if (data[i].high > data[indexMaxPrice].high) {
+                                    indexMaxPrice = i;
+                                }
                                 i++;
                             }
 
@@ -364,6 +378,12 @@ export class BotFather {
                                 if (values[i].MACD <= 0) { check = 3; break; }
                                 if (values[i].signal <= 0) { check = 3; break; }
                                 if (values[i].histogram < 0) break;
+                                if (values[i].MACD > values[indexMaxMACD].MACD) {
+                                    indexMaxMACD = i;
+                                }
+                                if (data[i].high > data[preIndexMaxPrice].high) {
+                                    preIndexMaxPrice = i;
+                                }
 
                                 cnt++;
                                 i++;
@@ -373,6 +393,12 @@ export class BotFather {
                                 while (i < values.length - 1) {
                                     if (values[i].histogram < 0) break;
                                     cnt++;
+                                    if (values[i].MACD > values[indexMaxMACD].MACD) {
+                                        indexMaxMACD = i;
+                                    }
+                                    if (data[i].high > data[preIndexMaxPrice].high) {
+                                        preIndexMaxPrice = i;
+                                    }
                                     i++;
                                 }
                             }
@@ -387,19 +413,26 @@ export class BotFather {
                             }
                         }
 
+                        preIndexMaxMACD = i;
                         for (; i < values.length - 1; i++) {
                             cnt = 0;
+                            let cntRed = 0;
                             let check = 0;
                             while (i < values.length - 1) {
                                 if (values[i].MACD <= 0) { check = 1; break; };
                                 if (values[i].signal <= 0) { check = 1; break; };
                                 if (values[i].histogram >= 0) break;
+                                if (values[i].MACD > values[preIndexMaxMACD].MACD) {
+                                    preIndexMaxMACD = i;
+                                }
+                                if (data[i].high > data[preIndexMaxPrice].high) {
+                                    preIndexMaxPrice = i;
+                                }
 
-                                cnt++;
+                                cntRed++;
                                 i++;
 
                             }
-                            if (cnt < depth) check = 2;
 
                             if (check === 1) {
                                 value = n;
@@ -415,6 +448,9 @@ export class BotFather {
                                 if (values[i].MACD <= 0) { check = 3; break; }
                                 if (values[i].signal <= 0) { check = 3; break; }
                                 if (values[i].histogram < 0) break;
+                                if (values[i].MACD > values[preIndexMaxMACD].MACD) {
+                                    preIndexMaxMACD = i;
+                                }
 
                                 cnt++;
                                 i++;
@@ -424,14 +460,26 @@ export class BotFather {
                             if (check === 3) {
                                 while (i < values.length - 1) {
                                     if (values[i].histogram < 0) break;
+                                    if (values[i].MACD > values[preIndexMaxMACD].MACD) {
+                                        preIndexMaxMACD = i;
+                                    }
+
                                     cnt++;
                                     i++;
                                 }
                             }
-
+                            if (enableDivergence === 1 && values[preIndexMaxMACD] <= values[indexMaxMACD]) {
+                                value = 0;
+                                break;
+                            }
+                            if (data[indexMaxPrice].high - data[preIndexMaxPrice].high <= data[preIndexMaxPrice].high * diffPercents[0] / 100) {
+                                value = 0;
+                                break;
+                            }
+                            if (diffPercents.length > 1) diffPercents.shift();
 
                             n++;
-                            if (cnt < depth) {
+                            if (cnt < depth || cntRed < redDepth) {
                                 n--;
                             }
 
@@ -449,7 +497,7 @@ export class BotFather {
                         if (shift >= MACDs.length) return false;
                         if (fastPeriod >= slowPeriod) return false;
 
-                        const MASignals = util.iMA(MACDs.map(item => ({close: item.MACD} as RateData)), slowPeriod);
+                        const MASignals = util.iMA(MACDs.map(item => ({ close: item.MACD } as RateData)), slowPeriod);
                         if (shift >= MASignals.length - 1) return false;
 
                         const diffMACD = MACDs[shift].MACD - MACDs[shift + 1].MACD;
