@@ -344,7 +344,7 @@ export class BotFather {
                     case 'macd_n_dinh': {
                         //macd sau < macd trước
                         //giá sai > giá trước
-                        const [fastPeriod, slowPeriod, signalPeriod, depth, redDepth, enableDivergence, shift] = params;
+                        const [fastPeriod, slowPeriod, signalPeriod, redDepth, depth, enableDivergence, shift] = params;
                         const diffPercents = params.slice(7);
                         if (diffPercents.length === 0) diffPercents.push(-99999);
 
