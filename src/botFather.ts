@@ -475,11 +475,12 @@ export class BotFather {
                                     i++;
                                 }
                             }
+                            console.log({ enableDivergence, indexMaxPrice, preIndexMaxPrice, p: data[preIndexMaxPrice], p2: data[indexMaxPrice], diff: diffPercents[0] });
+
                             if (enableDivergence === 1 && values[preIndexMaxMACD] <= values[indexMaxMACD]) {
                                 value = 0;
                                 break;
                             }
-                            console.log({ indexMaxPrice, preIndexMaxPrice, p: data[preIndexMaxPrice], p2: data[indexMaxPrice], diff: diffPercents[0] });
                             if (data[indexMaxPrice].high - data[preIndexMaxPrice].high <= data[preIndexMaxPrice].high * diffPercents[0] / 100) {
                                 value = 0;
                                 break;
