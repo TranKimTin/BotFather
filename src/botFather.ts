@@ -475,7 +475,7 @@ export class BotFather {
                                     i++;
                                 }
                             }
-                            console.log({ enableDivergence, indexMaxPrice, preIndexMaxPrice, p: data[preIndexMaxPrice], p2: data[indexMaxPrice], diff: diffPercents[0] });
+                            console.log({ enableDivergence, preIndexMaxMACD, indexMaxMACD, m1: values[preIndexMaxMACD], m2: values[indexMaxMACD], indexMaxPrice, preIndexMaxPrice, p: data[preIndexMaxPrice], p2: data[indexMaxPrice], diff: diffPercents[0] });
 
                             if (enableDivergence === 1 && values[preIndexMaxMACD] <= values[indexMaxMACD]) {
                                 value = 0;
