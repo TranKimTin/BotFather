@@ -381,8 +381,8 @@ export class BotFather {
                                 if (values[i].MACD > values[indexMaxMACD].MACD) {
                                     indexMaxMACD = i;
                                 }
-                                if (data[i].high > data[preIndexMaxPrice].high) {
-                                    preIndexMaxPrice = i;
+                                if (data[i].high > data[indexMaxPrice].high) {
+                                    indexMaxPrice = i;
                                 }
 
                                 cnt++;
@@ -396,8 +396,8 @@ export class BotFather {
                                     if (values[i].MACD > values[indexMaxMACD].MACD) {
                                         indexMaxMACD = i;
                                     }
-                                    if (data[i].high > data[preIndexMaxPrice].high) {
-                                        preIndexMaxPrice = i;
+                                    if (data[i].high > data[indexMaxPrice].high) {
+                                        indexMaxPrice = i;
                                     }
                                     i++;
                                 }
@@ -452,6 +452,9 @@ export class BotFather {
                                 if (values[i].MACD > values[preIndexMaxMACD].MACD) {
                                     preIndexMaxMACD = i;
                                 }
+                                if (data[i].high > data[preIndexMaxPrice].high) {
+                                    preIndexMaxPrice = i;
+                                }
 
                                 cnt++;
                                 i++;
@@ -463,6 +466,9 @@ export class BotFather {
                                     if (values[i].histogram < 0) break;
                                     if (values[i].MACD > values[preIndexMaxMACD].MACD) {
                                         preIndexMaxMACD = i;
+                                    }
+                                    if (data[i].high > data[preIndexMaxPrice].high) {
+                                        preIndexMaxPrice = i;
                                     }
 
                                     cnt++;
@@ -478,6 +484,8 @@ export class BotFather {
                                 break;
                             }
                             if (diffPercents.length > 1) diffPercents.shift();
+                            indexMaxMACD = preIndexMaxMACD;
+                            indexMaxPrice = preIndexMaxPrice;
 
                             n++;
                             if (cnt < depth || cntRed < redDepth) {
