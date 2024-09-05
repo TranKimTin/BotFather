@@ -478,11 +478,11 @@ export class BotFather {
                             // console.log({ enableDivergence, preIndexMaxMACD, indexMaxMACD, m1: values[preIndexMaxMACD], m2: values[indexMaxMACD], indexMaxPrice, preIndexMaxPrice, p: data[preIndexMaxPrice], p2: data[indexMaxPrice], diff: diffPercents[0] });
 
                             if (enableDivergence === 1 && values[preIndexMaxMACD].MACD <= values[indexMaxMACD].MACD) {
-                                value = 0;
+                                value = n;
                                 break;
                             }
                             if (data[indexMaxPrice].high - data[preIndexMaxPrice].high <= data[preIndexMaxPrice].high * diffPercents[0] / 100) {
-                                value = 0;
+                                value = n;
                                 break;
                             }
                             if (diffPercents.length > 1) diffPercents.shift();
