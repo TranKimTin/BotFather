@@ -403,7 +403,7 @@ export class BotFather {
                                 }
                             }
 
-                            if (Math.abs(data[indexMaxPrice].high - data[shift].close) / data[indexMaxPrice].high > diffCandle0 / 100) {
+                            if (indexMaxPrice != shift && (data[indexMaxPrice].high - data[shift].close) / data[indexMaxPrice].high > diffCandle0 / 100) {
                                 value = 0;
                                 break;
                             }
