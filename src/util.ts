@@ -5,6 +5,7 @@ import fs from 'fs';
 import * as ccxt from 'ccxt'
 import * as indicator from 'technicalindicators';
 import _ from 'lodash';
+import axios from 'axios';
 
 let useFuture = true;
 let binance: ccxt.binance | ccxt.binanceusdm = new ccxt.binanceusdm({ 'timeout': 30000 });
@@ -97,15 +98,8 @@ export function iRSI(data: Array<RateData>, period: number) {
 
 export async function getDigitsFuture() {
     const url = useFuture ? 'https://fapi.binance.com/fapi/v1/exchangeInfo' : 'https://api.binance.com/api/v1/exchangeInfo'
-    const res = await fetch(url, {
-        "headers": {
-            "accept": "*/*",
-            "content-type": "application/json",
-        },
-        "body": null,
-        "method": "GET"
-    });
-    const data: any = await res.json();
+    const res = await axios.get(url);
+    const data: any = await res.data;
     const digits: { [key: string]: { price: number, volume: number } } = {};
     for (const item of data.symbols) {
         digits[item.symbol] = {
@@ -118,16 +112,9 @@ export async function getDigitsFuture() {
 
 export async function getBinanceSymbolList() {
     const url = useFuture ? 'https://fapi.binance.com/fapi/v1/exchangeInfo' : 'https://api.binance.com/api/v1/exchangeInfo';
-    const res = await fetch(url, {
-        "headers": {
-            "accept": "*/*",
-            "content-type": "application/json",
-        },
-        "body": null,
-        "method": "GET"
-    });
+    const res = await axios.get(url);
 
-    const data = await res.json() as { symbols: Array<{ symbol: string; status: string }> };
+    const data = res.data as { symbols: Array<{ symbol: string; status: string }> };
     return data.symbols
         .filter((item: { status: string }) => item.status == 'TRADING')
         .map((item: { symbol: any; }) => item.symbol)
@@ -137,16 +124,9 @@ export async function getBinanceSymbolList() {
 export async function getBybitSymbolList() {
     // const url = `https://api.bybit.com/v5/market/tickers?category=spot`;
     const url = `https://api.bybit.com/spot/v3/public/symbols`;
-    const res = await fetch(url, {
-        "headers": {
-            "accept": "*/*",
-            "content-type": "application/json",
-        },
-        "body": null,
-        "method": "GET"
-    });
+    const res = await axios.get(url);
 
-    const data = await res.json() as { result: { list: Array<{ name: string, quoteCoin: string }> } };
+    const data = await res.data as { result: { list: Array<{ name: string, quoteCoin: string }> } };
     return data.result.list
         .filter(item => item.quoteCoin === 'USDT')
         .map((item) => item.name);
@@ -154,16 +134,9 @@ export async function getBybitSymbolList() {
 
 export async function getOkxSymbolList() {
     const url = `https://www.okx.com/api/v5/public/instruments?instType=SPOT`;
-    const res = await fetch(url, {
-        "headers": {
-            "accept": "*/*",
-            "content-type": "application/json",
-        },
-        "body": null,
-        "method": "GET"
-    });
+    const res = await axios.get(url);
 
-    const data = await res.json() as { data: Array<{ baseCcy: string, quoteCcy: string, instId: string }> };
+    const data = await res.data as { data: Array<{ baseCcy: string, quoteCcy: string, instId: string }> };
     return data.data
         .filter(item => item.quoteCcy === 'USDT')
         .map((item) => item.instId);
@@ -305,16 +278,9 @@ export async function getBybitOHLCV(symbol: string, timeframe: string, limit: nu
     }
 
     const url = `https://api.bybit.com/v5/market/kline?category=spot&symbol=${symbol}&interval=${tf}&limit=${limit}`;
-    const res = await fetch(url, {
-        "headers": {
-            "accept": "*/*",
-            "content-type": "application/json",
-        },
-        "body": null,
-        "method": "GET"
-    });
+    const res = await axios.get(url);
 
-    const data = await res.json() as { result: { list: Array<string> } };
+    const data = await res.data as { result: { list: Array<string> } };
     const result = data.result.list.map(item => {
         const startTime = +item[0] || 0;
         const open = +item[1] || 0;
@@ -363,16 +329,9 @@ export async function getOkxOHLCV(symbol: string, timeframe: string, limit: numb
     }
 
     const url = `https://www.okx.com/api/v5/market/candles?instId=${symbol}&bar=${tf}&limit=${limit}`;
-    const res = await fetch(url, {
-        "headers": {
-            "accept": "*/*",
-            "content-type": "application/json",
-        },
-        "body": null,
-        "method": "GET"
-    });
+    const res = await axios.get(url);
 
-    const data = await res.json() as { data: Array<string> };
+    const data = await res.data as { data: Array<string> };
     const result = data.data.map(item => {
         const startTime = +item[0] || 0;
         const open = +item[1] || 0;
