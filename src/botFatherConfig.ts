@@ -91,7 +91,7 @@ export const paramsValidate: { [key: string]: Array<number> } = {
     'bb_middle': [2, 3, 1, 0],
     'bb_lower': [2, 3, 1, 0],
     'rsi_phan_ki': [6, 7, 1, 1, 1, 0, 1, 2],
-    'macd_n_dinh': [7, 100, 1, 2, 3, 0, 0],
+    'macd_n_dinh': [8, 100, 1, 2, 3, 0, 0],
     'macd_slope': [3, 4, 1, 2, 3]
 };
 export const indicatorSupported: Array<string> = Object.keys(paramsValidate);
