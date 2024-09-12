@@ -539,7 +539,7 @@ export class BotFather {
                     case 'bullish_engulfing': {
                         const [shift = 0] = params;
                         if (shift >= data.length - 1) return false;
-                        value = util.isBearishEngulfing(data[shift + 1], data[shift]) ? 1 : 0;
+                        value = util.isBullishEngulfing(data[shift + 1], data[shift]) ? 1 : 0;
                         break;
                     }
 
