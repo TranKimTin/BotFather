@@ -530,6 +530,19 @@ export class BotFather {
                         break;
                     }
 
+                    case 'bearish_engulfing': {
+                        const [shift = 0] = params;
+                        if (shift >= data.length - 2) return false;
+                        value = util.isBearishEngulfing(data[shift + 1], data[shift]);
+                        break;
+                    }
+                    case 'bullish_engulfing': {
+                        const [shift = 0] = params;
+                        if (shift >= data.length - 1) return false;
+                        value = util.isBearishEngulfing(data[shift + 1], data[shift]);
+                        break;
+                    }
+
                     default:
                         break;
                 }

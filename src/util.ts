@@ -609,3 +609,23 @@ export function iATR(data: Array<RateData>, period: number) {
     });
     return ATRs.reverse();
 }
+
+export function isBearishEngulfing(candle1: RateData, candle2: RateData): boolean {
+    const twoDayBearishInput = {
+        open: [candle1.open, candle2.open],
+        high: [candle1.high, candle2.high],
+        close: [candle1.close, candle2.close],
+        low: [candle1.low, candle2.low]
+    };
+    return indicator.bearishengulfingpattern(twoDayBearishInput);
+}
+
+export function isBullishEngulfing(candle1: RateData, candle2: RateData): boolean {
+    const twoDayBullishInput = {
+        open: [candle1.open, candle2.open],
+        high: [candle1.high, candle2.high],
+        close: [candle1.close, candle2.close],
+        low: [candle1.low, candle2.low]
+    };
+    return indicator.bullishengulfingpattern(twoDayBullishInput);
+}
