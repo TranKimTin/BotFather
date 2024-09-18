@@ -248,13 +248,10 @@ export class BotFather {
                         const RSIs = util.iRSI(data, period);
                         if (shift >= RSIs.length - 1) return false;
 
-                        const MASignals = util.iMA(RSIs.map(item => ({ close: item } as RateData)), period * 2);
-                        if (shift >= MASignals.length - 1) return false;
-
                         const diffRSI = RSIs[shift] - RSIs[shift + 1];
-                        const diffMASignal = Math.abs(MASignals[shift] - MASignals[shift + 1])
+                        const wide = 3;
 
-                        const tan = diffRSI / diffMASignal;
+                        const tan = diffRSI / wide;
                         const slope = Math.atan(tan);
                         value = Math.round(slope / Math.PI * 180);
 
