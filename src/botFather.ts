@@ -243,6 +243,23 @@ export class BotFather {
                         value = values[shift];
                         break;
                     }
+                    case 'rsi_slope': {
+                        const [period, shift = 0] = params;
+                        const RSIs = util.iRSI(data, period);
+                        if (shift >= RSIs.length - 1) return false;
+
+                        const MASignals = util.iMA(RSIs.map(item => ({ close: item } as RateData)), period * 2);
+                        if (shift >= MASignals.length - 1) return false;
+
+                        const diffRSI = RSIs[shift] - RSIs[shift + 1];
+                        const diffMASignal = Math.abs(MASignals[shift] - MASignals[shift + 1])
+
+                        const tan = diffRSI / diffMASignal;
+                        const slope = Math.atan(tan);
+                        value = Math.round(slope / Math.PI * 180);
+
+                        break;
+                    }
                     case 'ma': {
                         const [period, shift = 0] = params;
                         const values = util.iMA(data, period);

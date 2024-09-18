@@ -82,6 +82,7 @@ export const paramsValidate: { [key: string]: Array<number> } = {
     'lower_shadow': [0, 1],
     'lower_shadow%': [0, 1],
     'rsi': [1, 2, 1],
+    'rsi_slope': [1, 2],
     'ma': [1, 2, 1],
     'ema': [1, 2, 1],
     'macd_value': [3, 4, 1, 2, 1],
