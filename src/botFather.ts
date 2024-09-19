@@ -568,7 +568,16 @@ export class BotFather {
                         value = util.isBearishHammer(data[shift]) ? 1 : 0;
                         break;
                     }
-
+                    case 'bullish': {
+                        const [shift = 0] = params;
+                        if (shift > data.length - 5) return false;
+                        value = util.isBullish(data, shift) ? 1 : 0;
+                    }
+                    case 'bearish': {
+                        const [shift = 0] = params;
+                        if (shift > data.length - 5) return false;
+                        value = util.isBearish(data, shift) ? 1 : 0;
+                    }
                     default:
                         break;
                 }

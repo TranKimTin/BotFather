@@ -649,3 +649,31 @@ export function isBearishHammer(candle: RateData): boolean {
     };
     return indicator.bearishhammerstick(singleInput);
 }
+
+export function isBullish(data: Array<RateData>, shift: number): boolean {
+    //BullishEngulfingPattern, DownsideTasukiGap, BullishHarami, BullishHaramiCross, MorningDojiStar, MorningStar,
+    //BullishMarubozu, PiercingLine, ThreeWhiteSoldiers, BullishHammerStick, BullishInvertedHammerStick, HammerPattern,
+    //HammerPatternUnconfirmed, TweezerBottom, BullishHammerStick
+    const rates = data.slice(shift, shift + 5).reverse();
+    const input = {
+        open: rates.map(candle => candle.open),
+        close: rates.map(candle => candle.close),
+        high: rates.map(candle => candle.high),
+        low: rates.map(candle => candle.low)
+    };
+    return indicator.bullish(input);
+}
+
+export function isBearish(data: Array<RateData>, shift: number): boolean {
+    //BearishEngulfingPattern, BearishHarami, BearishHaramiCross, EveningDojiStar, EveningStar, BearishMarubozu,
+    //ThreeBlackCrows, BearishHammerStick, BearishInvertedHammerStick, HangingMan, HangingManUnconfirmed,
+    //ShootingStar, ShootingStarUnconfirmed, TweezerTop, BullishHammerStick
+    const rates = data.slice(shift, shift + 5).reverse();
+    const input = {
+        open: rates.map(candle => candle.open),
+        close: rates.map(candle => candle.close),
+        high: rates.map(candle => candle.high),
+        low: rates.map(candle => candle.low)
+    };
+    return indicator.bullish(input);
+}

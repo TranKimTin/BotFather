@@ -97,7 +97,9 @@ export const paramsValidate: { [key: string]: Array<number> } = {
     'bullish_engulfing': [0, 1],
     'bearish_engulfing': [0, 1],
     'bullish_hammer': [0, 1],
-    'bearish_hammer': [0, 1]
+    'bearish_hammer': [0, 1],
+    'bullish': [0, 1],
+    'bearish': [0, 1]
 };
 export const indicatorSupported: Array<string> = Object.keys(paramsValidate);
 
