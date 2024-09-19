@@ -556,6 +556,18 @@ export class BotFather {
                         value = util.isBullishEngulfing(data[shift + 1], data[shift]) ? 1 : 0;
                         break;
                     }
+                    case 'bullish_hammer': {
+                        const [shift = 0] = params;
+                        if (shift >= data.length - 1) return false;
+                        value = util.isBullishHammer(data[shift]) ? 1 : 0;
+                        break;
+                    }
+                    case 'bearish_hammer': {
+                        const [shift = 0] = params;
+                        if (shift >= data.length - 1) return false;
+                        value = util.isBearishHammer(data[shift]) ? 1 : 0;
+                        break;
+                    }
 
                     default:
                         break;

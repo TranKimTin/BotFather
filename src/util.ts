@@ -629,3 +629,23 @@ export function isBullishEngulfing(candle1: RateData, candle2: RateData): boolea
     };
     return indicator.bullishengulfingpattern(twoDayBullishInput);
 }
+
+export function isBullishHammer(candle: RateData): boolean {
+    const singleInput = {
+        open: [candle.open],
+        high: [candle.high],
+        close: [candle.close],
+        low: [candle.low]
+    };
+    return indicator.bullishhammerstick(singleInput);
+}
+
+export function isBearishHammer(candle: RateData): boolean {
+    const singleInput = {
+        open: [candle.open],
+        high: [candle.high],
+        close: [candle.close],
+        low: [candle.low]
+    };
+    return indicator.bearishhammerstick(singleInput);
+}
