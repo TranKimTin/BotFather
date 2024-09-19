@@ -675,5 +675,5 @@ export function isBearish(data: Array<RateData>, shift: number): boolean {
         high: rates.map(candle => candle.high),
         low: rates.map(candle => candle.low)
     };
-    return indicator.bullish(input);
+    return indicator.bearish(input);
 }
