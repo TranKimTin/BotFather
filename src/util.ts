@@ -653,7 +653,7 @@ export function isBearishHammer(candle: RateData): boolean {
 export function isBullish(data: Array<RateData>, shift: number): boolean {
     //BullishEngulfingPattern, DownsideTasukiGap, BullishHarami, BullishHaramiCross, MorningDojiStar, MorningStar,
     //BullishMarubozu, PiercingLine, ThreeWhiteSoldiers, BullishHammerStick, BullishInvertedHammerStick, HammerPattern,
-    //HammerPatternUnconfirmed, TweezerBottom, BullishHammerStick
+    //HammerPatternUnconfirmed, TweezerBottom
     const rates = data.slice(shift, shift + 5).reverse();
     const input = {
         open: rates.map(candle => candle.open),
@@ -667,7 +667,7 @@ export function isBullish(data: Array<RateData>, shift: number): boolean {
 export function isBearish(data: Array<RateData>, shift: number): boolean {
     //BearishEngulfingPattern, BearishHarami, BearishHaramiCross, EveningDojiStar, EveningStar, BearishMarubozu,
     //ThreeBlackCrows, BearishHammerStick, BearishInvertedHammerStick, HangingMan, HangingManUnconfirmed,
-    //ShootingStar, ShootingStarUnconfirmed, TweezerTop, BullishHammerStick
+    //ShootingStar, ShootingStarUnconfirmed, TweezerTop
     const rates = data.slice(shift, shift + 5).reverse();
     const input = {
         open: rates.map(candle => candle.open),
