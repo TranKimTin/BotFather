@@ -376,18 +376,49 @@ $(document).ready(function () {
         }, 500);
     });
 
-    $('#toogleAllSymbol').click(function () {
-        this.temp = this.temp || 1;
-        $('.selectpicker').selectpicker('toggle');
-        if (this.temp++ % 2) {
+    $('#toogleAllSymbolBinance').click(function () {
+        toogleAllSymbol('binance');
+    });
+
+    $('#toogleAllSymbolOkx').click(function () {
+        toogleAllSymbol('okx');
+    });
+
+    $('#toogleAllSymbolBybit').click(function () {
+        toogleAllSymbol('bybit');
+    });
+
+    function toogleAllSymbol(broker) {
+        this.temp = this.temp || {};
+        this.temp[broker] = this.temp[broker] || 1;
+
+
+        let symbolList = $('#symbolList option').map(function () {
+            return this.value;
+        }).get();
+        let selectedList = $('#symbolList').val() || [];
+
+        if (symbolList.length == 0) {
+            alert('Đang load, chờ 1 tí');
+            return;
+        }
+
+
+        console.log(selectedList);
+        selectedList = selectedList.filter(item => !item.startsWith(broker));
+        if (this.temp[broker]++ % 2) {
             $('#symbolList').selectpicker('selectAll');
+            selectedList.push(...symbolList.filter(item => item.startsWith(broker)));
+            alert(`Chọn toàn bộ coin ${broker} (${selectedList.length} coin)`);
+            console.log(symbolList)
         }
         else {
-            $('#symbolList').selectpicker('deselectAll');
+            alert(`Bỏ toàn bộ coin ${broker} (${selectedList.length} coin)`);
         }
+        $('#symbolList').selectpicker('toggle');
+        $('#symbolList').val(selectedList);
         $('#symbolList').selectpicker('refresh');
-
-    });
+    }
 
     $('#filterDuplicate').click(function () {
         let symbolList = $('#symbolList').val() || [];
