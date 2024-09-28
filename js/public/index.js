@@ -368,7 +368,7 @@ $(document).ready(function () {
         });
     }
 
-    $('#botName').on('keydown click', function (event) {
+    $('#botName').on('keydown change', function (event) {
         clearTimeout(this.timeout);
         this.timeout = setTimeout(() => {
             let botName = $('#botName').val();
