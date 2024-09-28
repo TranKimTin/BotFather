@@ -467,11 +467,14 @@ $(document).ready(function () {
                 if (response.code == 200) {
                     $("#botName").autocomplete({
                         source: response.data,
-                        minLength: 0
+                        minLength: 0,
+                        select: function (event, ui) {
+                            loadData(ui.item.value);
+                        }
                     }).focus(function () {
                         // Bất kỳ khi nào trường này nhận focus, ngay cả khi không có nhập liệu
                         $(this).autocomplete("search", "");
-                    });;
+                    });
                 }
                 else {
                     alert('có lỗi');
