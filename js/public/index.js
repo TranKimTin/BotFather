@@ -452,7 +452,7 @@ $(document).ready(function () {
         }
         symbolList = symbolList.filter(item => item).map(item => `${item.broker}:${item.symbol}`);
         $('#symbolList').val(symbolList);
-        alert('Đã lọc coin trùng nhau');
+        alert(`Đã lọc coin trùng nhau (${symbolList.length} coin)`);
     });
 
     function getBotList() {
