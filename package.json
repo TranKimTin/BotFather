@@ -7,7 +7,7 @@
   "description": "",
   "scripts": {
     "test": "mocha",
-    "build": "tsc",
+    "build": "antlr4ng -Dlanguage=TypeScript -o src/generated/ -visitor -no-listener -Xexact-output-dir src/Expr.g4",
     "start": "node js/BinanceFuture.js"
   },
   "mocha": {
@@ -29,10 +29,12 @@
     "@types/moment": "^2.13.0",
     "@types/morgan": "^1.9.9",
     "@types/node-telegram-bot-api": "^0.63.1",
-    "@types/ws": "^8.5.12"
+    "@types/ws": "^8.5.12",
+    "antlr4ng-cli": "^2.0.0"
   },
   "dependencies": {
     "@types/socket.io": "^3.0.2",
+    "antlr4ng": "^3.0.5",
     "axios": "^1.7.7",
     "binance-api-node": "^0.12.7",
     "body-parser": "^1.20.2",
