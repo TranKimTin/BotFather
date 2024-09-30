@@ -49,8 +49,16 @@ expr
     | bearish                   # iBearish
     ;
 
-telegram: 'telegram:' telegram_content;
-telegram_content: (expr | STRING_VALUE)*;
+telegram : 'telegram:' telegramContent* ;
+
+telegramContent
+    : '{' expr '}'
+    | textContent
+    ;
+
+textContent : ~('{' | '}')+ ;
+
+
 
 broker: 'broker' '(' ')';
 symbol: 'symbol' '(' ')';
@@ -104,5 +112,5 @@ comparisonOp
 INT: '-'? [0-9]+ ;
 FLOAT: '-'? [0-9]+ ('.' [0-9]+)? ([eE] [+\-]? [0-9]+)? ;
 STRING: '\'' (~['\r\n])* '\'';
-STRING_VALUE: (~['\r\n])+;
+CHAR: .;
 WS: [ \t\r\n]+ -> skip;

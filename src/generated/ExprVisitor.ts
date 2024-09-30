@@ -50,7 +50,8 @@ import { IUpperShadowContext } from "./ExprParser.js";
 import { IBearishContext } from "./ExprParser.js";
 import { IOpenContext } from "./ExprParser.js";
 import { TelegramContext } from "./ExprParser.js";
-import { Telegram_contentContext } from "./ExprParser.js";
+import { TelegramContentContext } from "./ExprParser.js";
+import { TextContentContext } from "./ExprParser.js";
 import { BrokerContext } from "./ExprParser.js";
 import { SymbolContext } from "./ExprParser.js";
 import { TimeframeContext } from "./ExprParser.js";
@@ -429,11 +430,17 @@ export class ExprVisitor<Result> extends AbstractParseTreeVisitor<Result> {
      */
     visitTelegram?: (ctx: TelegramContext) => Result;
     /**
-     * Visit a parse tree produced by `ExprParser.telegram_content`.
+     * Visit a parse tree produced by `ExprParser.telegramContent`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitTelegram_content?: (ctx: Telegram_contentContext) => Result;
+    visitTelegramContent?: (ctx: TelegramContentContext) => Result;
+    /**
+     * Visit a parse tree produced by `ExprParser.textContent`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitTextContent?: (ctx: TextContentContext) => Result;
     /**
      * Visit a parse tree produced by `ExprParser.broker`.
      * @param ctx the parse tree
