@@ -8,7 +8,6 @@ expr
     | INT                       # Int
     | FLOAT                     # Float
     | STRING                    # String
-    | rsi                       # iRSI
     | broker                    # iBroker
     | symbol                    # iSymbol
     | timeframe                 # iTimeframe
@@ -24,9 +23,16 @@ expr
     | changeP                   # iChangeP
     | ampl                      # iAmpl
     | amplP                     # iAmplP
+    | upper_shadow              # iUpperShadow
+    | upper_shadowP             # iUpperShadowP
+    | lower_shadow              # iLowerShadow
+    | lower_shadowP             # iLowerShadowP
+    | rsi                       # iRSI
+    | rsi_slope                 # iRSISlope
+    | ma                        # iMA
+    | ema                       # iEMA
     ;
 
-rsi: 'rsi' '(' INT (',' INT)? ')'     # RSI;
 broker: 'broker' '(' ')';
 symbol: 'symbol' '(' ')';
 timeframe: 'timeframe' '(' ')';
@@ -42,6 +48,15 @@ change: 'change' '(' INT? ')';
 changeP: 'change%' '(' INT? ')';
 ampl: 'ampl' '(' INT? ')';
 amplP: 'ampl%' '(' INT? ')';
+upper_shadow: 'upper_shadow' '(' INT? ')';
+upper_shadowP: 'upper_shadow%' '(' INT? ')';
+lower_shadow: 'lower_shadow' '(' INT? ')';
+lower_shadowP: 'lower_shadow%' '(' INT? ')';
+rsi: 'rsi' '(' INT (',' INT)? ')';
+rsi_slope: 'rsi_slope' '(' INT (',' INT)? ')';
+ma: 'ma' '(' INT (',' INT)? ')';
+ema: 'ema' '(' INT (',' INT)? ')';
+
 
 comparisonOp
     : '>'

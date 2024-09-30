@@ -1,7 +1,7 @@
 import * as antlr from "antlr4ng";
 import { BaseErrorListener, CharStream, CommonTokenStream, RecognitionException, Recognizer, Token } from 'antlr4ng';
 import { ExprLexer } from './generated/ExprLexer';
-import { AddSubContext, AmplContext, AmplPContext, BrokerContext, ChangeContext, ChangePContext, CloseContext, ComparisonContext, ExprParser, FloatContext, HighContext, HourContext, IntContext, IRSIContext, LowContext, MinuteContext, MulDivContext, OpenContext, ParensContext, RSIContext, StringContext, SymbolContext, TimeframeContext, Volume24h_in_usdContext, VolumeContext } from './generated/ExprParser';
+import { AddSubContext, AmplContext, AmplPContext, BrokerContext, ChangeContext, ChangePContext, CloseContext, ComparisonContext, EmaContext, ExprParser, FloatContext, HighContext, HourContext, IntContext, IRSIContext, LowContext, Lower_shadowContext, Lower_shadowPContext, MaContext, MinuteContext, MulDivContext, OpenContext, ParensContext, Rsi_slopeContext, RsiContext, StringContext, SymbolContext, TimeframeContext, Upper_shadowContext, Upper_shadowPContext, Volume24h_in_usdContext, VolumeContext } from './generated/ExprParser';
 import { ExprVisitor } from './generated/ExprVisitor';
 import * as util from './util';
 import Telegram, { TelegramIdType } from './telegram';
@@ -134,15 +134,6 @@ export class Expr extends ExprVisitor<any> {
         return this.visit(ctx.expr());
     };
 
-    visitRSI = (ctx: RSIContext) => {
-        const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
-        let shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
-
-        const RSIs = util.iRSI(this.data, period);
-        if (shift >= RSIs.length) throw `RSI out of range. length = ${RSIs.length}`;
-        return RSIs[shift];
-    };
-
     visitBroker = (ctx: BrokerContext) => {
         return this.broker;
     };
@@ -239,5 +230,78 @@ export class Expr extends ExprVisitor<any> {
 
         const ampl: number = this.data[shift].high - this.data[shift].low;
         return parseFloat((ampl / this.data[shift].open * 100).toFixed(2));
+    };
+
+    visitUpper_shadow = (ctx: Upper_shadowContext) => {
+        const shift = parseInt(ctx.INT()?.getText() || '0');
+        if (shift >= this.data.length) throw `upper shadow out of range. length = ${this.data.length}`;
+
+        const diff: number = this.data[shift].high - Math.max(this.data[shift].open, this.data[shift].close);
+        return diff;
+    };
+
+    visitUpper_shadowP = (ctx: Upper_shadowPContext) => {
+        const shift = parseInt(ctx.INT()?.getText() || '0');
+        if (shift >= this.data.length) throw `upper shadow % out of range. length = ${this.data.length}`;
+
+        const diff: number = this.data[shift].high - Math.max(this.data[shift].open, this.data[shift].close);
+        return parseFloat((diff / this.data[shift].open * 100).toFixed(2));
+    };
+
+    visitLower_shadow = (ctx: Lower_shadowContext) => {
+        const shift = parseInt(ctx.INT()?.getText() || '0');
+        if (shift >= this.data.length) throw `lower shadow % out of range. length = ${this.data.length}`;
+
+        const diff: number = Math.min(this.data[shift].open, this.data[shift].close) - this.data[shift].low;
+        return diff;
+    };
+
+    visitLower_shadowP = (ctx: Lower_shadowPContext) => {
+        const shift = parseInt(ctx.INT()?.getText() || '0');
+        if (shift >= this.data.length) throw `lower shadow % out of range. length = ${this.data.length}`;
+
+        const diff: number = Math.min(this.data[shift].open, this.data[shift].close) - this.data[shift].low;
+        return parseFloat((diff / this.data[shift].open * 100).toFixed(2));
+    };
+
+    visitRsi = (ctx: RsiContext) => {
+        const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
+        let shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
+
+        const RSIs = util.iRSI(this.data, period);
+        if (shift >= RSIs.length) throw `RSI out of range. length = ${RSIs.length}`;
+        return RSIs[shift];
+    };
+
+    visitRsi_slope = (ctx: Rsi_slopeContext) => {
+        const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
+        let shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
+        const RSIs = util.iRSI(this.data, period);
+        if (shift >= RSIs.length - 1) throw `rsi_slope out of range. length = ${RSIs.length}`;
+
+        const diffRSI = RSIs[shift] - RSIs[shift + 1];
+        const wide = 3;
+
+        const tan = diffRSI / wide;
+        const slope = Math.atan(tan);
+        return Math.round(slope / Math.PI * 180);
+    };
+
+    visitMa = (ctx: MaContext) => {
+        const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
+        let shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
+        const MAs = util.iMA(this.data, period);
+        if (shift >= MAs.length) throw `ma out of range. length = ${MAs.length}`;
+
+        return MAs[shift];
+    };
+
+    visitEMa = (ctx: EmaContext) => {
+        const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
+        let shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
+        const EMAs = util.iEMA(this.data, period);
+        if (shift >= EMAs.length) throw `ema out of range. length = ${EMAs.length}`;
+
+        return EMAs[shift];
     };
 }
