@@ -31,6 +31,21 @@ expr
     | rsi_slope                 # iRSISlope
     | ma                        # iMA
     | ema                       # iEMA
+    | macd_value                # iMACD_value
+    | macd_signal               # iMACD_signal
+    | macd_histogram            # iMACD_histogram
+    | bb_upper                  # iBB_up
+    | bb_middle                 # iBB_mid
+    | bb_lower                  # iBB_low
+    | rsi_phan_ki               # iRSI_phan_ki
+    | macd_n_dinh               # iMACD_n_dinh
+    | macd_slope                # iMACD_slope
+    | bullish_engulfing         # iBullish_engulfing
+    | bearish_engulfing         # iBearish_engulfing
+    | bullish_hammer            # iBullish_hammer
+    | bearish_hammer            # iBearish_hammer
+    | bullish                   # iBullish
+    | bearish                   # iBearish
     ;
 
 broker: 'broker' '(' ')';
@@ -56,6 +71,22 @@ rsi: 'rsi' '(' INT (',' INT)? ')';
 rsi_slope: 'rsi_slope' '(' INT (',' INT)? ')';
 ma: 'ma' '(' INT (',' INT)? ')';
 ema: 'ema' '(' INT (',' INT)? ')';
+macd_value: 'macd_value' '(' INT ',' INT ',' INT (',' INT)? ')';
+macd_signal: 'macd_signal' '(' INT ',' INT ',' INT (',' INT)? ')';
+macd_histogram: 'macd_histogram' '(' INT ',' INT ',' INT (',' INT)? ')';
+bb_upper: 'bb_upper' '(' INT ','  FLOAT (',' INT)? ')';
+bb_middle: 'bb_middle' '(' INT ','  FLOAT (',' INT)? ')';
+bb_lower: 'bb_lower' '(' INT ','  FLOAT (',' INT)? ')';
+rsi_phan_ki: 'rsi_phan_ki' '(' INT ','  FLOAT ','  INT ','  INT ','  FLOAT ','  FLOAT (',' INT)? ')';
+macd_n_dinh: 'macd_n_dinh' '(' INT ',' INT ',' INT ',' INT ',' INT ',' INT ','  FLOAT ',' INT (',' FLOAT)* ')';
+macd_slope: 'macd_slope' '(' INT ',' INT ',' INT (',' INT)? ')';
+bullish_engulfing: 'bullish_engulfing' '(' INT? ')';
+bearish_engulfing: 'bearish_engulfing' '(' INT? ')';
+bullish_hammer: 'bullish_hammer' '(' INT? ')';
+bearish_hammer: 'bearish_hammer' '(' INT? ')';
+bullish: 'bullish' '(' INT? ')';
+bearish: 'bearish' '(' INT? ')';
+
 
 
 comparisonOp
