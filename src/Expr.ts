@@ -29,6 +29,7 @@ export class CustomErrorListener extends BaseErrorListener {
 }
 
 export function checkCondition(condition: string, args: ExprArgs): boolean {
+    console.log({ condition });
     const inputStream = CharStream.fromString(condition);
     const lexer = new ExprLexer(inputStream);
     const tokenStream = new CommonTokenStream(lexer);
@@ -43,7 +44,7 @@ export function checkCondition(condition: string, args: ExprArgs): boolean {
         const evalVisitor = new Expr(args);
         const result = evalVisitor.visit(tree);
 
-        // console.log(result);
+        console.log({ result });
 
         return Boolean(result);
     }
@@ -115,6 +116,7 @@ export class Expr extends ExprVisitor<any> {
             case '<=':
                 return left <= right;
             case '=':
+            case '==':
                 return left == right;
             default:
                 return null;
@@ -153,7 +155,7 @@ export class Expr extends ExprVisitor<any> {
 
         if (ctx.getText() === '<--->') mess = '--------------------';
         this.telegram.sendMessage(mess, this.idTelegram);
-        
+
         return 1;
     };
 
