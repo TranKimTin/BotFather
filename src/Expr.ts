@@ -138,8 +138,22 @@ export class Expr extends ExprVisitor<any> {
     };
 
     visitTelegram = (ctx: TelegramContext) => {
-        const mess = this.visit(ctx.telegram_content());
+        const condition = ctx.getText();
+        console.log({ condition, symbol: this.symbol, timeframe: this.timeframe });
+
+        const emoji: { [key: string]: string } = {
+            'binance': '🥇🥇🥇',
+            'bybit': '',
+            'okx': '🏁🏁🏁'
+        }
+
+        let mess = emoji[this.broker];
+        mess += `\n${this.broker}:${this.symbol} ${this.timeframe}`
+        mess += `\n${this.visit(ctx.telegram_content())}`;
+
+        if (ctx.getText() === '<--->') mess = '--------------------';
         this.telegram.sendMessage(mess, this.idTelegram);
+        
         return 1;
     };
 
