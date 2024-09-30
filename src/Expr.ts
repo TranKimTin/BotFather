@@ -1,7 +1,7 @@
 import * as antlr from "antlr4ng";
 import { BaseErrorListener, CharStream, CommonTokenStream, RecognitionException, Recognizer, Token } from 'antlr4ng';
 import { ExprLexer } from './generated/ExprLexer';
-import { AddSubContext, AmplContext, AmplPContext, Bb_lowerContext, Bb_middleContext, Bb_upperContext, Bearish_engulfingContext, Bearish_hammerContext, BearishContext, BrokerContext, Bullish_engulfingContext, Bullish_hammerContext, BullishContext, ChangeContext, ChangePContext, CloseContext, ComparisonContext, EmaContext, ExprParser, FloatContext, HighContext, HourContext, IntContext, IRSIContext, LowContext, Lower_shadowContext, Lower_shadowPContext, Macd_histogramContext, Macd_n_dinhContext, Macd_signalContext, Macd_slopeContext, Macd_valueContext, MaContext, MinuteContext, MulDivContext, OpenContext, ParensContext, Rsi_phan_kiContext, Rsi_slopeContext, RsiContext, StringContext, SymbolContext, TimeframeContext, Upper_shadowContext, Upper_shadowPContext, Volume24h_in_usdContext, VolumeContext } from './generated/ExprParser';
+import { AddSubContext, AmplContext, AmplPContext, Bb_lowerContext, Bb_middleContext, Bb_upperContext, Bearish_engulfingContext, Bearish_hammerContext, BearishContext, BrokerContext, Bullish_engulfingContext, Bullish_hammerContext, BullishContext, ChangeContext, ChangePContext, CloseContext, ComparisonContext, EmaContext, ExprParser, FloatContext, HighContext, HourContext, IntContext, IRSIContext, LowContext, Lower_shadowContext, Lower_shadowPContext, Macd_histogramContext, Macd_n_dinhContext, Macd_signalContext, Macd_slopeContext, Macd_valueContext, MaContext, MinuteContext, MulDivContext, OpenContext, ParensContext, Rsi_phan_kiContext, Rsi_slopeContext, RsiContext, SendTelegramContext, StringContext, SymbolContext, Telegram_contentContext, TelegramContext, TimeframeContext, Upper_shadowContext, Upper_shadowPContext, Volume24h_in_usdContext, VolumeContext } from './generated/ExprParser';
 import { ExprVisitor } from './generated/ExprVisitor';
 import * as util from './util';
 import Telegram, { TelegramIdType } from './telegram';
@@ -10,6 +10,7 @@ import moment from "moment";
 
 export interface ExprArgs {
     telegram: Telegram;
+    idTelegram: TelegramIdType;
     broker: string;
     symbol: string;
     timeframe: string;
@@ -54,6 +55,7 @@ export function checkCondition(condition: string, args: ExprArgs): boolean {
 
 export class Expr extends ExprVisitor<any> {
     private telegram: Telegram;
+    private idTelegram: TelegramIdType
     private broker: string;
     private symbol: string;
     private timeframe: string;
@@ -62,6 +64,7 @@ export class Expr extends ExprVisitor<any> {
     constructor(args: ExprArgs) {
         super();
         this.telegram = args.telegram;
+        this.idTelegram = args.idTelegram;
         this.broker = args.broker;
         this.symbol = args.symbol;
         this.timeframe = args.timeframe;
@@ -132,6 +135,25 @@ export class Expr extends ExprVisitor<any> {
 
     visitParens = (ctx: ParensContext) => {
         return this.visit(ctx.expr());
+    };
+
+    visitTelegram = (ctx: TelegramContext) => {
+        const mess = this.visit(ctx.telegram_content());
+        this.telegram.sendMessage(mess, this.idTelegram);
+        return 1;
+    };
+
+    visitTelegram_content = (ctx: Telegram_contentContext) => {
+        let content = ctx.getText();
+        let i = 0;
+        while (1) {
+            const expr = ctx.expr(i);
+            if (expr === null) break;
+            const result = this.visit(expr);
+            content = content.replace(expr.getText(), result);
+            i++;
+        }
+        return content;
     };
 
     visitBroker = (ctx: BrokerContext) => {

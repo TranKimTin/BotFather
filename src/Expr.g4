@@ -8,6 +8,7 @@ expr
     | INT                       # Int
     | FLOAT                     # Float
     | STRING                    # String
+    | telegram                  # SendTelegram
     | broker                    # iBroker
     | symbol                    # iSymbol
     | timeframe                 # iTimeframe
@@ -48,6 +49,9 @@ expr
     | bearish                   # iBearish
     ;
 
+telegram: 'telegram:' telegram_content;
+telegram_content: (expr | STRING_VALUE)*;
+
 broker: 'broker' '(' ')';
 symbol: 'symbol' '(' ')';
 timeframe: 'timeframe' '(' ')';
@@ -87,8 +91,6 @@ bearish_hammer: 'bearish_hammer' '(' INT? ')';
 bullish: 'bullish' '(' INT? ')';
 bearish: 'bearish' '(' INT? ')';
 
-
-
 comparisonOp
     : '>'
     | '>='
@@ -101,4 +103,5 @@ comparisonOp
 INT: '-'? [0-9]+ ;
 FLOAT: '-'? [0-9]+ ('.' [0-9]+)? ([eE] [+\-]? [0-9]+)? ;
 STRING: '\'' (~['\r\n])* '\'';
+STRING_VALUE: (~['\r\n])+;
 WS: [ \t\r\n]+ -> skip;

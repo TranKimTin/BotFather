@@ -36,6 +36,7 @@ import { IMACD_n_dinhContext } from "./ExprParser.js";
 import { AddSubContext } from "./ExprParser.js";
 import { IBearish_engulfingContext } from "./ExprParser.js";
 import { IChangePContext } from "./ExprParser.js";
+import { SendTelegramContext } from "./ExprParser.js";
 import { IBrokerContext } from "./ExprParser.js";
 import { IBearish_hammerContext } from "./ExprParser.js";
 import { IRSIContext } from "./ExprParser.js";
@@ -48,6 +49,8 @@ import { IMAContext } from "./ExprParser.js";
 import { IUpperShadowContext } from "./ExprParser.js";
 import { IBearishContext } from "./ExprParser.js";
 import { IOpenContext } from "./ExprParser.js";
+import { TelegramContext } from "./ExprParser.js";
+import { Telegram_contentContext } from "./ExprParser.js";
 import { BrokerContext } from "./ExprParser.js";
 import { SymbolContext } from "./ExprParser.js";
 import { TimeframeContext } from "./ExprParser.js";
@@ -329,6 +332,13 @@ export class ExprVisitor<Result> extends AbstractParseTreeVisitor<Result> {
      */
     visitIChangeP?: (ctx: IChangePContext) => Result;
     /**
+     * Visit a parse tree produced by the `SendTelegram`
+     * labeled alternative in `ExprParser.expr`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitSendTelegram?: (ctx: SendTelegramContext) => Result;
+    /**
      * Visit a parse tree produced by the `iBroker`
      * labeled alternative in `ExprParser.expr`.
      * @param ctx the parse tree
@@ -412,6 +422,18 @@ export class ExprVisitor<Result> extends AbstractParseTreeVisitor<Result> {
      * @return the visitor result
      */
     visitIOpen?: (ctx: IOpenContext) => Result;
+    /**
+     * Visit a parse tree produced by `ExprParser.telegram`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitTelegram?: (ctx: TelegramContext) => Result;
+    /**
+     * Visit a parse tree produced by `ExprParser.telegram_content`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitTelegram_content?: (ctx: Telegram_contentContext) => Result;
     /**
      * Visit a parse tree produced by `ExprParser.broker`.
      * @param ctx the parse tree
