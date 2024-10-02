@@ -44,7 +44,8 @@ export function checkCondition(condition: string, args: ExprArgs): boolean {
         const evalVisitor = new Expr(args);
         const result = evalVisitor.visit(tree);
 
-        // console.log({ result });
+        console.log({ tree: tree.toStringTree(parser) });
+        console.log({ result });
 
         return Boolean(result);
     }
@@ -692,12 +693,13 @@ export class Expr extends ExprVisitor<any> {
     };
 }
 
-// const args = {
-//     telegram: new Telegram(),
-//     idTelegram: '@tin',
-//     broker: 'binance',
-//     symbol: 'BTCUSDT',
-//     timeframe: '1h',
-//     data: []
-// };
-// checkCondition("telegram: rsi= {rsis(14)}", args);
+const args = {
+    telegram: new Telegram(),
+    idTelegram: '@tin',
+    broker: 'binance',
+    symbol: 'BTCUSDT',
+    timeframe: '1h',
+    data: []
+};
+const condition = "telegram: tin dep zai rsi= {rsi(14)};";
+console.log({ condition }, checkCondition(condition, args));
