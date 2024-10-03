@@ -527,7 +527,9 @@ export class Expr extends ExprVisitor<any> {
                 }
             }
 
-            if (indexMaxPrice != shift && (this.data[indexMaxPrice].high - this.data[shift].close) / this.data[indexMaxPrice].high > diffCandle0 / 100) {
+            const topCandle = Math.max(this.data[indexMaxPrice].open, this.data[indexMaxPrice].close);
+
+            if (indexMaxPrice != shift && (topCandle - this.data[shift].high) / topCandle > diffCandle0 / 100) {
                 return 0;
             }
 

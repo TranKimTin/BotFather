@@ -417,7 +417,7 @@ export class BotFather {
                                 }
                             }
 
-                            let topCandle = Math.max(data[indexMaxPrice].open, data[indexMaxPrice].close);
+                            const topCandle = Math.max(data[indexMaxPrice].open, data[indexMaxPrice].close);
 
                             if (indexMaxPrice != shift && (topCandle - data[shift].high) / topCandle > diffCandle0 / 100) {
                                 value = 0;
