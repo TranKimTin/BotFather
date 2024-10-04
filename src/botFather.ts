@@ -589,7 +589,7 @@ export class BotFather {
                         const MARSIs = util.iMA(fakeData, periodMA);
 
                         if (shift >= MARSIs.length) return false;
-                        value = MARSIs[shift];
+                        value = +MARSIs[shift].toFixed(2);
                         break;
                     }
                     default:
