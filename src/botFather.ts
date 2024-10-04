@@ -582,6 +582,16 @@ export class BotFather {
                         value = util.isBearish(data, shift) ? 1 : 0;
                         break;
                     }
+                    case 'marsi': {
+                        const [periodRSI, periodMA, shift = 0] = params;
+                        const RSIs = util.iRSI(data, periodRSI);
+                        const fakeData = RSIs.map(item => ({ close: item } as RateData));
+                        const MARSIs = util.iMA(fakeData, periodMA);
+
+                        if (shift >= MARSIs.length) return false;
+                        value = MARSIs[shift];
+                        break;
+                    }
                     default:
                         break;
                 }
