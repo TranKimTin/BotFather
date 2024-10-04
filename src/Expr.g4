@@ -47,6 +47,7 @@ expr
     | bearish_hammer            # iBearish_hammer
     | bullish                   # iBullish
     | bearish                   # iBearish
+    | marsi                     # iMARSI
     ;
 
 telegram : 'telegram:' telegramContent* ;
@@ -98,6 +99,7 @@ bullish_hammer: 'bullish_hammer' '(' INT? ')';
 bearish_hammer: 'bearish_hammer' '(' INT? ')';
 bullish: 'bullish' '(' INT? ')';
 bearish: 'bearish' '(' INT? ')';
+marsi: 'rsi' '(' INT ',' INT (',' INT)? ')';
 
 comparisonOp
     : '>'

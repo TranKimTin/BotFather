@@ -6,6 +6,7 @@ import { AbstractParseTreeVisitor } from "antlr4ng";
 import { ICloseContext } from "./ExprParser.js";
 import { IHighContext } from "./ExprParser.js";
 import { IMACD_signalContext } from "./ExprParser.js";
+import { IMARSIContext } from "./ExprParser.js";
 import { IVolume24hInUSDContext } from "./ExprParser.js";
 import { MulDivContext } from "./ExprParser.js";
 import { ParensContext } from "./ExprParser.js";
@@ -90,6 +91,7 @@ import { Bullish_hammerContext } from "./ExprParser.js";
 import { Bearish_hammerContext } from "./ExprParser.js";
 import { BullishContext } from "./ExprParser.js";
 import { BearishContext } from "./ExprParser.js";
+import { MarsiContext } from "./ExprParser.js";
 import { ComparisonOpContext } from "./ExprParser.js";
 
 
@@ -122,6 +124,13 @@ export class ExprVisitor<Result> extends AbstractParseTreeVisitor<Result> {
      * @return the visitor result
      */
     visitIMACD_signal?: (ctx: IMACD_signalContext) => Result;
+    /**
+     * Visit a parse tree produced by the `iMARSI`
+     * labeled alternative in `ExprParser.expr`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitIMARSI?: (ctx: IMARSIContext) => Result;
     /**
      * Visit a parse tree produced by the `iVolume24hInUSD`
      * labeled alternative in `ExprParser.expr`.
@@ -669,6 +678,12 @@ export class ExprVisitor<Result> extends AbstractParseTreeVisitor<Result> {
      * @return the visitor result
      */
     visitBearish?: (ctx: BearishContext) => Result;
+    /**
+     * Visit a parse tree produced by `ExprParser.marsi`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitMarsi?: (ctx: MarsiContext) => Result;
     /**
      * Visit a parse tree produced by `ExprParser.comparisonOp`.
      * @param ctx the parse tree

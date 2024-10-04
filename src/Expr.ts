@@ -1,7 +1,7 @@
 import * as antlr from "antlr4ng";
 import { BaseErrorListener, CharStream, CommonTokenStream, RecognitionException, Recognizer, Token } from 'antlr4ng';
 import { ExprLexer } from './generated/ExprLexer';
-import { AddSubContext, AmplContext, AmplPContext, Bb_lowerContext, Bb_middleContext, Bb_upperContext, Bearish_engulfingContext, Bearish_hammerContext, BearishContext, BrokerContext, Bullish_engulfingContext, Bullish_hammerContext, BullishContext, ChangeContext, ChangePContext, CloseContext, ComparisonContext, EmaContext, ExprParser, FloatContext, HighContext, HourContext, IntContext, IRSIContext, LowContext, Lower_shadowContext, Lower_shadowPContext, Macd_histogramContext, Macd_n_dinhContext, Macd_signalContext, Macd_slopeContext, Macd_valueContext, MaContext, MinuteContext, MulDivContext, OpenContext, ParensContext, Rsi_phan_kiContext, Rsi_slopeContext, RsiContext, StringContext, SymbolContext, TelegramContentContext, TelegramContext, TimeframeContext, Upper_shadowContext, Upper_shadowPContext, Volume24h_in_usdContext, VolumeContext } from './generated/ExprParser';
+import { AddSubContext, AmplContext, AmplPContext, Bb_lowerContext, Bb_middleContext, Bb_upperContext, Bearish_engulfingContext, Bearish_hammerContext, BearishContext, BrokerContext, Bullish_engulfingContext, Bullish_hammerContext, BullishContext, ChangeContext, ChangePContext, CloseContext, ComparisonContext, EmaContext, ExprParser, FloatContext, HighContext, HourContext, IntContext, IRSIContext, LowContext, Lower_shadowContext, Lower_shadowPContext, Macd_histogramContext, Macd_n_dinhContext, Macd_signalContext, Macd_slopeContext, Macd_valueContext, MaContext, MarsiContext, MinuteContext, MulDivContext, OpenContext, ParensContext, Rsi_phan_kiContext, Rsi_slopeContext, RsiContext, StringContext, SymbolContext, TelegramContentContext, TelegramContext, TimeframeContext, Upper_shadowContext, Upper_shadowPContext, Volume24h_in_usdContext, VolumeContext } from './generated/ExprParser';
 import { ExprVisitor } from './generated/ExprVisitor';
 import * as util from './util';
 import Telegram, { TelegramIdType } from './telegram';
@@ -692,6 +692,19 @@ export class Expr extends ExprVisitor<any> {
         if (shift > this.data.length - 5) return 0;
 
         return util.isBearish(this.data, shift) ? 1 : 0;
+    };
+
+    visitMarsi = (ctx: MarsiContext) => {
+        const shift = parseInt(ctx.INT(0)?.getText() || "0", 10);
+        const periodRSI = parseInt(ctx.INT(1)?.getText() || "0", 10);
+        const periodMA = parseInt(ctx.INT(2)?.getText() || "0", 10);
+
+        const RSIs = util.iRSI(this.data, periodRSI);
+        const fakeData = RSIs.map(item => ({ close: item } as RateData));
+        const MARSIs = util.iMA(fakeData, periodMA);
+
+        if (shift >= MARSIs.length) return false;
+        return parseFloat(MARSIs[shift].toFixed(2));
     };
 }
 
