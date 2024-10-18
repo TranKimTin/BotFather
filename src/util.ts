@@ -132,6 +132,17 @@ export async function getBybitSymbolList() {
         .map((item) => item.name);
 }
 
+export async function getBybitFutureSymbolList() {
+    const url = `https://api.bybit.com/v2/public/symbols`;
+    const res = await axios.get(url);
+
+    const data = await res.data as { result: Array<{ name: string, quote_currency: string, status: string }> };
+    return data.result
+        .filter(item => item.status === 'Trading')
+        .filter(item => item.quote_currency === 'USDT')
+        .map((item) => item.name);
+}
+
 export async function getOkxSymbolList() {
     const url = `https://www.okx.com/api/v5/public/instruments?instType=SPOT`;
     const res = await axios.get(url);
@@ -278,6 +289,55 @@ export async function getBybitOHLCV(symbol: string, timeframe: string, limit: nu
     }
 
     const url = `https://api.bybit.com/v5/market/kline?category=spot&symbol=${symbol}&interval=${tf}&limit=${limit}`;
+    const res = await axios.get(url);
+
+    const data = await res.data as { result: { list: Array<string> } };
+    const result = data.result.list.map(item => {
+        const startTime = +item[0] || 0;
+        const open = +item[1] || 0;
+        const high = +item[2] || 0;
+        const low = +item[3] || 0;
+        const close = +item[4] || 0;
+        const volume = +item[5] || 0;
+        const interval = timeframe;
+        const isFinal = true;
+        const change = (close - open) / open;
+        const ampl = (high - low) / open;
+        const timestring = moment(startTime).format('YYYY-MM-DD HH:mm:SS');
+        return { symbol, startTime, timestring, open, high, low, close, volume, interval, isFinal, change, ampl };
+    });
+    result.sort((a, b) => b.startTime - a.startTime);
+    if (result.length) result[0].isFinal = false;
+
+    return result;
+}
+
+export async function getBybitFutureOHLCV(symbol: string, timeframe: string, limit: number): Promise<Array<RateData>> {
+    // https://bybit-exchange.github.io/docs/v5/market/kline
+    let tf: string | number = timeframe;
+    switch (timeframe) {
+        case '1m':
+        case '3m':
+        case '5m':
+        case '15m':
+        case '30m':
+            tf = timeframe.slice(0, timeframe.length - 1);
+            break;
+        case '1h':
+        case '2h':
+        case '4h':
+        case '6h':
+        case '8h':
+        case '12h':
+            tf = +timeframe.slice(0, timeframe.length - 1) * 60;
+            break;
+        case '1d': tf = 'D';
+            break;
+        default:
+            break;
+    }
+
+    const url = `https://api.bybit.com/v5/market/kline?category=linear&symbol=${symbol}&interval=${tf}&limit=${limit}`;
     const res = await axios.get(url);
 
     const data = await res.data as { result: { list: Array<string> } };

@@ -330,7 +330,11 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
         let okxSymbolList = await util.getOkxSymbolList();
         okxSymbolList = okxSymbolList.map(item => `${'okx'}:${item}`);
 
-        const symbolList = [...binanceSymbolList, ...bybitSymbolList, ...okxSymbolList];
+        let bybitFutureSymbolList = await util.getBybitFutureSymbolList();
+        bybitFutureSymbolList = bybitFutureSymbolList.map(item => `${'bybit_future'}:${item}`);
+
+
+        const symbolList = [...binanceSymbolList, ...bybitSymbolList, ...okxSymbolList, ...bybitFutureSymbolList];
         res.json({ code: 200, message: "ok", data: symbolList });
     });
 

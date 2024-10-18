@@ -388,6 +388,10 @@ $(document).ready(function () {
         toogleAllSymbol('bybit');
     });
 
+    $('#toogleAllSymbolBybit').click(function () {
+        toogleAllSymbol('bybit_future');
+    });
+
     function toogleAllSymbol(broker) {
         this.temp = this.temp || {};
         this.temp[broker] = this.temp[broker] || 1;
@@ -423,6 +427,20 @@ $(document).ready(function () {
     $('#filterDuplicate').click(function () {
         let symbolList = $('#symbolList').val() || [];
         symbolList = symbolList.map(item => item.split(':')).map(item => ({ broker: item[0], symbol: item[1] }));
+
+        for (let i = 0; i < symbolList.length; i++) {
+            if (!symbolList[i]) continue;
+            let { symbol, broker } = symbolList[i];
+            if (broker === 'bybit_future') {
+                for (let item of symbolList) {
+                    if (!item) continue;
+                    if (item.symbol.replace('-', '') === symbol && (item.broker === 'bybit'  || item.broker === 'binance' || item.broker === 'okx')) {
+                        symbolList[i] = null;
+                        break;
+                    }
+                }
+            }
+        }
 
         for (let i = 0; i < symbolList.length; i++) {
             if (!symbolList[i]) continue;
