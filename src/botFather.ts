@@ -620,7 +620,11 @@ export class BotFather {
             mess += `\n${condition}`;
 
             if (condition === '<--->') mess = '--------------------';
-            this.telegram.sendMessage(mess, idTelegram);
+
+            const ids = idTelegram.toString().split(',');
+            for (const id of ids) {
+                this.telegram.sendMessage(mess, id);
+            }
             return true;
         }
 

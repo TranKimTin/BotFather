@@ -160,7 +160,11 @@ export class Expr extends ExprVisitor<any> {
         }
 
         if (ctx.getText() === '<--->') mess = '--------------------';
-        this.telegram.sendMessage(mess, this.idTelegram);
+
+        const ids = this.idTelegram.toString().split(',');
+        for (const id of ids) {
+            this.telegram.sendMessage(mess, id);
+        }
 
         return 1;
     };
