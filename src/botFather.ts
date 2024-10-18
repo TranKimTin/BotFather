@@ -621,7 +621,7 @@ export class BotFather {
 
             if (condition === '<--->') mess = '--------------------';
 
-            const ids = idTelegram.toString().split(',');
+            const ids = idTelegram.toString().split(',').map(item => item.trim());
             for (const id of ids) {
                 this.telegram.sendMessage(mess, id);
             }
