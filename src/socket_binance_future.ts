@@ -6,27 +6,25 @@ import delay from 'delay';
 import WebSocket from 'ws';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 
-export class BinanceSocket {
-    public static readonly broker = 'binance';
+export class BinanceSocketFuture {
+    public static readonly broker = 'binance_future';
 
-    private gBinance: Binance;
     private gData: { [key: string]: { [key: string]: Array<RateData> } };
     private gLastPrice: { [key: string]: number };
     private gLastUpdated: { [key: string]: number };
 
     constructor() {
-        this.gBinance = IBinance({});
         this.gData = {};
         this.gLastPrice = {};
         this.gLastUpdated = {};
     }
 
     async init(numbler_candle_load: number, onCloseCandle: (broker: string, symbol: string, timeframe: string, data: Array<RateData>) => void) {
-        const symbolList = await util.getBinanceSymbolList();
+        const symbolList = await util.getBinanceFutureSymbolList();
         // console.log(symbolList.join(' '));
-        console.log(`binance: Total ${symbolList.length} symbols`);
+        console.log(`${BinanceSocketFuture.broker}: Total ${symbolList.length} symbols`);
 
-        const timeframes = ['15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d', '1m', '3m', '5m',];
+        const timeframes = ['1m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d', '3m', '5m',];
         // timeframes = ['1m', '15m', '4h', '1d'];
         for (const symbol of symbolList) {
             this.gData[symbol] = {};
@@ -35,7 +33,7 @@ export class BinanceSocket {
             }
         }
 
-        console.log('binance: init timeframe', timeframes);
+        console.log(`${BinanceSocketFuture.broker}: init timeframe`, timeframes);
         const fetchCandles = (candle: Candle) => {
             this.gLastUpdated[candle.symbol] = new Date().getTime();
             for (const tf of timeframes) {
@@ -69,7 +67,7 @@ export class BinanceSocket {
 
                     if (data.isFinal && !dataList[0].isFinal) {
                         dataList[0].isFinal = data.isFinal;
-                        onCloseCandle(BinanceSocket.broker, data.symbol, data.interval, [...dataList]);
+                        onCloseCandle(BinanceSocketFuture.broker, data.symbol, data.interval, [...dataList]);
                     }
                 }
                 else if (dataList[0].startTime < data.startTime) {
@@ -79,30 +77,21 @@ export class BinanceSocket {
                     }
                     if (dataList[1] && !dataList[1].isFinal) {
                         dataList[1].isFinal = true;
-                        onCloseCandle(BinanceSocket.broker, data.symbol, data.interval, dataList.slice(1));
+                        onCloseCandle(BinanceSocketFuture.broker, data.symbol, data.interval, dataList.slice(1));
                     }
                 }
             }
         }
 
-        // if (util.isFuture()) {
-        //     this.gBinance.ws.futuresCandles(symbolList, '1m', fetchCandles);
-        // }
-        // else {
-        //     this.gBinance.ws.candles(symbolList, '1m', fetchCandles);
-        // }
         for (const symbol of symbolList) {
-            let url = `wss://stream.binance.com/ws/${symbol.toLowerCase()}@kline_1m`;
+            let url = `wss://fstream.binance.com/ws/${symbol.toLowerCase()}@kline_1m`;
 
-            // const ws = new WebSocket(url);
             const rws = new ReconnectingWebSocket(url, [], { WebSocket: WebSocket });
 
-            // ws.on('open', () => {
             rws.addEventListener('open', () => {
                 // console.log(`binance: Connected to ${url}`);
             });
 
-            // ws.on('message', (mess) => {
             rws.addEventListener('message', (event) => {
                 const mess = event.data;
                 const data = JSON.parse(mess.toString());
@@ -131,7 +120,6 @@ export class BinanceSocket {
                 fetchCandles(candle);
             });
 
-            // ws.on('error', (err) => {
             rws.addEventListener('error', (err) => {
                 console.error(`binance: WebSocket error ${symbol}`, err);
                 setTimeout(() => {
@@ -139,25 +127,24 @@ export class BinanceSocket {
                 }, 5000);
             });
 
-            // ws.on('close', () => {
             rws.addEventListener('close', (event) => {
-                console.error(`binance: WebSocket connection closed ${symbol}, ${event.code} ${event.reason}`);
+                console.error(`${BinanceSocketFuture.broker}: WebSocket connection closed ${symbol}, ${event.code} ${event.reason}`);
                 setTimeout(() => {
-                    throw `binance: WebSocket connection closed ${symbol}, ${event.code} ${event.reason}`;
+                    throw `${BinanceSocketFuture.broker}: WebSocket connection closed ${symbol}, ${event.code} ${event.reason}`;
                 }, 5000);
             });
             await delay(10);
         }
 
         const initCandle = async (symbol: string, tf: string) => {
-            const rates = await util.getOHLCV(symbol, tf, numbler_candle_load);
+            const rates = await util.getBinanceFutureOHLCV(symbol, tf, numbler_candle_load);
             this.gData[symbol][tf] = rates;
             this.gLastPrice[symbol] = this.gData[symbol][tf][0]?.close || 0;
-            // console.log('binance: init candle', { symbol, tf })
+            // console.log(`${BinanceSocketFuture.broker}: init candle`, { symbol, tf })
         }
 
         for (const tf of timeframes) {
-            console.log(`binance: init candle ${tf}...`);
+            console.log(`${BinanceSocketFuture.broker}: init candle ${tf}...`);
             let promiseList = [];
             for (const symbol of symbolList) {
                 promiseList.push(initCandle(symbol, tf));
@@ -178,8 +165,8 @@ export class BinanceSocket {
             for (const symbol in this.gLastUpdated) {
                 const lastTimeUpdated = this.gLastUpdated[symbol];
                 if (now - lastTimeUpdated > timeInterval) {
-                    console.error(`binance: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`);
-                    throw `binance: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`;
+                    console.error(`${BinanceSocketFuture.broker}: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`);
+                    throw `${BinanceSocketFuture.broker}: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`;
                 }
             }
         }, timeInterval);
@@ -195,15 +182,15 @@ const io = new Server(server, {
     pingInterval: 25000,
     pingTimeout: 60000
 });
-const port = 81;
+const port = 85;
 let cnt = 0;
 io.on('connection', client => {
     cnt++;
-    console.log(`binance: client connected. total: ${cnt} connection`);
+    console.log(`${BinanceSocketFuture.broker}: client connected. total: ${cnt} connection`);
 
     client.on('disconnect', () => {
         cnt--;
-        console.log(`binance: onDisconnect - Client disconnected. total: ${cnt} connection`);
+        console.log(`${BinanceSocketFuture.broker}: onDisconnect - Client disconnected. total: ${cnt} connection`);
     });
 });
 server.listen(port);
@@ -212,5 +199,5 @@ function onCloseCandle(broker: string, symbol: string, timeframe: string, data: 
     io.emit('onCloseCandle', { broker, symbol, timeframe, data });
 }
 
-const binanceSocket = new BinanceSocket();
-binanceSocket.init(300, onCloseCandle);
+const binanceSocketFuture = new BinanceSocketFuture();
+binanceSocketFuture.init(300, onCloseCandle);

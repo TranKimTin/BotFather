@@ -11,6 +11,7 @@ export class BotFather {
     private bybitSocketPort: number;
     private okxSocketPort: number;
     private bybitSocketFuturePort: number;
+    private binanceSocketFuturePort: number;
     private webConfigServerPort: number;
     private botChildren: Array<BotInfo>;
     private telegram: Telegram;
@@ -20,6 +21,7 @@ export class BotFather {
         this.bybitSocketPort = 82;
         this.okxSocketPort = 83;
         this.bybitSocketFuturePort = 84;
+        this.binanceSocketFuturePort = 85;
         this.webConfigServerPort = 8080;
         this.botChildren = [];
         this.telegram = new Telegram(undefined, undefined, true);
@@ -28,6 +30,7 @@ export class BotFather {
         this.connectTradeDataServer(this.binanceSocketPort);
         this.connectTradeDataServer(this.bybitSocketPort);
         this.connectTradeDataServer(this.okxSocketPort);
+        this.connectTradeDataServer(this.binanceSocketFuturePort);
         this.connectTradeDataServer(this.bybitSocketFuturePort);
 
 
@@ -617,6 +620,7 @@ export class BotFather {
                 'binance': '🥇🥇🥇',
                 'bybit': '',
                 'okx': '🏁🏁🏁',
+                'binance_future': '🥇🥇🥇',
                 'bybit_future': ''
             }
 

@@ -7,8 +7,6 @@ import path from "path";
 import * as util from './util'
 import { TelegramIdType } from "./telegram";
 
-util.useSport();
-
 export const BOT_DATA_DIR = './botData';
 if (!fs.existsSync(BOT_DATA_DIR)) {
     fs.mkdirSync(BOT_DATA_DIR);
@@ -330,11 +328,14 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
         let okxSymbolList = await util.getOkxSymbolList();
         okxSymbolList = okxSymbolList.map(item => `${'okx'}:${item}`);
 
+        let binanceFutureSymbolList = await util.getBinanceFutureSymbolList();
+        binanceFutureSymbolList = binanceFutureSymbolList.map(item => `${'binance_future'}:${item}`);
+
         let bybitFutureSymbolList = await util.getBybitFutureSymbolList();
         bybitFutureSymbolList = bybitFutureSymbolList.map(item => `${'bybit_future'}:${item}`);
 
 
-        const symbolList = [...binanceSymbolList, ...bybitSymbolList, ...okxSymbolList, ...bybitFutureSymbolList];
+        const symbolList = [...binanceSymbolList, ...bybitSymbolList, ...okxSymbolList, ...binanceFutureSymbolList, ...bybitFutureSymbolList];
         res.json({ code: 200, message: "ok", data: symbolList });
     });
 

@@ -388,6 +388,10 @@ $(document).ready(function () {
         toogleAllSymbol('bybit');
     });
 
+    $('#toogleAllSymbolBinanceFuture').click(function () {
+        toogleAllSymbol('binance_future');
+    });
+
     $('#toogleAllSymbolBybitFuture').click(function () {
         toogleAllSymbol('bybit_future');
     });
@@ -434,7 +438,21 @@ $(document).ready(function () {
             if (broker === 'bybit_future') {
                 for (let item of symbolList) {
                     if (!item) continue;
-                    if (item.symbol.replace('-', '') === symbol && (item.broker === 'bybit'  || item.broker === 'binance' || item.broker === 'okx')) {
+                    if (item.symbol.replace('-', '') === symbol && (item.broker === 'binance_future' || item.broker === 'bybit' || item.broker === 'binance' || item.broker === 'okx')) {
+                        symbolList[i] = null;
+                        break;
+                    }
+                }
+            }
+        }
+
+        for (let i = 0; i < symbolList.length; i++) {
+            if (!symbolList[i]) continue;
+            let { symbol, broker } = symbolList[i];
+            if (broker === 'binance_future') {
+                for (let item of symbolList) {
+                    if (!item) continue;
+                    if (item.symbol.replace('-', '') === symbol && (item.broker === 'bybit' || item.broker === 'binance' || item.broker === 'okx')) {
                         symbolList[i] = null;
                         break;
                     }
@@ -455,6 +473,7 @@ $(document).ready(function () {
                 }
             }
         }
+
         for (let i = 0; i < symbolList.length; i++) {
             if (!symbolList[i]) continue;
             let { symbol, broker } = symbolList[i];
@@ -468,6 +487,7 @@ $(document).ready(function () {
                 }
             }
         }
+        
         symbolList = symbolList.filter(item => item).map(item => `${item.broker}:${item.symbol}`);
         $('#symbolList').val(symbolList);
         alert(`Đã lọc coin trùng nhau (${symbolList.length} coin)`);

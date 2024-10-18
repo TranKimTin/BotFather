@@ -7,8 +7,8 @@ import * as indicator from 'technicalindicators';
 import _ from 'lodash';
 import axios from 'axios';
 
-let useFuture = true;
-let binance: ccxt.binance | ccxt.binanceusdm = new ccxt.binanceusdm({ 'timeout': 30000 });
+let binance = new ccxt.binance({ 'timeout': 30000 });
+let binanceFuture = new ccxt.binanceusdm({ 'timeout': 30000 });
 
 const LogError = console.error.bind(console);
 console.error = function () {
@@ -26,15 +26,6 @@ interface OHLCV {
     low: number,
     close: number,
     volume: number
-}
-
-export function useSport() {
-    useFuture = false;
-    binance = new ccxt.binance({ 'timeout': 30000 });
-}
-
-export function isFuture() {
-    return useFuture;
 }
 
 export function iCCI(data: Array<RateData>, period: number) {
@@ -97,7 +88,8 @@ export function iRSI(data: Array<RateData>, period: number) {
 }
 
 export async function getDigitsFuture() {
-    const url = useFuture ? 'https://fapi.binance.com/fapi/v1/exchangeInfo' : 'https://api.binance.com/api/v1/exchangeInfo'
+    // const url = useFuture ? 'https://fapi.binance.com/fapi/v1/exchangeInfo' : 'https://api.binance.com/api/v1/exchangeInfo'
+    const url = 'https://fapi.binance.com/fapi/v1/exchangeInfo';
     const res = await axios.get(url);
     const data: any = await res.data;
     const digits: { [key: string]: { price: number, volume: number } } = {};
@@ -111,7 +103,18 @@ export async function getDigitsFuture() {
 }
 
 export async function getBinanceSymbolList() {
-    const url = useFuture ? 'https://fapi.binance.com/fapi/v1/exchangeInfo' : 'https://api.binance.com/api/v1/exchangeInfo';
+    const url = 'https://api.binance.com/api/v1/exchangeInfo';
+    const res = await axios.get(url);
+
+    const data = res.data as { symbols: Array<{ symbol: string; status: string }> };
+    return data.symbols
+        .filter((item: { status: string }) => item.status == 'TRADING')
+        .map((item: { symbol: any; }) => item.symbol)
+        .filter(item => item.endsWith('USDT'));
+}
+
+export async function getBinanceFutureSymbolList() {
+    const url = 'https://fapi.binance.com/fapi/v1/exchangeInfo';
     const res = await axios.get(url);
 
     const data = res.data as { symbols: Array<{ symbol: string; status: string }> };
@@ -234,6 +237,43 @@ export async function getOHLCV(symbol: string, timeframe: string, limit: number)
     while (limit > 0) {
         if (limit > maxCall) console.log(`getOHLCV pending ${symbol} ${timeframe} ${limit}`);
         const ohlcv = await binance.fetchOHLCV(symbol, timeframe, since, Math.min(limit, maxCall));
+        const data = ohlcv.filter(item => item[0] !== undefined && item[1] !== undefined && item[2] !== undefined && item[3] !== undefined && item[4] !== undefined && item[5] !== undefined).map(item => {
+            const startTime = item[0] || 0;
+            const open = item[1] || 0;
+            const high = item[2] || 0;
+            const low = item[3] || 0;
+            const close = item[4] || 0;
+            const volume = item[5] || 0;
+            const interval = timeframe;
+            const isFinal = true;
+            const change = (close - open) / open;
+            const ampl = (high - low) / open;
+            const timestring = moment(startTime).format('YYYY-MM-DD HH:mm:SS');
+            return { symbol, startTime, timestring, open, high, low, close, volume, interval, isFinal, change, ampl };
+        }).filter(item => !check[item.startTime]);
+        if (data.length == 0) break;
+        data.sort((a, b) => a.startTime - b.startTime);
+        result.push(...data);
+        for (const item of data) {
+            check[item.startTime] = true;
+        }
+        limit -= Math.min(limit, maxCall);
+        since = moment(data[0].startTime).subtract(Math.min(limit, maxCall) * (+timeframe.slice(0, timeframe.length - 1)), <DurationInputArg2>timeframe[timeframe.length - 1]).valueOf();
+    }
+    result.sort((a, b) => b.startTime - a.startTime);
+
+    if (result.length) result[0].isFinal = false;
+    return result;
+}
+
+export async function getBinanceFutureOHLCV(symbol: string, timeframe: string, limit: number): Promise<Array<RateData>> {
+    const result = [];
+    const maxCall = 1000;
+    const check: { [key: number]: boolean } = {};
+    let since: number | undefined = undefined;
+    while (limit > 0) {
+        if (limit > maxCall) console.log(`getBinanceFutureOHLCV pending ${symbol} ${timeframe} ${limit}`);
+        const ohlcv = await binanceFuture.fetchOHLCV(symbol, timeframe, since, Math.min(limit, maxCall));
         const data = ohlcv.filter(item => item[0] !== undefined && item[1] !== undefined && item[2] !== undefined && item[3] !== undefined && item[4] !== undefined && item[5] !== undefined).map(item => {
             const startTime = item[0] || 0;
             const open = item[1] || 0;

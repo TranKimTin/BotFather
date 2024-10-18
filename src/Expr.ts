@@ -146,6 +146,7 @@ export class Expr extends ExprVisitor<any> {
             'binance': '🥇🥇🥇',
             'bybit': '',
             'okx': '🏁🏁🏁',
+            'binance_future': '🥇🥇🥇',
             'bybit_future': ''
         }
 
