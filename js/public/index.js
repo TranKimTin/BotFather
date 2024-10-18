@@ -388,7 +388,7 @@ $(document).ready(function () {
         toogleAllSymbol('bybit');
     });
 
-    $('#toogleAllSymbolBybit').click(function () {
+    $('#toogleAllSymbolBybitFuture').click(function () {
         toogleAllSymbol('bybit_future');
     });
 
