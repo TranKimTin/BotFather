@@ -616,7 +616,8 @@ export class BotFather {
             const emoji: { [key: string]: string } = {
                 'binance': '🥇🥇🥇',
                 'bybit': '',
-                'okx': '🏁🏁🏁'
+                'okx': '🏁🏁🏁',
+                'bybit_future': ''
             }
 
             let mess = emoji[broker];
