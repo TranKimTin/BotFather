@@ -145,7 +145,8 @@ export class Expr extends ExprVisitor<any> {
         const emoji: { [key: string]: string } = {
             'binance': '🥇🥇🥇',
             'bybit': '',
-            'okx': '🏁🏁🏁'
+            'okx': '🏁🏁🏁',
+            'bybit_future': ''
         }
 
         let mess = `${emoji[this.broker]}\n`;
