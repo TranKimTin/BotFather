@@ -25,33 +25,6 @@ export class CustomErrorListener extends BaseErrorListener {
     }
 }
 
-export function calculate(condition: string, args: ExprArgs): any {
-    // console.log({ condition });
-    const inputStream = CharStream.fromString(condition);
-    const lexer = new ExprLexer(inputStream);
-    const tokenStream = new CommonTokenStream(lexer);
-    const parser = new ExprParser(tokenStream);
-
-    parser.removeErrorListeners();
-    parser.addErrorListener(new CustomErrorListener());
-
-    try {
-        const tree = parser.expr();
-
-        const evalVisitor = new Expr(args);
-        const result = evalVisitor.visit(tree);
-
-        // console.log({ tree: tree.toStringTree(parser) });
-        // console.log({ result });
-
-        return result;
-    }
-    catch (err) {
-        console.error({ condition }, err);
-        return null;
-    }
-}
-
 export class Expr extends ExprVisitor<any> {
     private broker: string;
     private symbol: string;
@@ -671,35 +644,107 @@ export class Expr extends ExprVisitor<any> {
 }
 
 
+export function calculate(condition: string, args: ExprArgs): any {
+    try {
+        const inputStream = CharStream.fromString(condition);
+        const lexer = new ExprLexer(inputStream);
+        const tokenStream = new CommonTokenStream(lexer);
+        const parser = new ExprParser(tokenStream);
 
-// async function test() {
-//     const data = await util.getBinanceOHLCV('BTCUSDT', '15m', 300);
-//     data.shift();
+        lexer.removeErrorListeners();
+        lexer.addErrorListener(new CustomErrorListener());
 
-//     const args = {
-//         broker: 'binance',
-//         symbol: 'BTCUSDT',
-//         timeframe: '15m',
-//         data: data
-//     };
-//     const idTelegram = 'id_tele_tin';
+        parser.removeErrorListeners();
+        parser.addErrorListener(new CustomErrorListener());
 
-//     let condition = "macd_n_dinh(12,26,9,5,8,0,2,0,0) >= 1";
+        const tree = parser.expr();
 
-//     const subExprs = [...new Set([...condition.matchAll(/\{(.*?)\}/g)].map(match => match[1]))];
-//     for (const expr of subExprs) {
-//         const result = calculate(expr, args);
-//         condition = condition.replaceAll(`{${expr}}`, result);
-//     }
+        const evalVisitor = new Expr(args);
+        const result = evalVisitor.visit(tree);
 
-//     if (condition.startsWith('telegram:')) {
-//         console.log({ condition });
-//     }
+        // console.log({ tree: tree.toStringTree(parser) });
+        // console.log({ result });
 
-//     else {
-//         let result = calculate(condition, args);
-//         console.log({ condition, result });
-//     }
-// }
+        return result;
+    }
+    catch (err) {
+        console.error({ condition }, err);
+        return null;
+    }
+}
 
-// test();
+function isValidExpr(expr: string): boolean {
+    try {
+        const inputStream = CharStream.fromString(expr);
+        const lexer = new ExprLexer(inputStream);
+        const tokenStream = new CommonTokenStream(lexer);
+        const parser = new ExprParser(tokenStream);
+
+        lexer.removeErrorListeners();
+        lexer.addErrorListener(new CustomErrorListener());
+
+        parser.removeErrorListeners();
+        parser.addErrorListener(new CustomErrorListener());
+
+        const tree = parser.expr();
+
+        return true;
+    }
+    catch (err) {
+        console.error('expr invalid', { expr }, err);
+        return false;
+    }
+}
+
+export function isValidCondition(condition: string) {
+    condition = condition.toLowerCase().trim();
+
+    const subExprs = [...new Set([...condition.matchAll(/\{(.*?)\}/g)].map(match => match[1]))];
+
+    for (const expr of subExprs) {
+        if (!isValidExpr(expr)) {
+            return false;
+        }
+        condition = condition.replaceAll(`{${expr}}`, '1');
+    }
+
+    if (condition.startsWith('telegram:')) {
+        return true;
+    }
+    else {
+        return isValidExpr(condition);
+    }
+}
+
+
+async function test() {
+    const data = await util.getBinanceOHLCV('BTCUSDT', '15m', 300);
+    data.shift();
+
+    const args = {
+        broker: 'binance',
+        symbol: 'BTCUSDT',
+        timeframe: '15m',
+        data: data
+    };
+    const idTelegram = 'id_tele_tin';
+
+    let condition = "marsi(14,20) > rsi(14)";
+
+    const subExprs = [...new Set([...condition.matchAll(/\{(.*?)\}/g)].map(match => match[1]))];
+    for (const expr of subExprs) {
+        const result = calculate(expr, args);
+        condition = condition.replaceAll(`{${expr}}`, result);
+    }
+
+    if (condition.startsWith('telegram:')) {
+        console.log({ condition });
+    }
+
+    else {
+        let result = calculate(condition, args);
+        console.log({ condition, result });
+    }
+}
+
+test();

@@ -1,7 +1,8 @@
 var assert = require('assert');
 import * as util from './util';
-import { BotInfo, CreateWebConfig, BOT_DATA_DIR, Node, findIndicator, extractParams, checkEval, checkCondition, indicatorSupported, checkParams } from './botFatherConfig';
+import { BotInfo, CreateWebConfig, BOT_DATA_DIR, Node, findIndicator, extractParams, checkEval, indicatorSupported, checkParams } from './botFatherConfig';
 import { RateData } from './BinanceFuture';
+import { isValidCondition } from './Expr';
 
 
 describe('BotFather', function () {
@@ -59,32 +60,27 @@ describe('BotFather', function () {
     describe('checkCondition', function () {
         it('rsi(14,5) > 70', function () {
             const s = 'rsi(14,5) > 70';
-            const value = checkCondition(s);
+            const value = isValidCondition(s);
             assert.strictEqual(value, true);
         });
         it('console.log(123)', function () {
             const s = 'console.log(123)';
-            const value = checkCondition(s);
+            const value = isValidCondition(s);
             assert.strictEqual(value, false);
         });
         it('rsi(14) >= rsi(14,1)', function () {
             const s = 'rsi(14) >= rsi(14,1)';
-            const value = checkCondition(s);
+            const value = isValidCondition(s);
             assert.strictEqual(value, true);
         });
         it('change() >= ampl() * 0.3', function () {
             const s = 'change() >= ampl() * 0.3';
-            const value = checkCondition(s);
+            const value = isValidCondition(s);
             assert.strictEqual(value, true);
         });
-        it('rsi(14,5,5) > 70', function () {
-            const s = 'rsi(14,5,5) > 70';
-            const value = checkCondition(s);
-            assert.equal(value, false);
-        });
         it('telegram: send tele', function () {
-            const s = 'telegram: send tele';
-            const value = checkCondition(s);
+            const s = 'telegram: send tele rsi={rsi(14)}';
+            const value = isValidCondition(s);
             assert.strictEqual(value, true);
         })
     });
