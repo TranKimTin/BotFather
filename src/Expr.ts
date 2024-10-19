@@ -47,7 +47,7 @@ export function calculate(condition: string, args: ExprArgs): any {
         return result;
     }
     catch (err) {
-        console.error(err);
+        console.error({ condition }, err);
         return null;
     }
 }
