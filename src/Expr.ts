@@ -699,6 +699,8 @@ function isValidExpr(expr: string): boolean {
 export function isValidCondition(condition: string) {
     condition = condition.toLowerCase().trim();
 
+    if (condition === 'start') return true;
+
     const subExprs = [...new Set([...condition.matchAll(/\{(.*?)\}/g)].map(match => match[1]))];
 
     for (const expr of subExprs) {
