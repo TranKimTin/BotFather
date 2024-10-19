@@ -229,13 +229,13 @@ export async function decompress(data: Buffer): Promise<Buffer> {
     });
 }
 
-export async function getOHLCV(symbol: string, timeframe: string, limit: number): Promise<Array<RateData>> {
+export async function getBinanceOHLCV(symbol: string, timeframe: string, limit: number): Promise<Array<RateData>> {
     const result = [];
     const maxCall = 1000;
     const check: { [key: number]: boolean } = {};
     let since: number | undefined = undefined;
     while (limit > 0) {
-        if (limit > maxCall) console.log(`getOHLCV pending ${symbol} ${timeframe} ${limit}`);
+        if (limit > maxCall) console.log(`getBinanceOHLCV pending ${symbol} ${timeframe} ${limit}`);
         const ohlcv = await binance.fetchOHLCV(symbol, timeframe, since, Math.min(limit, maxCall));
         const data = ohlcv.filter(item => item[0] !== undefined && item[1] !== undefined && item[2] !== undefined && item[3] !== undefined && item[4] !== undefined && item[5] !== undefined).map(item => {
             const startTime = item[0] || 0;

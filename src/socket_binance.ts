@@ -24,7 +24,7 @@ export class BinanceSocket {
     async init(numbler_candle_load: number, onCloseCandle: (broker: string, symbol: string, timeframe: string, data: Array<RateData>) => void) {
         const symbolList = await util.getBinanceSymbolList();
         // console.log(symbolList.join(' '));
-        console.log(`binance: Total ${symbolList.length} symbols`);
+        console.log(`${BinanceSocket.broker}: Total ${symbolList.length} symbols`);
 
         const timeframes = ['15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d', '1m', '3m', '5m',];
         // timeframes = ['1m', '15m', '4h', '1d'];
@@ -35,7 +35,7 @@ export class BinanceSocket {
             }
         }
 
-        console.log('binance: init timeframe', timeframes);
+        console.log(`${BinanceSocket.broker}: init timeframe`, timeframes);
         const fetchCandles = (candle: Candle) => {
             this.gLastUpdated[candle.symbol] = new Date().getTime();
             for (const tf of timeframes) {
@@ -133,7 +133,7 @@ export class BinanceSocket {
 
             // ws.on('error', (err) => {
             rws.addEventListener('error', (err) => {
-                console.error(`binance: WebSocket error ${symbol}`, err);
+                console.error(`${BinanceSocket.broker}: WebSocket error ${symbol}`, err);
                 setTimeout(() => {
                     throw err;
                 }, 5000);
@@ -141,23 +141,23 @@ export class BinanceSocket {
 
             // ws.on('close', () => {
             rws.addEventListener('close', (event) => {
-                console.error(`binance: WebSocket connection closed ${symbol}, ${event.code} ${event.reason}`);
+                console.error(`${BinanceSocket.broker}: WebSocket connection closed ${symbol}, ${event.code} ${event.reason}`);
                 setTimeout(() => {
-                    throw `binance: WebSocket connection closed ${symbol}, ${event.code} ${event.reason}`;
+                    throw `${BinanceSocket.broker}: WebSocket connection closed ${symbol}, ${event.code} ${event.reason}`;
                 }, 5000);
             });
             await delay(10);
         }
 
         const initCandle = async (symbol: string, tf: string) => {
-            const rates = await util.getOHLCV(symbol, tf, numbler_candle_load);
+            const rates = await util.getBinanceOHLCV(symbol, tf, numbler_candle_load);
             this.gData[symbol][tf] = rates;
             this.gLastPrice[symbol] = this.gData[symbol][tf][0]?.close || 0;
             // console.log('binance: init candle', { symbol, tf })
         }
 
         for (const tf of timeframes) {
-            console.log(`binance: init candle ${tf}...`);
+            console.log(`${BinanceSocket.broker}: init candle ${tf}...`);
             let promiseList = [];
             for (const symbol of symbolList) {
                 promiseList.push(initCandle(symbol, tf));
@@ -199,11 +199,11 @@ const port = 81;
 let cnt = 0;
 io.on('connection', client => {
     cnt++;
-    console.log(`binance: client connected. total: ${cnt} connection`);
+    console.log(`${BinanceSocket.broker}: client connected. total: ${cnt} connection`);
 
     client.on('disconnect', () => {
         cnt--;
-        console.log(`binance: onDisconnect - Client disconnected. total: ${cnt} connection`);
+        console.log(`${BinanceSocket.broker}: onDisconnect - Client disconnected. total: ${cnt} connection`);
     });
 });
 server.listen(port);

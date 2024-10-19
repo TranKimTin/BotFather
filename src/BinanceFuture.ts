@@ -246,7 +246,7 @@ class BinanceFuture {
             console.log(`init candle ${tf}...`);
             const promiseList = [];
             for (const symbol of this.symbolList) {
-                promiseList.push(util.getOHLCV(symbol, tf, numbler_candle_load));
+                promiseList.push(util.getBinanceFutureOHLCV(symbol, tf, numbler_candle_load));
                 // promiseList.push(util.getOHLCVFromCache(symbol, tf, numbler_candle_load));
                 // promiseList.push(fetch(`http://localhost:${process.env.PORT_DATA_SERVER}/?symbol=${symbol}&timeframe=${tf}&limit=${numbler_candle_load}`));
             }

@@ -21,7 +21,7 @@ export class OkxSocket {
     async init(numbler_candle_load: number, onCloseCandle: (broker: string, symbol: string, timeframe: string, data: Array<RateData>) => void) {
         const symbolList = await util.getOkxSymbolList();
         // console.log(symbolList.join(' '));
-        console.log(`okx: Total ${symbolList.length} symbols`);
+        console.log(`${OkxSocket.broker}: Total ${symbolList.length} symbols`);
 
         const timeframes = ['15m', '30m', '1h', '2h', '4h', '6h', '12h', '1d', '1m', '3m', '5m'];
         // timeframes = ['1m', '15m', '4h', '1d'];
@@ -37,7 +37,7 @@ export class OkxSocket {
 
         // ws.on('open', async function open() {
         rws.addEventListener('open', () => {
-            console.log('okx: WebSocket connection opened');
+            console.log(`${OkxSocket.broker}: WebSocket connection opened`);
 
             rws.send(JSON.stringify({
                 op: "subscribe",
@@ -114,15 +114,15 @@ export class OkxSocket {
 
         // ws.on('close', function close() {
         rws.addEventListener('close', (event) => {
-            console.error(`okx: WebSocket connection closed ${event.code} ${event.reason}`);
+            console.error(`${OkxSocket.broker}: WebSocket connection closed ${event.code} ${event.reason}`);
             setTimeout(() => {
-                throw `okx: WebSocket connection closed ${event.code} ${event.reason}`;
+                throw `${OkxSocket.broker}: WebSocket connection closed ${event.code} ${event.reason}`;
             }, 5000);
         });
 
         // ws.on('error', function error(err) {
         rws.addEventListener('error', (err) => {
-            console.error('okx: WebSocket error: ', err);
+            console.error(`${OkxSocket.broker}: WebSocket error: `, err);
             setTimeout(() => {
                 throw err;
             }, 5000);
@@ -137,7 +137,7 @@ export class OkxSocket {
         }
 
         for (const tf of timeframes) {
-            console.log(`okx: init candle ${tf}...`);
+            console.log(`${OkxSocket.broker}: init candle ${tf}...`);
             let promiseList = [];
             for (const symbol of symbolList) {
                 promiseList.push(initCandle(symbol, tf));
@@ -158,8 +158,8 @@ export class OkxSocket {
             for (const symbol in this.gLastUpdated) {
                 const lastTimeUpdated = this.gLastUpdated[symbol];
                 if (now - lastTimeUpdated > timeInterval) {
-                    console.error(`okx: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`);
-                    throw `okx: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`;
+                    console.error(`${OkxSocket.broker}: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`);
+                    throw `${OkxSocket.broker}: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`;
                 }
             }
         }, timeInterval);
@@ -177,11 +177,11 @@ const port = 83;
 let cnt = 0;
 io.on('connection', client => {
     cnt++;
-    console.log(`okx: client connected. total: ${cnt} connection`);
+    console.log(`${OkxSocket.broker}: client connected. total: ${cnt} connection`);
 
     client.on('disconnect', () => {
         cnt--;
-        console.log(`okx: onDisconnect - Client disconnected. total: ${cnt} connection`);
+        console.log(`${OkxSocket.broker}: onDisconnect - Client disconnected. total: ${cnt} connection`);
     });
 });
 server.listen(port);
