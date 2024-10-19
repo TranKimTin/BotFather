@@ -1,63 +1,11 @@
 var assert = require('assert');
 import * as util from './util';
-import { BotInfo, CreateWebConfig, BOT_DATA_DIR, Node, findIndicator, extractParams, checkEval, indicatorSupported, checkParams } from './botFatherConfig';
 import { RateData } from './BinanceFuture';
 import { isValidCondition } from './Expr';
 
 
 describe('BotFather', function () {
-    describe('extractParams', function () {
-        it('rsi(14)', function () {
-            const s = 'rsi(14)';
-            const params = extractParams(s);
-            assert.equal(params.length, 1);
-            assert.equal(params[0], 14);
-        });
-        it('rsi(14,5)', function () {
-            const s = 'rsi(14,5)';
-            const params = extractParams(s);
-            assert.equal(params.length, 2);
-            assert.equal(params[0], 14);
-            assert.equal(params[1], 5);
-        });
-        it('macd(11,9,6,2)', function () {
-            const s = 'macd(11,9,6,2)';
-            const params = extractParams(s);
-            assert.equal(params.length, 4);
-            assert.equal(params[0], 11);
-            assert.equal(params[1], 9);
-            assert.equal(params[2], 6);
-            assert.equal(params[3], 2);
-        });
-    });
-
-    describe('findIndicator', function () {
-        it('rsi(14) >= rsi(14,1) * 0.3', function () {
-            const s = 'rsi(14) >= rsi(14,1) * 0.3';
-            const indicators = findIndicator(s, 'rsi');
-            assert.deepStrictEqual(indicators, ['rsi(14)', 'rsi(14,1)'])
-        });
-        it('upper_shadow() >= ampl() * 0.3', function () {
-            const s = 'upper_shadow() >= ampl() * 0.3';
-
-            assert.deepStrictEqual(findIndicator(s, 'upper_shadow'), ['upper_shadow()'])
-            assert.deepStrictEqual(findIndicator(s, 'ampl'), ['ampl()'])
-        });
-
-        it('telegram: ma14: ma(14,0) ma(14,1) ma(14,2)', function () {
-            const s = 'telegram: ma14: ma(14,0) ma(14,1) ma(14,2)';
-            assert.deepStrictEqual(findIndicator(s, 'ma'), ['ma(14,0)', 'ma(14,1)', 'ma(14,2)'])
-        });
-
-        it('telegram: ema(14,0) ma(14,1) ema(14,2)', function () {
-            const s = 'telegram: ema(14,0) ma(14,1) ema(14,2)';
-            assert.deepStrictEqual(findIndicator(s, 'ma'), ['ma(14,1)']);
-            assert.deepStrictEqual(findIndicator(s, 'ema'), ['ema(14,0)', 'ema(14,2)']);
-        });
-    });
-
-
-    describe('checkCondition', function () {
+    describe('isValidCondition', function () {
         it('rsi(14,5) > 70', function () {
             const s = 'rsi(14,5) > 70';
             const value = isValidCondition(s);
@@ -84,11 +32,6 @@ describe('BotFather', function () {
             assert.strictEqual(value, true);
         })
     });
-
-    // describe('extractParams', function () {
-    //     it('macd(11,9,6,2)', function () {
-    //     });
-    // });
 });
 
 

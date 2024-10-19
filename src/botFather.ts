@@ -1,10 +1,8 @@
-import { BotInfo, CreateWebConfig, BOT_DATA_DIR, Node, findIndicator, extractParams, checkEval, indicatorSupported, checkParams } from './botFatherConfig';
+import { BotInfo, CreateWebConfig, BOT_DATA_DIR, Node} from './botFatherConfig';
 import { RateData } from './BinanceFuture';
-import * as util from './util';
 import fs from 'fs';
 import Telegram, { TelegramIdType } from './telegram';
 import io from 'socket.io-client';
-import moment from 'moment';
 import { calculate, ExprArgs } from './Expr';
 
 export class BotFather {
