@@ -75,11 +75,11 @@ ema: 'ema' '(' INT (',' INT)? ')';
 macd_value: 'macd_value' '(' INT ',' INT ',' INT (',' INT)? ')';
 macd_signal: 'macd_signal' '(' INT ',' INT ',' INT (',' INT)? ')';
 macd_histogram: 'macd_histogram' '(' INT ',' INT ',' INT (',' INT)? ')';
-bb_upper: 'bb_upper' '(' INT ','  FLOAT (',' INT)? ')';
-bb_middle: 'bb_middle' '(' INT ','  FLOAT (',' INT)? ')';
-bb_lower: 'bb_lower' '(' INT ','  FLOAT (',' INT)? ')';
-rsi_phan_ki: 'rsi_phan_ki' '(' INT ','  FLOAT ','  INT ','  INT ','  FLOAT ','  FLOAT (',' INT)? ')';
-macd_n_dinh: 'macd_n_dinh' '(' INT ',' INT ',' INT ',' INT ',' INT ',' INT ','  FLOAT ',' INT (',' FLOAT)* ')';
+bb_upper: 'bb_upper' '(' INT ','  number (',' INT)? ')';
+bb_middle: 'bb_middle' '(' INT ','  number (',' INT)? ')';
+bb_lower: 'bb_lower' '(' INT ','  number (',' INT)? ')';
+rsi_phan_ki: 'rsi_phan_ki' '(' INT ','  number ','  INT ','  INT ','  number ','  number (',' INT)? ')';
+macd_n_dinh: 'macd_n_dinh' '(' INT ',' INT ',' INT ',' INT ',' INT ',' INT ','  number ',' INT (',' number)* ')';
 macd_slope: 'macd_slope' '(' INT ',' INT ',' INT (',' INT)? ')';
 bullish_engulfing: 'bullish_engulfing' '(' INT? ')';
 bearish_engulfing: 'bearish_engulfing' '(' INT? ')';
@@ -98,8 +98,10 @@ comparisonOp
     | '='
     ;
 
+number: INT | FLOAT;
+
 // Lexer rules
 INT: '-'? [0-9]+ ;
-FLOAT: '-'? [0-9]+ ('.' [0-9]+)? ([eE] [+\-]? [0-9]+)? ;
+FLOAT: '-'? [0-9]+ '.' ([0-9]+)?;
 STRING: '\'' (~['\r\n])* '\'';
 WS: [ \t\r\n]+ -> skip;

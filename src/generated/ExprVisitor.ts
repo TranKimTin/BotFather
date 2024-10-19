@@ -89,6 +89,7 @@ import { BullishContext } from "./ExprParser.js";
 import { BearishContext } from "./ExprParser.js";
 import { MarsiContext } from "./ExprParser.js";
 import { ComparisonOpContext } from "./ExprParser.js";
+import { NumberContext } from "./ExprParser.js";
 
 
 /**
@@ -661,5 +662,11 @@ export class ExprVisitor<Result> extends AbstractParseTreeVisitor<Result> {
      * @return the visitor result
      */
     visitComparisonOp?: (ctx: ComparisonOpContext) => Result;
+    /**
+     * Visit a parse tree produced by `ExprParser.number`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitNumber?: (ctx: NumberContext) => Result;
 }
 

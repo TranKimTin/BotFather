@@ -1,7 +1,7 @@
 import * as antlr from "antlr4ng";
 import { BaseErrorListener, CharStream, CommonTokenStream, RecognitionException, Recognizer, Token } from 'antlr4ng';
 import { ExprLexer } from './generated/ExprLexer';
-import { AddSubContext, AmplContext, AmplPContext, Bb_lowerContext, Bb_middleContext, Bb_upperContext, Bearish_engulfingContext, Bearish_hammerContext, BearishContext, BrokerContext, Bullish_engulfingContext, Bullish_hammerContext, BullishContext, ChangeContext, ChangePContext, CloseContext, ComparisonContext, EmaContext, ExprParser, FloatContext, HighContext, HourContext, IntContext, IRSIContext, LowContext, Lower_shadowContext, Lower_shadowPContext, Macd_histogramContext, Macd_n_dinhContext, Macd_signalContext, Macd_slopeContext, Macd_valueContext, MaContext, MarsiContext, MinuteContext, MulDivContext, OpenContext, ParensContext, Rsi_phan_kiContext, Rsi_slopeContext, RsiContext, StringContext, SymbolContext, TimeframeContext, Upper_shadowContext, Upper_shadowPContext, Volume24h_in_usdContext, VolumeContext } from './generated/ExprParser';
+import { AddSubContext, AmplContext, AmplPContext, Bb_lowerContext, Bb_middleContext, Bb_upperContext, Bearish_engulfingContext, Bearish_hammerContext, BearishContext, BrokerContext, Bullish_engulfingContext, Bullish_hammerContext, BullishContext, ChangeContext, ChangePContext, CloseContext, ComparisonContext, EmaContext, ExprParser, FloatContext, HighContext, HourContext, IntContext, IRSIContext, LowContext, Lower_shadowContext, Lower_shadowPContext, Macd_histogramContext, Macd_n_dinhContext, Macd_signalContext, Macd_slopeContext, Macd_valueContext, MaContext, MarsiContext, MinuteContext, MulDivContext, NumberContext, OpenContext, ParensContext, Rsi_phan_kiContext, Rsi_slopeContext, RsiContext, StringContext, SymbolContext, TimeframeContext, Upper_shadowContext, Upper_shadowPContext, Volume24h_in_usdContext, VolumeContext } from './generated/ExprParser';
 import { ExprVisitor } from './generated/ExprVisitor';
 import * as util from './util';
 import { RateData } from "./BinanceFuture";
@@ -113,6 +113,10 @@ export class Expr extends ExprVisitor<any> {
             default:
                 return null;
         }
+    };
+
+    visitNumber = (ctx: NumberContext) => {
+        return parseFloat(ctx.toString()) || null;
     };
 
     visitInt = (ctx: IntContext) => {
@@ -343,7 +347,7 @@ export class Expr extends ExprVisitor<any> {
 
     visitBb_upper = (ctx: Bb_upperContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
-        const multiplier = parseFloat(ctx.FLOAT()?.getText() || "0");
+        const multiplier = parseFloat(ctx.number()?.getText() || "0");
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
 
         const BBs = util.iBB(this.data, period, multiplier);
@@ -354,7 +358,7 @@ export class Expr extends ExprVisitor<any> {
 
     visitBb_lower = (ctx: Bb_lowerContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
-        const multiplier = parseFloat(ctx.FLOAT()?.getText() || "0");
+        const multiplier = parseFloat(ctx.number()?.getText() || "0");
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
 
         const BBs = util.iBB(this.data, period, multiplier);
@@ -365,7 +369,7 @@ export class Expr extends ExprVisitor<any> {
 
     visitBb_middle = (ctx: Bb_middleContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
-        const multiplier = parseFloat(ctx.FLOAT()?.getText() || "0");
+        const multiplier = parseFloat(ctx.number()?.getText() || "0");
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
 
         const BBs = util.iBB(this.data, period, multiplier);
@@ -376,11 +380,11 @@ export class Expr extends ExprVisitor<any> {
 
     visitRsi_phan_ki = (ctx: Rsi_phan_kiContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
-        const deviation = parseFloat(ctx.FLOAT(0)?.getText() || "0");
+        const deviation = parseFloat(ctx.number_(0)?.getText() || "0");
         const depth = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const numberOfPeaks = parseInt(ctx.INT(2)?.getText() || "0", 10);
-        const minhDiff = parseFloat(ctx.FLOAT(1)?.getText() || "0");
-        const maxRSI = parseFloat(ctx.FLOAT(2)?.getText() || "0");
+        const minhDiff = parseFloat(ctx.number_(1)?.getText() || "0");
+        const maxRSI = parseFloat(ctx.number_(2)?.getText() || "0");
         const shift = parseInt(ctx.INT(3)?.getText() || "0", 10);
 
         const rates = this.data.slice(shift);
@@ -422,12 +426,12 @@ export class Expr extends ExprVisitor<any> {
         const redDepth = parseInt(ctx.INT(3)?.getText() || "0", 10);
         const depth = parseInt(ctx.INT(4)?.getText() || "0", 10);
         const enableDivergence = parseInt(ctx.INT(5)?.getText() || "0", 10);
-        const diffCandle0 = parseFloat(ctx.FLOAT(0)?.getText() || "0");
+        const diffCandle0 = parseFloat(ctx.number_(0)?.getText() || "0");
         const shift = parseInt(ctx.INT(6)?.getText() || "0", 10);
         const diffPercents: Array<number> = [];
 
-        for (let i = 1; ctx.FLOAT(i) !== null; i++) {
-            diffPercents.push(parseFloat(ctx.FLOAT(i)?.getText() || '0'));
+        for (let i = 1; ctx.number_(i) !== null; i++) {
+            diffPercents.push(parseFloat(ctx.number_(i)?.getText() || '0'));
         }
 
         const values = util.iMACD(this.data, fastPeriod, slowPeriod, signalPeriod);
