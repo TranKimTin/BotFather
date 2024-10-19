@@ -669,3 +669,37 @@ export class Expr extends ExprVisitor<any> {
         return parseFloat(MARSIs[shift].toFixed(2));
     };
 }
+
+
+
+// async function test() {
+//     const data = await util.getBinanceOHLCV('BTCUSDT', '15m', 300);
+//     data.shift();
+
+//     const args = {
+//         broker: 'binance',
+//         symbol: 'BTCUSDT',
+//         timeframe: '15m',
+//         data: data
+//     };
+//     const idTelegram = 'id_tele_tin';
+
+//     let condition = "macd_n_dinh(12,26,9,5,8,0,2,0,0) >= 1";
+
+//     const subExprs = [...new Set([...condition.matchAll(/\{(.*?)\}/g)].map(match => match[1]))];
+//     for (const expr of subExprs) {
+//         const result = calculate(expr, args);
+//         condition = condition.replaceAll(`{${expr}}`, result);
+//     }
+
+//     if (condition.startsWith('telegram:')) {
+//         console.log({ condition });
+//     }
+
+//     else {
+//         let result = calculate(condition, args);
+//         console.log({ condition, result });
+//     }
+// }
+
+// test();
