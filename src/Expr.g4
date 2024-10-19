@@ -8,7 +8,6 @@ expr
     | INT                       # Int
     | FLOAT                     # Float
     | STRING                    # String
-    | telegram                  # SendTelegram
     | broker                    # iBroker
     | symbol                    # iSymbol
     | timeframe                 # iTimeframe
@@ -49,17 +48,6 @@ expr
     | bearish                   # iBearish
     | marsi                     # iMARSI
     ;
-
-telegram : 'telegram:' telegramContent* ;
-
-telegramContent
-    : '{' expr '}'
-    | textContent
-    ;
-
-textContent : ~('{' | '}')+ ;
-
-
 
 broker: 'broker' '(' ')';
 symbol: 'symbol' '(' ')';

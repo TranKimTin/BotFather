@@ -1,16 +1,13 @@
 import * as antlr from "antlr4ng";
 import { BaseErrorListener, CharStream, CommonTokenStream, RecognitionException, Recognizer, Token } from 'antlr4ng';
 import { ExprLexer } from './generated/ExprLexer';
-import { AddSubContext, AmplContext, AmplPContext, Bb_lowerContext, Bb_middleContext, Bb_upperContext, Bearish_engulfingContext, Bearish_hammerContext, BearishContext, BrokerContext, Bullish_engulfingContext, Bullish_hammerContext, BullishContext, ChangeContext, ChangePContext, CloseContext, ComparisonContext, EmaContext, ExprParser, FloatContext, HighContext, HourContext, IntContext, IRSIContext, LowContext, Lower_shadowContext, Lower_shadowPContext, Macd_histogramContext, Macd_n_dinhContext, Macd_signalContext, Macd_slopeContext, Macd_valueContext, MaContext, MarsiContext, MinuteContext, MulDivContext, OpenContext, ParensContext, Rsi_phan_kiContext, Rsi_slopeContext, RsiContext, StringContext, SymbolContext, TelegramContentContext, TelegramContext, TimeframeContext, Upper_shadowContext, Upper_shadowPContext, Volume24h_in_usdContext, VolumeContext } from './generated/ExprParser';
+import { AddSubContext, AmplContext, AmplPContext, Bb_lowerContext, Bb_middleContext, Bb_upperContext, Bearish_engulfingContext, Bearish_hammerContext, BearishContext, BrokerContext, Bullish_engulfingContext, Bullish_hammerContext, BullishContext, ChangeContext, ChangePContext, CloseContext, ComparisonContext, EmaContext, ExprParser, FloatContext, HighContext, HourContext, IntContext, IRSIContext, LowContext, Lower_shadowContext, Lower_shadowPContext, Macd_histogramContext, Macd_n_dinhContext, Macd_signalContext, Macd_slopeContext, Macd_valueContext, MaContext, MarsiContext, MinuteContext, MulDivContext, OpenContext, ParensContext, Rsi_phan_kiContext, Rsi_slopeContext, RsiContext, StringContext, SymbolContext, TimeframeContext, Upper_shadowContext, Upper_shadowPContext, Volume24h_in_usdContext, VolumeContext } from './generated/ExprParser';
 import { ExprVisitor } from './generated/ExprVisitor';
 import * as util from './util';
-import Telegram, { TelegramIdType } from './telegram';
 import { RateData } from "./BinanceFuture";
 import moment from "moment";
 
 export interface ExprArgs {
-    telegram: Telegram;
-    idTelegram: TelegramIdType;
     broker: string;
     symbol: string;
     timeframe: string;
@@ -28,7 +25,7 @@ export class CustomErrorListener extends BaseErrorListener {
     }
 }
 
-export function checkCondition(condition: string, args: ExprArgs): boolean {
+export function calculate(condition: string, args: ExprArgs): any {
     // console.log({ condition });
     const inputStream = CharStream.fromString(condition);
     const lexer = new ExprLexer(inputStream);
@@ -44,20 +41,18 @@ export function checkCondition(condition: string, args: ExprArgs): boolean {
         const evalVisitor = new Expr(args);
         const result = evalVisitor.visit(tree);
 
-        console.log({ tree: tree.toStringTree(parser) });
-        console.log({ result });
+        // console.log({ tree: tree.toStringTree(parser) });
+        // console.log({ result });
 
-        return Boolean(result);
+        return result;
     }
     catch (err) {
         console.error(err);
-        return false;
+        return null;
     }
 }
 
 export class Expr extends ExprVisitor<any> {
-    private telegram: Telegram;
-    private idTelegram: TelegramIdType
     private broker: string;
     private symbol: string;
     private timeframe: string;
@@ -65,8 +60,6 @@ export class Expr extends ExprVisitor<any> {
 
     constructor(args: ExprArgs) {
         super();
-        this.telegram = args.telegram;
-        this.idTelegram = args.idTelegram;
         this.broker = args.broker;
         this.symbol = args.symbol;
         this.timeframe = args.timeframe;
@@ -136,47 +129,6 @@ export class Expr extends ExprVisitor<any> {
 
     visitParens = (ctx: ParensContext) => {
         return this.visit(ctx.expr());
-    };
-
-    visitTelegram = (ctx: TelegramContext) => {
-        const condition = ctx.getText();
-        // console.log({ condition, symbol: this.symbol, timeframe: this.timeframe });
-
-        const emoji: { [key: string]: string } = {
-            'binance': '🥇🥇🥇',
-            'bybit': '',
-            'okx': '🏁🏁🏁',
-            'binance_future': '🥇🥇🥇',
-            'bybit_future': ''
-        }
-
-        let mess = `${emoji[this.broker]}\n`;
-        mess += `${this.broker}:${this.symbol} ${this.timeframe}\n`;
-
-        let i = 0;
-        while (1) {
-            const content = ctx.telegramContent(i);
-            if (content === null) break;
-            mess += `${this.visit(content)} `;
-            i++;
-        }
-
-        if (ctx.getText() === '<--->') mess = '--------------------';
-
-        const ids = this.idTelegram.toString().split(',').map(item => item.trim());
-        for (const id of ids) {
-            this.telegram.sendMessage(mess, id);
-        }
-
-        return 1;
-    };
-
-    visitTelegramContent = (ctx: TelegramContentContext) => {
-        let content = ctx.getText();
-
-        const expr = ctx.expr();
-        if (expr === null) return content;
-        return this.visit(expr);
     };
 
     visitBroker = (ctx: BrokerContext) => {
@@ -713,14 +665,3 @@ export class Expr extends ExprVisitor<any> {
         return parseFloat(MARSIs[shift].toFixed(2));
     };
 }
-
-const args = {
-    telegram: new Telegram(),
-    idTelegram: '@tin',
-    broker: 'binance',
-    symbol: 'BTCUSDT',
-    timeframe: '1h',
-    data: []
-};
-const condition = "telegram: tin dep zai rsi= {rsi(14)};";
-console.log({ condition }, checkCondition(condition, args));

@@ -62,69 +62,63 @@ export class ExprParser extends antlr.Parser {
     public static readonly T__48 = 49;
     public static readonly T__49 = 50;
     public static readonly T__50 = 51;
-    public static readonly T__51 = 52;
-    public static readonly T__52 = 53;
-    public static readonly T__53 = 54;
-    public static readonly INT = 55;
-    public static readonly FLOAT = 56;
-    public static readonly STRING = 57;
-    public static readonly WS = 58;
+    public static readonly INT = 52;
+    public static readonly FLOAT = 53;
+    public static readonly STRING = 54;
+    public static readonly WS = 55;
     public static readonly RULE_expr = 0;
-    public static readonly RULE_telegram = 1;
-    public static readonly RULE_telegramContent = 2;
-    public static readonly RULE_textContent = 3;
-    public static readonly RULE_broker = 4;
-    public static readonly RULE_symbol = 5;
-    public static readonly RULE_timeframe = 6;
-    public static readonly RULE_hour = 7;
-    public static readonly RULE_minute = 8;
-    public static readonly RULE_open = 9;
-    public static readonly RULE_high = 10;
-    public static readonly RULE_low = 11;
-    public static readonly RULE_close = 12;
-    public static readonly RULE_volume = 13;
-    public static readonly RULE_volume24h_in_usd = 14;
-    public static readonly RULE_change = 15;
-    public static readonly RULE_changeP = 16;
-    public static readonly RULE_ampl = 17;
-    public static readonly RULE_amplP = 18;
-    public static readonly RULE_upper_shadow = 19;
-    public static readonly RULE_upper_shadowP = 20;
-    public static readonly RULE_lower_shadow = 21;
-    public static readonly RULE_lower_shadowP = 22;
-    public static readonly RULE_rsi = 23;
-    public static readonly RULE_rsi_slope = 24;
-    public static readonly RULE_ma = 25;
-    public static readonly RULE_ema = 26;
-    public static readonly RULE_macd_value = 27;
-    public static readonly RULE_macd_signal = 28;
-    public static readonly RULE_macd_histogram = 29;
-    public static readonly RULE_bb_upper = 30;
-    public static readonly RULE_bb_middle = 31;
-    public static readonly RULE_bb_lower = 32;
-    public static readonly RULE_rsi_phan_ki = 33;
-    public static readonly RULE_macd_n_dinh = 34;
-    public static readonly RULE_macd_slope = 35;
-    public static readonly RULE_bullish_engulfing = 36;
-    public static readonly RULE_bearish_engulfing = 37;
-    public static readonly RULE_bullish_hammer = 38;
-    public static readonly RULE_bearish_hammer = 39;
-    public static readonly RULE_bullish = 40;
-    public static readonly RULE_bearish = 41;
-    public static readonly RULE_marsi = 42;
-    public static readonly RULE_comparisonOp = 43;
+    public static readonly RULE_broker = 1;
+    public static readonly RULE_symbol = 2;
+    public static readonly RULE_timeframe = 3;
+    public static readonly RULE_hour = 4;
+    public static readonly RULE_minute = 5;
+    public static readonly RULE_open = 6;
+    public static readonly RULE_high = 7;
+    public static readonly RULE_low = 8;
+    public static readonly RULE_close = 9;
+    public static readonly RULE_volume = 10;
+    public static readonly RULE_volume24h_in_usd = 11;
+    public static readonly RULE_change = 12;
+    public static readonly RULE_changeP = 13;
+    public static readonly RULE_ampl = 14;
+    public static readonly RULE_amplP = 15;
+    public static readonly RULE_upper_shadow = 16;
+    public static readonly RULE_upper_shadowP = 17;
+    public static readonly RULE_lower_shadow = 18;
+    public static readonly RULE_lower_shadowP = 19;
+    public static readonly RULE_rsi = 20;
+    public static readonly RULE_rsi_slope = 21;
+    public static readonly RULE_ma = 22;
+    public static readonly RULE_ema = 23;
+    public static readonly RULE_macd_value = 24;
+    public static readonly RULE_macd_signal = 25;
+    public static readonly RULE_macd_histogram = 26;
+    public static readonly RULE_bb_upper = 27;
+    public static readonly RULE_bb_middle = 28;
+    public static readonly RULE_bb_lower = 29;
+    public static readonly RULE_rsi_phan_ki = 30;
+    public static readonly RULE_macd_n_dinh = 31;
+    public static readonly RULE_macd_slope = 32;
+    public static readonly RULE_bullish_engulfing = 33;
+    public static readonly RULE_bearish_engulfing = 34;
+    public static readonly RULE_bullish_hammer = 35;
+    public static readonly RULE_bearish_hammer = 36;
+    public static readonly RULE_bullish = 37;
+    public static readonly RULE_bearish = 38;
+    public static readonly RULE_marsi = 39;
+    public static readonly RULE_comparisonOp = 40;
 
     public static readonly literalNames = [
-        null, "'*'", "'/'", "'+'", "'-'", "'('", "')'", "'telegram:'", "'{'", 
-        "'}'", "'broker'", "'symbol'", "'timeframe'", "'hour'", "'minute'", 
-        "'open'", "'high'", "'low'", "'close'", "'volume'", "'volume24h_in_usd'", 
-        "'change'", "'change%'", "'ampl'", "'ampl%'", "'upper_shadow'", 
-        "'upper_shadow%'", "'lower_shadow'", "'lower_shadow%'", "'rsi'", 
-        "','", "'rsi_slope'", "'ma'", "'ema'", "'macd_value'", "'macd_signal'", 
-        "'macd_histogram'", "'bb_upper'", "'bb_middle'", "'bb_lower'", "'rsi_phan_ki'", 
-        "'macd_n_dinh'", "'macd_slope'", "'bullish_engulfing'", "'bearish_engulfing'", 
-        "'bullish_hammer'", "'bearish_hammer'", "'bullish'", "'bearish'", 
-        "'>'", "'>='", "'<'", "'<='", "'=='", "'='"
+        null, "'*'", "'/'", "'+'", "'-'", "'('", "')'", "'broker'", "'symbol'", 
+        "'timeframe'", "'hour'", "'minute'", "'open'", "'high'", "'low'", 
+        "'close'", "'volume'", "'volume24h_in_usd'", "'change'", "'change%'", 
+        "'ampl'", "'ampl%'", "'upper_shadow'", "'upper_shadow%'", "'lower_shadow'", 
+        "'lower_shadow%'", "'rsi'", "','", "'rsi_slope'", "'ma'", "'ema'", 
+        "'macd_value'", "'macd_signal'", "'macd_histogram'", "'bb_upper'", 
+        "'bb_middle'", "'bb_lower'", "'rsi_phan_ki'", "'macd_n_dinh'", "'macd_slope'", 
+        "'bullish_engulfing'", "'bearish_engulfing'", "'bullish_hammer'", 
+        "'bearish_hammer'", "'bullish'", "'bearish'", "'>'", "'>='", "'<'", 
+        "'<='", "'=='", "'='"
     ];
 
     public static readonly symbolicNames = [
@@ -132,18 +126,18 @@ export class ExprParser extends antlr.Parser {
         null, null, null, null, null, null, null, null, null, null, null, 
         null, null, null, null, null, null, null, null, null, null, null, 
         null, null, null, null, null, null, null, null, null, null, null, 
-        null, null, null, null, null, null, null, null, null, null, null, 
-        "INT", "FLOAT", "STRING", "WS"
+        null, null, null, null, null, null, null, null, "INT", "FLOAT", 
+        "STRING", "WS"
     ];
     public static readonly ruleNames = [
-        "expr", "telegram", "telegramContent", "textContent", "broker", 
-        "symbol", "timeframe", "hour", "minute", "open", "high", "low", 
-        "close", "volume", "volume24h_in_usd", "change", "changeP", "ampl", 
-        "amplP", "upper_shadow", "upper_shadowP", "lower_shadow", "lower_shadowP", 
-        "rsi", "rsi_slope", "ma", "ema", "macd_value", "macd_signal", "macd_histogram", 
-        "bb_upper", "bb_middle", "bb_lower", "rsi_phan_ki", "macd_n_dinh", 
-        "macd_slope", "bullish_engulfing", "bearish_engulfing", "bullish_hammer", 
-        "bearish_hammer", "bullish", "bearish", "marsi", "comparisonOp",
+        "expr", "broker", "symbol", "timeframe", "hour", "minute", "open", 
+        "high", "low", "close", "volume", "volume24h_in_usd", "change", 
+        "changeP", "ampl", "amplP", "upper_shadow", "upper_shadowP", "lower_shadow", 
+        "lower_shadowP", "rsi", "rsi_slope", "ma", "ema", "macd_value", 
+        "macd_signal", "macd_histogram", "bb_upper", "bb_middle", "bb_lower", 
+        "rsi_phan_ki", "macd_n_dinh", "macd_slope", "bullish_engulfing", 
+        "bearish_engulfing", "bullish_hammer", "bearish_hammer", "bullish", 
+        "bearish", "marsi", "comparisonOp",
     ];
 
     public get grammarFileName(): string { return "Expr.g4"; }
@@ -179,7 +173,7 @@ export class ExprParser extends antlr.Parser {
             let alternative: number;
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 136;
+            this.state = 129;
             this.errorHandler.sync(this);
             switch (this.interpreter.adaptivePredict(this.tokenStream, 0, this.context) ) {
             case 1:
@@ -188,11 +182,11 @@ export class ExprParser extends antlr.Parser {
                 this.context = localContext;
                 previousContext = localContext;
 
-                this.state = 89;
+                this.state = 83;
                 this.match(ExprParser.T__4);
-                this.state = 90;
+                this.state = 84;
                 this.expr(0);
-                this.state = 91;
+                this.state = 85;
                 this.match(ExprParser.T__5);
                 }
                 break;
@@ -201,7 +195,7 @@ export class ExprParser extends antlr.Parser {
                 localContext = new IntContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 93;
+                this.state = 87;
                 this.match(ExprParser.INT);
                 }
                 break;
@@ -210,7 +204,7 @@ export class ExprParser extends antlr.Parser {
                 localContext = new FloatContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 94;
+                this.state = 88;
                 this.match(ExprParser.FLOAT);
                 }
                 break;
@@ -219,373 +213,364 @@ export class ExprParser extends antlr.Parser {
                 localContext = new StringContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 95;
+                this.state = 89;
                 this.match(ExprParser.STRING);
                 }
                 break;
             case 5:
                 {
-                localContext = new SendTelegramContext(localContext);
+                localContext = new IBrokerContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 96;
-                this.telegram();
+                this.state = 90;
+                this.broker();
                 }
                 break;
             case 6:
                 {
-                localContext = new IBrokerContext(localContext);
+                localContext = new ISymbolContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 97;
-                this.broker();
+                this.state = 91;
+                this.symbol_();
                 }
                 break;
             case 7:
                 {
-                localContext = new ISymbolContext(localContext);
+                localContext = new ITimeframeContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 98;
-                this.symbol_();
+                this.state = 92;
+                this.timeframe();
                 }
                 break;
             case 8:
                 {
-                localContext = new ITimeframeContext(localContext);
+                localContext = new IHourContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 99;
-                this.timeframe();
+                this.state = 93;
+                this.hour();
                 }
                 break;
             case 9:
                 {
-                localContext = new IHourContext(localContext);
+                localContext = new IMinuteContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 100;
-                this.hour();
+                this.state = 94;
+                this.minute();
                 }
                 break;
             case 10:
                 {
-                localContext = new IMinuteContext(localContext);
+                localContext = new IOpenContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 101;
-                this.minute();
+                this.state = 95;
+                this.open();
                 }
                 break;
             case 11:
                 {
-                localContext = new IOpenContext(localContext);
+                localContext = new IHighContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 102;
-                this.open();
+                this.state = 96;
+                this.high();
                 }
                 break;
             case 12:
                 {
-                localContext = new IHighContext(localContext);
+                localContext = new ILowContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 103;
-                this.high();
+                this.state = 97;
+                this.low();
                 }
                 break;
             case 13:
                 {
-                localContext = new ILowContext(localContext);
+                localContext = new ICloseContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 104;
-                this.low();
+                this.state = 98;
+                this.close();
                 }
                 break;
             case 14:
                 {
-                localContext = new ICloseContext(localContext);
+                localContext = new IVolumeContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 105;
-                this.close();
+                this.state = 99;
+                this.volume();
                 }
                 break;
             case 15:
                 {
-                localContext = new IVolumeContext(localContext);
+                localContext = new IVolume24hInUSDContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 106;
-                this.volume();
+                this.state = 100;
+                this.volume24h_in_usd();
                 }
                 break;
             case 16:
                 {
-                localContext = new IVolume24hInUSDContext(localContext);
+                localContext = new IChangeContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 107;
-                this.volume24h_in_usd();
+                this.state = 101;
+                this.change();
                 }
                 break;
             case 17:
                 {
-                localContext = new IChangeContext(localContext);
+                localContext = new IChangePContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 108;
-                this.change();
+                this.state = 102;
+                this.changeP();
                 }
                 break;
             case 18:
                 {
-                localContext = new IChangePContext(localContext);
+                localContext = new IAmplContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 109;
-                this.changeP();
+                this.state = 103;
+                this.ampl();
                 }
                 break;
             case 19:
                 {
-                localContext = new IAmplContext(localContext);
+                localContext = new IAmplPContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 110;
-                this.ampl();
+                this.state = 104;
+                this.amplP();
                 }
                 break;
             case 20:
                 {
-                localContext = new IAmplPContext(localContext);
+                localContext = new IUpperShadowContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 111;
-                this.amplP();
+                this.state = 105;
+                this.upper_shadow();
                 }
                 break;
             case 21:
                 {
-                localContext = new IUpperShadowContext(localContext);
+                localContext = new IUpperShadowPContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 112;
-                this.upper_shadow();
+                this.state = 106;
+                this.upper_shadowP();
                 }
                 break;
             case 22:
                 {
-                localContext = new IUpperShadowPContext(localContext);
+                localContext = new ILowerShadowContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 113;
-                this.upper_shadowP();
+                this.state = 107;
+                this.lower_shadow();
                 }
                 break;
             case 23:
                 {
-                localContext = new ILowerShadowContext(localContext);
+                localContext = new ILowerShadowPContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 114;
-                this.lower_shadow();
+                this.state = 108;
+                this.lower_shadowP();
                 }
                 break;
             case 24:
                 {
-                localContext = new ILowerShadowPContext(localContext);
+                localContext = new IRSIContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 115;
-                this.lower_shadowP();
+                this.state = 109;
+                this.rsi();
                 }
                 break;
             case 25:
                 {
-                localContext = new IRSIContext(localContext);
+                localContext = new IRSISlopeContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 116;
-                this.rsi();
+                this.state = 110;
+                this.rsi_slope();
                 }
                 break;
             case 26:
                 {
-                localContext = new IRSISlopeContext(localContext);
+                localContext = new IMAContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 117;
-                this.rsi_slope();
+                this.state = 111;
+                this.ma();
                 }
                 break;
             case 27:
                 {
-                localContext = new IMAContext(localContext);
+                localContext = new IEMAContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 118;
-                this.ma();
+                this.state = 112;
+                this.ema();
                 }
                 break;
             case 28:
                 {
-                localContext = new IEMAContext(localContext);
+                localContext = new IMACD_valueContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 119;
-                this.ema();
+                this.state = 113;
+                this.macd_value();
                 }
                 break;
             case 29:
                 {
-                localContext = new IMACD_valueContext(localContext);
+                localContext = new IMACD_signalContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 120;
-                this.macd_value();
+                this.state = 114;
+                this.macd_signal();
                 }
                 break;
             case 30:
                 {
-                localContext = new IMACD_signalContext(localContext);
+                localContext = new IMACD_histogramContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 121;
-                this.macd_signal();
+                this.state = 115;
+                this.macd_histogram();
                 }
                 break;
             case 31:
                 {
-                localContext = new IMACD_histogramContext(localContext);
+                localContext = new IBB_upContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 122;
-                this.macd_histogram();
+                this.state = 116;
+                this.bb_upper();
                 }
                 break;
             case 32:
                 {
-                localContext = new IBB_upContext(localContext);
+                localContext = new IBB_midContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 123;
-                this.bb_upper();
+                this.state = 117;
+                this.bb_middle();
                 }
                 break;
             case 33:
                 {
-                localContext = new IBB_midContext(localContext);
+                localContext = new IBB_lowContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 124;
-                this.bb_middle();
+                this.state = 118;
+                this.bb_lower();
                 }
                 break;
             case 34:
                 {
-                localContext = new IBB_lowContext(localContext);
+                localContext = new IRSI_phan_kiContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 125;
-                this.bb_lower();
+                this.state = 119;
+                this.rsi_phan_ki();
                 }
                 break;
             case 35:
                 {
-                localContext = new IRSI_phan_kiContext(localContext);
+                localContext = new IMACD_n_dinhContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 126;
-                this.rsi_phan_ki();
+                this.state = 120;
+                this.macd_n_dinh();
                 }
                 break;
             case 36:
                 {
-                localContext = new IMACD_n_dinhContext(localContext);
+                localContext = new IMACD_slopeContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 127;
-                this.macd_n_dinh();
+                this.state = 121;
+                this.macd_slope();
                 }
                 break;
             case 37:
                 {
-                localContext = new IMACD_slopeContext(localContext);
+                localContext = new IBullish_engulfingContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 128;
-                this.macd_slope();
+                this.state = 122;
+                this.bullish_engulfing();
                 }
                 break;
             case 38:
                 {
-                localContext = new IBullish_engulfingContext(localContext);
+                localContext = new IBearish_engulfingContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 129;
-                this.bullish_engulfing();
+                this.state = 123;
+                this.bearish_engulfing();
                 }
                 break;
             case 39:
                 {
-                localContext = new IBearish_engulfingContext(localContext);
+                localContext = new IBullish_hammerContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 130;
-                this.bearish_engulfing();
+                this.state = 124;
+                this.bullish_hammer();
                 }
                 break;
             case 40:
                 {
-                localContext = new IBullish_hammerContext(localContext);
+                localContext = new IBearish_hammerContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 131;
-                this.bullish_hammer();
+                this.state = 125;
+                this.bearish_hammer();
                 }
                 break;
             case 41:
                 {
-                localContext = new IBearish_hammerContext(localContext);
+                localContext = new IBullishContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 132;
-                this.bearish_hammer();
+                this.state = 126;
+                this.bullish();
                 }
                 break;
             case 42:
                 {
-                localContext = new IBullishContext(localContext);
+                localContext = new IBearishContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 133;
-                this.bullish();
+                this.state = 127;
+                this.bearish();
                 }
                 break;
             case 43:
                 {
-                localContext = new IBearishContext(localContext);
-                this.context = localContext;
-                previousContext = localContext;
-                this.state = 134;
-                this.bearish();
-                }
-                break;
-            case 44:
-                {
                 localContext = new IMARSIContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 135;
+                this.state = 128;
                 this.marsi();
                 }
                 break;
             }
             this.context!.stop = this.tokenStream.LT(-1);
-            this.state = 150;
+            this.state = 143;
             this.errorHandler.sync(this);
             alternative = this.interpreter.adaptivePredict(this.tokenStream, 2, this.context);
             while (alternative !== 2 && alternative !== antlr.ATN.INVALID_ALT_NUMBER) {
@@ -595,18 +580,18 @@ export class ExprParser extends antlr.Parser {
                     }
                     previousContext = localContext;
                     {
-                    this.state = 148;
+                    this.state = 141;
                     this.errorHandler.sync(this);
                     switch (this.interpreter.adaptivePredict(this.tokenStream, 1, this.context) ) {
                     case 1:
                         {
                         localContext = new MulDivContext(new ExprContext(parentContext, parentState));
                         this.pushNewRecursionContext(localContext, _startState, ExprParser.RULE_expr);
-                        this.state = 138;
-                        if (!(this.precpred(this.context, 47))) {
-                            throw this.createFailedPredicateException("this.precpred(this.context, 47)");
+                        this.state = 131;
+                        if (!(this.precpred(this.context, 46))) {
+                            throw this.createFailedPredicateException("this.precpred(this.context, 46)");
                         }
-                        this.state = 139;
+                        this.state = 132;
                         _la = this.tokenStream.LA(1);
                         if(!(_la === 1 || _la === 2)) {
                         this.errorHandler.recoverInline(this);
@@ -615,19 +600,19 @@ export class ExprParser extends antlr.Parser {
                             this.errorHandler.reportMatch(this);
                             this.consume();
                         }
-                        this.state = 140;
-                        this.expr(48);
+                        this.state = 133;
+                        this.expr(47);
                         }
                         break;
                     case 2:
                         {
                         localContext = new AddSubContext(new ExprContext(parentContext, parentState));
                         this.pushNewRecursionContext(localContext, _startState, ExprParser.RULE_expr);
-                        this.state = 141;
-                        if (!(this.precpred(this.context, 46))) {
-                            throw this.createFailedPredicateException("this.precpred(this.context, 46)");
+                        this.state = 134;
+                        if (!(this.precpred(this.context, 45))) {
+                            throw this.createFailedPredicateException("this.precpred(this.context, 45)");
                         }
-                        this.state = 142;
+                        this.state = 135;
                         _la = this.tokenStream.LA(1);
                         if(!(_la === 3 || _la === 4)) {
                         this.errorHandler.recoverInline(this);
@@ -636,28 +621,28 @@ export class ExprParser extends antlr.Parser {
                             this.errorHandler.reportMatch(this);
                             this.consume();
                         }
-                        this.state = 143;
-                        this.expr(47);
+                        this.state = 136;
+                        this.expr(46);
                         }
                         break;
                     case 3:
                         {
                         localContext = new ComparisonContext(new ExprContext(parentContext, parentState));
                         this.pushNewRecursionContext(localContext, _startState, ExprParser.RULE_expr);
-                        this.state = 144;
-                        if (!(this.precpred(this.context, 45))) {
-                            throw this.createFailedPredicateException("this.precpred(this.context, 45)");
+                        this.state = 137;
+                        if (!(this.precpred(this.context, 44))) {
+                            throw this.createFailedPredicateException("this.precpred(this.context, 44)");
                         }
-                        this.state = 145;
+                        this.state = 138;
                         this.comparisonOp();
-                        this.state = 146;
-                        this.expr(46);
+                        this.state = 139;
+                        this.expr(45);
                         }
                         break;
                     }
                     }
                 }
-                this.state = 152;
+                this.state = 145;
                 this.errorHandler.sync(this);
                 alternative = this.interpreter.adaptivePredict(this.tokenStream, 2, this.context);
             }
@@ -676,204 +661,17 @@ export class ExprParser extends antlr.Parser {
         }
         return localContext;
     }
-    public telegram(): TelegramContext {
-        let localContext = new TelegramContext(this.context, this.state);
-        this.enterRule(localContext, 2, ExprParser.RULE_telegram);
-        try {
-            let alternative: number;
-            this.enterOuterAlt(localContext, 1);
-            {
-            this.state = 153;
-            this.match(ExprParser.T__6);
-            this.state = 157;
-            this.errorHandler.sync(this);
-            alternative = this.interpreter.adaptivePredict(this.tokenStream, 3, this.context);
-            while (alternative !== 2 && alternative !== antlr.ATN.INVALID_ALT_NUMBER) {
-                if (alternative === 1) {
-                    {
-                    {
-                    this.state = 154;
-                    this.telegramContent();
-                    }
-                    }
-                }
-                this.state = 159;
-                this.errorHandler.sync(this);
-                alternative = this.interpreter.adaptivePredict(this.tokenStream, 3, this.context);
-            }
-            }
-        }
-        catch (re) {
-            if (re instanceof antlr.RecognitionException) {
-                this.errorHandler.reportError(this, re);
-                this.errorHandler.recover(this, re);
-            } else {
-                throw re;
-            }
-        }
-        finally {
-            this.exitRule();
-        }
-        return localContext;
-    }
-    public telegramContent(): TelegramContentContext {
-        let localContext = new TelegramContentContext(this.context, this.state);
-        this.enterRule(localContext, 4, ExprParser.RULE_telegramContent);
-        try {
-            this.state = 165;
-            this.errorHandler.sync(this);
-            switch (this.tokenStream.LA(1)) {
-            case ExprParser.T__7:
-                this.enterOuterAlt(localContext, 1);
-                {
-                this.state = 160;
-                this.match(ExprParser.T__7);
-                this.state = 161;
-                this.expr(0);
-                this.state = 162;
-                this.match(ExprParser.T__8);
-                }
-                break;
-            case ExprParser.T__0:
-            case ExprParser.T__1:
-            case ExprParser.T__2:
-            case ExprParser.T__3:
-            case ExprParser.T__4:
-            case ExprParser.T__5:
-            case ExprParser.T__6:
-            case ExprParser.T__9:
-            case ExprParser.T__10:
-            case ExprParser.T__11:
-            case ExprParser.T__12:
-            case ExprParser.T__13:
-            case ExprParser.T__14:
-            case ExprParser.T__15:
-            case ExprParser.T__16:
-            case ExprParser.T__17:
-            case ExprParser.T__18:
-            case ExprParser.T__19:
-            case ExprParser.T__20:
-            case ExprParser.T__21:
-            case ExprParser.T__22:
-            case ExprParser.T__23:
-            case ExprParser.T__24:
-            case ExprParser.T__25:
-            case ExprParser.T__26:
-            case ExprParser.T__27:
-            case ExprParser.T__28:
-            case ExprParser.T__29:
-            case ExprParser.T__30:
-            case ExprParser.T__31:
-            case ExprParser.T__32:
-            case ExprParser.T__33:
-            case ExprParser.T__34:
-            case ExprParser.T__35:
-            case ExprParser.T__36:
-            case ExprParser.T__37:
-            case ExprParser.T__38:
-            case ExprParser.T__39:
-            case ExprParser.T__40:
-            case ExprParser.T__41:
-            case ExprParser.T__42:
-            case ExprParser.T__43:
-            case ExprParser.T__44:
-            case ExprParser.T__45:
-            case ExprParser.T__46:
-            case ExprParser.T__47:
-            case ExprParser.T__48:
-            case ExprParser.T__49:
-            case ExprParser.T__50:
-            case ExprParser.T__51:
-            case ExprParser.T__52:
-            case ExprParser.T__53:
-            case ExprParser.INT:
-            case ExprParser.FLOAT:
-            case ExprParser.STRING:
-            case ExprParser.WS:
-                this.enterOuterAlt(localContext, 2);
-                {
-                this.state = 164;
-                this.textContent();
-                }
-                break;
-            default:
-                throw new antlr.NoViableAltException(this);
-            }
-        }
-        catch (re) {
-            if (re instanceof antlr.RecognitionException) {
-                this.errorHandler.reportError(this, re);
-                this.errorHandler.recover(this, re);
-            } else {
-                throw re;
-            }
-        }
-        finally {
-            this.exitRule();
-        }
-        return localContext;
-    }
-    public textContent(): TextContentContext {
-        let localContext = new TextContentContext(this.context, this.state);
-        this.enterRule(localContext, 6, ExprParser.RULE_textContent);
-        let _la: number;
-        try {
-            let alternative: number;
-            this.enterOuterAlt(localContext, 1);
-            {
-            this.state = 168;
-            this.errorHandler.sync(this);
-            alternative = 1;
-            do {
-                switch (alternative) {
-                case 1:
-                    {
-                    {
-                    this.state = 167;
-                    _la = this.tokenStream.LA(1);
-                    if(_la<=0 || _la === 8 || _la === 9) {
-                    this.errorHandler.recoverInline(this);
-                    }
-                    else {
-                        this.errorHandler.reportMatch(this);
-                        this.consume();
-                    }
-                    }
-                    }
-                    break;
-                default:
-                    throw new antlr.NoViableAltException(this);
-                }
-                this.state = 170;
-                this.errorHandler.sync(this);
-                alternative = this.interpreter.adaptivePredict(this.tokenStream, 5, this.context);
-            } while (alternative !== 2 && alternative !== antlr.ATN.INVALID_ALT_NUMBER);
-            }
-        }
-        catch (re) {
-            if (re instanceof antlr.RecognitionException) {
-                this.errorHandler.reportError(this, re);
-                this.errorHandler.recover(this, re);
-            } else {
-                throw re;
-            }
-        }
-        finally {
-            this.exitRule();
-        }
-        return localContext;
-    }
     public broker(): BrokerContext {
         let localContext = new BrokerContext(this.context, this.state);
-        this.enterRule(localContext, 8, ExprParser.RULE_broker);
+        this.enterRule(localContext, 2, ExprParser.RULE_broker);
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 172;
-            this.match(ExprParser.T__9);
-            this.state = 173;
+            this.state = 146;
+            this.match(ExprParser.T__6);
+            this.state = 147;
             this.match(ExprParser.T__4);
-            this.state = 174;
+            this.state = 148;
             this.match(ExprParser.T__5);
             }
         }
@@ -892,15 +690,15 @@ export class ExprParser extends antlr.Parser {
     }
     public symbol_(): SymbolContext {
         let localContext = new SymbolContext(this.context, this.state);
-        this.enterRule(localContext, 10, ExprParser.RULE_symbol);
+        this.enterRule(localContext, 4, ExprParser.RULE_symbol);
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 176;
-            this.match(ExprParser.T__10);
-            this.state = 177;
+            this.state = 150;
+            this.match(ExprParser.T__7);
+            this.state = 151;
             this.match(ExprParser.T__4);
-            this.state = 178;
+            this.state = 152;
             this.match(ExprParser.T__5);
             }
         }
@@ -919,15 +717,15 @@ export class ExprParser extends antlr.Parser {
     }
     public timeframe(): TimeframeContext {
         let localContext = new TimeframeContext(this.context, this.state);
-        this.enterRule(localContext, 12, ExprParser.RULE_timeframe);
+        this.enterRule(localContext, 6, ExprParser.RULE_timeframe);
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 180;
-            this.match(ExprParser.T__11);
-            this.state = 181;
+            this.state = 154;
+            this.match(ExprParser.T__8);
+            this.state = 155;
             this.match(ExprParser.T__4);
-            this.state = 182;
+            this.state = 156;
             this.match(ExprParser.T__5);
             }
         }
@@ -946,15 +744,15 @@ export class ExprParser extends antlr.Parser {
     }
     public hour(): HourContext {
         let localContext = new HourContext(this.context, this.state);
-        this.enterRule(localContext, 14, ExprParser.RULE_hour);
+        this.enterRule(localContext, 8, ExprParser.RULE_hour);
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 184;
-            this.match(ExprParser.T__12);
-            this.state = 185;
+            this.state = 158;
+            this.match(ExprParser.T__9);
+            this.state = 159;
             this.match(ExprParser.T__4);
-            this.state = 186;
+            this.state = 160;
             this.match(ExprParser.T__5);
             }
         }
@@ -973,15 +771,15 @@ export class ExprParser extends antlr.Parser {
     }
     public minute(): MinuteContext {
         let localContext = new MinuteContext(this.context, this.state);
-        this.enterRule(localContext, 16, ExprParser.RULE_minute);
+        this.enterRule(localContext, 10, ExprParser.RULE_minute);
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 188;
-            this.match(ExprParser.T__13);
-            this.state = 189;
+            this.state = 162;
+            this.match(ExprParser.T__10);
+            this.state = 163;
             this.match(ExprParser.T__4);
-            this.state = 190;
+            this.state = 164;
             this.match(ExprParser.T__5);
             }
         }
@@ -1000,26 +798,26 @@ export class ExprParser extends antlr.Parser {
     }
     public open(): OpenContext {
         let localContext = new OpenContext(this.context, this.state);
-        this.enterRule(localContext, 18, ExprParser.RULE_open);
+        this.enterRule(localContext, 12, ExprParser.RULE_open);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 192;
-            this.match(ExprParser.T__14);
-            this.state = 193;
+            this.state = 166;
+            this.match(ExprParser.T__11);
+            this.state = 167;
             this.match(ExprParser.T__4);
-            this.state = 195;
+            this.state = 169;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 55) {
+            if (_la === 52) {
                 {
-                this.state = 194;
+                this.state = 168;
                 this.match(ExprParser.INT);
                 }
             }
 
-            this.state = 197;
+            this.state = 171;
             this.match(ExprParser.T__5);
             }
         }
@@ -1038,26 +836,26 @@ export class ExprParser extends antlr.Parser {
     }
     public high(): HighContext {
         let localContext = new HighContext(this.context, this.state);
-        this.enterRule(localContext, 20, ExprParser.RULE_high);
+        this.enterRule(localContext, 14, ExprParser.RULE_high);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 199;
-            this.match(ExprParser.T__15);
-            this.state = 200;
+            this.state = 173;
+            this.match(ExprParser.T__12);
+            this.state = 174;
             this.match(ExprParser.T__4);
-            this.state = 202;
+            this.state = 176;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 55) {
+            if (_la === 52) {
                 {
-                this.state = 201;
+                this.state = 175;
                 this.match(ExprParser.INT);
                 }
             }
 
-            this.state = 204;
+            this.state = 178;
             this.match(ExprParser.T__5);
             }
         }
@@ -1076,26 +874,26 @@ export class ExprParser extends antlr.Parser {
     }
     public low(): LowContext {
         let localContext = new LowContext(this.context, this.state);
-        this.enterRule(localContext, 22, ExprParser.RULE_low);
+        this.enterRule(localContext, 16, ExprParser.RULE_low);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 206;
-            this.match(ExprParser.T__16);
-            this.state = 207;
+            this.state = 180;
+            this.match(ExprParser.T__13);
+            this.state = 181;
             this.match(ExprParser.T__4);
-            this.state = 209;
+            this.state = 183;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 55) {
+            if (_la === 52) {
                 {
-                this.state = 208;
+                this.state = 182;
                 this.match(ExprParser.INT);
                 }
             }
 
-            this.state = 211;
+            this.state = 185;
             this.match(ExprParser.T__5);
             }
         }
@@ -1114,26 +912,26 @@ export class ExprParser extends antlr.Parser {
     }
     public close(): CloseContext {
         let localContext = new CloseContext(this.context, this.state);
-        this.enterRule(localContext, 24, ExprParser.RULE_close);
+        this.enterRule(localContext, 18, ExprParser.RULE_close);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 213;
-            this.match(ExprParser.T__17);
-            this.state = 214;
+            this.state = 187;
+            this.match(ExprParser.T__14);
+            this.state = 188;
             this.match(ExprParser.T__4);
-            this.state = 216;
+            this.state = 190;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 55) {
+            if (_la === 52) {
                 {
-                this.state = 215;
+                this.state = 189;
                 this.match(ExprParser.INT);
                 }
             }
 
-            this.state = 218;
+            this.state = 192;
             this.match(ExprParser.T__5);
             }
         }
@@ -1152,26 +950,26 @@ export class ExprParser extends antlr.Parser {
     }
     public volume(): VolumeContext {
         let localContext = new VolumeContext(this.context, this.state);
-        this.enterRule(localContext, 26, ExprParser.RULE_volume);
+        this.enterRule(localContext, 20, ExprParser.RULE_volume);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 220;
-            this.match(ExprParser.T__18);
-            this.state = 221;
+            this.state = 194;
+            this.match(ExprParser.T__15);
+            this.state = 195;
             this.match(ExprParser.T__4);
-            this.state = 223;
+            this.state = 197;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 55) {
+            if (_la === 52) {
                 {
-                this.state = 222;
+                this.state = 196;
                 this.match(ExprParser.INT);
                 }
             }
 
-            this.state = 225;
+            this.state = 199;
             this.match(ExprParser.T__5);
             }
         }
@@ -1190,15 +988,15 @@ export class ExprParser extends antlr.Parser {
     }
     public volume24h_in_usd(): Volume24h_in_usdContext {
         let localContext = new Volume24h_in_usdContext(this.context, this.state);
-        this.enterRule(localContext, 28, ExprParser.RULE_volume24h_in_usd);
+        this.enterRule(localContext, 22, ExprParser.RULE_volume24h_in_usd);
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 227;
-            this.match(ExprParser.T__19);
-            this.state = 228;
+            this.state = 201;
+            this.match(ExprParser.T__16);
+            this.state = 202;
             this.match(ExprParser.T__4);
-            this.state = 229;
+            this.state = 203;
             this.match(ExprParser.T__5);
             }
         }
@@ -1217,26 +1015,26 @@ export class ExprParser extends antlr.Parser {
     }
     public change(): ChangeContext {
         let localContext = new ChangeContext(this.context, this.state);
-        this.enterRule(localContext, 30, ExprParser.RULE_change);
+        this.enterRule(localContext, 24, ExprParser.RULE_change);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 231;
-            this.match(ExprParser.T__20);
-            this.state = 232;
+            this.state = 205;
+            this.match(ExprParser.T__17);
+            this.state = 206;
             this.match(ExprParser.T__4);
-            this.state = 234;
+            this.state = 208;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 55) {
+            if (_la === 52) {
                 {
-                this.state = 233;
+                this.state = 207;
                 this.match(ExprParser.INT);
                 }
             }
 
-            this.state = 236;
+            this.state = 210;
             this.match(ExprParser.T__5);
             }
         }
@@ -1255,26 +1053,26 @@ export class ExprParser extends antlr.Parser {
     }
     public changeP(): ChangePContext {
         let localContext = new ChangePContext(this.context, this.state);
-        this.enterRule(localContext, 32, ExprParser.RULE_changeP);
+        this.enterRule(localContext, 26, ExprParser.RULE_changeP);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 238;
-            this.match(ExprParser.T__21);
-            this.state = 239;
+            this.state = 212;
+            this.match(ExprParser.T__18);
+            this.state = 213;
             this.match(ExprParser.T__4);
-            this.state = 241;
+            this.state = 215;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 55) {
+            if (_la === 52) {
                 {
-                this.state = 240;
+                this.state = 214;
                 this.match(ExprParser.INT);
                 }
             }
 
-            this.state = 243;
+            this.state = 217;
             this.match(ExprParser.T__5);
             }
         }
@@ -1293,26 +1091,26 @@ export class ExprParser extends antlr.Parser {
     }
     public ampl(): AmplContext {
         let localContext = new AmplContext(this.context, this.state);
-        this.enterRule(localContext, 34, ExprParser.RULE_ampl);
+        this.enterRule(localContext, 28, ExprParser.RULE_ampl);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 245;
-            this.match(ExprParser.T__22);
-            this.state = 246;
+            this.state = 219;
+            this.match(ExprParser.T__19);
+            this.state = 220;
             this.match(ExprParser.T__4);
-            this.state = 248;
+            this.state = 222;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 55) {
+            if (_la === 52) {
                 {
-                this.state = 247;
+                this.state = 221;
                 this.match(ExprParser.INT);
                 }
             }
 
-            this.state = 250;
+            this.state = 224;
             this.match(ExprParser.T__5);
             }
         }
@@ -1331,26 +1129,26 @@ export class ExprParser extends antlr.Parser {
     }
     public amplP(): AmplPContext {
         let localContext = new AmplPContext(this.context, this.state);
-        this.enterRule(localContext, 36, ExprParser.RULE_amplP);
+        this.enterRule(localContext, 30, ExprParser.RULE_amplP);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 252;
-            this.match(ExprParser.T__23);
-            this.state = 253;
+            this.state = 226;
+            this.match(ExprParser.T__20);
+            this.state = 227;
             this.match(ExprParser.T__4);
-            this.state = 255;
+            this.state = 229;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 55) {
+            if (_la === 52) {
                 {
-                this.state = 254;
+                this.state = 228;
                 this.match(ExprParser.INT);
                 }
             }
 
-            this.state = 257;
+            this.state = 231;
             this.match(ExprParser.T__5);
             }
         }
@@ -1369,26 +1167,26 @@ export class ExprParser extends antlr.Parser {
     }
     public upper_shadow(): Upper_shadowContext {
         let localContext = new Upper_shadowContext(this.context, this.state);
-        this.enterRule(localContext, 38, ExprParser.RULE_upper_shadow);
+        this.enterRule(localContext, 32, ExprParser.RULE_upper_shadow);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 259;
-            this.match(ExprParser.T__24);
-            this.state = 260;
+            this.state = 233;
+            this.match(ExprParser.T__21);
+            this.state = 234;
             this.match(ExprParser.T__4);
-            this.state = 262;
+            this.state = 236;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 55) {
+            if (_la === 52) {
                 {
-                this.state = 261;
+                this.state = 235;
                 this.match(ExprParser.INT);
                 }
             }
 
-            this.state = 264;
+            this.state = 238;
             this.match(ExprParser.T__5);
             }
         }
@@ -1407,26 +1205,26 @@ export class ExprParser extends antlr.Parser {
     }
     public upper_shadowP(): Upper_shadowPContext {
         let localContext = new Upper_shadowPContext(this.context, this.state);
-        this.enterRule(localContext, 40, ExprParser.RULE_upper_shadowP);
+        this.enterRule(localContext, 34, ExprParser.RULE_upper_shadowP);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 266;
-            this.match(ExprParser.T__25);
-            this.state = 267;
+            this.state = 240;
+            this.match(ExprParser.T__22);
+            this.state = 241;
             this.match(ExprParser.T__4);
-            this.state = 269;
+            this.state = 243;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 55) {
+            if (_la === 52) {
                 {
-                this.state = 268;
+                this.state = 242;
                 this.match(ExprParser.INT);
                 }
             }
 
-            this.state = 271;
+            this.state = 245;
             this.match(ExprParser.T__5);
             }
         }
@@ -1445,26 +1243,26 @@ export class ExprParser extends antlr.Parser {
     }
     public lower_shadow(): Lower_shadowContext {
         let localContext = new Lower_shadowContext(this.context, this.state);
-        this.enterRule(localContext, 42, ExprParser.RULE_lower_shadow);
+        this.enterRule(localContext, 36, ExprParser.RULE_lower_shadow);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 273;
-            this.match(ExprParser.T__26);
-            this.state = 274;
+            this.state = 247;
+            this.match(ExprParser.T__23);
+            this.state = 248;
             this.match(ExprParser.T__4);
-            this.state = 276;
+            this.state = 250;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 55) {
+            if (_la === 52) {
                 {
-                this.state = 275;
+                this.state = 249;
                 this.match(ExprParser.INT);
                 }
             }
 
-            this.state = 278;
+            this.state = 252;
             this.match(ExprParser.T__5);
             }
         }
@@ -1483,26 +1281,26 @@ export class ExprParser extends antlr.Parser {
     }
     public lower_shadowP(): Lower_shadowPContext {
         let localContext = new Lower_shadowPContext(this.context, this.state);
-        this.enterRule(localContext, 44, ExprParser.RULE_lower_shadowP);
+        this.enterRule(localContext, 38, ExprParser.RULE_lower_shadowP);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 280;
-            this.match(ExprParser.T__27);
-            this.state = 281;
+            this.state = 254;
+            this.match(ExprParser.T__24);
+            this.state = 255;
             this.match(ExprParser.T__4);
-            this.state = 283;
+            this.state = 257;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 55) {
+            if (_la === 52) {
                 {
-                this.state = 282;
+                this.state = 256;
                 this.match(ExprParser.INT);
                 }
             }
 
-            this.state = 285;
+            this.state = 259;
             this.match(ExprParser.T__5);
             }
         }
@@ -1521,30 +1319,30 @@ export class ExprParser extends antlr.Parser {
     }
     public rsi(): RsiContext {
         let localContext = new RsiContext(this.context, this.state);
-        this.enterRule(localContext, 46, ExprParser.RULE_rsi);
+        this.enterRule(localContext, 40, ExprParser.RULE_rsi);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 287;
-            this.match(ExprParser.T__28);
-            this.state = 288;
+            this.state = 261;
+            this.match(ExprParser.T__25);
+            this.state = 262;
             this.match(ExprParser.T__4);
-            this.state = 289;
+            this.state = 263;
             this.match(ExprParser.INT);
-            this.state = 292;
+            this.state = 266;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 30) {
+            if (_la === 27) {
                 {
-                this.state = 290;
-                this.match(ExprParser.T__29);
-                this.state = 291;
+                this.state = 264;
+                this.match(ExprParser.T__26);
+                this.state = 265;
                 this.match(ExprParser.INT);
                 }
             }
 
-            this.state = 294;
+            this.state = 268;
             this.match(ExprParser.T__5);
             }
         }
@@ -1563,30 +1361,30 @@ export class ExprParser extends antlr.Parser {
     }
     public rsi_slope(): Rsi_slopeContext {
         let localContext = new Rsi_slopeContext(this.context, this.state);
-        this.enterRule(localContext, 48, ExprParser.RULE_rsi_slope);
+        this.enterRule(localContext, 42, ExprParser.RULE_rsi_slope);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 296;
-            this.match(ExprParser.T__30);
-            this.state = 297;
+            this.state = 270;
+            this.match(ExprParser.T__27);
+            this.state = 271;
             this.match(ExprParser.T__4);
-            this.state = 298;
+            this.state = 272;
             this.match(ExprParser.INT);
-            this.state = 301;
+            this.state = 275;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 30) {
+            if (_la === 27) {
                 {
-                this.state = 299;
-                this.match(ExprParser.T__29);
-                this.state = 300;
+                this.state = 273;
+                this.match(ExprParser.T__26);
+                this.state = 274;
                 this.match(ExprParser.INT);
                 }
             }
 
-            this.state = 303;
+            this.state = 277;
             this.match(ExprParser.T__5);
             }
         }
@@ -1605,30 +1403,30 @@ export class ExprParser extends antlr.Parser {
     }
     public ma(): MaContext {
         let localContext = new MaContext(this.context, this.state);
-        this.enterRule(localContext, 50, ExprParser.RULE_ma);
+        this.enterRule(localContext, 44, ExprParser.RULE_ma);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 305;
-            this.match(ExprParser.T__31);
-            this.state = 306;
+            this.state = 279;
+            this.match(ExprParser.T__28);
+            this.state = 280;
             this.match(ExprParser.T__4);
-            this.state = 307;
+            this.state = 281;
             this.match(ExprParser.INT);
-            this.state = 310;
+            this.state = 284;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 30) {
+            if (_la === 27) {
                 {
-                this.state = 308;
-                this.match(ExprParser.T__29);
-                this.state = 309;
+                this.state = 282;
+                this.match(ExprParser.T__26);
+                this.state = 283;
                 this.match(ExprParser.INT);
                 }
             }
 
-            this.state = 312;
+            this.state = 286;
             this.match(ExprParser.T__5);
             }
         }
@@ -1647,24 +1445,124 @@ export class ExprParser extends antlr.Parser {
     }
     public ema(): EmaContext {
         let localContext = new EmaContext(this.context, this.state);
-        this.enterRule(localContext, 52, ExprParser.RULE_ema);
+        this.enterRule(localContext, 46, ExprParser.RULE_ema);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 314;
-            this.match(ExprParser.T__32);
-            this.state = 315;
+            this.state = 288;
+            this.match(ExprParser.T__29);
+            this.state = 289;
             this.match(ExprParser.T__4);
+            this.state = 290;
+            this.match(ExprParser.INT);
+            this.state = 293;
+            this.errorHandler.sync(this);
+            _la = this.tokenStream.LA(1);
+            if (_la === 27) {
+                {
+                this.state = 291;
+                this.match(ExprParser.T__26);
+                this.state = 292;
+                this.match(ExprParser.INT);
+                }
+            }
+
+            this.state = 295;
+            this.match(ExprParser.T__5);
+            }
+        }
+        catch (re) {
+            if (re instanceof antlr.RecognitionException) {
+                this.errorHandler.reportError(this, re);
+                this.errorHandler.recover(this, re);
+            } else {
+                throw re;
+            }
+        }
+        finally {
+            this.exitRule();
+        }
+        return localContext;
+    }
+    public macd_value(): Macd_valueContext {
+        let localContext = new Macd_valueContext(this.context, this.state);
+        this.enterRule(localContext, 48, ExprParser.RULE_macd_value);
+        let _la: number;
+        try {
+            this.enterOuterAlt(localContext, 1);
+            {
+            this.state = 297;
+            this.match(ExprParser.T__30);
+            this.state = 298;
+            this.match(ExprParser.T__4);
+            this.state = 299;
+            this.match(ExprParser.INT);
+            this.state = 300;
+            this.match(ExprParser.T__26);
+            this.state = 301;
+            this.match(ExprParser.INT);
+            this.state = 302;
+            this.match(ExprParser.T__26);
+            this.state = 303;
+            this.match(ExprParser.INT);
+            this.state = 306;
+            this.errorHandler.sync(this);
+            _la = this.tokenStream.LA(1);
+            if (_la === 27) {
+                {
+                this.state = 304;
+                this.match(ExprParser.T__26);
+                this.state = 305;
+                this.match(ExprParser.INT);
+                }
+            }
+
+            this.state = 308;
+            this.match(ExprParser.T__5);
+            }
+        }
+        catch (re) {
+            if (re instanceof antlr.RecognitionException) {
+                this.errorHandler.reportError(this, re);
+                this.errorHandler.recover(this, re);
+            } else {
+                throw re;
+            }
+        }
+        finally {
+            this.exitRule();
+        }
+        return localContext;
+    }
+    public macd_signal(): Macd_signalContext {
+        let localContext = new Macd_signalContext(this.context, this.state);
+        this.enterRule(localContext, 50, ExprParser.RULE_macd_signal);
+        let _la: number;
+        try {
+            this.enterOuterAlt(localContext, 1);
+            {
+            this.state = 310;
+            this.match(ExprParser.T__31);
+            this.state = 311;
+            this.match(ExprParser.T__4);
+            this.state = 312;
+            this.match(ExprParser.INT);
+            this.state = 313;
+            this.match(ExprParser.T__26);
+            this.state = 314;
+            this.match(ExprParser.INT);
+            this.state = 315;
+            this.match(ExprParser.T__26);
             this.state = 316;
             this.match(ExprParser.INT);
             this.state = 319;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 30) {
+            if (_la === 27) {
                 {
                 this.state = 317;
-                this.match(ExprParser.T__29);
+                this.match(ExprParser.T__26);
                 this.state = 318;
                 this.match(ExprParser.INT);
                 }
@@ -1687,34 +1585,34 @@ export class ExprParser extends antlr.Parser {
         }
         return localContext;
     }
-    public macd_value(): Macd_valueContext {
-        let localContext = new Macd_valueContext(this.context, this.state);
-        this.enterRule(localContext, 54, ExprParser.RULE_macd_value);
+    public macd_histogram(): Macd_histogramContext {
+        let localContext = new Macd_histogramContext(this.context, this.state);
+        this.enterRule(localContext, 52, ExprParser.RULE_macd_histogram);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
             this.state = 323;
-            this.match(ExprParser.T__33);
+            this.match(ExprParser.T__32);
             this.state = 324;
             this.match(ExprParser.T__4);
             this.state = 325;
             this.match(ExprParser.INT);
             this.state = 326;
-            this.match(ExprParser.T__29);
+            this.match(ExprParser.T__26);
             this.state = 327;
             this.match(ExprParser.INT);
             this.state = 328;
-            this.match(ExprParser.T__29);
+            this.match(ExprParser.T__26);
             this.state = 329;
             this.match(ExprParser.INT);
             this.state = 332;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 30) {
+            if (_la === 27) {
                 {
                 this.state = 330;
-                this.match(ExprParser.T__29);
+                this.match(ExprParser.T__26);
                 this.state = 331;
                 this.match(ExprParser.INT);
                 }
@@ -1737,136 +1635,36 @@ export class ExprParser extends antlr.Parser {
         }
         return localContext;
     }
-    public macd_signal(): Macd_signalContext {
-        let localContext = new Macd_signalContext(this.context, this.state);
-        this.enterRule(localContext, 56, ExprParser.RULE_macd_signal);
+    public bb_upper(): Bb_upperContext {
+        let localContext = new Bb_upperContext(this.context, this.state);
+        this.enterRule(localContext, 54, ExprParser.RULE_bb_upper);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
             this.state = 336;
-            this.match(ExprParser.T__34);
+            this.match(ExprParser.T__33);
             this.state = 337;
             this.match(ExprParser.T__4);
             this.state = 338;
             this.match(ExprParser.INT);
             this.state = 339;
-            this.match(ExprParser.T__29);
+            this.match(ExprParser.T__26);
             this.state = 340;
-            this.match(ExprParser.INT);
-            this.state = 341;
-            this.match(ExprParser.T__29);
-            this.state = 342;
-            this.match(ExprParser.INT);
-            this.state = 345;
-            this.errorHandler.sync(this);
-            _la = this.tokenStream.LA(1);
-            if (_la === 30) {
-                {
-                this.state = 343;
-                this.match(ExprParser.T__29);
-                this.state = 344;
-                this.match(ExprParser.INT);
-                }
-            }
-
-            this.state = 347;
-            this.match(ExprParser.T__5);
-            }
-        }
-        catch (re) {
-            if (re instanceof antlr.RecognitionException) {
-                this.errorHandler.reportError(this, re);
-                this.errorHandler.recover(this, re);
-            } else {
-                throw re;
-            }
-        }
-        finally {
-            this.exitRule();
-        }
-        return localContext;
-    }
-    public macd_histogram(): Macd_histogramContext {
-        let localContext = new Macd_histogramContext(this.context, this.state);
-        this.enterRule(localContext, 58, ExprParser.RULE_macd_histogram);
-        let _la: number;
-        try {
-            this.enterOuterAlt(localContext, 1);
-            {
-            this.state = 349;
-            this.match(ExprParser.T__35);
-            this.state = 350;
-            this.match(ExprParser.T__4);
-            this.state = 351;
-            this.match(ExprParser.INT);
-            this.state = 352;
-            this.match(ExprParser.T__29);
-            this.state = 353;
-            this.match(ExprParser.INT);
-            this.state = 354;
-            this.match(ExprParser.T__29);
-            this.state = 355;
-            this.match(ExprParser.INT);
-            this.state = 358;
-            this.errorHandler.sync(this);
-            _la = this.tokenStream.LA(1);
-            if (_la === 30) {
-                {
-                this.state = 356;
-                this.match(ExprParser.T__29);
-                this.state = 357;
-                this.match(ExprParser.INT);
-                }
-            }
-
-            this.state = 360;
-            this.match(ExprParser.T__5);
-            }
-        }
-        catch (re) {
-            if (re instanceof antlr.RecognitionException) {
-                this.errorHandler.reportError(this, re);
-                this.errorHandler.recover(this, re);
-            } else {
-                throw re;
-            }
-        }
-        finally {
-            this.exitRule();
-        }
-        return localContext;
-    }
-    public bb_upper(): Bb_upperContext {
-        let localContext = new Bb_upperContext(this.context, this.state);
-        this.enterRule(localContext, 60, ExprParser.RULE_bb_upper);
-        let _la: number;
-        try {
-            this.enterOuterAlt(localContext, 1);
-            {
-            this.state = 362;
-            this.match(ExprParser.T__36);
-            this.state = 363;
-            this.match(ExprParser.T__4);
-            this.state = 364;
-            this.match(ExprParser.INT);
-            this.state = 365;
-            this.match(ExprParser.T__29);
-            this.state = 366;
             this.match(ExprParser.FLOAT);
-            this.state = 369;
+            this.state = 343;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 30) {
+            if (_la === 27) {
                 {
-                this.state = 367;
-                this.match(ExprParser.T__29);
-                this.state = 368;
+                this.state = 341;
+                this.match(ExprParser.T__26);
+                this.state = 342;
                 this.match(ExprParser.INT);
                 }
             }
 
-            this.state = 371;
+            this.state = 345;
             this.match(ExprParser.T__5);
             }
         }
@@ -1885,34 +1683,34 @@ export class ExprParser extends antlr.Parser {
     }
     public bb_middle(): Bb_middleContext {
         let localContext = new Bb_middleContext(this.context, this.state);
-        this.enterRule(localContext, 62, ExprParser.RULE_bb_middle);
+        this.enterRule(localContext, 56, ExprParser.RULE_bb_middle);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 373;
-            this.match(ExprParser.T__37);
-            this.state = 374;
+            this.state = 347;
+            this.match(ExprParser.T__34);
+            this.state = 348;
             this.match(ExprParser.T__4);
-            this.state = 375;
+            this.state = 349;
             this.match(ExprParser.INT);
-            this.state = 376;
-            this.match(ExprParser.T__29);
-            this.state = 377;
+            this.state = 350;
+            this.match(ExprParser.T__26);
+            this.state = 351;
             this.match(ExprParser.FLOAT);
-            this.state = 380;
+            this.state = 354;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 30) {
+            if (_la === 27) {
                 {
-                this.state = 378;
-                this.match(ExprParser.T__29);
-                this.state = 379;
+                this.state = 352;
+                this.match(ExprParser.T__26);
+                this.state = 353;
                 this.match(ExprParser.INT);
                 }
             }
 
-            this.state = 382;
+            this.state = 356;
             this.match(ExprParser.T__5);
             }
         }
@@ -1931,34 +1729,34 @@ export class ExprParser extends antlr.Parser {
     }
     public bb_lower(): Bb_lowerContext {
         let localContext = new Bb_lowerContext(this.context, this.state);
-        this.enterRule(localContext, 64, ExprParser.RULE_bb_lower);
+        this.enterRule(localContext, 58, ExprParser.RULE_bb_lower);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 384;
-            this.match(ExprParser.T__38);
-            this.state = 385;
+            this.state = 358;
+            this.match(ExprParser.T__35);
+            this.state = 359;
             this.match(ExprParser.T__4);
-            this.state = 386;
+            this.state = 360;
             this.match(ExprParser.INT);
-            this.state = 387;
-            this.match(ExprParser.T__29);
-            this.state = 388;
+            this.state = 361;
+            this.match(ExprParser.T__26);
+            this.state = 362;
             this.match(ExprParser.FLOAT);
-            this.state = 391;
+            this.state = 365;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 30) {
+            if (_la === 27) {
                 {
-                this.state = 389;
-                this.match(ExprParser.T__29);
-                this.state = 390;
+                this.state = 363;
+                this.match(ExprParser.T__26);
+                this.state = 364;
                 this.match(ExprParser.INT);
                 }
             }
 
-            this.state = 393;
+            this.state = 367;
             this.match(ExprParser.T__5);
             }
         }
@@ -1977,50 +1775,50 @@ export class ExprParser extends antlr.Parser {
     }
     public rsi_phan_ki(): Rsi_phan_kiContext {
         let localContext = new Rsi_phan_kiContext(this.context, this.state);
-        this.enterRule(localContext, 66, ExprParser.RULE_rsi_phan_ki);
+        this.enterRule(localContext, 60, ExprParser.RULE_rsi_phan_ki);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 395;
-            this.match(ExprParser.T__39);
-            this.state = 396;
+            this.state = 369;
+            this.match(ExprParser.T__36);
+            this.state = 370;
             this.match(ExprParser.T__4);
-            this.state = 397;
+            this.state = 371;
             this.match(ExprParser.INT);
-            this.state = 398;
-            this.match(ExprParser.T__29);
-            this.state = 399;
+            this.state = 372;
+            this.match(ExprParser.T__26);
+            this.state = 373;
             this.match(ExprParser.FLOAT);
-            this.state = 400;
-            this.match(ExprParser.T__29);
-            this.state = 401;
+            this.state = 374;
+            this.match(ExprParser.T__26);
+            this.state = 375;
             this.match(ExprParser.INT);
-            this.state = 402;
-            this.match(ExprParser.T__29);
-            this.state = 403;
+            this.state = 376;
+            this.match(ExprParser.T__26);
+            this.state = 377;
             this.match(ExprParser.INT);
-            this.state = 404;
-            this.match(ExprParser.T__29);
-            this.state = 405;
+            this.state = 378;
+            this.match(ExprParser.T__26);
+            this.state = 379;
             this.match(ExprParser.FLOAT);
-            this.state = 406;
-            this.match(ExprParser.T__29);
-            this.state = 407;
+            this.state = 380;
+            this.match(ExprParser.T__26);
+            this.state = 381;
             this.match(ExprParser.FLOAT);
-            this.state = 410;
+            this.state = 384;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 30) {
+            if (_la === 27) {
                 {
-                this.state = 408;
-                this.match(ExprParser.T__29);
-                this.state = 409;
+                this.state = 382;
+                this.match(ExprParser.T__26);
+                this.state = 383;
                 this.match(ExprParser.INT);
                 }
             }
 
-            this.state = 412;
+            this.state = 386;
             this.match(ExprParser.T__5);
             }
         }
@@ -2039,62 +1837,62 @@ export class ExprParser extends antlr.Parser {
     }
     public macd_n_dinh(): Macd_n_dinhContext {
         let localContext = new Macd_n_dinhContext(this.context, this.state);
-        this.enterRule(localContext, 68, ExprParser.RULE_macd_n_dinh);
+        this.enterRule(localContext, 62, ExprParser.RULE_macd_n_dinh);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 414;
-            this.match(ExprParser.T__40);
-            this.state = 415;
+            this.state = 388;
+            this.match(ExprParser.T__37);
+            this.state = 389;
             this.match(ExprParser.T__4);
-            this.state = 416;
+            this.state = 390;
             this.match(ExprParser.INT);
-            this.state = 417;
-            this.match(ExprParser.T__29);
-            this.state = 418;
+            this.state = 391;
+            this.match(ExprParser.T__26);
+            this.state = 392;
             this.match(ExprParser.INT);
-            this.state = 419;
-            this.match(ExprParser.T__29);
-            this.state = 420;
+            this.state = 393;
+            this.match(ExprParser.T__26);
+            this.state = 394;
             this.match(ExprParser.INT);
-            this.state = 421;
-            this.match(ExprParser.T__29);
-            this.state = 422;
+            this.state = 395;
+            this.match(ExprParser.T__26);
+            this.state = 396;
             this.match(ExprParser.INT);
-            this.state = 423;
-            this.match(ExprParser.T__29);
-            this.state = 424;
+            this.state = 397;
+            this.match(ExprParser.T__26);
+            this.state = 398;
             this.match(ExprParser.INT);
-            this.state = 425;
-            this.match(ExprParser.T__29);
-            this.state = 426;
+            this.state = 399;
+            this.match(ExprParser.T__26);
+            this.state = 400;
             this.match(ExprParser.INT);
-            this.state = 427;
-            this.match(ExprParser.T__29);
-            this.state = 428;
+            this.state = 401;
+            this.match(ExprParser.T__26);
+            this.state = 402;
             this.match(ExprParser.FLOAT);
-            this.state = 429;
-            this.match(ExprParser.T__29);
-            this.state = 430;
+            this.state = 403;
+            this.match(ExprParser.T__26);
+            this.state = 404;
             this.match(ExprParser.INT);
-            this.state = 435;
+            this.state = 409;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            while (_la === 30) {
+            while (_la === 27) {
                 {
                 {
-                this.state = 431;
-                this.match(ExprParser.T__29);
-                this.state = 432;
+                this.state = 405;
+                this.match(ExprParser.T__26);
+                this.state = 406;
                 this.match(ExprParser.FLOAT);
                 }
                 }
-                this.state = 437;
+                this.state = 411;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
             }
-            this.state = 438;
+            this.state = 412;
             this.match(ExprParser.T__5);
             }
         }
@@ -2113,38 +1911,38 @@ export class ExprParser extends antlr.Parser {
     }
     public macd_slope(): Macd_slopeContext {
         let localContext = new Macd_slopeContext(this.context, this.state);
-        this.enterRule(localContext, 70, ExprParser.RULE_macd_slope);
+        this.enterRule(localContext, 64, ExprParser.RULE_macd_slope);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 440;
-            this.match(ExprParser.T__41);
-            this.state = 441;
+            this.state = 414;
+            this.match(ExprParser.T__38);
+            this.state = 415;
             this.match(ExprParser.T__4);
-            this.state = 442;
+            this.state = 416;
             this.match(ExprParser.INT);
-            this.state = 443;
-            this.match(ExprParser.T__29);
-            this.state = 444;
+            this.state = 417;
+            this.match(ExprParser.T__26);
+            this.state = 418;
             this.match(ExprParser.INT);
-            this.state = 445;
-            this.match(ExprParser.T__29);
-            this.state = 446;
+            this.state = 419;
+            this.match(ExprParser.T__26);
+            this.state = 420;
             this.match(ExprParser.INT);
-            this.state = 449;
+            this.state = 423;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 30) {
+            if (_la === 27) {
                 {
-                this.state = 447;
-                this.match(ExprParser.T__29);
-                this.state = 448;
+                this.state = 421;
+                this.match(ExprParser.T__26);
+                this.state = 422;
                 this.match(ExprParser.INT);
                 }
             }
 
-            this.state = 451;
+            this.state = 425;
             this.match(ExprParser.T__5);
             }
         }
@@ -2163,26 +1961,26 @@ export class ExprParser extends antlr.Parser {
     }
     public bullish_engulfing(): Bullish_engulfingContext {
         let localContext = new Bullish_engulfingContext(this.context, this.state);
-        this.enterRule(localContext, 72, ExprParser.RULE_bullish_engulfing);
+        this.enterRule(localContext, 66, ExprParser.RULE_bullish_engulfing);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 453;
-            this.match(ExprParser.T__42);
-            this.state = 454;
+            this.state = 427;
+            this.match(ExprParser.T__39);
+            this.state = 428;
             this.match(ExprParser.T__4);
-            this.state = 456;
+            this.state = 430;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 55) {
+            if (_la === 52) {
                 {
-                this.state = 455;
+                this.state = 429;
                 this.match(ExprParser.INT);
                 }
             }
 
-            this.state = 458;
+            this.state = 432;
             this.match(ExprParser.T__5);
             }
         }
@@ -2201,26 +1999,26 @@ export class ExprParser extends antlr.Parser {
     }
     public bearish_engulfing(): Bearish_engulfingContext {
         let localContext = new Bearish_engulfingContext(this.context, this.state);
-        this.enterRule(localContext, 74, ExprParser.RULE_bearish_engulfing);
+        this.enterRule(localContext, 68, ExprParser.RULE_bearish_engulfing);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 460;
-            this.match(ExprParser.T__43);
-            this.state = 461;
+            this.state = 434;
+            this.match(ExprParser.T__40);
+            this.state = 435;
             this.match(ExprParser.T__4);
-            this.state = 463;
+            this.state = 437;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 55) {
+            if (_la === 52) {
                 {
-                this.state = 462;
+                this.state = 436;
                 this.match(ExprParser.INT);
                 }
             }
 
-            this.state = 465;
+            this.state = 439;
             this.match(ExprParser.T__5);
             }
         }
@@ -2239,26 +2037,26 @@ export class ExprParser extends antlr.Parser {
     }
     public bullish_hammer(): Bullish_hammerContext {
         let localContext = new Bullish_hammerContext(this.context, this.state);
-        this.enterRule(localContext, 76, ExprParser.RULE_bullish_hammer);
+        this.enterRule(localContext, 70, ExprParser.RULE_bullish_hammer);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 467;
-            this.match(ExprParser.T__44);
-            this.state = 468;
+            this.state = 441;
+            this.match(ExprParser.T__41);
+            this.state = 442;
             this.match(ExprParser.T__4);
-            this.state = 470;
+            this.state = 444;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 55) {
+            if (_la === 52) {
                 {
-                this.state = 469;
+                this.state = 443;
                 this.match(ExprParser.INT);
                 }
             }
 
-            this.state = 472;
+            this.state = 446;
             this.match(ExprParser.T__5);
             }
         }
@@ -2277,26 +2075,26 @@ export class ExprParser extends antlr.Parser {
     }
     public bearish_hammer(): Bearish_hammerContext {
         let localContext = new Bearish_hammerContext(this.context, this.state);
-        this.enterRule(localContext, 78, ExprParser.RULE_bearish_hammer);
+        this.enterRule(localContext, 72, ExprParser.RULE_bearish_hammer);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 474;
-            this.match(ExprParser.T__45);
-            this.state = 475;
+            this.state = 448;
+            this.match(ExprParser.T__42);
+            this.state = 449;
             this.match(ExprParser.T__4);
-            this.state = 477;
+            this.state = 451;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 55) {
+            if (_la === 52) {
                 {
-                this.state = 476;
+                this.state = 450;
                 this.match(ExprParser.INT);
                 }
             }
 
-            this.state = 479;
+            this.state = 453;
             this.match(ExprParser.T__5);
             }
         }
@@ -2315,26 +2113,26 @@ export class ExprParser extends antlr.Parser {
     }
     public bullish(): BullishContext {
         let localContext = new BullishContext(this.context, this.state);
-        this.enterRule(localContext, 80, ExprParser.RULE_bullish);
+        this.enterRule(localContext, 74, ExprParser.RULE_bullish);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 481;
-            this.match(ExprParser.T__46);
-            this.state = 482;
+            this.state = 455;
+            this.match(ExprParser.T__43);
+            this.state = 456;
             this.match(ExprParser.T__4);
-            this.state = 484;
+            this.state = 458;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 55) {
+            if (_la === 52) {
                 {
-                this.state = 483;
+                this.state = 457;
                 this.match(ExprParser.INT);
                 }
             }
 
-            this.state = 486;
+            this.state = 460;
             this.match(ExprParser.T__5);
             }
         }
@@ -2353,26 +2151,26 @@ export class ExprParser extends antlr.Parser {
     }
     public bearish(): BearishContext {
         let localContext = new BearishContext(this.context, this.state);
-        this.enterRule(localContext, 82, ExprParser.RULE_bearish);
+        this.enterRule(localContext, 76, ExprParser.RULE_bearish);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 488;
-            this.match(ExprParser.T__47);
-            this.state = 489;
+            this.state = 462;
+            this.match(ExprParser.T__44);
+            this.state = 463;
             this.match(ExprParser.T__4);
-            this.state = 491;
+            this.state = 465;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 55) {
+            if (_la === 52) {
                 {
-                this.state = 490;
+                this.state = 464;
                 this.match(ExprParser.INT);
                 }
             }
 
-            this.state = 493;
+            this.state = 467;
             this.match(ExprParser.T__5);
             }
         }
@@ -2391,34 +2189,34 @@ export class ExprParser extends antlr.Parser {
     }
     public marsi(): MarsiContext {
         let localContext = new MarsiContext(this.context, this.state);
-        this.enterRule(localContext, 84, ExprParser.RULE_marsi);
+        this.enterRule(localContext, 78, ExprParser.RULE_marsi);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 495;
-            this.match(ExprParser.T__28);
-            this.state = 496;
+            this.state = 469;
+            this.match(ExprParser.T__25);
+            this.state = 470;
             this.match(ExprParser.T__4);
-            this.state = 497;
+            this.state = 471;
             this.match(ExprParser.INT);
-            this.state = 498;
-            this.match(ExprParser.T__29);
-            this.state = 499;
+            this.state = 472;
+            this.match(ExprParser.T__26);
+            this.state = 473;
             this.match(ExprParser.INT);
-            this.state = 502;
+            this.state = 476;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 30) {
+            if (_la === 27) {
                 {
-                this.state = 500;
-                this.match(ExprParser.T__29);
-                this.state = 501;
+                this.state = 474;
+                this.match(ExprParser.T__26);
+                this.state = 475;
                 this.match(ExprParser.INT);
                 }
             }
 
-            this.state = 504;
+            this.state = 478;
             this.match(ExprParser.T__5);
             }
         }
@@ -2437,14 +2235,14 @@ export class ExprParser extends antlr.Parser {
     }
     public comparisonOp(): ComparisonOpContext {
         let localContext = new ComparisonOpContext(this.context, this.state);
-        this.enterRule(localContext, 86, ExprParser.RULE_comparisonOp);
+        this.enterRule(localContext, 80, ExprParser.RULE_comparisonOp);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 506;
+            this.state = 480;
             _la = this.tokenStream.LA(1);
-            if(!(((((_la - 49)) & ~0x1F) === 0 && ((1 << (_la - 49)) & 63) !== 0))) {
+            if(!(((((_la - 46)) & ~0x1F) === 0 && ((1 << (_la - 46)) & 63) !== 0))) {
             this.errorHandler.recoverInline(this);
             }
             else {
@@ -2477,199 +2275,189 @@ export class ExprParser extends antlr.Parser {
     private expr_sempred(localContext: ExprContext | null, predIndex: number): boolean {
         switch (predIndex) {
         case 0:
-            return this.precpred(this.context, 47);
-        case 1:
             return this.precpred(this.context, 46);
-        case 2:
+        case 1:
             return this.precpred(this.context, 45);
+        case 2:
+            return this.precpred(this.context, 44);
         }
         return true;
     }
 
     public static readonly _serializedATN: number[] = [
-        4,1,58,509,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,
+        4,1,55,483,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,
         6,2,7,7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,2,13,7,13,
         2,14,7,14,2,15,7,15,2,16,7,16,2,17,7,17,2,18,7,18,2,19,7,19,2,20,
         7,20,2,21,7,21,2,22,7,22,2,23,7,23,2,24,7,24,2,25,7,25,2,26,7,26,
         2,27,7,27,2,28,7,28,2,29,7,29,2,30,7,30,2,31,7,31,2,32,7,32,2,33,
         7,33,2,34,7,34,2,35,7,35,2,36,7,36,2,37,7,37,2,38,7,38,2,39,7,39,
-        2,40,7,40,2,41,7,41,2,42,7,42,2,43,7,43,1,0,1,0,1,0,1,0,1,0,1,0,
-        1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,
-        1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,
-        1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,3,0,137,8,0,1,0,1,0,1,0,
-        1,0,1,0,1,0,1,0,1,0,1,0,1,0,5,0,149,8,0,10,0,12,0,152,9,0,1,1,1,
-        1,5,1,156,8,1,10,1,12,1,159,9,1,1,2,1,2,1,2,1,2,1,2,3,2,166,8,2,
-        1,3,4,3,169,8,3,11,3,12,3,170,1,4,1,4,1,4,1,4,1,5,1,5,1,5,1,5,1,
-        6,1,6,1,6,1,6,1,7,1,7,1,7,1,7,1,8,1,8,1,8,1,8,1,9,1,9,1,9,3,9,196,
-        8,9,1,9,1,9,1,10,1,10,1,10,3,10,203,8,10,1,10,1,10,1,11,1,11,1,11,
-        3,11,210,8,11,1,11,1,11,1,12,1,12,1,12,3,12,217,8,12,1,12,1,12,1,
-        13,1,13,1,13,3,13,224,8,13,1,13,1,13,1,14,1,14,1,14,1,14,1,15,1,
-        15,1,15,3,15,235,8,15,1,15,1,15,1,16,1,16,1,16,3,16,242,8,16,1,16,
-        1,16,1,17,1,17,1,17,3,17,249,8,17,1,17,1,17,1,18,1,18,1,18,3,18,
-        256,8,18,1,18,1,18,1,19,1,19,1,19,3,19,263,8,19,1,19,1,19,1,20,1,
-        20,1,20,3,20,270,8,20,1,20,1,20,1,21,1,21,1,21,3,21,277,8,21,1,21,
-        1,21,1,22,1,22,1,22,3,22,284,8,22,1,22,1,22,1,23,1,23,1,23,1,23,
-        1,23,3,23,293,8,23,1,23,1,23,1,24,1,24,1,24,1,24,1,24,3,24,302,8,
-        24,1,24,1,24,1,25,1,25,1,25,1,25,1,25,3,25,311,8,25,1,25,1,25,1,
-        26,1,26,1,26,1,26,1,26,3,26,320,8,26,1,26,1,26,1,27,1,27,1,27,1,
-        27,1,27,1,27,1,27,1,27,1,27,3,27,333,8,27,1,27,1,27,1,28,1,28,1,
-        28,1,28,1,28,1,28,1,28,1,28,1,28,3,28,346,8,28,1,28,1,28,1,29,1,
-        29,1,29,1,29,1,29,1,29,1,29,1,29,1,29,3,29,359,8,29,1,29,1,29,1,
-        30,1,30,1,30,1,30,1,30,1,30,1,30,3,30,370,8,30,1,30,1,30,1,31,1,
-        31,1,31,1,31,1,31,1,31,1,31,3,31,381,8,31,1,31,1,31,1,32,1,32,1,
-        32,1,32,1,32,1,32,1,32,3,32,392,8,32,1,32,1,32,1,33,1,33,1,33,1,
-        33,1,33,1,33,1,33,1,33,1,33,1,33,1,33,1,33,1,33,1,33,1,33,3,33,411,
-        8,33,1,33,1,33,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,
-        1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,5,34,434,8,34,10,34,
-        12,34,437,9,34,1,34,1,34,1,35,1,35,1,35,1,35,1,35,1,35,1,35,1,35,
-        1,35,3,35,450,8,35,1,35,1,35,1,36,1,36,1,36,3,36,457,8,36,1,36,1,
-        36,1,37,1,37,1,37,3,37,464,8,37,1,37,1,37,1,38,1,38,1,38,3,38,471,
-        8,38,1,38,1,38,1,39,1,39,1,39,3,39,478,8,39,1,39,1,39,1,40,1,40,
-        1,40,3,40,485,8,40,1,40,1,40,1,41,1,41,1,41,3,41,492,8,41,1,41,1,
-        41,1,42,1,42,1,42,1,42,1,42,1,42,1,42,3,42,503,8,42,1,42,1,42,1,
-        43,1,43,1,43,0,1,0,44,0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,
-        32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,
-        76,78,80,82,84,86,0,4,1,0,1,2,1,0,3,4,1,0,8,9,1,0,49,54,546,0,136,
-        1,0,0,0,2,153,1,0,0,0,4,165,1,0,0,0,6,168,1,0,0,0,8,172,1,0,0,0,
-        10,176,1,0,0,0,12,180,1,0,0,0,14,184,1,0,0,0,16,188,1,0,0,0,18,192,
-        1,0,0,0,20,199,1,0,0,0,22,206,1,0,0,0,24,213,1,0,0,0,26,220,1,0,
-        0,0,28,227,1,0,0,0,30,231,1,0,0,0,32,238,1,0,0,0,34,245,1,0,0,0,
-        36,252,1,0,0,0,38,259,1,0,0,0,40,266,1,0,0,0,42,273,1,0,0,0,44,280,
-        1,0,0,0,46,287,1,0,0,0,48,296,1,0,0,0,50,305,1,0,0,0,52,314,1,0,
-        0,0,54,323,1,0,0,0,56,336,1,0,0,0,58,349,1,0,0,0,60,362,1,0,0,0,
-        62,373,1,0,0,0,64,384,1,0,0,0,66,395,1,0,0,0,68,414,1,0,0,0,70,440,
-        1,0,0,0,72,453,1,0,0,0,74,460,1,0,0,0,76,467,1,0,0,0,78,474,1,0,
-        0,0,80,481,1,0,0,0,82,488,1,0,0,0,84,495,1,0,0,0,86,506,1,0,0,0,
-        88,89,6,0,-1,0,89,90,5,5,0,0,90,91,3,0,0,0,91,92,5,6,0,0,92,137,
-        1,0,0,0,93,137,5,55,0,0,94,137,5,56,0,0,95,137,5,57,0,0,96,137,3,
-        2,1,0,97,137,3,8,4,0,98,137,3,10,5,0,99,137,3,12,6,0,100,137,3,14,
-        7,0,101,137,3,16,8,0,102,137,3,18,9,0,103,137,3,20,10,0,104,137,
-        3,22,11,0,105,137,3,24,12,0,106,137,3,26,13,0,107,137,3,28,14,0,
-        108,137,3,30,15,0,109,137,3,32,16,0,110,137,3,34,17,0,111,137,3,
-        36,18,0,112,137,3,38,19,0,113,137,3,40,20,0,114,137,3,42,21,0,115,
-        137,3,44,22,0,116,137,3,46,23,0,117,137,3,48,24,0,118,137,3,50,25,
-        0,119,137,3,52,26,0,120,137,3,54,27,0,121,137,3,56,28,0,122,137,
-        3,58,29,0,123,137,3,60,30,0,124,137,3,62,31,0,125,137,3,64,32,0,
-        126,137,3,66,33,0,127,137,3,68,34,0,128,137,3,70,35,0,129,137,3,
-        72,36,0,130,137,3,74,37,0,131,137,3,76,38,0,132,137,3,78,39,0,133,
-        137,3,80,40,0,134,137,3,82,41,0,135,137,3,84,42,0,136,88,1,0,0,0,
-        136,93,1,0,0,0,136,94,1,0,0,0,136,95,1,0,0,0,136,96,1,0,0,0,136,
-        97,1,0,0,0,136,98,1,0,0,0,136,99,1,0,0,0,136,100,1,0,0,0,136,101,
-        1,0,0,0,136,102,1,0,0,0,136,103,1,0,0,0,136,104,1,0,0,0,136,105,
-        1,0,0,0,136,106,1,0,0,0,136,107,1,0,0,0,136,108,1,0,0,0,136,109,
-        1,0,0,0,136,110,1,0,0,0,136,111,1,0,0,0,136,112,1,0,0,0,136,113,
-        1,0,0,0,136,114,1,0,0,0,136,115,1,0,0,0,136,116,1,0,0,0,136,117,
-        1,0,0,0,136,118,1,0,0,0,136,119,1,0,0,0,136,120,1,0,0,0,136,121,
-        1,0,0,0,136,122,1,0,0,0,136,123,1,0,0,0,136,124,1,0,0,0,136,125,
-        1,0,0,0,136,126,1,0,0,0,136,127,1,0,0,0,136,128,1,0,0,0,136,129,
-        1,0,0,0,136,130,1,0,0,0,136,131,1,0,0,0,136,132,1,0,0,0,136,133,
-        1,0,0,0,136,134,1,0,0,0,136,135,1,0,0,0,137,150,1,0,0,0,138,139,
-        10,47,0,0,139,140,7,0,0,0,140,149,3,0,0,48,141,142,10,46,0,0,142,
-        143,7,1,0,0,143,149,3,0,0,47,144,145,10,45,0,0,145,146,3,86,43,0,
-        146,147,3,0,0,46,147,149,1,0,0,0,148,138,1,0,0,0,148,141,1,0,0,0,
-        148,144,1,0,0,0,149,152,1,0,0,0,150,148,1,0,0,0,150,151,1,0,0,0,
-        151,1,1,0,0,0,152,150,1,0,0,0,153,157,5,7,0,0,154,156,3,4,2,0,155,
-        154,1,0,0,0,156,159,1,0,0,0,157,155,1,0,0,0,157,158,1,0,0,0,158,
-        3,1,0,0,0,159,157,1,0,0,0,160,161,5,8,0,0,161,162,3,0,0,0,162,163,
-        5,9,0,0,163,166,1,0,0,0,164,166,3,6,3,0,165,160,1,0,0,0,165,164,
-        1,0,0,0,166,5,1,0,0,0,167,169,8,2,0,0,168,167,1,0,0,0,169,170,1,
-        0,0,0,170,168,1,0,0,0,170,171,1,0,0,0,171,7,1,0,0,0,172,173,5,10,
-        0,0,173,174,5,5,0,0,174,175,5,6,0,0,175,9,1,0,0,0,176,177,5,11,0,
-        0,177,178,5,5,0,0,178,179,5,6,0,0,179,11,1,0,0,0,180,181,5,12,0,
-        0,181,182,5,5,0,0,182,183,5,6,0,0,183,13,1,0,0,0,184,185,5,13,0,
-        0,185,186,5,5,0,0,186,187,5,6,0,0,187,15,1,0,0,0,188,189,5,14,0,
-        0,189,190,5,5,0,0,190,191,5,6,0,0,191,17,1,0,0,0,192,193,5,15,0,
-        0,193,195,5,5,0,0,194,196,5,55,0,0,195,194,1,0,0,0,195,196,1,0,0,
-        0,196,197,1,0,0,0,197,198,5,6,0,0,198,19,1,0,0,0,199,200,5,16,0,
-        0,200,202,5,5,0,0,201,203,5,55,0,0,202,201,1,0,0,0,202,203,1,0,0,
-        0,203,204,1,0,0,0,204,205,5,6,0,0,205,21,1,0,0,0,206,207,5,17,0,
-        0,207,209,5,5,0,0,208,210,5,55,0,0,209,208,1,0,0,0,209,210,1,0,0,
-        0,210,211,1,0,0,0,211,212,5,6,0,0,212,23,1,0,0,0,213,214,5,18,0,
-        0,214,216,5,5,0,0,215,217,5,55,0,0,216,215,1,0,0,0,216,217,1,0,0,
-        0,217,218,1,0,0,0,218,219,5,6,0,0,219,25,1,0,0,0,220,221,5,19,0,
-        0,221,223,5,5,0,0,222,224,5,55,0,0,223,222,1,0,0,0,223,224,1,0,0,
-        0,224,225,1,0,0,0,225,226,5,6,0,0,226,27,1,0,0,0,227,228,5,20,0,
-        0,228,229,5,5,0,0,229,230,5,6,0,0,230,29,1,0,0,0,231,232,5,21,0,
-        0,232,234,5,5,0,0,233,235,5,55,0,0,234,233,1,0,0,0,234,235,1,0,0,
-        0,235,236,1,0,0,0,236,237,5,6,0,0,237,31,1,0,0,0,238,239,5,22,0,
-        0,239,241,5,5,0,0,240,242,5,55,0,0,241,240,1,0,0,0,241,242,1,0,0,
-        0,242,243,1,0,0,0,243,244,5,6,0,0,244,33,1,0,0,0,245,246,5,23,0,
-        0,246,248,5,5,0,0,247,249,5,55,0,0,248,247,1,0,0,0,248,249,1,0,0,
-        0,249,250,1,0,0,0,250,251,5,6,0,0,251,35,1,0,0,0,252,253,5,24,0,
-        0,253,255,5,5,0,0,254,256,5,55,0,0,255,254,1,0,0,0,255,256,1,0,0,
-        0,256,257,1,0,0,0,257,258,5,6,0,0,258,37,1,0,0,0,259,260,5,25,0,
-        0,260,262,5,5,0,0,261,263,5,55,0,0,262,261,1,0,0,0,262,263,1,0,0,
-        0,263,264,1,0,0,0,264,265,5,6,0,0,265,39,1,0,0,0,266,267,5,26,0,
-        0,267,269,5,5,0,0,268,270,5,55,0,0,269,268,1,0,0,0,269,270,1,0,0,
-        0,270,271,1,0,0,0,271,272,5,6,0,0,272,41,1,0,0,0,273,274,5,27,0,
-        0,274,276,5,5,0,0,275,277,5,55,0,0,276,275,1,0,0,0,276,277,1,0,0,
-        0,277,278,1,0,0,0,278,279,5,6,0,0,279,43,1,0,0,0,280,281,5,28,0,
-        0,281,283,5,5,0,0,282,284,5,55,0,0,283,282,1,0,0,0,283,284,1,0,0,
-        0,284,285,1,0,0,0,285,286,5,6,0,0,286,45,1,0,0,0,287,288,5,29,0,
-        0,288,289,5,5,0,0,289,292,5,55,0,0,290,291,5,30,0,0,291,293,5,55,
-        0,0,292,290,1,0,0,0,292,293,1,0,0,0,293,294,1,0,0,0,294,295,5,6,
-        0,0,295,47,1,0,0,0,296,297,5,31,0,0,297,298,5,5,0,0,298,301,5,55,
-        0,0,299,300,5,30,0,0,300,302,5,55,0,0,301,299,1,0,0,0,301,302,1,
-        0,0,0,302,303,1,0,0,0,303,304,5,6,0,0,304,49,1,0,0,0,305,306,5,32,
-        0,0,306,307,5,5,0,0,307,310,5,55,0,0,308,309,5,30,0,0,309,311,5,
-        55,0,0,310,308,1,0,0,0,310,311,1,0,0,0,311,312,1,0,0,0,312,313,5,
-        6,0,0,313,51,1,0,0,0,314,315,5,33,0,0,315,316,5,5,0,0,316,319,5,
-        55,0,0,317,318,5,30,0,0,318,320,5,55,0,0,319,317,1,0,0,0,319,320,
-        1,0,0,0,320,321,1,0,0,0,321,322,5,6,0,0,322,53,1,0,0,0,323,324,5,
-        34,0,0,324,325,5,5,0,0,325,326,5,55,0,0,326,327,5,30,0,0,327,328,
-        5,55,0,0,328,329,5,30,0,0,329,332,5,55,0,0,330,331,5,30,0,0,331,
-        333,5,55,0,0,332,330,1,0,0,0,332,333,1,0,0,0,333,334,1,0,0,0,334,
-        335,5,6,0,0,335,55,1,0,0,0,336,337,5,35,0,0,337,338,5,5,0,0,338,
-        339,5,55,0,0,339,340,5,30,0,0,340,341,5,55,0,0,341,342,5,30,0,0,
-        342,345,5,55,0,0,343,344,5,30,0,0,344,346,5,55,0,0,345,343,1,0,0,
-        0,345,346,1,0,0,0,346,347,1,0,0,0,347,348,5,6,0,0,348,57,1,0,0,0,
-        349,350,5,36,0,0,350,351,5,5,0,0,351,352,5,55,0,0,352,353,5,30,0,
-        0,353,354,5,55,0,0,354,355,5,30,0,0,355,358,5,55,0,0,356,357,5,30,
-        0,0,357,359,5,55,0,0,358,356,1,0,0,0,358,359,1,0,0,0,359,360,1,0,
-        0,0,360,361,5,6,0,0,361,59,1,0,0,0,362,363,5,37,0,0,363,364,5,5,
-        0,0,364,365,5,55,0,0,365,366,5,30,0,0,366,369,5,56,0,0,367,368,5,
-        30,0,0,368,370,5,55,0,0,369,367,1,0,0,0,369,370,1,0,0,0,370,371,
-        1,0,0,0,371,372,5,6,0,0,372,61,1,0,0,0,373,374,5,38,0,0,374,375,
-        5,5,0,0,375,376,5,55,0,0,376,377,5,30,0,0,377,380,5,56,0,0,378,379,
-        5,30,0,0,379,381,5,55,0,0,380,378,1,0,0,0,380,381,1,0,0,0,381,382,
-        1,0,0,0,382,383,5,6,0,0,383,63,1,0,0,0,384,385,5,39,0,0,385,386,
-        5,5,0,0,386,387,5,55,0,0,387,388,5,30,0,0,388,391,5,56,0,0,389,390,
-        5,30,0,0,390,392,5,55,0,0,391,389,1,0,0,0,391,392,1,0,0,0,392,393,
-        1,0,0,0,393,394,5,6,0,0,394,65,1,0,0,0,395,396,5,40,0,0,396,397,
-        5,5,0,0,397,398,5,55,0,0,398,399,5,30,0,0,399,400,5,56,0,0,400,401,
-        5,30,0,0,401,402,5,55,0,0,402,403,5,30,0,0,403,404,5,55,0,0,404,
-        405,5,30,0,0,405,406,5,56,0,0,406,407,5,30,0,0,407,410,5,56,0,0,
-        408,409,5,30,0,0,409,411,5,55,0,0,410,408,1,0,0,0,410,411,1,0,0,
-        0,411,412,1,0,0,0,412,413,5,6,0,0,413,67,1,0,0,0,414,415,5,41,0,
-        0,415,416,5,5,0,0,416,417,5,55,0,0,417,418,5,30,0,0,418,419,5,55,
-        0,0,419,420,5,30,0,0,420,421,5,55,0,0,421,422,5,30,0,0,422,423,5,
-        55,0,0,423,424,5,30,0,0,424,425,5,55,0,0,425,426,5,30,0,0,426,427,
-        5,55,0,0,427,428,5,30,0,0,428,429,5,56,0,0,429,430,5,30,0,0,430,
-        435,5,55,0,0,431,432,5,30,0,0,432,434,5,56,0,0,433,431,1,0,0,0,434,
-        437,1,0,0,0,435,433,1,0,0,0,435,436,1,0,0,0,436,438,1,0,0,0,437,
-        435,1,0,0,0,438,439,5,6,0,0,439,69,1,0,0,0,440,441,5,42,0,0,441,
-        442,5,5,0,0,442,443,5,55,0,0,443,444,5,30,0,0,444,445,5,55,0,0,445,
-        446,5,30,0,0,446,449,5,55,0,0,447,448,5,30,0,0,448,450,5,55,0,0,
-        449,447,1,0,0,0,449,450,1,0,0,0,450,451,1,0,0,0,451,452,5,6,0,0,
-        452,71,1,0,0,0,453,454,5,43,0,0,454,456,5,5,0,0,455,457,5,55,0,0,
-        456,455,1,0,0,0,456,457,1,0,0,0,457,458,1,0,0,0,458,459,5,6,0,0,
-        459,73,1,0,0,0,460,461,5,44,0,0,461,463,5,5,0,0,462,464,5,55,0,0,
-        463,462,1,0,0,0,463,464,1,0,0,0,464,465,1,0,0,0,465,466,5,6,0,0,
-        466,75,1,0,0,0,467,468,5,45,0,0,468,470,5,5,0,0,469,471,5,55,0,0,
-        470,469,1,0,0,0,470,471,1,0,0,0,471,472,1,0,0,0,472,473,5,6,0,0,
-        473,77,1,0,0,0,474,475,5,46,0,0,475,477,5,5,0,0,476,478,5,55,0,0,
-        477,476,1,0,0,0,477,478,1,0,0,0,478,479,1,0,0,0,479,480,5,6,0,0,
-        480,79,1,0,0,0,481,482,5,47,0,0,482,484,5,5,0,0,483,485,5,55,0,0,
-        484,483,1,0,0,0,484,485,1,0,0,0,485,486,1,0,0,0,486,487,5,6,0,0,
-        487,81,1,0,0,0,488,489,5,48,0,0,489,491,5,5,0,0,490,492,5,55,0,0,
-        491,490,1,0,0,0,491,492,1,0,0,0,492,493,1,0,0,0,493,494,5,6,0,0,
-        494,83,1,0,0,0,495,496,5,29,0,0,496,497,5,5,0,0,497,498,5,55,0,0,
-        498,499,5,30,0,0,499,502,5,55,0,0,500,501,5,30,0,0,501,503,5,55,
-        0,0,502,500,1,0,0,0,502,503,1,0,0,0,503,504,1,0,0,0,504,505,5,6,
-        0,0,505,85,1,0,0,0,506,507,7,3,0,0,507,87,1,0,0,0,39,136,148,150,
-        157,165,170,195,202,209,216,223,234,241,248,255,262,269,276,283,
-        292,301,310,319,332,345,358,369,380,391,410,435,449,456,463,470,
-        477,484,491,502
+        2,40,7,40,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,
+        0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,
+        0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,
+        0,1,0,3,0,130,8,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,5,0,142,
+        8,0,10,0,12,0,145,9,0,1,1,1,1,1,1,1,1,1,2,1,2,1,2,1,2,1,3,1,3,1,
+        3,1,3,1,4,1,4,1,4,1,4,1,5,1,5,1,5,1,5,1,6,1,6,1,6,3,6,170,8,6,1,
+        6,1,6,1,7,1,7,1,7,3,7,177,8,7,1,7,1,7,1,8,1,8,1,8,3,8,184,8,8,1,
+        8,1,8,1,9,1,9,1,9,3,9,191,8,9,1,9,1,9,1,10,1,10,1,10,3,10,198,8,
+        10,1,10,1,10,1,11,1,11,1,11,1,11,1,12,1,12,1,12,3,12,209,8,12,1,
+        12,1,12,1,13,1,13,1,13,3,13,216,8,13,1,13,1,13,1,14,1,14,1,14,3,
+        14,223,8,14,1,14,1,14,1,15,1,15,1,15,3,15,230,8,15,1,15,1,15,1,16,
+        1,16,1,16,3,16,237,8,16,1,16,1,16,1,17,1,17,1,17,3,17,244,8,17,1,
+        17,1,17,1,18,1,18,1,18,3,18,251,8,18,1,18,1,18,1,19,1,19,1,19,3,
+        19,258,8,19,1,19,1,19,1,20,1,20,1,20,1,20,1,20,3,20,267,8,20,1,20,
+        1,20,1,21,1,21,1,21,1,21,1,21,3,21,276,8,21,1,21,1,21,1,22,1,22,
+        1,22,1,22,1,22,3,22,285,8,22,1,22,1,22,1,23,1,23,1,23,1,23,1,23,
+        3,23,294,8,23,1,23,1,23,1,24,1,24,1,24,1,24,1,24,1,24,1,24,1,24,
+        1,24,3,24,307,8,24,1,24,1,24,1,25,1,25,1,25,1,25,1,25,1,25,1,25,
+        1,25,1,25,3,25,320,8,25,1,25,1,25,1,26,1,26,1,26,1,26,1,26,1,26,
+        1,26,1,26,1,26,3,26,333,8,26,1,26,1,26,1,27,1,27,1,27,1,27,1,27,
+        1,27,1,27,3,27,344,8,27,1,27,1,27,1,28,1,28,1,28,1,28,1,28,1,28,
+        1,28,3,28,355,8,28,1,28,1,28,1,29,1,29,1,29,1,29,1,29,1,29,1,29,
+        3,29,366,8,29,1,29,1,29,1,30,1,30,1,30,1,30,1,30,1,30,1,30,1,30,
+        1,30,1,30,1,30,1,30,1,30,1,30,1,30,3,30,385,8,30,1,30,1,30,1,31,
+        1,31,1,31,1,31,1,31,1,31,1,31,1,31,1,31,1,31,1,31,1,31,1,31,1,31,
+        1,31,1,31,1,31,1,31,1,31,5,31,408,8,31,10,31,12,31,411,9,31,1,31,
+        1,31,1,32,1,32,1,32,1,32,1,32,1,32,1,32,1,32,1,32,3,32,424,8,32,
+        1,32,1,32,1,33,1,33,1,33,3,33,431,8,33,1,33,1,33,1,34,1,34,1,34,
+        3,34,438,8,34,1,34,1,34,1,35,1,35,1,35,3,35,445,8,35,1,35,1,35,1,
+        36,1,36,1,36,3,36,452,8,36,1,36,1,36,1,37,1,37,1,37,3,37,459,8,37,
+        1,37,1,37,1,38,1,38,1,38,3,38,466,8,38,1,38,1,38,1,39,1,39,1,39,
+        1,39,1,39,1,39,1,39,3,39,477,8,39,1,39,1,39,1,40,1,40,1,40,0,1,0,
+        41,0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,
+        44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,80,0,3,1,0,
+        1,2,1,0,3,4,1,0,46,51,519,0,129,1,0,0,0,2,146,1,0,0,0,4,150,1,0,
+        0,0,6,154,1,0,0,0,8,158,1,0,0,0,10,162,1,0,0,0,12,166,1,0,0,0,14,
+        173,1,0,0,0,16,180,1,0,0,0,18,187,1,0,0,0,20,194,1,0,0,0,22,201,
+        1,0,0,0,24,205,1,0,0,0,26,212,1,0,0,0,28,219,1,0,0,0,30,226,1,0,
+        0,0,32,233,1,0,0,0,34,240,1,0,0,0,36,247,1,0,0,0,38,254,1,0,0,0,
+        40,261,1,0,0,0,42,270,1,0,0,0,44,279,1,0,0,0,46,288,1,0,0,0,48,297,
+        1,0,0,0,50,310,1,0,0,0,52,323,1,0,0,0,54,336,1,0,0,0,56,347,1,0,
+        0,0,58,358,1,0,0,0,60,369,1,0,0,0,62,388,1,0,0,0,64,414,1,0,0,0,
+        66,427,1,0,0,0,68,434,1,0,0,0,70,441,1,0,0,0,72,448,1,0,0,0,74,455,
+        1,0,0,0,76,462,1,0,0,0,78,469,1,0,0,0,80,480,1,0,0,0,82,83,6,0,-1,
+        0,83,84,5,5,0,0,84,85,3,0,0,0,85,86,5,6,0,0,86,130,1,0,0,0,87,130,
+        5,52,0,0,88,130,5,53,0,0,89,130,5,54,0,0,90,130,3,2,1,0,91,130,3,
+        4,2,0,92,130,3,6,3,0,93,130,3,8,4,0,94,130,3,10,5,0,95,130,3,12,
+        6,0,96,130,3,14,7,0,97,130,3,16,8,0,98,130,3,18,9,0,99,130,3,20,
+        10,0,100,130,3,22,11,0,101,130,3,24,12,0,102,130,3,26,13,0,103,130,
+        3,28,14,0,104,130,3,30,15,0,105,130,3,32,16,0,106,130,3,34,17,0,
+        107,130,3,36,18,0,108,130,3,38,19,0,109,130,3,40,20,0,110,130,3,
+        42,21,0,111,130,3,44,22,0,112,130,3,46,23,0,113,130,3,48,24,0,114,
+        130,3,50,25,0,115,130,3,52,26,0,116,130,3,54,27,0,117,130,3,56,28,
+        0,118,130,3,58,29,0,119,130,3,60,30,0,120,130,3,62,31,0,121,130,
+        3,64,32,0,122,130,3,66,33,0,123,130,3,68,34,0,124,130,3,70,35,0,
+        125,130,3,72,36,0,126,130,3,74,37,0,127,130,3,76,38,0,128,130,3,
+        78,39,0,129,82,1,0,0,0,129,87,1,0,0,0,129,88,1,0,0,0,129,89,1,0,
+        0,0,129,90,1,0,0,0,129,91,1,0,0,0,129,92,1,0,0,0,129,93,1,0,0,0,
+        129,94,1,0,0,0,129,95,1,0,0,0,129,96,1,0,0,0,129,97,1,0,0,0,129,
+        98,1,0,0,0,129,99,1,0,0,0,129,100,1,0,0,0,129,101,1,0,0,0,129,102,
+        1,0,0,0,129,103,1,0,0,0,129,104,1,0,0,0,129,105,1,0,0,0,129,106,
+        1,0,0,0,129,107,1,0,0,0,129,108,1,0,0,0,129,109,1,0,0,0,129,110,
+        1,0,0,0,129,111,1,0,0,0,129,112,1,0,0,0,129,113,1,0,0,0,129,114,
+        1,0,0,0,129,115,1,0,0,0,129,116,1,0,0,0,129,117,1,0,0,0,129,118,
+        1,0,0,0,129,119,1,0,0,0,129,120,1,0,0,0,129,121,1,0,0,0,129,122,
+        1,0,0,0,129,123,1,0,0,0,129,124,1,0,0,0,129,125,1,0,0,0,129,126,
+        1,0,0,0,129,127,1,0,0,0,129,128,1,0,0,0,130,143,1,0,0,0,131,132,
+        10,46,0,0,132,133,7,0,0,0,133,142,3,0,0,47,134,135,10,45,0,0,135,
+        136,7,1,0,0,136,142,3,0,0,46,137,138,10,44,0,0,138,139,3,80,40,0,
+        139,140,3,0,0,45,140,142,1,0,0,0,141,131,1,0,0,0,141,134,1,0,0,0,
+        141,137,1,0,0,0,142,145,1,0,0,0,143,141,1,0,0,0,143,144,1,0,0,0,
+        144,1,1,0,0,0,145,143,1,0,0,0,146,147,5,7,0,0,147,148,5,5,0,0,148,
+        149,5,6,0,0,149,3,1,0,0,0,150,151,5,8,0,0,151,152,5,5,0,0,152,153,
+        5,6,0,0,153,5,1,0,0,0,154,155,5,9,0,0,155,156,5,5,0,0,156,157,5,
+        6,0,0,157,7,1,0,0,0,158,159,5,10,0,0,159,160,5,5,0,0,160,161,5,6,
+        0,0,161,9,1,0,0,0,162,163,5,11,0,0,163,164,5,5,0,0,164,165,5,6,0,
+        0,165,11,1,0,0,0,166,167,5,12,0,0,167,169,5,5,0,0,168,170,5,52,0,
+        0,169,168,1,0,0,0,169,170,1,0,0,0,170,171,1,0,0,0,171,172,5,6,0,
+        0,172,13,1,0,0,0,173,174,5,13,0,0,174,176,5,5,0,0,175,177,5,52,0,
+        0,176,175,1,0,0,0,176,177,1,0,0,0,177,178,1,0,0,0,178,179,5,6,0,
+        0,179,15,1,0,0,0,180,181,5,14,0,0,181,183,5,5,0,0,182,184,5,52,0,
+        0,183,182,1,0,0,0,183,184,1,0,0,0,184,185,1,0,0,0,185,186,5,6,0,
+        0,186,17,1,0,0,0,187,188,5,15,0,0,188,190,5,5,0,0,189,191,5,52,0,
+        0,190,189,1,0,0,0,190,191,1,0,0,0,191,192,1,0,0,0,192,193,5,6,0,
+        0,193,19,1,0,0,0,194,195,5,16,0,0,195,197,5,5,0,0,196,198,5,52,0,
+        0,197,196,1,0,0,0,197,198,1,0,0,0,198,199,1,0,0,0,199,200,5,6,0,
+        0,200,21,1,0,0,0,201,202,5,17,0,0,202,203,5,5,0,0,203,204,5,6,0,
+        0,204,23,1,0,0,0,205,206,5,18,0,0,206,208,5,5,0,0,207,209,5,52,0,
+        0,208,207,1,0,0,0,208,209,1,0,0,0,209,210,1,0,0,0,210,211,5,6,0,
+        0,211,25,1,0,0,0,212,213,5,19,0,0,213,215,5,5,0,0,214,216,5,52,0,
+        0,215,214,1,0,0,0,215,216,1,0,0,0,216,217,1,0,0,0,217,218,5,6,0,
+        0,218,27,1,0,0,0,219,220,5,20,0,0,220,222,5,5,0,0,221,223,5,52,0,
+        0,222,221,1,0,0,0,222,223,1,0,0,0,223,224,1,0,0,0,224,225,5,6,0,
+        0,225,29,1,0,0,0,226,227,5,21,0,0,227,229,5,5,0,0,228,230,5,52,0,
+        0,229,228,1,0,0,0,229,230,1,0,0,0,230,231,1,0,0,0,231,232,5,6,0,
+        0,232,31,1,0,0,0,233,234,5,22,0,0,234,236,5,5,0,0,235,237,5,52,0,
+        0,236,235,1,0,0,0,236,237,1,0,0,0,237,238,1,0,0,0,238,239,5,6,0,
+        0,239,33,1,0,0,0,240,241,5,23,0,0,241,243,5,5,0,0,242,244,5,52,0,
+        0,243,242,1,0,0,0,243,244,1,0,0,0,244,245,1,0,0,0,245,246,5,6,0,
+        0,246,35,1,0,0,0,247,248,5,24,0,0,248,250,5,5,0,0,249,251,5,52,0,
+        0,250,249,1,0,0,0,250,251,1,0,0,0,251,252,1,0,0,0,252,253,5,6,0,
+        0,253,37,1,0,0,0,254,255,5,25,0,0,255,257,5,5,0,0,256,258,5,52,0,
+        0,257,256,1,0,0,0,257,258,1,0,0,0,258,259,1,0,0,0,259,260,5,6,0,
+        0,260,39,1,0,0,0,261,262,5,26,0,0,262,263,5,5,0,0,263,266,5,52,0,
+        0,264,265,5,27,0,0,265,267,5,52,0,0,266,264,1,0,0,0,266,267,1,0,
+        0,0,267,268,1,0,0,0,268,269,5,6,0,0,269,41,1,0,0,0,270,271,5,28,
+        0,0,271,272,5,5,0,0,272,275,5,52,0,0,273,274,5,27,0,0,274,276,5,
+        52,0,0,275,273,1,0,0,0,275,276,1,0,0,0,276,277,1,0,0,0,277,278,5,
+        6,0,0,278,43,1,0,0,0,279,280,5,29,0,0,280,281,5,5,0,0,281,284,5,
+        52,0,0,282,283,5,27,0,0,283,285,5,52,0,0,284,282,1,0,0,0,284,285,
+        1,0,0,0,285,286,1,0,0,0,286,287,5,6,0,0,287,45,1,0,0,0,288,289,5,
+        30,0,0,289,290,5,5,0,0,290,293,5,52,0,0,291,292,5,27,0,0,292,294,
+        5,52,0,0,293,291,1,0,0,0,293,294,1,0,0,0,294,295,1,0,0,0,295,296,
+        5,6,0,0,296,47,1,0,0,0,297,298,5,31,0,0,298,299,5,5,0,0,299,300,
+        5,52,0,0,300,301,5,27,0,0,301,302,5,52,0,0,302,303,5,27,0,0,303,
+        306,5,52,0,0,304,305,5,27,0,0,305,307,5,52,0,0,306,304,1,0,0,0,306,
+        307,1,0,0,0,307,308,1,0,0,0,308,309,5,6,0,0,309,49,1,0,0,0,310,311,
+        5,32,0,0,311,312,5,5,0,0,312,313,5,52,0,0,313,314,5,27,0,0,314,315,
+        5,52,0,0,315,316,5,27,0,0,316,319,5,52,0,0,317,318,5,27,0,0,318,
+        320,5,52,0,0,319,317,1,0,0,0,319,320,1,0,0,0,320,321,1,0,0,0,321,
+        322,5,6,0,0,322,51,1,0,0,0,323,324,5,33,0,0,324,325,5,5,0,0,325,
+        326,5,52,0,0,326,327,5,27,0,0,327,328,5,52,0,0,328,329,5,27,0,0,
+        329,332,5,52,0,0,330,331,5,27,0,0,331,333,5,52,0,0,332,330,1,0,0,
+        0,332,333,1,0,0,0,333,334,1,0,0,0,334,335,5,6,0,0,335,53,1,0,0,0,
+        336,337,5,34,0,0,337,338,5,5,0,0,338,339,5,52,0,0,339,340,5,27,0,
+        0,340,343,5,53,0,0,341,342,5,27,0,0,342,344,5,52,0,0,343,341,1,0,
+        0,0,343,344,1,0,0,0,344,345,1,0,0,0,345,346,5,6,0,0,346,55,1,0,0,
+        0,347,348,5,35,0,0,348,349,5,5,0,0,349,350,5,52,0,0,350,351,5,27,
+        0,0,351,354,5,53,0,0,352,353,5,27,0,0,353,355,5,52,0,0,354,352,1,
+        0,0,0,354,355,1,0,0,0,355,356,1,0,0,0,356,357,5,6,0,0,357,57,1,0,
+        0,0,358,359,5,36,0,0,359,360,5,5,0,0,360,361,5,52,0,0,361,362,5,
+        27,0,0,362,365,5,53,0,0,363,364,5,27,0,0,364,366,5,52,0,0,365,363,
+        1,0,0,0,365,366,1,0,0,0,366,367,1,0,0,0,367,368,5,6,0,0,368,59,1,
+        0,0,0,369,370,5,37,0,0,370,371,5,5,0,0,371,372,5,52,0,0,372,373,
+        5,27,0,0,373,374,5,53,0,0,374,375,5,27,0,0,375,376,5,52,0,0,376,
+        377,5,27,0,0,377,378,5,52,0,0,378,379,5,27,0,0,379,380,5,53,0,0,
+        380,381,5,27,0,0,381,384,5,53,0,0,382,383,5,27,0,0,383,385,5,52,
+        0,0,384,382,1,0,0,0,384,385,1,0,0,0,385,386,1,0,0,0,386,387,5,6,
+        0,0,387,61,1,0,0,0,388,389,5,38,0,0,389,390,5,5,0,0,390,391,5,52,
+        0,0,391,392,5,27,0,0,392,393,5,52,0,0,393,394,5,27,0,0,394,395,5,
+        52,0,0,395,396,5,27,0,0,396,397,5,52,0,0,397,398,5,27,0,0,398,399,
+        5,52,0,0,399,400,5,27,0,0,400,401,5,52,0,0,401,402,5,27,0,0,402,
+        403,5,53,0,0,403,404,5,27,0,0,404,409,5,52,0,0,405,406,5,27,0,0,
+        406,408,5,53,0,0,407,405,1,0,0,0,408,411,1,0,0,0,409,407,1,0,0,0,
+        409,410,1,0,0,0,410,412,1,0,0,0,411,409,1,0,0,0,412,413,5,6,0,0,
+        413,63,1,0,0,0,414,415,5,39,0,0,415,416,5,5,0,0,416,417,5,52,0,0,
+        417,418,5,27,0,0,418,419,5,52,0,0,419,420,5,27,0,0,420,423,5,52,
+        0,0,421,422,5,27,0,0,422,424,5,52,0,0,423,421,1,0,0,0,423,424,1,
+        0,0,0,424,425,1,0,0,0,425,426,5,6,0,0,426,65,1,0,0,0,427,428,5,40,
+        0,0,428,430,5,5,0,0,429,431,5,52,0,0,430,429,1,0,0,0,430,431,1,0,
+        0,0,431,432,1,0,0,0,432,433,5,6,0,0,433,67,1,0,0,0,434,435,5,41,
+        0,0,435,437,5,5,0,0,436,438,5,52,0,0,437,436,1,0,0,0,437,438,1,0,
+        0,0,438,439,1,0,0,0,439,440,5,6,0,0,440,69,1,0,0,0,441,442,5,42,
+        0,0,442,444,5,5,0,0,443,445,5,52,0,0,444,443,1,0,0,0,444,445,1,0,
+        0,0,445,446,1,0,0,0,446,447,5,6,0,0,447,71,1,0,0,0,448,449,5,43,
+        0,0,449,451,5,5,0,0,450,452,5,52,0,0,451,450,1,0,0,0,451,452,1,0,
+        0,0,452,453,1,0,0,0,453,454,5,6,0,0,454,73,1,0,0,0,455,456,5,44,
+        0,0,456,458,5,5,0,0,457,459,5,52,0,0,458,457,1,0,0,0,458,459,1,0,
+        0,0,459,460,1,0,0,0,460,461,5,6,0,0,461,75,1,0,0,0,462,463,5,45,
+        0,0,463,465,5,5,0,0,464,466,5,52,0,0,465,464,1,0,0,0,465,466,1,0,
+        0,0,466,467,1,0,0,0,467,468,5,6,0,0,468,77,1,0,0,0,469,470,5,26,
+        0,0,470,471,5,5,0,0,471,472,5,52,0,0,472,473,5,27,0,0,473,476,5,
+        52,0,0,474,475,5,27,0,0,475,477,5,52,0,0,476,474,1,0,0,0,476,477,
+        1,0,0,0,477,478,1,0,0,0,478,479,5,6,0,0,479,79,1,0,0,0,480,481,7,
+        2,0,0,481,81,1,0,0,0,36,129,141,143,169,176,183,190,197,208,215,
+        222,229,236,243,250,257,266,275,284,293,306,319,332,343,354,365,
+        384,409,423,430,437,444,451,458,465,476
     ];
 
     private static __ATN: antlr.ATN;
@@ -3267,22 +3055,6 @@ export class IChangePContext extends ExprContext {
         }
     }
 }
-export class SendTelegramContext extends ExprContext {
-    public constructor(ctx: ExprContext) {
-        super(ctx.parent, ctx.invokingState);
-        super.copyFrom(ctx);
-    }
-    public telegram(): TelegramContext {
-        return this.getRuleContext(0, TelegramContext)!;
-    }
-    public override accept<Result>(visitor: ExprVisitor<Result>): Result | null {
-        if (visitor.visitSendTelegram) {
-            return visitor.visitSendTelegram(this);
-        } else {
-            return visitor.visitChildren(this);
-        }
-    }
-}
 export class IBrokerContext extends ExprContext {
     public constructor(ctx: ExprContext) {
         super(ctx.parent, ctx.invokingState);
@@ -3470,72 +3242,6 @@ export class IOpenContext extends ExprContext {
     public override accept<Result>(visitor: ExprVisitor<Result>): Result | null {
         if (visitor.visitIOpen) {
             return visitor.visitIOpen(this);
-        } else {
-            return visitor.visitChildren(this);
-        }
-    }
-}
-
-
-export class TelegramContext extends antlr.ParserRuleContext {
-    public constructor(parent: antlr.ParserRuleContext | null, invokingState: number) {
-        super(parent, invokingState);
-    }
-    public telegramContent(): TelegramContentContext[];
-    public telegramContent(i: number): TelegramContentContext | null;
-    public telegramContent(i?: number): TelegramContentContext[] | TelegramContentContext | null {
-        if (i === undefined) {
-            return this.getRuleContexts(TelegramContentContext);
-        }
-
-        return this.getRuleContext(i, TelegramContentContext);
-    }
-    public override get ruleIndex(): number {
-        return ExprParser.RULE_telegram;
-    }
-    public override accept<Result>(visitor: ExprVisitor<Result>): Result | null {
-        if (visitor.visitTelegram) {
-            return visitor.visitTelegram(this);
-        } else {
-            return visitor.visitChildren(this);
-        }
-    }
-}
-
-
-export class TelegramContentContext extends antlr.ParserRuleContext {
-    public constructor(parent: antlr.ParserRuleContext | null, invokingState: number) {
-        super(parent, invokingState);
-    }
-    public expr(): ExprContext | null {
-        return this.getRuleContext(0, ExprContext);
-    }
-    public textContent(): TextContentContext | null {
-        return this.getRuleContext(0, TextContentContext);
-    }
-    public override get ruleIndex(): number {
-        return ExprParser.RULE_telegramContent;
-    }
-    public override accept<Result>(visitor: ExprVisitor<Result>): Result | null {
-        if (visitor.visitTelegramContent) {
-            return visitor.visitTelegramContent(this);
-        } else {
-            return visitor.visitChildren(this);
-        }
-    }
-}
-
-
-export class TextContentContext extends antlr.ParserRuleContext {
-    public constructor(parent: antlr.ParserRuleContext | null, invokingState: number) {
-        super(parent, invokingState);
-    }
-    public override get ruleIndex(): number {
-        return ExprParser.RULE_textContent;
-    }
-    public override accept<Result>(visitor: ExprVisitor<Result>): Result | null {
-        if (visitor.visitTextContent) {
-            return visitor.visitTextContent(this);
         } else {
             return visitor.visitChildren(this);
         }
