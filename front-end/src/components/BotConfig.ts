@@ -43,7 +43,7 @@ export default defineComponent({
 
             const treeData = botData.treeData;
             if (treeData.elements.nodes.filter((item: { id: string; }) => item.id != 'start').length == 0) {
-                treeData.elements.nodes.push({ data: { id: 'start', name: 'Start' }, position: { x: 100, y: 100 } });
+                treeData.elements.nodes.push({ data: { id: 'start', name: 'Start' }, position: { x: 400, y: 300 } });
             }
             cy.json(treeData);
 
@@ -255,7 +255,7 @@ export default defineComponent({
 
             const treeData: { [key: string]: any } = { elements: { nodes: [], edges: [] } };
             if (treeData.elements.nodes.filter((item: { id: string; }) => item.id != 'start').length == 0) {
-                treeData.elements.nodes.push({ data: { id: 'start', name: 'Start' }, position: { x: 100, y: 100 } });
+                treeData.elements.nodes.push({ data: { id: 'start', name: 'Start' }, position: { x: 400, y: 300 } });
             }
 
             cy = cytoscape({

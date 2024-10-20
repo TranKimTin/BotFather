@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="alwaysOnTop">
         <div class="row">
             <div class="col-2"><b>Tên bot</b></div>
             <div class="col-2"><b>Telegram</b></div>
@@ -19,8 +19,8 @@
 
         <div class="row">
             <div class="col-2">
-                <AutoComplete v-model="r_botName" :suggestions="r_botNameList" @complete="searchBot" dropdown @keydown="getBotInfo" @change="getBotInfo"
-                    placeholder="Nhập tên..." />
+                <AutoComplete v-model="r_botName" :suggestions="r_botNameList" @complete="searchBot" dropdown
+                    @keydown="getBotInfo" @change="getBotInfo" placeholder="Nhập tên..." />
             </div>
             <div class="col-2">
                 <input v-model="r_idTelegram" class="form-control" type="text" placeholder="Nhập id telegram" />
@@ -53,17 +53,18 @@
 <style scoped>
 #cy {
     width: 100%;
-    height: 80vh;
+    height: 100vh;
     left: 0;
     top: 0;
     right: 0;
     bottom: 0;
     margin: auto;
+    position: fixed;
 }
 
 .alwaysOnTop {
     position: absolute;
-    z-index: 99999;
+    z-index: 1000;
     width: 100%;
 }
 
