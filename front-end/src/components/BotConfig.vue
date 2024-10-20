@@ -53,7 +53,7 @@
 <style scoped>
 #cy {
     width: 100%;
-    height: 70vh;
+    height: 80vh;
     left: 0;
     top: 0;
     right: 0;
