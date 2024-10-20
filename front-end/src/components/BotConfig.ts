@@ -100,7 +100,7 @@ export default defineComponent({
             );
         }
 
-        function findFreePosition(x: number = 0, y: number = 0) {
+        function findFreePosition(x: number = 400, y: number = 300) {
             const step = 50;
             while (true) {
                 let isFree = true;
