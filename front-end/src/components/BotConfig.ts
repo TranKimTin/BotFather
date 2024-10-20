@@ -1,11 +1,11 @@
 import { defineComponent, onMounted, ref } from 'vue';
-import cytoscape, { type Core } from 'cytoscape';
+import typecytoscape, { type Core } from 'cytoscape';
 import edgehandles from 'cytoscape-edgehandles';
 import * as axios from '../axios/axios';
 import Cookies from 'js-cookie';
 import MultiSelect from 'primevue/multiselect';
 
-cytoscape.use(edgehandles);
+// cytoscape.use(edgehandles);
 
 export default defineComponent({
     components: { MultiSelect },
@@ -85,7 +85,9 @@ export default defineComponent({
             r_botName.value = Cookies.get("botName") || '';
             let treeData = { elements: { nodes: [], edges: [] } };
 
-            r_symbolList.value = await axios.get('/getSymbolList');
+            axios.get('/getSymbolList').then(result => {
+                r_symbolList.value = result;
+            });
 
             loadData();
         });

@@ -5,10 +5,11 @@
             <div class="col-2"><b>Telegram</b></div>
             <div class="col-2"><b>Khung thời gian</b></div>
             <div class="col-6">
-                <button v-for="broker in brokerList" @click="toogleAllSymbol(broker)">
-                    <b>{{ r_symbolList.filter(item =>
+                <button v-for="broker in brokerList" @click="toogleAllSymbol(broker)"
+                    :title="r_symbolListSelected.filter((item: string) => item.startsWith(`${broker}:`)).length + ' / ' + r_symbolList.filter((item: string) => item.startsWith(`${broker}:`)).length">
+                    <b>{{ r_symbolList.filter((item: string) =>
                         item.startsWith(`${broker}:`)).length
-                        !== r_symbolListSelected.filter(item => item.startsWith(`${broker}:`)).length ? '+' :
+                        !== r_symbolListSelected.filter((item: string) => item.startsWith(`${broker}:`)).length ? '+' :
                         '-' }}</b>
                     {{ broker }}</button>
                 <button @click="filterDuplicate()">Lọc trùng</button>

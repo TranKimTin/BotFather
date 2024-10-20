@@ -12,7 +12,6 @@
     "lint": "eslint . --fix"
   },
   "dependencies": {
-    "@primevue/themes": "^4.1.1",
     "axios": "^1.7.7",
     "cytoscape": "^3.30.2",
     "cytoscape-edgehandles": "^4.0.1",
@@ -23,8 +22,10 @@
     "vue-multiselect": "^3.1.0"
   },
   "devDependencies": {
+    "@primevue/themes": "^4.1.1",
     "@tsconfig/node20": "^20.1.4",
     "@types/cytoscape": "^3.21.8",
+    "@types/cytoscape-edgehandles": "^4.0.4",
     "@types/js-cookie": "^3.0.6",
     "@types/node": "^20.16.11",
     "@vitejs/plugin-vue": "^5.1.4",
