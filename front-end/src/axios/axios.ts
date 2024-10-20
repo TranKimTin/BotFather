@@ -19,6 +19,43 @@ export async function get(url: string, params: Params = {}): Promise<any> {
         return data.data;
     }
     else {
-        throw data.message;
+        console.error('axios get error', data)
+        throw data;
+    }
+}
+
+export async function post(url: string, body: Params = {}): Promise<any> {
+    const response = await axios.post(`${URL}${url}`, body);
+    const data: Response = response.data as Response;
+    if (data.code === 200) {
+        return data.data;
+    }
+    else {
+        console.error('axios post error', data);
+        throw data;
+    }
+}
+
+export async function put(url: string, params: Params = {}): Promise<any> {
+    const response = await axios.put(`${URL}${url}`, undefined, { params });
+    const data: Response = response.data as Response;
+    if (data.code === 200) {
+        return data.data;
+    }
+    else {
+        console.error('axios put error', data)
+        throw data;
+    }
+}
+
+export async function delete_(url: string, params: Params = {}): Promise<any> {
+    const response = await axios.delete(`${URL}${url}`, { params });
+    const data: Response = response.data as Response;
+    if (data.code === 200) {
+        return data.data;
+    }
+    else {
+        console.error('axios delete error', data)
+        throw data;
     }
 }

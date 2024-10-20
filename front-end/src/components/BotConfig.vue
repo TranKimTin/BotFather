@@ -19,8 +19,6 @@
 
         <div class="row">
             <div class="col-2">
-                <!-- <input v-model="r_botName" @keydown="getBotInfo" @change="getBotInfo" class="form-control" type="text"
-                    placeholder="Nhập tên bot" /> -->
                 <AutoComplete v-model="r_botName" :suggestions="r_botNameList" @complete="searchBot" dropdown @keydown="getBotInfo" @change="getBotInfo"
                     placeholder="Nhập tên..." />
             </div>
@@ -38,15 +36,13 @@
         </div>
 
         <div class="justify-center">
-            <button class="btn btn-outline-danger mr-1" id="removeBot">Xóa bot</button>
-            <button class="btn btn-outline-primary mr-1" id="addNode">Thêm điều kiện</button>
-            <button class="btn btn-outline-primary mr-1" id="draw-on">Draw mode on</button>
-            <button class="btn btn-outline-primary mr-1" id="draw-off">Draw mode off</button>
-            <button class="btn btn-outline-primary mr-1" id="editNode">Sửa điều kiện</button>
-            <button class="btn btn-outline-danger mr-1" id="removeNode">Xóa</button>
-            <button class="btn btn-outline-success mr-1" id="save">Lưu</button>
-            <button class="btn btn-outline-info mr-1" data-toggle="modal" data-target="#instructionModal">Hướng
-                dẫn</button>
+            <button class="btn btn-outline-danger mr-1" @click="removeBot">Xóa bot</button>
+            <button class="btn btn-outline-primary mr-1" @click="addNode">Thêm điều kiện</button>
+            <button class="btn btn-outline-primary mr-1" @click="drawModeOn">Draw mode on</button>
+            <button class="btn btn-outline-primary mr-1" @click="drawModeOff">Draw mode off</button>
+            <button class="btn btn-outline-primary mr-1" @click="editNode">Sửa điều kiện</button>
+            <button class="btn btn-outline-danger mr-1" @click="removeNode">Xóa</button>
+            <button class="btn btn-outline-success mr-1" @click="saveBot">Lưu</button>
         </div>
     </div>
     <div id="cy"></div>

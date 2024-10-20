@@ -1,4 +1,5 @@
 <template>
+  <div id="background"></div>
   <div class="container-fluid">
     <BotConfig></BotConfig>
   </div>
