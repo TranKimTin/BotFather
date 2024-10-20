@@ -19,8 +19,10 @@
 
         <div class="row">
             <div class="col-2">
-                <input v-model="r_botName" @keydown="getBotInfo" @change="getBotInfo" class="form-control" type="text"
-                    placeholder="Nhập tên bot" />
+                <!-- <input v-model="r_botName" @keydown="getBotInfo" @change="getBotInfo" class="form-control" type="text"
+                    placeholder="Nhập tên bot" /> -->
+                <AutoComplete v-model="r_botName" :suggestions="r_botNameList" @complete="searchBot" dropdown @keydown="getBotInfo" @change="getBotInfo"
+                    placeholder="Nhập tên..." />
             </div>
             <div class="col-2">
                 <input v-model="r_idTelegram" class="form-control" type="text" placeholder="Nhập id telegram" />
@@ -55,7 +57,7 @@
 <style scoped>
 #cy {
     width: 100%;
-    height: 100%;
+    height: 70vh;
     left: 0;
     top: 0;
     right: 0;

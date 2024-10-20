@@ -1,22 +1,26 @@
 import { defineComponent, onMounted, ref } from 'vue';
-import typecytoscape, { type Core } from 'cytoscape';
+import cytoscape, { type Core } from 'cytoscape';
 import edgehandles from 'cytoscape-edgehandles';
 import * as axios from '../axios/axios';
 import Cookies from 'js-cookie';
 import MultiSelect from 'primevue/multiselect';
+import AutoComplete from 'primevue/autocomplete';
 
-// cytoscape.use(edgehandles);
+
+cytoscape.use(edgehandles);
 
 export default defineComponent({
-    components: { MultiSelect },
+    components: { MultiSelect, AutoComplete },
     setup() {
-        let r_botName = ref<string>('');
-        let r_idTelegram = ref<string>('');
+        const r_botName = ref<string>('');
+        const r_idTelegram = ref<string>('');
         const timeframes = ref<Array<string>>(['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d']);
-        let r_timeframesSelected = ref<Array<string>>([]);
-        let r_symbolList = ref<Array<string>>([]);
-        let r_symbolListSelected = ref<Array<string>>([]);
+        const r_timeframesSelected = ref<Array<string>>([]);
+        const r_symbolList = ref<Array<string>>([]);
+        const r_symbolListSelected = ref<Array<string>>([]);
         const brokerList = ['binance', 'okx', 'bybit', 'binance_future', 'bybit_future'];
+        const r_botNameList = ref<Array<string>>([]);
+        let allBotList: Array<string> = [];
 
         let timeout: number | undefined;
         function getBotInfo() {
@@ -80,17 +84,134 @@ export default defineComponent({
             alert(`Đã lọc coin trùng nhau (${newSymbolListSelected.length} coin)`);
         }
 
+        function searchBot(event: any) {
+            const inputValue = event.query;
+            r_botNameList.value = allBotList.filter(suggestion =>
+                suggestion.toLowerCase().includes(inputValue.toLowerCase())
+            );
+        }
+
         onMounted(async () => {
-            let cy: Core | null = null;
             r_botName.value = Cookies.get("botName") || '';
-            let treeData = { elements: { nodes: [], edges: [] } };
 
             axios.get('/getSymbolList').then(result => {
                 r_symbolList.value = result;
             });
 
+            axios.get('/getBotList').then(result => {
+                allBotList = result;
+            });
+
             loadData();
+
+            let treeData: { [key: string]: any } = { elements: { nodes: [], edges: [] } };
+            if (treeData.elements.nodes.filter((item: { id: string; }) => item.id != 'start').length == 0) {
+                treeData.elements.nodes.push({ data: { id: 'start', name: 'Start' }, position: { x: 100, y: 100 } });
+            }
+
+            let cy = cytoscape({
+                container: document.getElementById('cy'),
+                ...treeData,
+                style: [
+                    {
+                        selector: 'node',
+                        style: {
+                            'background-color': '#666',
+                            'label': 'data(name)'
+                        }
+                    },
+                    {
+                        selector: 'edge',
+                        style: {
+                            'width': 3,
+                            'line-color': '#ccc',
+                            'target-arrow-color': '#ccc',
+                            'target-arrow-shape': 'triangle',
+                            'curve-style': 'bezier'
+                        }
+                    },
+                    {
+                        selector: '.eh-handle',
+                        style: {
+                            'background-color': 'red',
+                            'width': 12,
+                            'height': 12,
+                            'shape': 'ellipse',
+                            'overlay-opacity': 0,
+                            'border-width': 12, // makes the handle easier to hit
+                            'border-opacity': 0
+                        }
+                    },
+
+                    {
+                        selector: '.eh-hover',
+                        style: {
+                            'background-color': 'red'
+                        }
+                    },
+
+                    {
+                        selector: '.eh-source',
+                        style: {
+                            'border-width': 2,
+                            'border-color': 'red'
+                        }
+                    },
+
+                    {
+                        selector: '.eh-target',
+                        style: {
+                            'border-width': 2,
+                            'border-color': 'red'
+                        }
+                    },
+
+                    {
+                        selector: '.eh-preview, .eh-ghost-edge',
+                        style: {
+                            'background-color': 'red',
+                            'line-color': 'red',
+                            'target-arrow-color': 'red',
+                            'source-arrow-color': 'red'
+                        }
+                    },
+
+                    {
+                        selector: '.eh-ghost-edge.eh-preview-active',
+                        style: {
+                            'opacity': 0
+                        }
+                    },
+                    {
+                        selector: '.selected',
+                        style: {
+                            'background-color': 'blue',
+                            'line-color': 'blue',
+                            'target-arrow-color': 'blue',
+                            'transition-property': 'background-color, line-color, target-arrow-color',
+                            'transition-duration': 0.5
+                        }
+                    }
+                ],
+                layout: {
+                    name: 'preset',
+                    // directed: true,
+                    padding: 10
+                },
+                zoomingEnabled: true,
+                maxZoom: 3,
+                minZoom: 0.3
+            });
+
+            let eh = cy.edgehandles({
+                noEdgeEventsInDraw: true,
+                canConnect: function (sourceNode, targetNode) {
+                    return sourceNode.edgesWith(targetNode).empty() ? !sourceNode.same(targetNode) : false;
+                }
+            });
         });
+
+
 
         return {
             r_botName,
@@ -100,9 +221,11 @@ export default defineComponent({
             r_symbolList,
             r_symbolListSelected,
             brokerList,
+            r_botNameList,
             getBotInfo,
             toogleAllSymbol,
-            filterDuplicate
+            filterDuplicate,
+            searchBot
         };
     }
 });
