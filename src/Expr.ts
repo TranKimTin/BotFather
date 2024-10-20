@@ -630,9 +630,9 @@ export class Expr extends ExprVisitor<any> {
     };
 
     visitMarsi = (ctx: MarsiContext) => {
-        const shift = parseInt(ctx.INT(0)?.getText() || "0", 10);
-        const periodRSI = parseInt(ctx.INT(1)?.getText() || "0", 10);
-        const periodMA = parseInt(ctx.INT(2)?.getText() || "0", 10);
+        const periodRSI = parseInt(ctx.INT(0)?.getText() || "0", 10);
+        const periodMA = parseInt(ctx.INT(1)?.getText() || "0", 10);
+        const shift = parseInt(ctx.INT(2)?.getText() || "0", 10);
 
         const RSIs = util.iRSI(this.data, periodRSI);
         const fakeData = RSIs.map(item => ({ close: item } as RateData));
@@ -731,7 +731,7 @@ async function test() {
     };
     const idTelegram = 'id_tele_tin';
 
-    let condition = "marsi(14,20) > rsi(14)";
+    let condition = "marsi(14,14) ";
 
     const subExprs = [...new Set([...condition.matchAll(/\{(.*?)\}/g)].map(match => match[1]))];
     for (const expr of subExprs) {
