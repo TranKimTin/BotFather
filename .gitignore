@@ -139,5 +139,6 @@ js/config82.txt
 data/*
 js/config83.txt
 js/botData/*
+js/public/*
 .vscode/*
 src/test.ts
