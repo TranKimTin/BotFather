@@ -428,6 +428,13 @@ export class Expr extends ExprVisitor<any> {
                 if (this.data[i].high > this.data[indexMaxPrice].high) {
                     indexMaxPrice = i;
                 }
+
+                const topCandle = Math.max(this.data[i].open, this.data[i].close);
+
+                if (i != shift && (topCandle - this.data[shift].high) / topCandle > diffCandle0 / 100) {
+                    return 0;
+                }
+
                 i++;
             }
 
@@ -444,6 +451,12 @@ export class Expr extends ExprVisitor<any> {
                     indexMaxPrice = i;
                 }
 
+                const topCandle = Math.max(this.data[i].open, this.data[i].close);
+
+                if (i != shift && (topCandle - this.data[shift].high) / topCandle > diffCandle0 / 100) {
+                    return 0;
+                }
+
                 cnt++;
                 i++;
 
@@ -458,14 +471,15 @@ export class Expr extends ExprVisitor<any> {
                     if (this.data[i].high > this.data[indexMaxPrice].high) {
                         indexMaxPrice = i;
                     }
+
+                    const topCandle = Math.max(this.data[i].open, this.data[i].close);
+
+                    if (i != shift && (topCandle - this.data[shift].high) / topCandle > diffCandle0 / 100) {
+                        return 0;
+                    }
+
                     i++;
                 }
-            }
-
-            const topCandle = Math.max(this.data[indexMaxPrice].open, this.data[indexMaxPrice].close);
-
-            if (indexMaxPrice != shift && (topCandle - this.data[shift].high) / topCandle > diffCandle0 / 100) {
-                return 0;
             }
 
             n++;
