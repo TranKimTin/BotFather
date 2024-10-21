@@ -14,9 +14,6 @@ export default defineConfig({
     }
   },
   build: {
-    outDir: '../js/public',
-    rollupOptions: {
-      external: ['bootstrap']
-    }
+    outDir: '../js/public'
   }
 })
