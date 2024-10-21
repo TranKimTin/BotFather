@@ -5,6 +5,7 @@ import * as axios from '../axios/axios';
 import Cookies from 'js-cookie';
 import MultiSelect from 'primevue/multiselect';
 import AutoComplete from 'primevue/autocomplete';
+import * as Toast from '../toast/toast';
 
 
 cytoscape.use(edgehandles);
@@ -12,6 +13,7 @@ cytoscape.use(edgehandles);
 export default defineComponent({
     components: { MultiSelect, AutoComplete },
     setup() {
+        Toast.showInfo("Xin chào");
         const r_botName = ref<string>('');
         const r_idTelegram = ref<string>('');
         const timeframes = ref<Array<string>>(['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d']);
@@ -55,7 +57,7 @@ export default defineComponent({
             let selectedList = r_symbolListSelected.value;
 
             if (symbolList.length == 0) {
-                alert('Đang load, chờ một tí');
+                Toast.showError('Đang load, chờ một tí');
                 return;
             }
 
@@ -65,10 +67,10 @@ export default defineComponent({
             selectedList = selectedList.filter(item => !item.startsWith(`${broker}:`));
             if (numberOfSymbol !== numberOfSymbolSelected) {
                 selectedList.push(...symbolList.filter(item => item.startsWith(`${broker}:`)));
-                alert(`Chọn toàn bộ coin ${broker} (${selectedList.length} coin)`);
+                Toast.showSuccess(`Chọn toàn bộ coin ${broker} (${selectedList.length} coin)`);
             }
             else {
-                alert(`Bỏ toàn bộ coin ${broker} (${selectedList.length} coin)`);
+                Toast.showSuccess(`Bỏ toàn bộ coin ${broker} (${selectedList.length} coin)`);
             }
 
             r_symbolListSelected.value = selectedList;
@@ -90,7 +92,7 @@ export default defineComponent({
             }
             r_symbolListSelected.value = newSymbolListSelected;
 
-            alert(`Đã lọc coin trùng nhau (${newSymbolListSelected.length} coin)`);
+            Toast.showSuccess(`Đã lọc coin trùng nhau (${newSymbolListSelected.length} coin)`);
         }
 
         function searchBot(event: any) {
@@ -146,7 +148,7 @@ export default defineComponent({
                 cy.zoom(currentZoom);
             }
             catch (err: any) {
-                alert(err.message);
+                Toast.showError(err.message);
             }
         }
 
@@ -188,7 +190,7 @@ export default defineComponent({
                 cy.zoom(currentZoom);
             }
             catch (err: any) {
-                alert(err.message);
+                Toast.showError(err.message);
             }
         }
 
@@ -216,13 +218,13 @@ export default defineComponent({
                 console.log(JSON.stringify(data))
 
                 let res = await axios.post('/save', data);
-                alert(`Đã lưu ${data.botName}`);
+                Toast.showSuccess(`Đã lưu ${data.botName}`);
                 Cookies.set("botName", data.botName);
             }
 
             catch (err: any) {
                 console.error({ err })
-                alert(err.message);
+                Toast.showError(err.message);
             }
         }
 
@@ -230,14 +232,15 @@ export default defineComponent({
             try {
                 const botName = r_botName.value;
                 await axios.put('/delete', { botName });
-                alert(`Xóa bot ${botName}`);
+                Toast.showWarning(`Xóa bot ${botName} thành công`);
                 Cookies.set("botName", '');
-                window.location.reload();
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
             }
             catch (err: any) {
-                alert(err.message);
+                Toast.showError(err.message);
             }
-
         }
 
         onMounted(async () => {
