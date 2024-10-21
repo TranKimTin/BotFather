@@ -1,4 +1,5 @@
 import axios from "axios";
+import * as Toast from "../toast/toast";
 
 interface Params {
     [key: string]: any
@@ -20,7 +21,8 @@ export async function get(url: string, params: Params = {}): Promise<any> {
         return data.data;
     }
     else {
-        console.error('axios get error', data)
+        console.error('axios get error', data);
+        Toast.showError(data.message);
         throw data;
     }
 }
@@ -33,6 +35,7 @@ export async function post(url: string, body: Params = {}): Promise<any> {
     }
     else {
         console.error('axios post error', data);
+        Toast.showError(data.message);
         throw data;
     }
 }
@@ -44,7 +47,8 @@ export async function put(url: string, params: Params = {}): Promise<any> {
         return data.data;
     }
     else {
-        console.error('axios put error', data)
+        console.error('axios put error', data);
+        Toast.showError(data.message);
         throw data;
     }
 }
@@ -56,7 +60,8 @@ export async function delete_(url: string, params: Params = {}): Promise<any> {
         return data.data;
     }
     else {
-        console.error('axios delete error', data)
+        // console.error('axios delete error', data);
+        Toast.showError(data.message);
         throw data;
     }
 }
