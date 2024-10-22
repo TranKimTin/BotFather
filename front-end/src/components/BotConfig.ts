@@ -67,10 +67,10 @@ export default defineComponent({
             selectedList = selectedList.filter(item => !item.startsWith(`${broker}:`));
             if (numberOfSymbol !== numberOfSymbolSelected) {
                 selectedList.push(...symbolList.filter(item => item.startsWith(`${broker}:`)));
-                Toast.showSuccess(`Chọn toàn bộ coin ${broker} (${numberOfSymbol.length} / ${numberOfSymbol.length})`);
+                Toast.showSuccess(`Chọn toàn bộ coin ${broker} (${numberOfSymbol} / ${numberOfSymbol})`);
             }
             else {
-                Toast.showSuccess(`Bỏ toàn bộ coin ${broker} (0 / ${numberOfSymbol.length})`);
+                Toast.showSuccess(`Bỏ toàn bộ coin ${broker} (0 / ${numberOfSymbol})`);
             }
 
             r_symbolListSelected.value = selectedList;
