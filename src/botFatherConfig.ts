@@ -178,19 +178,18 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
     });
 
     app.get('/getSymbolList', async (req, res) => {
-        let binanceSymbolList = await util.getBinanceSymbolList();
+        let [binanceSymbolList, bybitSymbolList, okxSymbolList, binanceFutureSymbolList, bybitFutureSymbolList] = await Promise.all([
+            util.getBinanceSymbolList(),
+            util.getBybitSymbolList(),
+            util.getOkxSymbolList(),
+            util.getBinanceFutureSymbolList(),
+            util.getBybitFutureSymbolList()
+        ]);
+
         binanceSymbolList = binanceSymbolList.map(item => `${'binance'}:${item}`);
-
-        let bybitSymbolList = await util.getBybitSymbolList();
         bybitSymbolList = bybitSymbolList.map(item => `${'bybit'}:${item}`);
-
-        let okxSymbolList = await util.getOkxSymbolList();
         okxSymbolList = okxSymbolList.map(item => `${'okx'}:${item}`);
-
-        let binanceFutureSymbolList = await util.getBinanceFutureSymbolList();
         binanceFutureSymbolList = binanceFutureSymbolList.map(item => `${'binance_future'}:${item}`);
-
-        let bybitFutureSymbolList = await util.getBybitFutureSymbolList();
         bybitFutureSymbolList = bybitFutureSymbolList.map(item => `${'bybit_future'}:${item}`);
 
 
