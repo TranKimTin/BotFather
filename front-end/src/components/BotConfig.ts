@@ -26,7 +26,7 @@ export default defineComponent({
         let cy: Core;
         let eh: edgehandles.EdgeHandlesInstance;
 
-        let timeout: number | undefined;
+        let timeout: any;
         function getBotInfo() {
             clearTimeout(timeout);
             timeout = setTimeout(loadData, 500);
@@ -67,10 +67,10 @@ export default defineComponent({
             selectedList = selectedList.filter(item => !item.startsWith(`${broker}:`));
             if (numberOfSymbol !== numberOfSymbolSelected) {
                 selectedList.push(...symbolList.filter(item => item.startsWith(`${broker}:`)));
-                Toast.showSuccess(`Chọn toàn bộ coin ${broker} (${selectedList.length} coin)`);
+                Toast.showSuccess(`Chọn toàn bộ coin ${broker} (${numberOfSymbol.length} / ${numberOfSymbol.length})`);
             }
             else {
-                Toast.showSuccess(`Bỏ toàn bộ coin ${broker} (${selectedList.length} coin)`);
+                Toast.showSuccess(`Bỏ toàn bộ coin ${broker} (0 / ${numberOfSymbol.length})`);
             }
 
             r_symbolListSelected.value = selectedList;
@@ -92,7 +92,7 @@ export default defineComponent({
             }
             r_symbolListSelected.value = newSymbolListSelected;
 
-            Toast.showSuccess(`Đã lọc coin trùng nhau (${newSymbolListSelected.length} coin)`);
+            Toast.showSuccess(`Đã lọc coin trùng nhau (${newSymbolListSelected.length} / ${r_symbolList.value.length})`);
         }
 
         function searchBot(event: any) {

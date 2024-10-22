@@ -13,7 +13,7 @@
                         '-' }}</b>
                     {{ broker }}</button>
                 <button @click="filterDuplicate()">Lọc trùng</button>
-                <b> ({{ r_symbolListSelected.length }}/{{ r_symbolList.length }} coin)</b>
+                <b> ({{ r_symbolListSelected.length }}/{{ r_symbolList.length }})</b>
             </div>
         </div>
 
