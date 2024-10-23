@@ -178,6 +178,7 @@ export class BybitSocketFuture {
 
 import http from 'http';
 import { Server } from "socket.io";
+import { SymbolListener } from "./botFather";
 const server = http.createServer();
 const io = new Server(server, {
     pingInterval: 25000,
@@ -185,6 +186,8 @@ const io = new Server(server, {
 });
 const port = 84;
 let cnt = 0;
+let symbolListener: { [key: string]: boolean } = {};
+
 io.on('connection', client => {
     cnt++;
     console.log(`${BybitSocketFuture.broker}: client connected. total: ${cnt} connection`);
@@ -193,10 +196,24 @@ io.on('connection', client => {
         cnt--;
         console.log(`${BybitSocketFuture.broker}: onDisconnect - Client disconnected. total: ${cnt} connection`);
     });
+
+    client.on('update_symbol_listener', (data: Array<SymbolListener>) => {
+        console.log(`${BybitSocketFuture.broker} on update_symbol_listener`);
+        console.log(JSON.stringify(data));
+        symbolListener = {};
+        for (const { symbol, timeframe, broker } of data) {
+            if (broker !== BybitSocketFuture.broker) continue;
+            let key = `${symbol}:${timeframe}`;
+            symbolListener[key] = true;
+        }
+    });
 });
 server.listen(port);
 
 function onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
+    let key = `${symbol}:${timeframe}`;
+    if (!symbolListener[key]) return;
+
     io.emit('onCloseCandle', { broker, symbol, timeframe, data });
 }
 

@@ -1,43 +1,49 @@
-import { BotInfo, CreateWebConfig, BOT_DATA_DIR, Node} from './botFatherConfig';
+import { BotInfo, CreateWebConfig, BOT_DATA_DIR, Node } from './botFatherConfig';
 import { RateData } from './BinanceFuture';
 import fs from 'fs';
 import Telegram, { TelegramIdType } from './telegram';
-import io from 'socket.io-client';
+import io, { Socket } from 'socket.io-client';
 import { calculate, ExprArgs } from './Expr';
+import { DefaultEventsMap } from 'socket.io/dist/typed-events';
+
+interface SocketInfo {
+    name: string;
+    port: number;
+    client: Socket<DefaultEventsMap, DefaultEventsMap>,
+}
+
+export interface SymbolListener {
+    symbol: string,
+    broker: string
+    timeframe: string,
+}
 
 export class BotFather {
-    private binanceSocketPort: number;
-    private bybitSocketPort: number;
-    private okxSocketPort: number;
-    private bybitSocketFuturePort: number;
-    private binanceSocketFuturePort: number;
+    private socketList: Array<SocketInfo>;
+
     private webConfigServerPort: number;
     private botChildren: Array<BotInfo>;
     private telegram: Telegram;
 
     constructor() {
-        this.binanceSocketPort = 81;
-        this.bybitSocketPort = 82;
-        this.okxSocketPort = 83;
-        this.bybitSocketFuturePort = 84;
-        this.binanceSocketFuturePort = 85;
+        this.socketList = [];
         this.webConfigServerPort = 8080;
+
         this.botChildren = [];
         this.telegram = new Telegram(undefined, undefined, true);
         this.telegram.setChatID('@tintk_RSI_CCI'); //group chat
 
-        this.connectTradeDataServer(this.binanceSocketPort);
-        this.connectTradeDataServer(this.bybitSocketPort);
-        this.connectTradeDataServer(this.okxSocketPort);
-        this.connectTradeDataServer(this.binanceSocketFuturePort);
-        this.connectTradeDataServer(this.bybitSocketFuturePort);
-
+        this.connectTradeDataServer('binance', 81);
+        this.connectTradeDataServer('bybit', 82);
+        this.connectTradeDataServer('okx', 83);
+        this.connectTradeDataServer('bybit_future', 84);
+        this.connectTradeDataServer('binance_future', 85);
 
         CreateWebConfig(this.webConfigServerPort, this.initBotChildren.bind(this));
         this.initBotChildren();
     }
 
-    private connectTradeDataServer(port: number) {
+    private connectTradeDataServer(name: string, port: number) {
         const client = io(`http://localhost:${port}`, {
             reconnection: true,              // Bật tính năng tự động kết nối lại (mặc định là true)
             reconnectionAttempts: Infinity,  // Số lần thử kết nối lại tối đa (mặc định là vô hạn)
@@ -47,7 +53,7 @@ export class BotFather {
         });
 
         client.on('connect', () => {
-            console.log(`Connected to server ${port}`);
+            console.log(`Connected to server ${name}:${port}`);
         });
 
         client.on('onCloseCandle', (msg: { broker: string, symbol: string, timeframe: string, data: Array<RateData> }) => {
@@ -62,11 +68,11 @@ export class BotFather {
         });
 
         client.on('disconnect', (reason: string) => {
-            console.log(`onDisconnect - Disconnected from server ${port}. reason: ${reason}`);
+            console.log(`onDisconnect - Disconnected from server ${name}:${port}. reason: ${reason}`);
         });
 
         client.on("connect_error", (error: { message: any; }) => {
-            console.log(`connect_error - Attempting to reconnect ${port}`);
+            console.log(`connect_error - Attempting to reconnect ${name}:${port}`);
             if (client.active) {
                 // temporary failure, the socket will automatically try to reconnect
             } else {
@@ -76,6 +82,8 @@ export class BotFather {
                 client.connect();
             }
         });
+
+        this.socketList.push({ name, port, client })
     }
 
     private initBotChildren(botName?: string) {
@@ -86,6 +94,26 @@ export class BotFather {
                 const botInfo: BotInfo = JSON.parse(fs.readFileSync(`${BOT_DATA_DIR}/${botFile}`).toString());
                 this.botChildren.push(botInfo);
             }
+        }
+
+        const list: Array<string> = [];
+        for (const bot of this.botChildren) {
+            for (const timeframe of bot.timeframes) {
+                for (const s of bot.symbolList) {
+                    const [broker, symbol] = s.split(':');
+                    const key = `${symbol}:${broker}:${timeframe}`;
+                    list.push(key);
+                }
+            }
+        }
+        const symbolListener: Array<SymbolListener> = [...new Set(list)].map(item => {
+            const [symbol, broker, timeframe] = item.split(':');
+            return { symbol, broker, timeframe };
+        });
+
+        for (const { client, name, port } of this.socketList) {
+            client.emit('update_symbol_listener', symbolListener);
+            console.log('update_symbol_listener', { name, port });
         }
     }
 
