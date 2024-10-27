@@ -142,3 +142,4 @@ js/botData/*
 js/public/*
 .vscode/*
 src/test.ts
+/src/generated
