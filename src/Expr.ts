@@ -82,7 +82,6 @@ export class Expr extends ExprVisitor<any> {
                 return left <= right;
             case '=':
             case '==':
-                console.log({ left, right })
                 return left == right;
             default:
                 return null;
