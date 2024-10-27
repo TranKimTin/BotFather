@@ -82,6 +82,7 @@ export class Expr extends ExprVisitor<any> {
                 return left <= right;
             case '=':
             case '==':
+                console.log({ left, right })
                 return left == right;
             default:
                 return null;
@@ -89,15 +90,18 @@ export class Expr extends ExprVisitor<any> {
     };
 
     visitNumber = (ctx: NumberContext) => {
-        return parseFloat(ctx.toString()) || null;
+        const value = parseFloat(ctx.toString());
+        return isNaN(value) ? null : value;
     };
 
     visitInt = (ctx: IntContext) => {
-        return parseInt(ctx.INT().getText(), 10) || null;
+        const value = parseInt(ctx.INT().getText(), 10);
+        return isNaN(value) ? null : value;
     };
 
     visitFloat = (ctx: FloatContext) => {
-        return parseFloat(ctx.FLOAT().getText()) || null;
+        const value = parseFloat(ctx.FLOAT().getText());
+        return isNaN(value) ? null : value;
     };
 
     visitString = (ctx: StringContext) => {
@@ -745,7 +749,7 @@ async function test() {
     };
     const idTelegram = 'id_tele_tin';
 
-    let condition = "marsi(14,14) ";
+    let condition = "telegram: {bearish()} {bearish() = 0} {0 = 0}";
 
     const subExprs = [...new Set([...condition.matchAll(/\{(.*?)\}/g)].map(match => match[1]))];
     for (const expr of subExprs) {
