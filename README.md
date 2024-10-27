@@ -1,5 +1,7 @@
 # trade
 
+require install java 11 for antlr
+
 get chatid telegram:
 https://api.telegram.org/bot<YourBOTToken>/getUpdates
 
