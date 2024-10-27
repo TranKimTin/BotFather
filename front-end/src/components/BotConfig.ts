@@ -6,12 +6,13 @@ import Cookies from 'js-cookie';
 import MultiSelect from 'primevue/multiselect';
 import AutoComplete from 'primevue/autocomplete';
 import * as Toast from '../toast/toast';
-
+import Button from 'primevue/button';
+import { useConfirm } from "primevue/useconfirm";
 
 cytoscape.use(edgehandles);
 
 export default defineComponent({
-    components: { MultiSelect, AutoComplete },
+    components: { MultiSelect, AutoComplete, Button },
     setup() {
         Toast.showInfo("Xin chào");
         const r_botName = ref<string>('');
@@ -25,6 +26,9 @@ export default defineComponent({
         let allBotList: Array<string> = [];
         let cy: Core;
         let eh: edgehandles.EdgeHandlesInstance;
+
+        const confirmation = useConfirm();
+
 
         let timeout: any;
         function getBotInfo() {
@@ -207,12 +211,17 @@ export default defineComponent({
 
         async function saveBot() {
             try {
+                const botName = r_botName.value;
+                if (!botName) {
+                    Toast.showError("Tên bot không hợp lệ");
+                    return;
+                }
                 let data = {
                     treeData: cy.json(),
                     idTelegram: r_idTelegram.value,
                     timeframes: r_timeframesSelected.value,
                     symbolList: r_symbolListSelected.value,
-                    botName: r_botName.value
+                    botName: botName
                 };
 
                 console.log(JSON.stringify(data))
@@ -228,19 +237,43 @@ export default defineComponent({
             }
         }
 
-        async function removeBot() {
-            try {
-                const botName = r_botName.value;
-                await axios.put('/delete', { botName });
-                Toast.showWarning(`Xóa bot ${botName} thành công`);
-                Cookies.set("botName", '');
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
+        function removeBot() {
+            const botName = r_botName.value;
+            if (!botName) {
+                Toast.showError("Tên bot không hợp lệ");
+                return;
             }
-            catch (err: any) {
-                Toast.showError(err.message);
-            }
+            confirmation.require({
+                message: `Xác nhận xóa bot ${r_botName.value}`,
+                header: 'Danger Zone',
+                icon: 'pi pi-info-circle',
+                rejectLabel: 'Cancel',
+                rejectProps: {
+                    label: 'Cancel',
+                    severity: 'secondary',
+                    outlined: true
+                },
+                acceptProps: {
+                    label: 'Delete',
+                    severity: 'danger'
+                },
+                accept: async () => {
+                    try {
+                        const botName = r_botName.value;
+                        await axios.put('/delete', { botName });
+                        Toast.showWarning(`Xóa bot ${botName} thành công`);
+                        Cookies.set("botName", '');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    }
+                    catch (err: any) {
+                        Toast.showError(err.message);
+                    }
+                },
+                reject: () => {
+                }
+            });
         }
 
         onMounted(async () => {
