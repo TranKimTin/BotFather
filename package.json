@@ -7,8 +7,9 @@
   "description": "",
   "scripts": {
     "test": "mocha",
-    "build": "npm run build-antlr && npm run build-web",
+    "build": "npm run build-antlr && npm run build-ts && npm run build-web",
     "build-antlr": "antlr4ng -Dlanguage=TypeScript -o src/generated/ -visitor -no-listener -Xexact-output-dir src/Expr.g4",
+    "build-ts": "tsc",
     "build-web": "cd ./front-end && npm run build",
     "start": "node js/BinanceFuture.js"
   },
