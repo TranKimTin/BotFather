@@ -777,3 +777,47 @@ export function isBearish(data: Array<RateData>, shift: number): boolean {
     };
     return indicator.bearish(input);
 }
+
+
+export function listBullBear(data: Array<RateData>, shift: number): Array<string> {
+    const rates = data.slice(shift, shift + 5).reverse();
+    const input = {
+        open: rates.map(candle => candle.open),
+        close: rates.map(candle => candle.close),
+        high: rates.map(candle => candle.high),
+        low: rates.map(candle => candle.low)
+    };
+
+    const list: Array<string> = [];
+
+    //bullish
+    if (indicator.bullishengulfingpattern(input)) list.push('BullishEngulfingPattern');
+    if (indicator.downsidetasukigap(input)) list.push('DownsideTasukiGap');
+    if (indicator.bullishharami(input)) list.push('BullishHaramiCross');
+    if (indicator.morningdojistar(input)) list.push('MorningDojiStar');
+    if (indicator.morningstar(input)) list.push('MorningStar');
+    if (indicator.bullishmarubozu(input)) list.push('BullishMarubozu');
+    if (indicator.piercingline(input)) list.push('PiercingLine');
+    if (indicator.threewhitesoldiers(input)) list.push('ThreeWhiteSoldiers');
+    if (indicator.bullishhammerstick(input)) list.push('BullishHammerStick');
+    if (indicator.hammerpattern(input)) list.push('HammerPattern');
+    if (indicator.hammerpatternunconfirmed(input)) list.push('HammerPatternUnconfirmed');
+    if (indicator.tweezerbottom(input)) list.push('TweezerBottom');
+
+    //bearish
+    if (indicator.bearishengulfingpattern(input)) list.push('BearishEngulfingPattern');
+    if (indicator.bearishharami(input)) list.push('BearishHarami');
+    if (indicator.bearishharamicross(input)) list.push('BearishHaramiCross');
+    if (indicator.eveningdojistar(input)) list.push('EveningDojiStar');
+    if (indicator.eveningstar(input)) list.push('EveningStar');
+    if (indicator.bearishmarubozu(input)) list.push('BearishMarubozu');
+    if (indicator.threeblackcrows(input)) list.push('ThreeBlackCrows');
+    if (indicator.bearishhammerstick(input)) list.push('BearishHammerStick');
+    if (indicator.bearishinvertedhammerstick(input)) list.push('BearishInvertedHammerStick');
+    if (indicator.hangingman(input)) list.push('HangingMan');
+    if (indicator.shootingstar(input)) list.push('ShootingStar');
+    if (indicator.shootingstarunconfirmed(input)) list.push('ShootingStarUnconfirmed');
+    if (indicator.tweezertop(input)) list.push('TweezerTop');
+
+    return list;
+}
