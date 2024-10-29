@@ -154,8 +154,8 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
         const data = req.body;
         console.log('check', data);
 
-        if (!data.id || !isValidCondition(data.name)) {
-            return res.json({ code: 400, message: `Điều kiện không hợp lệ ${data.name}` });
+        if (!data.id || !isValidCondition(data.value)) {
+            return res.json({ code: 400, message: `Điều kiện không hợp lệ ${data.value}` });
         }
 
         res.json({ code: 200, message: "ok" });
