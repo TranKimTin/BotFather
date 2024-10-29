@@ -45,9 +45,23 @@ export default defineComponent({
         const defaultTree = {
             style: [
                 {
-                    selector: 'node',
+                    selector: 'node[type="expr"]',
                     style: {
-                        'background-color': '#666',
+                        'background-color': '#FF9999',
+                        'label': 'data(value)'
+                    }
+                },
+                {
+                    selector: 'node[type="telegram"]',
+                    style: {
+                        'background-color': '#99FF33',
+                        'label': 'data(value)'
+                    }
+                },
+                {
+                    selector: 'node[type="start"]',
+                    style: {
+                        'background-color': '#ff0000',
                         'label': 'data(value)'
                     }
                 },
@@ -55,8 +69,8 @@ export default defineComponent({
                     selector: 'edge',
                     style: {
                         'width': 3,
-                        'line-color': '#ccc',
-                        'target-arrow-color': '#ccc',
+                        'line-color': '#FFCCCC',
+                        'target-arrow-color': '#FFCCCC',
                         'target-arrow-shape': 'triangle',
                         'curve-style': 'bezier'
                     }
@@ -160,7 +174,7 @@ export default defineComponent({
                 ...defaultTree
             };
             if (treeData.elements.nodes.filter((item: { id: string; }) => item.id != 'start').length == 0) {
-                treeData.elements.nodes.push({ data: { id: 'start', value: 'Start' }, position: { x: 400, y: 300 } });
+                treeData.elements.nodes.push({ data: { id: 'start', value: 'Start', type: 'start' }, position: { x: 400, y: 300 } });
             }
             cy.json(treeData);
 
@@ -410,7 +424,7 @@ export default defineComponent({
 
             const treeData: { [key: string]: any } = { elements: { nodes: [], edges: [] } };
             if (treeData.elements.nodes.filter((item: { id: string; }) => item.id != 'start').length == 0) {
-                treeData.elements.nodes.push({ data: { id: 'start', value: 'Start' }, position: { x: 400, y: 300 } });
+                treeData.elements.nodes.push({ data: { id: 'start', value: 'Start', type: 'start' }, position: { x: 400, y: 300 } });
             }
 
             cy = cytoscape({
