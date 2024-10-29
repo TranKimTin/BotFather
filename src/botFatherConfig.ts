@@ -23,8 +23,8 @@ export interface Elements {
     nodes?: Array<{
         data: {
             id: string;
-            name: string;
-            [key: string]: any;
+            value: string;
+            type: string;
         };
         position?: {
             x: number;
@@ -86,8 +86,8 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
 
         const nodeList: { [key: string]: Node } = {};
         for (let node of nodes) {
-            const { id, name } = node;
-            nodeList[id] = { logic: name, id, next: [] };
+            const { id, value } = node;
+            nodeList[id] = { logic: value, id, next: [] };
         }
 
         for (let edge of edges) {
@@ -133,9 +133,9 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
         console.log({ edges, nodes });
 
         for (let node of nodes) {
-            if (!isValidCondition(node.name)) {
-                console.log('invalid condition ', node.name);
-                return res.json({ code: 400, message: 'Điều kiện không hợp lệ ' + node.name });
+            if (!isValidCondition(node.value)) {
+                console.log('invalid condition ', node.value);
+                return res.json({ code: 400, message: 'Điều kiện không hợp lệ ' + node.value });
             }
         }
 
