@@ -821,3 +821,13 @@ export function listBullBear(data: Array<RateData>, shift: number): Array<string
 
     return list;
 }
+
+export function iDoji(candle: RateData): boolean {
+    const singleInput = {
+        open: [candle.open],
+        high: [candle.high],
+        close: [candle.close],
+        low: [candle.low]
+    };
+    return indicator.doji(singleInput);
+}
