@@ -18,9 +18,11 @@ interface NodeData {
     id: string,
     type: string,
     value?: string,
+    stop?: string,
     entry?: string,
     tp?: string,
     sl?: string,
+    unitStop?: string,
     unitEntry?: string,
     unitTP?: string,
     unitSL?: string,
@@ -381,14 +383,16 @@ export default defineComponent({
             const id = node.data('id');
             const value = node.data('value');
             const type = node.data('type');
+            const stop = node.data('stop');
             const entry = node.data('entry');
             const tp = node.data('tp');
             const sl = node.data('sl');
+            const unitStop = node.data('unitStop');
             const unitEntry = node.data('unitEntry');
             const unitTP = node.data('unitTP');
             const unitSL = node.data('unitSL');
 
-            r_currentNode.value = { id, value, type, entry, tp, sl, unitTP, unitEntry, unitSL };
+            r_currentNode.value = { id, value, type, stop, entry, tp, sl, unitStop, unitTP, unitEntry, unitSL };
         }
 
         async function applyNode() {
