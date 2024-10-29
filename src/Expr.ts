@@ -729,6 +729,7 @@ function isValidExpr(expr: string): boolean {
 }
 
 export function isValidCondition(condition: string) {
+    if (!condition) return false;
     condition = condition.toLowerCase().trim();
 
     if (condition === 'start') return true;
