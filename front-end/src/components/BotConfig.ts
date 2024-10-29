@@ -8,11 +8,13 @@ import AutoComplete from 'primevue/autocomplete';
 import * as Toast from '../toast/toast';
 import Button from 'primevue/button';
 import { useConfirm } from "primevue/useconfirm";
+import Dialog from 'primevue/dialog';
+import InputText from 'primevue/inputtext';
 
 cytoscape.use(edgehandles);
 
 export default defineComponent({
-    components: { MultiSelect, AutoComplete, Button },
+    components: { MultiSelect, AutoComplete, Button, Dialog, InputText },
     setup() {
         Toast.showInfo("Xin chào");
         const r_botName = ref<string>('');
@@ -23,6 +25,11 @@ export default defineComponent({
         const r_symbolListSelected = ref<Array<string>>([]);
         const brokerList = ['binance', 'okx', 'bybit', 'binance_future', 'bybit_future'];
         const r_botNameList = ref<Array<string>>([]);
+        const r_visible = ref<boolean>(false);
+        const r_currentNode = ref<NodeDataDefinition>({});
+        const r_type = ref<string>('');
+
+
         let allBotList: Array<string> = [];
         let cy: Core;
         let eh: edgehandles.EdgeHandlesInstance;
@@ -126,36 +133,6 @@ export default defineComponent({
             }
         }
 
-        async function addNode() {
-            const s = prompt("Nhập điều kiện");
-            if (s === null) return;
-            const data: NodeDataDefinition = { id: new Date().getTime().toString(), name: s };
-
-            try {
-                const res = await axios.post('/check', data);
-                console.log({ res })
-                const currentZoom = cy.zoom();
-
-                cy.add({
-                    group: 'nodes',
-                    data,
-                    position: findFreePosition()
-
-                });
-
-                cy.layout({
-                    name: 'preset',
-                    fit: false,
-                    padding: 10
-                }).run();
-
-                cy.zoom(currentZoom);
-            }
-            catch (err: any) {
-                Toast.showError(err.message);
-            }
-        }
-
         function drawModeOn() {
             eh.enableDrawMode();
             eh.stop();
@@ -168,35 +145,6 @@ export default defineComponent({
             cy.autoungrabify(false)
         }
 
-        async function editNode() {
-            const nodeSelected = cy.elements('.selected').filter(item => item.is('node') && item.id() != 'start');
-            if (nodeSelected.length == 0) return;
-            const node = nodeSelected[0];
-            const id = node.data('id');
-            const name = node.data('name');
-
-            const s = prompt("Nhập điều kiện", name);
-            if (s === null) return;
-
-            const data: NodeDataDefinition = { id, name: s };
-            try {
-                await axios.post('/check', data);
-                const currentZoom = cy.zoom();
-
-                node.data('name', s);
-
-                cy.layout({
-                    name: 'preset',
-                    fit: false,
-                    padding: 10
-                }).run();
-
-                cy.zoom(currentZoom);
-            }
-            catch (err: any) {
-                Toast.showError(err.message);
-            }
-        }
 
         function removeNode() {
             const highlightedElements = cy.elements('.selected').filter(item => !item.is('node') || item.id() != 'start');
@@ -274,6 +222,71 @@ export default defineComponent({
                 reject: () => {
                 }
             });
+        }
+
+        function newNode() {
+            r_visible.value = true;
+            r_type.value = 'Thêm điều kiện mới';
+
+            const id = new Date().getTime().toString();
+            const name = '';
+            r_currentNode.value = { id, name };
+        }
+
+        function updateNode() {
+            const nodeSelected = cy.elements('.selected').filter(item => item.is('node') && item.id() != 'start');
+            if (nodeSelected.length == 0) {
+                Toast.showWarning('Chưa chọn nút nào');
+                return;
+            };
+
+            r_type.value = 'Sửa điều kiện';
+            r_visible.value = true;
+            
+            const node = nodeSelected[0];
+            const id = node.data('id');
+            const name = node.data('name');
+            r_currentNode.value = { id, name };
+        }
+
+        async function applyNode() {
+            try {
+                const data: NodeDataDefinition = r_currentNode.value;
+                if (!data.id) {
+                    Toast.showWarning('Chưa nhập điều kiện');
+                    return;
+                }
+                await axios.post('/check', data);
+
+                if (r_type.value == 'Thêm điều kiện mới') {
+                    cy.add({
+                        group: 'nodes',
+                        data,
+                        position: findFreePosition()
+
+                    });
+                }
+                else if (r_type.value == 'Sửa điều kiện') {
+                    const node = cy.getElementById(data.id);
+                    node.data('name', data.name);
+                }
+
+                const currentZoom = cy.zoom();
+
+                cy.layout({
+                    name: 'preset',
+                    fit: false,
+                    padding: 10
+                }).run();
+
+                cy.zoom(currentZoom);
+
+                r_visible.value = false;
+            }
+            catch (err: any) {
+                Toast.showError(err.message);
+            }
+
         }
 
         onMounted(async () => {
@@ -421,17 +434,21 @@ export default defineComponent({
             r_symbolListSelected,
             brokerList,
             r_botNameList,
+            r_visible,
+            r_currentNode,
+            r_type,
             getBotInfo,
             toogleAllSymbol,
             filterDuplicate,
             searchBot,
-            addNode,
             drawModeOn,
             drawModeOff,
-            editNode,
             removeNode,
             saveBot,
-            removeBot
+            removeBot,
+            newNode,
+            updateNode,
+            applyNode
         };
     }
 });

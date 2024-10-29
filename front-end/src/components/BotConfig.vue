@@ -1,18 +1,29 @@
 <template>
     <div class="alwaysOnTop">
+        <Dialog v-model:visible="r_visible" modal :header="r_type" :style="{ width: '70%' }">
+            <div class="flex items-center gap-2 mb-2">
+                <label for="condition" class="font-semibold">Điều kiện</label>
+                <InputText id="condition" class="flex-auto" v-model="r_currentNode.name" autocomplete="off" />
+            </div>
+            <div class="flex justify-end gap-2">
+                <Button type="button" label="Cancel" severity="secondary" @click="r_visible = false"></Button>
+                <Button type="button" label="Save" @click="applyNode"></Button>
+            </div>
+        </Dialog>
+
         <div class="row">
             <div class="col-2"><b>Tên bot</b></div>
             <div class="col-2"><b>Telegram</b></div>
             <div class="col-2"><b>Khung thời gian</b></div>
             <div class="col-6">
-                <button v-for="broker in brokerList" @click="toogleAllSymbol(broker)"
+                <button v-for="broker in brokerList" @click="toogleAllSymbol(broker)" class="btn btn-outline-primary"
                     :title="r_symbolListSelected.filter((item: string) => item.startsWith(`${broker}:`)).length + ' / ' + r_symbolList.filter((item: string) => item.startsWith(`${broker}:`)).length">
                     <b>{{ r_symbolList.filter((item: string) =>
                         item.startsWith(`${broker}:`)).length
                         !== r_symbolListSelected.filter((item: string) => item.startsWith(`${broker}:`)).length ? '+' :
                         '-' }}</b>
                     {{ broker }}</button>
-                <button @click="filterDuplicate()">Lọc trùng</button>
+                <button @click="filterDuplicate()" class="btn btn-outline-primary">Lọc trùng</button>
                 <b> ({{ r_symbolListSelected.length }}/{{ r_symbolList.length }})</b>
             </div>
         </div>
@@ -35,12 +46,12 @@
             </div>
         </div>
 
-        <div class="justify-center">
+        <div class="flex justify-center">
             <button class="btn btn-outline-danger mr-1" @click="removeBot">Xóa bot</button>
-            <button class="btn btn-outline-primary mr-1" @click="addNode">Thêm điều kiện</button>
+            <button class="btn btn-outline-primary mr-1" @click="newNode">Thêm điều kiện</button>
             <button class="btn btn-outline-primary mr-1" @click="drawModeOn">Draw mode on</button>
             <button class="btn btn-outline-primary mr-1" @click="drawModeOff">Draw mode off</button>
-            <button class="btn btn-outline-primary mr-1" @click="editNode">Sửa điều kiện</button>
+            <button class="btn btn-outline-primary mr-1" @click="updateNode">Sửa điều kiện</button>
             <button class="btn btn-outline-danger mr-1" @click="removeNode">Xóa</button>
             <button class="btn btn-outline-success mr-1" @click="saveBot">Lưu</button>
         </div>
@@ -66,15 +77,5 @@
     position: absolute;
     z-index: 1000;
     width: 100%;
-}
-
-.padding10 {
-    padding: 10px;
-}
-
-.justify-center {
-    display: flex;
-    justify-content: center;
-    z-index: 88888;
 }
 </style>
