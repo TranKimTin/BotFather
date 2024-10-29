@@ -1,5 +1,5 @@
 import { defineComponent, onMounted, ref } from 'vue';
-import cytoscape, { type Core, type NodeDataDefinition } from 'cytoscape';
+import cytoscape, { type Core } from 'cytoscape';
 import edgehandles from 'cytoscape-edgehandles';
 import * as axios from '../axios/axios';
 import Cookies from 'js-cookie';
@@ -10,11 +10,18 @@ import Button from 'primevue/button';
 import { useConfirm } from "primevue/useconfirm";
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
+import Select from 'primevue/select';
 
 cytoscape.use(edgehandles);
 
+interface NodeData {
+    id: string,
+    value: string,
+    type: string
+}
+
 export default defineComponent({
-    components: { MultiSelect, AutoComplete, Button, Dialog, InputText },
+    components: { MultiSelect, AutoComplete, Button, Dialog, InputText, Select },
     setup() {
         Toast.showInfo("Xin chào");
         const r_botName = ref<string>('');
@@ -23,16 +30,110 @@ export default defineComponent({
         const r_timeframesSelected = ref<Array<string>>([]);
         const r_symbolList = ref<Array<string>>([]);
         const r_symbolListSelected = ref<Array<string>>([]);
-        const brokerList = ['binance', 'okx', 'bybit', 'binance_future', 'bybit_future'];
         const r_botNameList = ref<Array<string>>([]);
         const r_visible = ref<boolean>(false);
-        const r_currentNode = ref<NodeDataDefinition>({});
+        const r_currentNode = ref<NodeData>({ id: '', value: '', type: '' });
         const r_type = ref<string>('');
 
+        const brokerList = ['binance', 'okx', 'bybit', 'binance_future', 'bybit_future'];
+        const nodeTypes = [{ name: 'Biểu thức', value: 'expr' }, { name: 'Báo tín hiệu telegram', value: 'telegram' }, { name: 'Mở lệnh', value: 'position' }];
 
         let allBotList: Array<string> = [];
         let cy: Core;
         let eh: edgehandles.EdgeHandlesInstance;
+
+        const defaultTree = {
+            style: [
+                {
+                    selector: 'node',
+                    style: {
+                        'background-color': '#666',
+                        'label': 'data(value)'
+                    }
+                },
+                {
+                    selector: 'edge',
+                    style: {
+                        'width': 3,
+                        'line-color': '#ccc',
+                        'target-arrow-color': '#ccc',
+                        'target-arrow-shape': 'triangle',
+                        'curve-style': 'bezier'
+                    }
+                },
+                {
+                    selector: '.eh-handle',
+                    style: {
+                        'background-color': 'red',
+                        'width': 12,
+                        'height': 12,
+                        'shape': 'ellipse',
+                        'overlay-opacity': 0,
+                        'border-width': 12, // makes the handle easier to hit
+                        'border-opacity': 0
+                    }
+                },
+
+                {
+                    selector: '.eh-hover',
+                    style: {
+                        'background-color': 'red'
+                    }
+                },
+
+                {
+                    selector: '.eh-source',
+                    style: {
+                        'border-width': 2,
+                        'border-color': 'red'
+                    }
+                },
+
+                {
+                    selector: '.eh-target',
+                    style: {
+                        'border-width': 2,
+                        'border-color': 'red'
+                    }
+                },
+
+                {
+                    selector: '.eh-preview, .eh-ghost-edge',
+                    style: {
+                        'background-color': 'red',
+                        'line-color': 'red',
+                        'target-arrow-color': 'red',
+                        'source-arrow-color': 'red'
+                    }
+                },
+
+                {
+                    selector: '.eh-ghost-edge.eh-preview-active',
+                    style: {
+                        'opacity': 0
+                    }
+                },
+                {
+                    selector: '.selected',
+                    style: {
+                        'background-color': 'blue',
+                        'line-color': 'blue',
+                        'target-arrow-color': 'blue',
+                        'transition-property': 'background-color, line-color, target-arrow-color',
+                        'transition-duration': 0.5
+                    }
+                }
+            ],
+            layout: {
+                name: 'preset',
+                fit: false,
+                padding: 10
+            },
+            zoomingEnabled: true,
+            maxZoom: 3,
+            minZoom: 0.3
+        };
+
 
         const confirmation = useConfirm();
 
@@ -54,9 +155,12 @@ export default defineComponent({
             r_symbolListSelected.value = botData.symbolList;
             r_timeframesSelected.value = botData.timeframes;
 
-            const treeData = botData.treeData;
+            const treeData = {
+                ...botData.treeData,
+                ...defaultTree
+            };
             if (treeData.elements.nodes.filter((item: { id: string; }) => item.id != 'start').length == 0) {
-                treeData.elements.nodes.push({ data: { id: 'start', name: 'Start' }, position: { x: 400, y: 300 } });
+                treeData.elements.nodes.push({ data: { id: 'start', value: 'Start' }, position: { x: 400, y: 300 } });
             }
             cy.json(treeData);
 
@@ -229,8 +333,9 @@ export default defineComponent({
             r_type.value = 'Thêm điều kiện mới';
 
             const id = new Date().getTime().toString();
-            const name = '';
-            r_currentNode.value = { id, name };
+            const value = '';
+            const type = 'expr';
+            r_currentNode.value = { id, value, type };
         }
 
         function updateNode() {
@@ -242,16 +347,17 @@ export default defineComponent({
 
             r_type.value = 'Sửa điều kiện';
             r_visible.value = true;
-            
+
             const node = nodeSelected[0];
             const id = node.data('id');
-            const name = node.data('name');
-            r_currentNode.value = { id, name };
+            const value = node.data('value');
+            const type = node.data('type');
+            r_currentNode.value = { id, value, type };
         }
 
         async function applyNode() {
             try {
-                const data: NodeDataDefinition = r_currentNode.value;
+                const data: NodeData = r_currentNode.value;
                 if (!data.id) {
                     Toast.showWarning('Chưa nhập điều kiện');
                     return;
@@ -268,7 +374,7 @@ export default defineComponent({
                 }
                 else if (r_type.value == 'Sửa điều kiện') {
                     const node = cy.getElementById(data.id);
-                    node.data('name', data.name);
+                    node.data('value', data.value);
                 }
 
                 const currentZoom = cy.zoom();
@@ -304,101 +410,13 @@ export default defineComponent({
 
             const treeData: { [key: string]: any } = { elements: { nodes: [], edges: [] } };
             if (treeData.elements.nodes.filter((item: { id: string; }) => item.id != 'start').length == 0) {
-                treeData.elements.nodes.push({ data: { id: 'start', name: 'Start' }, position: { x: 400, y: 300 } });
+                treeData.elements.nodes.push({ data: { id: 'start', value: 'Start' }, position: { x: 400, y: 300 } });
             }
 
             cy = cytoscape({
                 container: document.getElementById('cy'),
                 ...treeData,
-                style: [
-                    {
-                        selector: 'node',
-                        style: {
-                            'background-color': '#666',
-                            'label': 'data(name)'
-                        }
-                    },
-                    {
-                        selector: 'edge',
-                        style: {
-                            'width': 3,
-                            'line-color': '#ccc',
-                            'target-arrow-color': '#ccc',
-                            'target-arrow-shape': 'triangle',
-                            'curve-style': 'bezier'
-                        }
-                    },
-                    {
-                        selector: '.eh-handle',
-                        style: {
-                            'background-color': 'red',
-                            'width': 12,
-                            'height': 12,
-                            'shape': 'ellipse',
-                            'overlay-opacity': 0,
-                            'border-width': 12, // makes the handle easier to hit
-                            'border-opacity': 0
-                        }
-                    },
-
-                    {
-                        selector: '.eh-hover',
-                        style: {
-                            'background-color': 'red'
-                        }
-                    },
-
-                    {
-                        selector: '.eh-source',
-                        style: {
-                            'border-width': 2,
-                            'border-color': 'red'
-                        }
-                    },
-
-                    {
-                        selector: '.eh-target',
-                        style: {
-                            'border-width': 2,
-                            'border-color': 'red'
-                        }
-                    },
-
-                    {
-                        selector: '.eh-preview, .eh-ghost-edge',
-                        style: {
-                            'background-color': 'red',
-                            'line-color': 'red',
-                            'target-arrow-color': 'red',
-                            'source-arrow-color': 'red'
-                        }
-                    },
-
-                    {
-                        selector: '.eh-ghost-edge.eh-preview-active',
-                        style: {
-                            'opacity': 0
-                        }
-                    },
-                    {
-                        selector: '.selected',
-                        style: {
-                            'background-color': 'blue',
-                            'line-color': 'blue',
-                            'target-arrow-color': 'blue',
-                            'transition-property': 'background-color, line-color, target-arrow-color',
-                            'transition-duration': 0.5
-                        }
-                    }
-                ],
-                layout: {
-                    name: 'preset',
-                    fit: false,
-                    padding: 10
-                },
-                zoomingEnabled: true,
-                maxZoom: 3,
-                minZoom: 0.3
+                ...defaultTree
             });
 
             eh = cy.edgehandles({
@@ -432,11 +450,12 @@ export default defineComponent({
             r_timeframesSelected,
             r_symbolList,
             r_symbolListSelected,
-            brokerList,
             r_botNameList,
             r_visible,
             r_currentNode,
             r_type,
+            brokerList,
+            nodeTypes,
             getBotInfo,
             toogleAllSymbol,
             filterDuplicate,

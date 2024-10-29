@@ -1,9 +1,19 @@
 <template>
     <div class="alwaysOnTop">
-        <Dialog v-model:visible="r_visible" modal :header="r_type" :style="{ width: '70%' }">
-            <div class="flex items-center gap-2 mb-2">
-                <label for="condition" class="font-semibold">Điều kiện</label>
-                <InputText id="condition" class="flex-auto" v-model="r_currentNode.name" autocomplete="off" />
+        <Dialog v-model:visible="r_visible" modal :header="r_type" :style="{ width: '40%' }">
+            <div class="grid grid-cols-[1fr_2fr] gap-2 p-2">
+                <label for="type" class="font-semibold">Loại</label>
+                <Select v-model="r_currentNode.type" :options="nodeTypes" optionLabel="name" optionValue="value"
+                    placeholder="Loại điều kiện" class="flex-auto" />
+
+                <label v-if="r_currentNode.type == 'expr'" for="condition" class="font-semibold">Điều kiện:</label>
+                <InputText v-if="r_currentNode.type == 'expr'" class="flex-auto" v-model="r_currentNode.value"
+                    autocomplete="off" />
+
+                <label v-if="r_currentNode.type == 'telegram'" for="teleContent" class="font-semibold">Nội dung:</label>
+                <InputText v-if="r_currentNode.type == 'telegram'" id="teleContent" class="flex-auto"
+                    v-model="r_currentNode.value" autocomplete="off" />
+
             </div>
             <div class="flex justify-end gap-2">
                 <Button type="button" label="Cancel" severity="secondary" @click="r_visible = false"></Button>
