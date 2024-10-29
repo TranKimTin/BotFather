@@ -16,8 +16,14 @@ cytoscape.use(edgehandles);
 
 interface NodeData {
     id: string,
-    value: string,
-    type: string
+    type: string,
+    value?: string,
+    entry?: string,
+    tp?: string,
+    sl?: string,
+    unitEntry?: string,
+    unitTP?: string,
+    unitSL?: string,
 }
 
 export default defineComponent({
@@ -32,12 +38,21 @@ export default defineComponent({
         const r_symbolListSelected = ref<Array<string>>([]);
         const r_botNameList = ref<Array<string>>([]);
         const r_visible = ref<boolean>(false);
-        const r_currentNode = ref<NodeData>({ id: '', value: '', type: '' });
+        const r_currentNode = ref<NodeData>({ id: '', type: '' });
         const r_type = ref<string>('');
 
         const brokerList = ['binance', 'okx', 'bybit', 'binance_future', 'bybit_future'];
-        const nodeTypes = [{ name: 'Biểu thức', value: 'expr' }, { name: 'Báo tín hiệu telegram', value: 'telegram' }, { name: 'Mở lệnh', value: 'position' }];
-
+        const nodeTypes = [
+            { name: 'Biểu thức', value: 'expr' },
+            { name: 'Báo tín hiệu telegram', value: 'telegram' },
+            { name: 'Mở lệnh market', value: 'openMarket' },
+            { name: 'Mở lệnh limit', value: 'openLimit' },
+            { name: 'Mở lệnh stop market', value: 'openStopMarket' },
+            { name: 'Mở lệnh stop limit', value: 'openStopLimit' },
+            { name: 'Đóng toàn bộ lệnh chưa khớp entry', value: 'closeAllOrder' },
+            { name: 'Đóng toàn bộ vị thế', value: 'closeAllPosition' }
+        ];
+        const units = [{ name: 'Theo giá', value: 'price' }, { name: '% so với entry', value: 'percent' }];
         let allBotList: Array<string> = [];
         let cy: Core;
         let eh: edgehandles.EdgeHandlesInstance;
@@ -366,7 +381,14 @@ export default defineComponent({
             const id = node.data('id');
             const value = node.data('value');
             const type = node.data('type');
-            r_currentNode.value = { id, value, type };
+            const entry = node.data('entry');
+            const tp = node.data('tp');
+            const sl = node.data('sl');
+            const unitEntry = node.data('unitEntry');
+            const unitTP = node.data('unitTP');
+            const unitSL = node.data('unitSL');
+
+            r_currentNode.value = { id, value, type, entry, tp, sl, unitTP, unitEntry, unitSL };
         }
 
         async function applyNode() {
@@ -470,6 +492,7 @@ export default defineComponent({
             r_type,
             brokerList,
             nodeTypes,
+            units,
             getBotInfo,
             toogleAllSymbol,
             filterDuplicate,

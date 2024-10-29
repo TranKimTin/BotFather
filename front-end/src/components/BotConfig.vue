@@ -1,18 +1,61 @@
 <template>
     <div class="alwaysOnTop">
         <Dialog v-model:visible="r_visible" modal :header="r_type" :style="{ width: '40%' }">
-            <div class="grid grid-cols-[1fr_2fr] gap-2 p-2">
+            <div class="grid grid-cols-[1fr_3fr] gap-2 p-2">
                 <label for="type" class="font-semibold">Loại</label>
-                <Select v-model="r_currentNode.type" :options="nodeTypes" optionLabel="name" optionValue="value"
+                <Select v-model="r_currentNode.type" filter :options="nodeTypes" optionLabel="name" optionValue="value"
                     placeholder="Loại điều kiện" class="flex-auto" />
 
-                <label v-if="r_currentNode.type == 'expr'" for="condition" class="font-semibold">Điều kiện:</label>
-                <InputText v-if="r_currentNode.type == 'expr'" class="flex-auto" v-model="r_currentNode.value"
+                <label v-if="r_currentNode.type == 'expr'" for="expr" class="font-semibold">Điều kiện:</label>
+                <InputText v-if="r_currentNode.type == 'expr'" id="expr" class="flex-auto" v-model="r_currentNode.value"
                     autocomplete="off" />
 
                 <label v-if="r_currentNode.type == 'telegram'" for="teleContent" class="font-semibold">Nội dung:</label>
                 <InputText v-if="r_currentNode.type == 'telegram'" id="teleContent" class="flex-auto"
                     v-model="r_currentNode.value" autocomplete="off" />
+
+                <!-- entry -->
+                <label v-if="['openLimit', 'openStopMarket', 'openStopLimit'].includes(r_currentNode.type)"
+                    class="font-semibold" for="entry">Entry:</label>
+                <div v-if="['openLimit', 'openStopMarket', 'openStopLimit'].includes(r_currentNode.type)"
+                    class="grid grid-cols-[2fr_2fr] gap-2 p-2 flex-auto">
+                    <InputText v-if="[, 'openLimit', 'openStopMarket', 'openStopLimit'].includes(r_currentNode.type)"
+                        v-model="r_currentNode.entry" autocomplete="off" class="flex-auto" id="entry" />
+                    <Select v-if="['openLimit', 'openStopMarket', 'openStopLimit'].includes(r_currentNode.type)"
+                        v-model="r_currentNode.unitEntry" :options="units" optionLabel="name" optionValue="value"
+                        placeholder="Đơn vị" class="flex-auto" />
+                </div>
+
+                <!-- TP -->
+                <label
+                    v-if="['openMarket', 'openLimit', 'openStopMarket', 'openStopLimit'].includes(r_currentNode.type)"
+                    class="font-semibold" for="tp">TP:</label>
+                <div v-if="['openMarket', 'openLimit', 'openStopMarket', 'openStopLimit'].includes(r_currentNode.type)"
+                    class="grid grid-cols-[2fr_2fr] gap-2 p-2 flex-auto">
+                    <InputText
+                        v-if="['openMarket', 'openLimit', 'openStopMarket', 'openStopLimit'].includes(r_currentNode.type)"
+                        v-model="r_currentNode.tp" autocomplete="off" class="flex-auto" id="tp" />
+                    <Select
+                        v-if="['openMarket', 'openLimit', 'openStopMarket', 'openStopLimit'].includes(r_currentNode.type)"
+                        v-model="r_currentNode.unitTP" :options="units" optionLabel="name" optionValue="value"
+                        placeholder="Đơn vị" class="flex-auto" />
+                </div>
+
+                <!-- SL -->
+                <label
+                    v-if="['openMarket', 'openLimit', 'openStopMarket', 'openStopLimit'].includes(r_currentNode.type)"
+                    class="font-semibold" for="sl">SL:</label>
+                <div v-if="['openMarket', 'openLimit', 'openStopMarket', 'openStopLimit'].includes(r_currentNode.type)"
+                    class="grid grid-cols-[2fr_2fr] gap-2 p-2 flex-auto">
+                    <InputText
+                        v-if="['openMarket', 'openLimit', 'openStopMarket', 'openStopLimit'].includes(r_currentNode.type)"
+                        v-model="r_currentNode.sl" autocomplete="off" class="flex-auto" id="sl" />
+                    <Select
+                        v-if="['openMarket', 'openLimit', 'openStopMarket', 'openStopLimit'].includes(r_currentNode.type)"
+                        v-model="r_currentNode.unitSL" :options="units" optionLabel="name" optionValue="value"
+                        placeholder="Đơn vị" class="flex-auto" />
+                </div>
+
 
             </div>
             <div class="flex justify-end gap-2">
