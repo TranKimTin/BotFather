@@ -143,3 +143,4 @@ js/public/*
 .vscode/*
 src/test.ts
 /src/generated
+!front-end/tailwind.config.js
