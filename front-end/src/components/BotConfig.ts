@@ -177,7 +177,7 @@ export default defineComponent({
                 treeData.elements.nodes.push({ data: { id: 'start', value: 'Start', type: 'start' }, position: { x: 400, y: 300 } });
             }
             cy.json(treeData);
-
+            cy.elements('.selected').removeClass('selected');
         }
 
         function toogleAllSymbol(broker: string) {
