@@ -48,6 +48,7 @@ expr
     | bearish                   # iBearish
     | marsi                     # iMARSI
     | bull_bear_list            # iBullBearList
+    | doji                      # iDoji
     ;
 
 broker: 'broker' '(' ')';
@@ -90,6 +91,8 @@ bullish: 'bullish' '(' INT? ')';
 bearish: 'bearish' '(' INT? ')';
 marsi: 'marsi' '(' INT ',' INT (',' INT)? ')';
 bull_bear_list: 'bull_bear_list' '(' INT? ')';
+doji: 'doji' '(' INT? ')';
+
 
 comparisonOp
     : '>'

@@ -1,7 +1,7 @@
 import * as antlr from "antlr4ng";
 import { BaseErrorListener, CharStream, CommonTokenStream, RecognitionException, Recognizer, Token } from 'antlr4ng';
 import { ExprLexer } from './generated/ExprLexer';
-import { AddSubContext, AmplContext, AmplPContext, Bb_lowerContext, Bb_middleContext, Bb_upperContext, Bearish_engulfingContext, Bearish_hammerContext, BearishContext, BrokerContext, Bull_bear_listContext, Bullish_engulfingContext, Bullish_hammerContext, BullishContext, ChangeContext, ChangePContext, CloseContext, ComparisonContext, EmaContext, ExprParser, FloatContext, HighContext, HourContext, IntContext, IRSIContext, LowContext, Lower_shadowContext, Lower_shadowPContext, Macd_histogramContext, Macd_n_dinhContext, Macd_signalContext, Macd_slopeContext, Macd_valueContext, MaContext, MarsiContext, MinuteContext, MulDivContext, NumberContext, OpenContext, ParensContext, Rsi_phan_kiContext, Rsi_slopeContext, RsiContext, StringContext, SymbolContext, TimeframeContext, Upper_shadowContext, Upper_shadowPContext, Volume24h_in_usdContext, VolumeContext } from './generated/ExprParser';
+import { AddSubContext, AmplContext, AmplPContext, Bb_lowerContext, Bb_middleContext, Bb_upperContext, Bearish_engulfingContext, Bearish_hammerContext, BearishContext, BrokerContext, Bull_bear_listContext, Bullish_engulfingContext, Bullish_hammerContext, BullishContext, ChangeContext, ChangePContext, CloseContext, ComparisonContext, DojiContext, EmaContext, ExprParser, FloatContext, HighContext, HourContext, IntContext, IRSIContext, LowContext, Lower_shadowContext, Lower_shadowPContext, Macd_histogramContext, Macd_n_dinhContext, Macd_signalContext, Macd_slopeContext, Macd_valueContext, MaContext, MarsiContext, MinuteContext, MulDivContext, NumberContext, OpenContext, ParensContext, Rsi_phan_kiContext, Rsi_slopeContext, RsiContext, StringContext, SymbolContext, TimeframeContext, Upper_shadowContext, Upper_shadowPContext, Volume24h_in_usdContext, VolumeContext } from './generated/ExprParser';
 import { ExprVisitor } from './generated/ExprVisitor';
 import * as util from './util';
 import { RateData } from "./BinanceFuture";
@@ -666,6 +666,13 @@ export class Expr extends ExprVisitor<any> {
         const list = util.listBullBear(this.data, shift);
         return list.join(',');
     };
+
+    visitDoji = (ctx: DojiContext) => {
+        const shift = parseInt(ctx.INT()?.getText() || "0", 10);
+        if (shift >= this.data.length) return 0;
+
+        return util.iDoji(this.data[shift]);
+    };
 }
 
 
@@ -745,18 +752,25 @@ export function isValidCondition(condition: string) {
 
 
 async function test() {
-    const data = await util.getBinanceOHLCV('BTCUSDT', '15m', 300);
+    const broker = 'binance_future';
+    const symbol = 'GMXUSDT';
+    const timeframe = '1h';
+    const data = (broker == 'binance_future')
+        ? await util.getBinanceFutureOHLCV(symbol, timeframe, 300)
+        : await util.getBinanceOHLCV(symbol, timeframe, 300);
     data.shift();
 
+    console.log(data[0]);
+
     const args = {
-        broker: 'binance',
-        symbol: 'BTCUSDT',
-        timeframe: '15m',
+        broker: broker,
+        symbol: symbol,
+        timeframe: timeframe,
         data: data
     };
     const idTelegram = 'id_tele_tin';
 
-    let condition = "telegram: {bearish()} {bearish() = 0} {bull_bear_list()}";
+    let condition = "telegram: bull: {bullish()}, bear: {bearish()}, list: {bull_bear_list()}";
 
     const subExprs = [...new Set([...condition.matchAll(/\{(.*?)\}/g)].map(match => match[1]))];
     for (const expr of subExprs) {
