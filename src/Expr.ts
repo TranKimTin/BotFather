@@ -671,7 +671,7 @@ export class Expr extends ExprVisitor<any> {
         const shift = parseInt(ctx.INT()?.getText() || "0", 10);
         if (shift >= this.data.length) return 0;
 
-        return util.iDoji(this.data[shift]);
+        return util.iDoji(this.data[shift]) ? 1 : 0;
     };
 }
 
