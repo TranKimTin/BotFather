@@ -19,13 +19,15 @@ export interface Node {
     next: Array<Node>;
 };
 
+export interface NodeData {
+    id: string;
+    value: string;
+    type: string;
+}
+
 export interface Elements {
     nodes?: Array<{
-        data: {
-            id: string;
-            value: string;
-            type: string;
-        };
+        data: NodeData;
         position?: {
             x: number;
             y: number;
@@ -133,7 +135,7 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
         console.log({ edges, nodes });
 
         for (let node of nodes) {
-            if (!isValidCondition(node.value)) {
+            if (!isValidCondition(node)) {
                 console.log('invalid condition ', node.value);
                 return res.json({ code: 400, message: 'Điều kiện không hợp lệ ' + node.value });
             }
@@ -154,7 +156,7 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
         const data = req.body;
         console.log('check', data);
 
-        if (!data.id || !isValidCondition(data.value)) {
+        if (!data.id || !isValidCondition(data)) {
             return res.json({ code: 400, message: `Điều kiện không hợp lệ ${data.value}` });
         }
 

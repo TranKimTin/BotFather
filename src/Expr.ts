@@ -6,6 +6,7 @@ import { ExprVisitor } from './generated/ExprVisitor';
 import * as util from './util';
 import { RateData } from "./BinanceFuture";
 import moment from "moment";
+import { NodeData } from "./botFatherConfig";
 
 export interface ExprArgs {
     broker: string;
@@ -728,9 +729,9 @@ function isValidExpr(expr: string): boolean {
     }
 }
 
-export function isValidCondition(condition: string) {
-    if (!condition) return false;
-    condition = condition.toLowerCase().trim();
+export function isValidCondition(data: NodeData) {
+    if (!data.value) return false;
+    let condition = data.value.toLowerCase().trim();
 
     if (condition === 'start') return true;
 
@@ -743,7 +744,7 @@ export function isValidCondition(condition: string) {
         condition = condition.replaceAll(`{${expr}}`, '1');
     }
 
-    if (condition.startsWith('telegram:')) {
+    if (data.type == 'telegram') {
         return true;
     }
     else {

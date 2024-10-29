@@ -8,27 +8,27 @@ describe('BotFather', function () {
     describe('isValidCondition', function () {
         it('rsi(14,5) > 70', function () {
             const s = 'rsi(14,5) > 70';
-            const value = isValidCondition(s);
+            const value = isValidCondition({ id: 'test', type: 'expr', value: s });
             assert.strictEqual(value, true);
         });
         it('console.log(123)', function () {
             const s = 'console.log(123)';
-            const value = isValidCondition(s);
+            const value = isValidCondition({ id: 'test', type: 'expr', value: s });
             assert.strictEqual(value, false);
         });
         it('rsi(14) >= rsi(14,1)', function () {
             const s = 'rsi(14) >= rsi(14,1)';
-            const value = isValidCondition(s);
+            const value = isValidCondition({ id: 'test', type: 'expr', value: s });
             assert.strictEqual(value, true);
         });
         it('change() >= ampl() * 0.3', function () {
             const s = 'change() >= ampl() * 0.3';
-            const value = isValidCondition(s);
+            const value = isValidCondition({ id: 'test', type: 'expr', value: s });
             assert.strictEqual(value, true);
         });
         it('telegram: send tele', function () {
-            const s = 'telegram: send tele rsi={rsi(14)}';
-            const value = isValidCondition(s);
+            const s = 'send tele rsi={rsi(14)}';
+            const value = isValidCondition({ id: 'test', type: 'telegram', value: s });
             assert.strictEqual(value, true);
         })
     });
