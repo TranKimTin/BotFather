@@ -25,7 +25,7 @@ interface NodeData {
     unitStop?: string,
     unitEntry?: string,
     unitTP?: string,
-    unitSL?: string,
+    unitSL?: string
 }
 
 export default defineComponent({
@@ -168,7 +168,7 @@ export default defineComponent({
         const confirmation = useConfirm();
         watch(r_timeframesSelected, (newValue) => {
             newValue.sort((a, b) => timeframes.indexOf(a) - timeframes.indexOf(b));
-        })
+        });
 
 
         let timeout: any;
@@ -274,12 +274,14 @@ export default defineComponent({
             eh.enableDrawMode();
             eh.stop();
             cy.autoungrabify(true);
+            Toast.showSuccess("Bật chế độ vẽ cạnh");
         }
 
         function drawModeOff() {
             eh.disableDrawMode();
             eh.start(cy.$('node:selected'));
-            cy.autoungrabify(false)
+            cy.autoungrabify(false);
+            Toast.showSuccess("Bật chế độ sắp xếp nút");
         }
 
 
@@ -363,12 +365,17 @@ export default defineComponent({
 
         function newNode() {
             r_visible.value = true;
-            r_type.value = 'Thêm điều kiện mới';
+            r_type.value = 'Thêm nút mới';
 
             const id = new Date().getTime().toString();
             const value = '';
             const type = 'expr';
-            r_currentNode.value = { id, value, type };
+            const unitEntry = 'price';
+            const unitTP = 'price';
+            const unitSL = 'price';
+            const unitStop = 'price';
+
+            r_currentNode.value = { id, value, type, unitEntry, unitTP, unitSL, unitStop };
         }
 
         function updateNode() {
@@ -378,7 +385,7 @@ export default defineComponent({
                 return;
             };
 
-            r_type.value = 'Sửa điều kiện';
+            r_type.value = 'Cập nhật nút';
             r_visible.value = true;
 
             const node = nodeSelected[0];
@@ -406,7 +413,7 @@ export default defineComponent({
                 }
                 await axios.post('/check', data);
 
-                if (r_type.value == 'Thêm điều kiện mới') {
+                if (r_type.value == 'Thêm nút mới') {
                     cy.add({
                         group: 'nodes',
                         data,
@@ -414,7 +421,7 @@ export default defineComponent({
 
                     });
                 }
-                else if (r_type.value == 'Sửa điều kiện') {
+                else if (r_type.value == 'Cập nhật nút') {
                     const node = cy.getElementById(data.id);
                     node.data('value', data.value);
                 }

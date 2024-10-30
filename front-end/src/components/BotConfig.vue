@@ -20,7 +20,7 @@
                 <div v-if="['openStopMarket', 'openStopLimit'].includes(r_currentNode.type)"
                     class="grid grid-cols-[2fr_2fr] gap-2 p-2 flex-auto">
                     <InputText v-if="['openStopMarket', 'openStopLimit'].includes(r_currentNode.type)"
-                        v-model="r_currentNode.stop" autocomplete="off" class="flex-auto" id="stop" />
+                        v-model="r_currentNode.stop" autocomplete="off" class="flex-auto" id="stop" placeholder="Nhập biểu thức" />
                     <Select v-if="['openStopMarket', 'openStopLimit'].includes(r_currentNode.type)"
                         v-model="r_currentNode.unitSL" :options="units" optionLabel="name" optionValue="value"
                         placeholder="Đơn vị" class="flex-auto" />
@@ -32,7 +32,7 @@
                 <div v-if="['openLimit', 'openStopLimit'].includes(r_currentNode.type)"
                     class="grid grid-cols-[2fr_2fr] gap-2 p-2 flex-auto">
                     <InputText v-if="['openLimit', 'openStopLimit'].includes(r_currentNode.type)"
-                        v-model="r_currentNode.entry" autocomplete="off" class="flex-auto" id="entry" />
+                        v-model="r_currentNode.entry" autocomplete="off" class="flex-auto" id="entry" placeholder="Nhập biểu thức"/>
                     <Select v-if="['openLimit', 'openStopLimit'].includes(r_currentNode.type)"
                         v-model="r_currentNode.unitEntry" :options="units" optionLabel="name" optionValue="value"
                         placeholder="Đơn vị" class="flex-auto" />
@@ -46,7 +46,7 @@
                     class="grid grid-cols-[2fr_2fr] gap-2 p-2 flex-auto">
                     <InputText
                         v-if="['openMarket', 'openLimit', 'openStopMarket', 'openStopLimit'].includes(r_currentNode.type)"
-                        v-model="r_currentNode.tp" autocomplete="off" class="flex-auto" id="tp" />
+                        v-model="r_currentNode.tp" autocomplete="off" class="flex-auto" id="tp" placeholder="Nhập biểu thức"/>
                     <Select
                         v-if="['openMarket', 'openLimit', 'openStopMarket', 'openStopLimit'].includes(r_currentNode.type)"
                         v-model="r_currentNode.unitTP" :options="units" optionLabel="name" optionValue="value"
@@ -61,7 +61,7 @@
                     class="grid grid-cols-[2fr_2fr] gap-2 p-2 flex-auto">
                     <InputText
                         v-if="['openMarket', 'openLimit', 'openStopMarket', 'openStopLimit'].includes(r_currentNode.type)"
-                        v-model="r_currentNode.sl" autocomplete="off" class="flex-auto" id="sl" />
+                        v-model="r_currentNode.sl" autocomplete="off" class="flex-auto" id="sl" placeholder="Nhập biểu thức"/>
                     <Select
                         v-if="['openMarket', 'openLimit', 'openStopMarket', 'openStopLimit'].includes(r_currentNode.type)"
                         v-model="r_currentNode.unitSL" :options="units" optionLabel="name" optionValue="value"
@@ -71,8 +71,8 @@
 
             </div>
             <div class="flex justify-end gap-2">
-                <Button type="button" label="Cancel" severity="secondary" @click="r_visible = false"></Button>
-                <Button type="button" label="Save" @click="applyNode"></Button>
+                <Button type="button" label="Hủy" severity="secondary" @click="r_visible = false"></Button>
+                <Button type="button" label="Lưu" @click="applyNode"></Button>
             </div>
         </Dialog>
 
@@ -113,12 +113,12 @@
 
         <div class="flex justify-center">
             <button class="btn btn-outline-danger mr-1" @click="removeBot">Xóa bot</button>
-            <button class="btn btn-outline-primary mr-1" @click="newNode">Thêm điều kiện</button>
-            <button class="btn btn-outline-primary mr-1" @click="drawModeOn">Draw mode on</button>
-            <button class="btn btn-outline-primary mr-1" @click="drawModeOff">Draw mode off</button>
-            <button class="btn btn-outline-primary mr-1" @click="updateNode">Sửa điều kiện</button>
-            <button class="btn btn-outline-danger mr-1" @click="removeNode">Xóa</button>
-            <button class="btn btn-outline-success mr-1" @click="saveBot">Lưu</button>
+            <button class="btn btn-outline-primary mr-1" @click="newNode">Thêm nút mới</button>
+            <button class="btn btn-outline-primary mr-1" @click="drawModeOn">Chế độ vẽ cạnh</button>
+            <button class="btn btn-outline-primary mr-1" @click="drawModeOff">Chế độ sắp xếp nút</button>
+            <button class="btn btn-outline-primary mr-1" @click="updateNode">Sửa nút đã chọn</button>
+            <button class="btn btn-outline-danger mr-1" @click="removeNode">Xóa nút đã chọn</button>
+            <button class="btn btn-outline-success mr-1" @click="saveBot">Lưu cấu hình bot</button>
         </div>
     </div>
     <div id="cy"></div>

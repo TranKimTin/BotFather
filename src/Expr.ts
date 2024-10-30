@@ -729,26 +729,85 @@ function isValidExpr(expr: string): boolean {
     }
 }
 
-export function isValidCondition(data: NodeData) {
-    if (!data.value) return false;
-    let condition = data.value.toLowerCase().trim();
+function replaceSubExprs(expr: string) {
+    const subExprs = [...new Set([...expr.matchAll(/\{(.*?)\}/g)].map(match => match[1]))];
 
-    if (condition === 'start') return true;
-
-    const subExprs = [...new Set([...condition.matchAll(/\{(.*?)\}/g)].map(match => match[1]))];
-
-    for (const expr of subExprs) {
-        if (!isValidExpr(expr)) {
-            return false;
+    for (const subExpr of subExprs) {
+        if (!isValidExpr(subExpr)) {
+            return '';
         }
-        condition = condition.replaceAll(`{${expr}}`, '1');
+        expr = expr.replaceAll(`{${subExpr}}`, '1');
     }
 
-    if (data.type == 'telegram') {
+    return expr;
+}
+
+export function isValidCondition(data: NodeData) {
+    if (data.type == 'start') return true;
+
+    //expr
+    if (data.type === 'expr') {
+        if (!data.value) return false;
+
+        let expr = data.value.toLowerCase().trim();
+        expr = replaceSubExprs(expr);
+        if (!expr) return false;
+
+        return isValidExpr(expr);
+    }
+
+    //telegram
+    if (data.type === 'telegram') {
+        if (!data.value) return false;
+
+        let expr = data.value.toLowerCase().trim();
+        expr = replaceSubExprs(expr);
+        if (!expr) return false;
+
+        return true;
+    }
+
+    //stop
+    if (['openStopMarket', 'openStopLimit'].includes(data.type)) {
+        if (!data.stop) return false;
+        let expr: string = data.stop;
+        expr = replaceSubExprs(expr);
+        if (!expr) return false;
+        if (!isValidExpr(expr)) return false;
+    }
+
+    //entry
+    if (['openLimit', 'openStopLimit'].includes(data.type)) {
+        if (!data.entry) return false;
+        let expr: string = data.entry;
+        expr = replaceSubExprs(expr);
+        if (!expr) return false;
+        if (!isValidExpr(expr)) return false;
+    }
+
+    //tp
+    if (['openMarket', 'openLimit', 'openStopMarket', 'openStopLimit'].includes(data.type)) {
+        if (!data.tp) return false;
+        let expr: string = data.tp;
+        expr = replaceSubExprs(expr);
+        if (!expr) return false;
+        if (!isValidExpr(expr)) return false;
+    }
+
+    //sl
+    if (['openMarket', 'openLimit', 'openStopMarket', 'openStopLimit'].includes(data.type)) {
+        if (!data.sl) return false;
+        let expr: string = data.sl;
+        expr = replaceSubExprs(expr);
+        if (!expr) return false;
+        if (!isValidExpr(expr)) return false;
+    }
+
+    if (['openMarket', 'openLimit', 'openStopMarket', 'openStopLimit', 'closeAllOrder', 'closeAllPosition'].includes(data.type)) {
         return true;
     }
     else {
-        return isValidExpr(condition);
+        return false;
     }
 }
 

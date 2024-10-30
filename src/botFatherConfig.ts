@@ -14,15 +14,23 @@ if (!fs.existsSync(BOT_DATA_DIR)) {
 }
 
 export interface Node {
-    logic: string;
+    data: NodeData;
     id: string;
     next: Array<Node>;
 };
 
 export interface NodeData {
-    id: string;
-    value: string;
-    type: string;
+    id: string,
+    type: string,
+    value?: string,
+    stop?: string,
+    entry?: string,
+    tp?: string,
+    sl?: string,
+    unitStop?: string,
+    unitEntry?: string,
+    unitTP?: string,
+    unitSL?: string
 }
 
 export interface Elements {
@@ -88,8 +96,8 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
 
         const nodeList: { [key: string]: Node } = {};
         for (let node of nodes) {
-            const { id, value } = node;
-            nodeList[id] = { logic: value, id, next: [] };
+            const { id } = node;
+            nodeList[id] = { data: node, id, next: [] };
         }
 
         for (let edge of edges) {
@@ -115,7 +123,6 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
         dfs(nodeList['start']);
         if (!ret) return false;
 
-        nodeList['start'].logic = '1==1';
         botInfo.route = nodeList['start'];
 
         return true;
@@ -168,7 +175,20 @@ export function CreateWebConfig(port: number, onChangeConfig: (botName: string) 
         if (!validatekBotName(botName)) {
             return res.json({ code: 400, message: 'Tên bot không hợp lệ ' + botName });
         }
-        let data: BotInfo = { treeData: { elements: { nodes: [], edges: [] } }, timeframes: [], symbolList: [], botName: '', idTelegram: '', route: { logic: "1==1", id: 'start', next: [] } };
+        let data: BotInfo = {
+            treeData: { elements: { nodes: [], edges: [] } },
+            timeframes: [],
+            symbolList: [],
+            botName: '',
+            idTelegram: '',
+            route: {
+                data: {
+                    id: "start",
+                    type: "start",
+                    value: "Start",
+                }, id: 'start', next: []
+            }
+        };
         if (fs.existsSync(`${BOT_DATA_DIR}/${botName}.json`)) {
             data = JSON.parse(fs.readFileSync(`${BOT_DATA_DIR}/${botName}.json`).toString());
         }

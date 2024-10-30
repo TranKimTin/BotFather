@@ -1,4 +1,4 @@
-import { BotInfo, CreateWebConfig, BOT_DATA_DIR, Node } from './botFatherConfig';
+import { BotInfo, CreateWebConfig, BOT_DATA_DIR, Node, NodeData } from './botFatherConfig';
 import { RateData } from './BinanceFuture';
 import fs from 'fs';
 import Telegram, { TelegramIdType } from './telegram';
@@ -136,19 +136,28 @@ export class BotFather {
     }
 
     private dfs_handleLogic(node: Node, broker: string, symbol: string, timeframe: string, data: RateData[], idTelegram: TelegramIdType, visited: { [key: string]: boolean }) {
-        const { logic, id, next } = node;
+        const { id, next } = node;
+        const nodeData = node.data;
+
         if (visited[id] === true) return;
         visited[id] = true;
-        if (this.handleLogic(logic, broker, symbol, timeframe, data, idTelegram)) {
+        if (this.handleLogic(nodeData, broker, symbol, timeframe, data, idTelegram)) {
             for (const child of next) {
                 this.dfs_handleLogic(child, broker, symbol, timeframe, data, idTelegram, visited);
             }
         }
     }
 
-    private handleLogic(condition: string, broker: string, symbol: string, timeframe: string, data: RateData[], idTelegram: TelegramIdType): boolean {
-        condition = condition.toLowerCase().trim();
+    private calculateSubExpr(expr: string, args: ExprArgs) {
+        const subExprs = [...new Set([...expr.matchAll(/\{(.*?)\}/g)].map(match => match[1]))];
+        for (const subExpr of subExprs) {
+            const result = calculate(subExpr, args);
+            expr = expr.replaceAll(`{${subExpr}}`, result);
+        }
+        return expr;
+    }
 
+    private handleLogic(nodeData: NodeData, broker: string, symbol: string, timeframe: string, data: RateData[], idTelegram: TelegramIdType): boolean {
         const args: ExprArgs = {
             broker,
             symbol,
@@ -156,16 +165,21 @@ export class BotFather {
             data
         };
 
-        const subExprs = [...new Set([...condition.matchAll(/\{(.*?)\}/g)].map(match => match[1]))];
-        for (const expr of subExprs) {
+        if (nodeData.type === 'expr') {
+            if (!nodeData.value) return false;
+
+            let expr = nodeData.value.toLowerCase().trim();
+            expr = this.calculateSubExpr(expr, args);
+
             const result = calculate(expr, args);
-            condition = condition.replaceAll(`{${expr}}`, result);
+            return Boolean(result);
         }
 
-        if (condition.startsWith('telegram:')) {
-            condition = condition.slice("telegram:".length).trim();
+        if (nodeData.type === 'telegram') {
+            if (!nodeData.value) return false;
 
-            console.log({ condition, symbol, timeframe });
+            let content: string = nodeData.value.slice("telegram:".length).trim();
+            content = this.calculateSubExpr(content, args);
 
             const emoji: { [key: string]: string } = {
                 'binance': '🥇🥇🥇',
@@ -177,9 +191,9 @@ export class BotFather {
 
             let mess = emoji[broker];
             mess += `\n${broker}:${symbol} ${timeframe}`
-            mess += `\n${condition}`;
+            mess += `\n${content}`;
 
-            if (condition === '<--->') mess = '--------------------';
+            if (content === '<--->') mess = '--------------------';
 
             const ids = idTelegram.toString().split(',').map(item => item.trim());
             for (const id of ids) {
@@ -187,10 +201,26 @@ export class BotFather {
             }
             return true;
         }
-        else {
-            const result = calculate(condition, args);
-            return Boolean(result);
+        if (nodeData.type === 'openMarket') {
+            return true;
         }
+        if (nodeData.type === 'openLimit') {
+            return true;
+        }
+        if (nodeData.type === 'openStopMarket') {
+            return true;
+        }
+        if (nodeData.type === 'openStopLimit') {
+            return true;
+        }
+        if (nodeData.type === 'closeAllOrder') {
+            return true;
+        }
+        if (nodeData.type === 'closeAllPosition') {
+            return true;
+        }
+
+        return false;
     }
 };
 
