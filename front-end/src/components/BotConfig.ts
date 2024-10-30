@@ -396,9 +396,6 @@ export default defineComponent({
                     botName: botName
                 };
 
-                console.log(data.treeData);
-                return;
-
                 let res = await axios.post('/save', data);
                 Toast.showSuccess(`Đã lưu ${data.botName}`);
                 Cookies.set("botName", data.botName);
