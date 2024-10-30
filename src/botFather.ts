@@ -158,6 +158,8 @@ export class BotFather {
     }
 
     private handleLogic(nodeData: NodeData, broker: string, symbol: string, timeframe: string, data: RateData[], idTelegram: TelegramIdType): boolean {
+        if (nodeData.type === 'start') return true;
+        
         const args: ExprArgs = {
             broker,
             symbol,
