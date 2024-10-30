@@ -803,6 +803,15 @@ export function isValidCondition(data: NodeData) {
         if (!isValidExpr(expr)) return false;
     }
 
+    //volume
+    if (['openMarket', 'openLimit', 'openStopMarket', 'openStopLimit'].includes(data.type)) {
+        if (!data.volume) return false;
+        let expr: string = data.volume;
+        expr = replaceSubExprs(expr);
+        if (!expr) return false;
+        if (!isValidExpr(expr)) return false;
+    }
+
     if (['openMarket', 'openLimit', 'openStopMarket', 'openStopLimit', 'closeAllOrder', 'closeAllPosition'].includes(data.type)) {
         return true;
     }

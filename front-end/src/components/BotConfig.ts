@@ -18,10 +18,12 @@ interface NodeData {
     id: string,
     type: string,
     value?: string,
+    volume?: string,
     stop?: string,
     entry?: string,
     tp?: string,
     sl?: string,
+    unitVolume?: string,
     unitStop?: string,
     unitEntry?: string,
     unitTP?: string,
@@ -54,7 +56,9 @@ export default defineComponent({
             { name: 'Đóng toàn bộ lệnh chưa khớp entry', value: 'closeAllOrder' },
             { name: 'Đóng toàn bộ vị thế', value: 'closeAllPosition' }
         ];
-        const units = [{ name: 'Theo giá', value: 'price' }, { name: '% so với entry', value: 'percent' }];
+        const unitsEntry = [{ name: 'Theo giá', value: 'price' }, { name: '% so với entry', value: 'percent' }];
+        const unitsVulume = [{ name: 'USD', value: 'usd' }, { name: 'token', value: 'token' }];
+
         let allBotList: Array<string> = [];
         let cy: Core;
         let eh: edgehandles.EdgeHandlesInstance;
@@ -370,12 +374,13 @@ export default defineComponent({
             const id = new Date().getTime().toString();
             const value = '';
             const type = 'expr';
+            const unitVolume = 'usd';
             const unitEntry = 'price';
             const unitTP = 'price';
             const unitSL = 'price';
             const unitStop = 'price';
 
-            r_currentNode.value = { id, value, type, unitEntry, unitTP, unitSL, unitStop };
+            r_currentNode.value = { id, value, type, unitVolume, unitEntry, unitTP, unitSL, unitStop };
         }
 
         function updateNode() {
@@ -392,16 +397,18 @@ export default defineComponent({
             const id = node.data('id');
             const value = node.data('value');
             const type = node.data('type');
+            const volume = node.data('volume');
             const stop = node.data('stop');
             const entry = node.data('entry');
             const tp = node.data('tp');
             const sl = node.data('sl');
+            const unitVolume = node.data('unitVolume');
             const unitStop = node.data('unitStop');
             const unitEntry = node.data('unitEntry');
             const unitTP = node.data('unitTP');
             const unitSL = node.data('unitSL');
 
-            r_currentNode.value = { id, value, type, stop, entry, tp, sl, unitStop, unitTP, unitEntry, unitSL };
+            r_currentNode.value = { id, value, type, volume, stop, entry, tp, sl, unitVolume, unitStop, unitTP, unitEntry, unitSL };
         }
 
         async function applyNode() {
@@ -505,7 +512,8 @@ export default defineComponent({
             r_type,
             brokerList,
             nodeTypes,
-            units,
+            unitsEntry,
+            unitsVulume,
             getBotInfo,
             toogleAllSymbol,
             filterDuplicate,
