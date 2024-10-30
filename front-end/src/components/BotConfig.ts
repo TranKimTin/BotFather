@@ -1,5 +1,5 @@
 import { defineComponent, onMounted, ref, watch } from 'vue';
-import cytoscape, { type Core } from 'cytoscape';
+import cytoscape, { type NodeSingular, type Core } from 'cytoscape';
 import edgehandles from 'cytoscape-edgehandles';
 import * as axios from '../axios/axios';
 import Cookies from 'js-cookie';
@@ -49,10 +49,14 @@ export default defineComponent({
         const nodeTypes = [
             { name: 'Biểu thức', value: 'expr' },
             { name: 'Báo tín hiệu telegram', value: 'telegram' },
-            { name: 'Mở lệnh market', value: 'openMarket' },
-            { name: 'Mở lệnh limit', value: 'openLimit' },
-            { name: 'Mở lệnh stop market', value: 'openStopMarket' },
-            { name: 'Mở lệnh stop limit', value: 'openStopLimit' },
+            { name: 'Mở lệnh BUY Market', value: 'openBuyMarket' },
+            { name: 'Mở lệnh BUY Limit', value: 'openBuyLimit' },
+            { name: 'Mở lệnh BUY Stop Market', value: 'openBuyStopMarket' },
+            { name: 'Mở lệnh BUY Stop Limit', value: 'openBuyStopLimit' },
+            { name: 'Mở lệnh SELL Market', value: 'openSellMarket' },
+            { name: 'Mở lệnh SELL Limit', value: 'openSellLimit' },
+            { name: 'Mở lệnh SELL Stop Market', value: 'openSellStopMarket' },
+            { name: 'Mở lệnh SELL Stop Limit', value: 'openSellStopLimit' },
             { name: 'Đóng toàn bộ lệnh chưa khớp entry', value: 'closeAllOrder' },
             { name: 'Đóng toàn bộ vị thế', value: 'closeAllPosition' }
         ];
@@ -75,7 +79,7 @@ export default defineComponent({
                 {
                     selector: 'node[type="telegram"]',
                     style: {
-                        'background-color': '#99FF33',
+                        'background-color': '#33CCFF',
                         'label': 'data(value)'
                     }
                 },
@@ -85,6 +89,20 @@ export default defineComponent({
                         'background-color': '#ff0000',
                         'label': 'data(value)'
                     }
+                },
+                {
+                    selector: 'node[type="openBuyMarket"], node[type="openBuyLimit"], node[type="openBuyStopMarket"], node[type="openBuyStopLimit"]',
+                    style: {
+                        'background-color': '#33CC33',
+                        'label': 'data(display)',
+                    },
+                },
+                {
+                    selector: 'node[type="openSellMarket"], node[type="openSellLimit"], node[type="openSellStopMarket"], node[type="openSellStopLimit"]',
+                    style: {
+                        'background-color': '#FF6600',
+                        'label': 'data(display)',
+                    },
                 },
                 {
                     selector: 'edge',
@@ -181,6 +199,63 @@ export default defineComponent({
             timeout = setTimeout(loadData, 500);
         }
 
+        function updateDisplay(node: NodeSingular) {
+            const id = node.data('id');
+            const value = node.data('value');
+            const type = node.data('type');
+            const volume = node.data('volume');
+            const stop = node.data('stop');
+            const entry = node.data('entry');
+            const tp = node.data('tp');
+            const sl = node.data('sl');
+            const unitVolume = node.data('unitVolume');
+            const unitStop = node.data('unitStop');
+            const unitEntry = node.data('unitEntry');
+            const unitTP = node.data('unitTP');
+            const unitSL = node.data('unitSL');
+
+            const getUnit = (unit: string) => {
+                if (unit === 'price') return 'USD';
+                if (unit === 'percent') return '%';
+                if (unit === 'usd') return 'USD';
+                if (unit === 'token') return 'Token';
+                return '';
+            }
+
+            if (type === 'openBuyMarket' || type === 'openSellMarket') {
+                let label = `Open ${type === 'openBuyMarket' ? 'BUY' : 'SELL'} Market. `;
+                label += `Volume=${volume} (${getUnit(unitVolume)}), `;
+                label += `TP=${tp} (${getUnit(unitTP)}), `;
+                label += `SL=${sl} (${getUnit(unitSL)})`;
+                node.data('display', label);
+            }
+            else if (type === 'openBuyLimit' || type === 'openSellLimit') {
+                let label = `Open ${type === 'openBuyLimit' ? 'BUY' : 'SELL'} Limit. `;
+                label += `Volume=${volume} (${getUnit(unitVolume)}), `;
+                label += `Entry=${entry} (${getUnit(unitEntry)}), `;
+                label += `TP=${tp} (${getUnit(unitTP)}), `;
+                label += `SL=${sl} (${getUnit(unitSL)})`;
+                node.data('display', label);
+            }
+            else if (type === 'openBuyStopMarket' || type === 'openSellStopMarket') {
+                let label = `Open ${type === 'openBuyStopMarket' ? 'BUY' : 'SELL'} Stop Market. `;
+                label += `Volume=${volume} (${getUnit(unitVolume)}), `;
+                label += `Stop=${stop} (${getUnit(unitStop)}), `;
+                label += `TP=${tp} (${getUnit(unitTP)}), `;
+                label += `SL=${sl} (${getUnit(unitSL)})`;
+                node.data('display', label);
+            }
+            else if (type === 'openBuyStopLimit' || type === 'openSellStopLimit') {
+                let label = `Open ${type === 'openBuyStopLimit' ? 'BUY' : 'SELL'} Stop Market. `;
+                label += `Volume=${volume} (${getUnit(unitVolume)}), `;
+                label += `Stop=${stop} (${getUnit(unitStop)}), `;
+                label += `Entry=${entry} (${getUnit(unitEntry)}), `;
+                label += `TP=${tp} (${getUnit(unitTP)}), `;
+                label += `SL=${sl} (${getUnit(unitSL)})`;
+                node.data('display', label);
+            }
+        }
+
         async function loadData() {
             const botName: string = r_botName.value;
             console.log({ botName })
@@ -199,7 +274,13 @@ export default defineComponent({
             if (treeData.elements.nodes.filter((item: { id: string; }) => item.id != 'start').length == 0) {
                 treeData.elements.nodes.push({ data: { id: 'start', value: 'Start', type: 'start' }, position: { x: 400, y: 300 } });
             }
+
             cy.json(treeData);
+
+            cy.nodes().forEach(node => {
+                updateDisplay(node);
+            });
+
             cy.elements('.selected').removeClass('selected');
         }
 
@@ -315,7 +396,8 @@ export default defineComponent({
                     botName: botName
                 };
 
-                console.log(JSON.stringify(data))
+                console.log(data.treeData);
+                return;
 
                 let res = await axios.post('/save', data);
                 Toast.showSuccess(`Đã lưu ${data.botName}`);
@@ -425,12 +507,25 @@ export default defineComponent({
                         group: 'nodes',
                         data,
                         position: findFreePosition()
-
                     });
+                    const node = cy.getElementById(data.id);
+                    updateDisplay(node);
                 }
                 else if (r_type.value == 'Cập nhật nút') {
                     const node = cy.getElementById(data.id);
+                    node.data('type', data.type);
                     node.data('value', data.value);
+                    node.data('volume', data.volume);
+                    node.data('stop', data.stop);
+                    node.data('entry', data.entry);
+                    node.data('tp', data.tp);
+                    node.data('sl', data.sl);
+                    node.data('unitVolume', data.unitVolume);
+                    node.data('unitStop', data.unitStop);
+                    node.data('unitEntry', data.unitEntry);
+                    node.data('unitTP', data.unitTP);
+                    node.data('unitSL', data.unitSL);
+                    updateDisplay(node);
                 }
 
                 const currentZoom = cy.zoom();

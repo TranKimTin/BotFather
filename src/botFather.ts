@@ -203,16 +203,28 @@ export class BotFather {
             }
             return true;
         }
-        if (nodeData.type === 'openMarket') {
+        if (nodeData.type === 'openBuyMarket') {
             return true;
         }
-        if (nodeData.type === 'openLimit') {
+        if (nodeData.type === 'openBuyLimit') {
             return true;
         }
-        if (nodeData.type === 'openStopMarket') {
+        if (nodeData.type === 'openBuyStopMarket') {
             return true;
         }
-        if (nodeData.type === 'openStopLimit') {
+        if (nodeData.type === 'openBuyStopLimit') {
+            return true;
+        }
+        if (nodeData.type === 'openSellMarket') {
+            return true;
+        }
+        if (nodeData.type === 'openSellLimit') {
+            return true;
+        }
+        if (nodeData.type === 'openSellStopMarket') {
+            return true;
+        }
+        if (nodeData.type === 'openSellStopLimit') {
             return true;
         }
         if (nodeData.type === 'closeAllOrder') {

@@ -768,7 +768,7 @@ export function isValidCondition(data: NodeData) {
     }
 
     //stop
-    if (['openStopMarket', 'openStopLimit'].includes(data.type)) {
+    if (['openBuyStopMarket', 'openBuyStopLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(data.type)) {
         if (!data.stop) return false;
         let expr: string = data.stop;
         expr = replaceSubExprs(expr);
@@ -777,7 +777,7 @@ export function isValidCondition(data: NodeData) {
     }
 
     //entry
-    if (['openLimit', 'openStopLimit'].includes(data.type)) {
+    if (['openBuyLimit', 'openBuyStopLimit', 'openSellLimit', 'openSellStopLimit'].includes(data.type)) {
         if (!data.entry) return false;
         let expr: string = data.entry;
         expr = replaceSubExprs(expr);
@@ -786,7 +786,7 @@ export function isValidCondition(data: NodeData) {
     }
 
     //tp
-    if (['openMarket', 'openLimit', 'openStopMarket', 'openStopLimit'].includes(data.type)) {
+    if (['openBuyMarket', 'openBuyLimit', 'openBuyStopMarket', 'openBuyStopLimit', 'openSellMarket', 'openSellLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(data.type)) {
         if (!data.tp) return false;
         let expr: string = data.tp;
         expr = replaceSubExprs(expr);
@@ -795,7 +795,7 @@ export function isValidCondition(data: NodeData) {
     }
 
     //sl
-    if (['openMarket', 'openLimit', 'openStopMarket', 'openStopLimit'].includes(data.type)) {
+    if (['openBuyMarket', 'openBuyLimit', 'openBuyStopMarket', 'openBuyStopLimit', 'openSellMarket', 'openSellLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(data.type)) {
         if (!data.sl) return false;
         let expr: string = data.sl;
         expr = replaceSubExprs(expr);
@@ -804,7 +804,7 @@ export function isValidCondition(data: NodeData) {
     }
 
     //volume
-    if (['openMarket', 'openLimit', 'openStopMarket', 'openStopLimit'].includes(data.type)) {
+    if (['openBuyMarket', 'openBuyLimit', 'openBuyStopMarket', 'openBuyStopLimit', 'openSellMarket', 'openSellLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(data.type)) {
         if (!data.volume) return false;
         let expr: string = data.volume;
         expr = replaceSubExprs(expr);
@@ -812,7 +812,7 @@ export function isValidCondition(data: NodeData) {
         if (!isValidExpr(expr)) return false;
     }
 
-    if (['openMarket', 'openLimit', 'openStopMarket', 'openStopLimit', 'closeAllOrder', 'closeAllPosition'].includes(data.type)) {
+    if (['openBuyMarket', 'openBuyLimit', 'openBuyStopMarket', 'openBuyStopLimit', 'openSellMarket', 'openSellLimit', 'openSellStopMarket', 'openSellStopLimit', 'closeAllOrder', 'closeAllPosition'].includes(data.type)) {
         return true;
     }
     else {
