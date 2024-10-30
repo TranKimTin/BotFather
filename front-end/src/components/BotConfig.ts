@@ -86,7 +86,7 @@ export default defineComponent({
                 {
                     selector: 'node[type="start"]',
                     style: {
-                        'background-color': '#ff0000',
+                        'background-color': '#FF6600',
                         'label': 'data(value)'
                     }
                 },
@@ -100,7 +100,7 @@ export default defineComponent({
                 {
                     selector: 'node[type="openSellMarket"], node[type="openSellLimit"], node[type="openSellStopMarket"], node[type="openSellStopLimit"]',
                     style: {
-                        'background-color': '#FF6600',
+                        'background-color': '#ff0000',
                         'label': 'data(display)',
                     },
                 },
