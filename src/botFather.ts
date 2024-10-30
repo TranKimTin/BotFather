@@ -159,7 +159,7 @@ export class BotFather {
 
     private handleLogic(nodeData: NodeData, broker: string, symbol: string, timeframe: string, data: RateData[], idTelegram: TelegramIdType): boolean {
         if (nodeData.type === 'start') return true;
-        
+
         const args: ExprArgs = {
             broker,
             symbol,
@@ -180,7 +180,7 @@ export class BotFather {
         if (nodeData.type === 'telegram') {
             if (!nodeData.value) return false;
 
-            let content: string = nodeData.value.slice("telegram:".length).trim();
+            let content: string = nodeData.value.trim();
             content = this.calculateSubExpr(content, args);
 
             const emoji: { [key: string]: string } = {
