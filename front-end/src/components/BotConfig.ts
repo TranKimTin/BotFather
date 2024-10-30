@@ -1,4 +1,4 @@
-import { defineComponent, onMounted, ref } from 'vue';
+import { defineComponent, onMounted, ref, watch } from 'vue';
 import cytoscape, { type Core } from 'cytoscape';
 import edgehandles from 'cytoscape-edgehandles';
 import * as axios from '../axios/axios';
@@ -34,7 +34,7 @@ export default defineComponent({
         Toast.showInfo("Xin chào");
         const r_botName = ref<string>('');
         const r_idTelegram = ref<string>('');
-        const timeframes = ref<Array<string>>(['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d']);
+        const timeframes: Array<string> = ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'];
         const r_timeframesSelected = ref<Array<string>>([]);
         const r_symbolList = ref<Array<string>>([]);
         const r_symbolListSelected = ref<Array<string>>([]);
@@ -165,8 +165,10 @@ export default defineComponent({
             minZoom: 0.3
         };
 
-
         const confirmation = useConfirm();
+        watch(r_timeframesSelected, (newValue) => {
+            newValue.sort((a, b) => timeframes.indexOf(a) - timeframes.indexOf(b));
+        })
 
 
         let timeout: any;
