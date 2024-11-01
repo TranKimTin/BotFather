@@ -135,3 +135,7 @@ export interface ExprArgs {
     timeframe: string;
     data: Array<RateData>
 }
+
+export interface CustomRequest extends Request {
+    onChangeConfig: (botName: string) => void;
+}

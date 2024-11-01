@@ -11,8 +11,8 @@ interface Response {
     message: string
 }
 
-// const URL = 'http://103.82.25.144:8080';
-const URL = '';
+// const URL = 'http://103.82.25.144:8080/api';
+const URL = '/api';
 
 export async function get(url: string, params: Params = {}): Promise<any> {
     const response = await axios.get(`${URL}${url}`, { params });
@@ -21,7 +21,7 @@ export async function get(url: string, params: Params = {}): Promise<any> {
         return data.data;
     }
     else {
-        console.error('axios get error', data);
+        console.error('axios get error', { url, data });
         Toast.showError(data.message);
         throw data;
     }
@@ -34,7 +34,7 @@ export async function post(url: string, body: Params = {}): Promise<any> {
         return data.data;
     }
     else {
-        console.error('axios post error', data);
+        console.error('axios post error', { url, data });
         Toast.showError(data.message);
         throw data;
     }
@@ -47,7 +47,7 @@ export async function put(url: string, params: Params = {}): Promise<any> {
         return data.data;
     }
     else {
-        console.error('axios put error', data);
+        console.error('axios put error', { url, data });
         Toast.showError(data.message);
         throw data;
     }
@@ -60,7 +60,7 @@ export async function delete_(url: string, params: Params = {}): Promise<any> {
         return data.data;
     }
     else {
-        // console.error('axios delete error', data);
+        console.error('axios delete error', { url, data });
         Toast.showError(data.message);
         throw data;
     }
