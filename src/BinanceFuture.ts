@@ -5,64 +5,9 @@ import moment from 'moment';
 import delay from 'delay';
 import * as util from './util';
 import dotenv from 'dotenv';
+import { Digit, IParamsConstructor, Order, Position, RateData } from './Interface';
 
 dotenv.config({ path: '../.env' });
-
-export interface RateData {
-    symbol: string,
-    startTime: number,
-    timestring: string,
-    open: number,
-    high: number,
-    low: number,
-    close: number,
-    volume: number,
-    interval: string,
-    isFinal: boolean,
-    change: number,
-    ampl: number
-}
-
-export interface IParamsConstructor {
-    apiKey: string | undefined,
-    secretKey: string | undefined,
-    symbolList: Array<string>,
-    timeframes: Array<string>,
-    onCloseCandle: (symbol: string, timeframe: string, data: Array<RateData>) => void,
-    onClosePosition: (symbol: string) => void,
-    onInitStart: () => void,
-    onInitDone: () => void,
-    onHandleError: (err: unknown, symbol: string | undefined) => void,
-    isReadOnly?: boolean
-}
-
-export interface Digit {
-    volume: number | undefined,
-    price: number | undefined
-}
-
-export interface Position {
-    symbol: string,
-    side: string,
-    volume: number,
-    entryPrice: number,
-    profit: number
-}
-
-export interface Order {
-    id: string,
-    symbol: string,
-    side: 'buy' | 'sell',
-    type: 'LIMIT' | 'MARKET' | 'STOP_LIMIT' | 'STOP_MARKET',
-    price: number,
-    volume: number,
-    stopPrice: number,
-    status: string,
-    reduceOnly: boolean,
-    closePosition: boolean,
-    timestamp: string,
-    timeInt: number
-}
 
 class BinanceFuture {
     private binance: ccxt.binanceusdm;

@@ -1,8 +1,8 @@
 import * as ccxt from 'ccxt';
-import { Digit, Position, RateData } from "./BinanceFuture";
 import moment from 'moment';
 import fs from 'fs';
 import * as util from './util';
+import { Digit, Position, RateData } from './Interface';
 
 enum OrderStatus {
     ORDER_BOOKED = 'ORDER_BOOKED',

@@ -1,4 +1,3 @@
-import { RateData } from "./BinanceFuture";
 import * as util from './util';
 import moment from 'moment';
 import delay from 'delay';
@@ -178,7 +177,7 @@ export class BybitSocketFuture {
 
 import http from 'http';
 import { Server } from "socket.io";
-import { SymbolListener } from "./botFather";
+import { RateData, SymbolListener } from "./Interface";
 const server = http.createServer();
 const io = new Server(server, {
     pingInterval: 25000,

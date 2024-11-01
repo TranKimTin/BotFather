@@ -1,33 +1,18 @@
-import { BotInfo, CreateWebConfig, BOT_DATA_DIR, Node, NodeData } from './botFatherConfig';
-import { RateData } from './BinanceFuture';
 import fs from 'fs';
-import Telegram, { TelegramIdType } from './telegram';
-import io, { Socket } from 'socket.io-client';
-import { calculate, ExprArgs } from './Expr';
-import { DefaultEventsMap } from 'socket.io/dist/typed-events';
-
-interface SocketInfo {
-    name: string;
-    port: number;
-    client: Socket<DefaultEventsMap, DefaultEventsMap>,
-}
-
-export interface SymbolListener {
-    symbol: string,
-    broker: string
-    timeframe: string,
-}
+import Telegram from './telegram';
+import io from 'socket.io-client';
+import { calculate } from './Expr';
+import { BotInfo, ExprArgs, Node, NodeData, RateData, SocketInfo, SymbolListener, TelegramIdType } from './Interface';
+const BOT_DATA_DIR = './botData';
 
 export class BotFather {
     private socketList: Array<SocketInfo>;
 
-    private webConfigServerPort: number;
     private botChildren: Array<BotInfo>;
     private telegram: Telegram;
 
     constructor() {
         this.socketList = [];
-        this.webConfigServerPort = 8080;
 
         this.botChildren = [];
         this.telegram = new Telegram(undefined, undefined, true);
@@ -39,7 +24,8 @@ export class BotFather {
         this.connectTradeDataServer('bybit_future', 84);
         this.connectTradeDataServer('binance_future', 85);
 
-        CreateWebConfig(this.webConfigServerPort, this.initBotChildren.bind(this));
+        this.connectToWebConfig(8080);
+
         this.initBotChildren();
     }
 
@@ -84,6 +70,39 @@ export class BotFather {
         });
 
         this.socketList.push({ name, port, client })
+    }
+
+    private connectToWebConfig(port: number) {
+        const client = io(`http://localhost:${port}`, {
+            reconnection: true,              // Bật tính năng tự động kết nối lại (mặc định là true)
+            reconnectionAttempts: Infinity,  // Số lần thử kết nối lại tối đa (mặc định là vô hạn)
+            reconnectionDelay: 1000,         // Thời gian chờ ban đầu trước khi thử kết nối lại (ms)
+            reconnectionDelayMax: 5000,      // Thời gian chờ tối đa giữa các lần thử kết nối lại (ms)
+            randomizationFactor: 0.5         // Yếu tố ngẫu nhiên trong thời gian chờ kết nối lại
+        });
+
+        client.on('connect', () => {
+            console.log(`Connected to web config :${port}`);
+            this.initBotChildren();
+        });
+
+        client.on('onUpdateConfig', (botName: string) => {
+            console.log('onUpdateConfig', botName);
+            this.initBotChildren(botName);
+        });
+
+        client.on('disconnect', (reason: string) => {
+            console.log(`onDisconnect - Disconnected from web config :${port}. reason: ${reason}`);
+        });
+
+        client.on("connect_error", (error: { message: any; }) => {
+            console.log(`connect_error - Attempting to reconnect web config :${port}`);
+            if (client.active) {
+            } else {
+                console.log(error.message);
+                client.connect();
+            }
+        });
     }
 
     private initBotChildren(botName?: string) {

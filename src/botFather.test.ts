@@ -1,7 +1,7 @@
 var assert = require('assert');
 import * as util from './util';
-import { RateData } from './BinanceFuture';
 import { isValidCondition } from './Expr';
+import { RateData } from './Interface';
 
 
 describe('BotFather', function () {

@@ -2,10 +2,10 @@ import TelegramBot from 'node-telegram-bot-api';
 import moment from 'moment';
 import _ from 'lodash';
 import dotenv from 'dotenv';
+import { TelegramIdType } from './Interface';
 
 dotenv.config({ path: '../.env' });
 
-export type TelegramIdType = string | number;
 
 let chatID: TelegramIdType = '@tintk_RSI_CCI'; //'@tintk_RSI_CCI'
 let errorChatID: TelegramIdType = '@tintk_RSI_CCI'; //'@tintk_RSI_CCI'

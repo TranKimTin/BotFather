@@ -1,4 +1,3 @@
-import BinanceFuture, { RateData } from '../BinanceFuture';
 import dotenv from 'dotenv';
 import * as util from '../util';
 import SetupConfig from './setupConfig';
@@ -7,6 +6,8 @@ import { GoogleSheet } from './GoogleSheet';
 import Telegram from '../telegram';
 import updateSheet from './updateSheet';
 import delay from 'delay';
+import BinanceFuture from '../BinanceFuture';
+import { RateData } from '../Interface';
 
 dotenv.config({ path: '../.env' });
 

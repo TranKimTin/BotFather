@@ -1,11 +1,11 @@
 import moment, { DurationInputArg2 } from 'moment';
-import { RateData } from './BinanceFuture';
 import zlib from 'zlib';
 import fs from 'fs';
 import * as ccxt from 'ccxt'
 import * as indicator from 'technicalindicators';
 import _ from 'lodash';
 import axios from 'axios';
+import { RateData } from './Interface';
 
 let binance = new ccxt.binance({ 'timeout': 30000 });
 let binanceFuture = new ccxt.binanceusdm({ 'timeout': 30000 });

@@ -14,6 +14,6 @@ export default defineConfig({
     }
   },
   build: {
-    outDir: '../js/public'
+    outDir: '../js/WebConfig/public'
   }
 })
