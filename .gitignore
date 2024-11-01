@@ -140,6 +140,7 @@ data/*
 js/config83.txt
 js/botData/*
 js/public/*
+js/WebConfig/*
 .vscode/*
 src/test.ts
 /src/generated
