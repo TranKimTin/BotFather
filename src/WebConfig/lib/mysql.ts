@@ -1,7 +1,6 @@
 import mysql, { Connection, PoolConnection } from 'mysql';
 import dotenv from 'dotenv';
-dotenv.config({ path: '../../../.env' });
-
+dotenv.config({ path: `${__dirname}/../../../.env` });
 let pool: mysql.Pool;
 
 export function init() {
@@ -12,6 +11,7 @@ export function init() {
             password: process.env.MYSQL_PASSWORD,
             database: process.env.MYSQL_DATABASE
         });
+        console.log(process.env.MYSQL_HOST, process.env.MYSQL_USER, process.env.MYSQL_PASSWORD, process.env.MYSQL_DATABASE)
     }
 }
 
@@ -41,7 +41,7 @@ export function query_transaction(connection: PoolConnection, query: string, par
     });
 }
 
-export function query(query: string, params: Array<any>) {
+export function query(query: string, params: Array<any> = []) {
     init();
     return new Promise((resolve, reject) => {
         pool.query(query, params, (error, results, fields) => {

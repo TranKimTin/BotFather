@@ -4,7 +4,7 @@ import _ from 'lodash';
 import dotenv from 'dotenv';
 import { TelegramIdType } from './Interface';
 
-dotenv.config({ path: '../.env' });
+dotenv.config({ path: `${__dirname}/../.env` });
 
 
 let chatID: TelegramIdType = '@tintk_RSI_CCI'; //'@tintk_RSI_CCI'
