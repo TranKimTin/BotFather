@@ -5,11 +5,7 @@ import { isValidCondition } from '../../Expr';
 import path from 'path';
 import * as util from '../../util'
 import fs from "fs";
-
-const BOT_DATA_DIR = '../botData';
-if (!fs.existsSync(BOT_DATA_DIR)) {
-    fs.mkdirSync(BOT_DATA_DIR);
-}
+import * as mysql from '../lib/mysql';
 
 function validatekBotName(botName: string) {
     const invalidChars = /[\/\\:*?"<>|]/;
@@ -56,12 +52,11 @@ function buildRoute(botInfo: BotInfo): boolean {
 }
 
 
-export function getBotInfo(botName: string) {
-    console.log('getBotInfo')
+export async function getBotInfo(botName: string) {
     if (!validatekBotName(botName)) {
         throw `Tên bot không hợp lệ ${botName}`;
     }
-    let data: BotInfo = {
+    let botInfo: BotInfo = {
         treeData: { elements: { nodes: [], edges: [] } },
         timeframes: [],
         symbolList: [],
@@ -75,10 +70,22 @@ export function getBotInfo(botName: string) {
             }, id: 'start', next: []
         }
     };
-    if (fs.existsSync(`${BOT_DATA_DIR}/${botName}.json`)) {
-        data = JSON.parse(fs.readFileSync(`${BOT_DATA_DIR}/${botName}.json`).toString());
+
+    const sql = `SELECT botName, idTelegram, route, symbolList, timeframes, treeData 
+                    FROM Bot WHERE botName = ?`;
+    const data = await mysql.query(sql, [botName]);
+
+    if (data.length > 0) {
+        const bot = data[0];
+        botInfo.botName = bot.botName;
+        botInfo.idTelegram = bot.idTelegram;
+        botInfo.route = JSON.parse(bot.route);
+        botInfo.symbolList = JSON.parse(bot.symbolList);
+        botInfo.timeframes = JSON.parse(bot.timeframes);
+        botInfo.treeData = JSON.parse(bot.treeData);
     }
-    return data;
+
+    return botInfo;
 }
 
 let cacheSymbolList: { lastTime: number, data: Array<string> } = {
@@ -115,8 +122,8 @@ export async function getSymbolList() {
 }
 
 export async function getBotList() {
-    const botList = fs.readdirSync(BOT_DATA_DIR);
-    const data = botList.map(item => item.replace('.json', '')) || [];
+    const botList = await mysql.query(`SELECT botName FROM Bot`);
+    const data = botList.map((item: { botName: any; }) => item.botName);
     return data;
 }
 
@@ -126,10 +133,10 @@ export async function saveBot(data: BotInfo) {
         throw `Tên bot không hợp lệ ${botName}`;
     }
 
-    const edges = data.treeData.elements.edges?.filter(item => !item.removed).map(item => item.data) || []; //{source, target, id}
+    // const edges = data.treeData.elements.edges?.filter(item => !item.removed).map(item => item.data) || []; //{source, target, id}
     const nodes = data.treeData.elements.nodes?.filter(item => !item.removed).map(item => item.data) || []; //{id, name}
 
-    console.log({ edges, nodes });
+    // console.log({ edges, nodes });
 
     for (let node of nodes) {
         if (!isValidCondition(node)) {
@@ -142,8 +149,47 @@ export async function saveBot(data: BotInfo) {
         throw 'Điều kiện vòng tròn';
     }
 
-    const botPath = path.join(BOT_DATA_DIR, `${data.botName}.json`);
-    fs.writeFileSync(botPath, JSON.stringify(data));
+    const [{ count }] = await mysql.query(
+        `SELECT count(1) AS count 
+            FROM Bot
+            WHERE botName = ?`,
+        [data.botName]);
+
+    if (count === 0) {
+        console.log('Insert new bot', JSON.stringify(data));
+        const sql = `INSERT INTO Bot(botName, idTelegram, route, symbolList, timeframes, treeData) VALUES(?,?,?,?,?,?)`;
+        await mysql.query(sql,
+            [
+                data.botName,
+                data.idTelegram,
+                JSON.stringify(data.route),
+                JSON.stringify(data.symbolList),
+                JSON.stringify(data.timeframes),
+                JSON.stringify(data.treeData)
+            ]);
+    }
+    else {
+        console.log(' Update bot', JSON.stringify(data));
+        const sql = `UPDATE Bot
+                    SET idTelegram = ?,
+                        route = ?,
+                        symbolList = ?,
+                        timeframes = ?,
+                        treeData = ?
+                    WHERE botName = ?
+                        `;
+        await mysql.query(sql,
+            [
+                data.idTelegram,
+                JSON.stringify(data.route),
+                JSON.stringify(data.symbolList),
+                JSON.stringify(data.timeframes),
+                JSON.stringify(data.treeData),
+                data.botName
+            ]);
+    }
+
+
 }
 
 export async function checkNode(data: NodeData) {
@@ -155,8 +201,5 @@ export async function checkNode(data: NodeData) {
 }
 
 export async function deleteBot(botName: string) {
-    const botFile = path.join(BOT_DATA_DIR, `${botName}.json`);
-    if (fs.existsSync(botFile)) {
-        fs.unlinkSync(botFile);
-    }
+    await mysql.query(`DELETE FROM Bot WHERE botName = ?`, [botName]);
 }

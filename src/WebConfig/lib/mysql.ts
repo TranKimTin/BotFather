@@ -40,7 +40,7 @@ export function query_transaction(connection: PoolConnection, query: string, par
     });
 }
 
-export function query(query: string, params: Array<any> = []) {
+export function query(query: string, params: Array<any> = []): Promise<any> {
     init();
     return new Promise((resolve, reject) => {
         pool.query(query, params, (error, results, fields) => {

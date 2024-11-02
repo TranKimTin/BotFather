@@ -3,7 +3,7 @@ import Telegram from './telegram';
 import io from 'socket.io-client';
 import { calculate } from './Expr';
 import { BotInfo, ExprArgs, Node, NodeData, RateData, SocketInfo, SymbolListener, TelegramIdType } from './Interface';
-const BOT_DATA_DIR = './botData';
+import * as mysql from './WebConfig/lib/mysql';
 
 export class BotFather {
     private socketList: Array<SocketInfo>;
@@ -105,14 +105,20 @@ export class BotFather {
         });
     }
 
-    private initBotChildren(botName?: string) {
+    private async initBotChildren(botName?: string) {
         this.botChildren = [];
-        const botFileList = fs.readdirSync(BOT_DATA_DIR);
-        for (const botFile of botFileList) {
-            if (botFile.endsWith('.json')) {
-                const botInfo: BotInfo = JSON.parse(fs.readFileSync(`${BOT_DATA_DIR}/${botFile}`).toString());
-                this.botChildren.push(botInfo);
-            }
+
+        const botList: Array<any> = await mysql.query(`SELECT botName, idTelegram, route, symbolList, timeframes, treeData FROM Bot`);
+        for (let bot of botList) {
+            const botInfo: BotInfo = {
+                botName: bot.botName,
+                idTelegram: bot.idTelegram,
+                route: JSON.parse(bot.route),
+                symbolList: JSON.parse(bot.symbolList),
+                timeframes: JSON.parse(bot.timeframes),
+                treeData: JSON.parse(bot.treeData)
+            };
+            this.botChildren.push(botInfo);
         }
 
         const list: Array<string> = [];
