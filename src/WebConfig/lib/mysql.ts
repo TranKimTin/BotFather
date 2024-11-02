@@ -11,7 +11,6 @@ export function init() {
             password: process.env.MYSQL_PASSWORD,
             database: process.env.MYSQL_DATABASE
         });
-        console.log(process.env.MYSQL_HOST, process.env.MYSQL_USER, process.env.MYSQL_PASSWORD, process.env.MYSQL_DATABASE)
     }
 }
 
