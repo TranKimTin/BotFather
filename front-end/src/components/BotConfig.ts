@@ -376,6 +376,7 @@ export default defineComponent({
         }
 
         document.addEventListener('keydown', (event) => {
+            if (r_visible.value) return;
             if (event.key === 'Delete') {
                 removeNode();
             }
