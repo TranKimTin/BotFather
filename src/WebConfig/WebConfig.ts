@@ -5,7 +5,7 @@ import body_parser from "body-parser";
 import path from "path";
 import { Server } from "socket.io";
 import http from 'http';
-import { CustomRequest } from '../Interface';
+import { CustomRequest } from '../common/Interface';
 import routes from './routes';
 
 const app = express();

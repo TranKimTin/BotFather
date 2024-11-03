@@ -1,9 +1,9 @@
-import { BotInfo, CustomRequest, Node, NodeData } from '../../Interface';
+import { BotInfo, CustomRequest, Node, NodeData } from '../../common/Interface';
 import { Server } from 'socket.io';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
-import { isValidCondition } from '../../Expr';
+import { isValidCondition } from '../../common/Expr';
 import path from 'path';
-import * as util from '../../util'
+import * as util from '../../common/util'
 import fs from "fs";
 import * as mysql from '../lib/mysql';
 

@@ -1,5 +1,5 @@
 import IBinance, { Binance, Candle } from 'binance-api-node';
-import * as util from './util';
+import * as util from './common/util';
 import moment from 'moment';
 import delay from 'delay';
 import WebSocket from 'ws';
@@ -176,7 +176,7 @@ export class BinanceSocketFuture {
 
 import http from 'http';
 import { Server } from "socket.io";
-import { RateData, SymbolListener } from './Interface';
+import { RateData, SymbolListener } from './common/Interface';
 const server = http.createServer();
 const io = new Server(server, {
     pingInterval: 25000,

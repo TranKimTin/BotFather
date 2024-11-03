@@ -1,8 +1,8 @@
 import * as ccxt from 'ccxt';
 import moment from 'moment';
 import fs from 'fs';
-import * as util from './util';
-import { Digit, Position, RateData } from './Interface';
+import * as util from './common/util';
+import { Digit, Position, RateData } from './common/Interface';
 
 enum OrderStatus {
     ORDER_BOOKED = 'ORDER_BOOKED',

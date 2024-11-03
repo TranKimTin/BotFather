@@ -3,9 +3,9 @@ import * as ccxt from 'ccxt'
 import IBinance, { Binance } from 'binance-api-node';
 import moment from 'moment';
 import delay from 'delay';
-import * as util from './util';
+import * as util from './common/util';
 import dotenv from 'dotenv';
-import { Digit, IParamsConstructor, Order, Position, RateData } from './Interface';
+import { Digit, IParamsConstructor, Order, Position, RateData } from './common/Interface';
 
 dotenv.config({ path: '../.env' });
 

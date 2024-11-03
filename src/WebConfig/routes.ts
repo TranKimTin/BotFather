@@ -1,8 +1,8 @@
 import express from 'express';
-import { BotInfo, CustomRequest, Node } from '../Interface';
+import { BotInfo, CustomRequest, Node } from '../common/Interface';
 import { Server } from 'socket.io';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
-import { isValidCondition } from '../Expr';
+import { isValidCondition } from '../common/Expr';
 import path from 'path';
 import fs from "fs";
 import * as BotConfig from './controller/BotConfig';

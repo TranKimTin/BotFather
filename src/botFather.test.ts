@@ -1,7 +1,7 @@
 var assert = require('assert');
-import * as util from './util';
-import { isValidCondition } from './Expr';
-import { RateData } from './Interface';
+import * as util from './common/util';
+import { isValidCondition } from './common/Expr';
+import { RateData } from './common/Interface';
 
 
 describe('BotFather', function () {

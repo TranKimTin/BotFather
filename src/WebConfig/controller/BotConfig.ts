@@ -1,4 +1,4 @@
-import { BotInfo, CustomRequest, NodeData } from '../../Interface';
+import { BotInfo, CustomRequest, NodeData } from '../../common/Interface';
 import * as BotConfig from '../business/BotConfig';
 
 export async function getBotInfo(req: any, res: any) {

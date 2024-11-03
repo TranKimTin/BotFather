@@ -1,8 +1,8 @@
 import fs from 'fs';
-import Telegram from './telegram';
+import Telegram from './common/telegram';
 import io from 'socket.io-client';
-import { calculate } from './Expr';
-import { BotInfo, ExprArgs, Node, NodeData, RateData, SocketInfo, SymbolListener, TelegramIdType } from './Interface';
+import { calculate } from './common/Expr';
+import { BotInfo, ExprArgs, Node, NodeData, RateData, SocketInfo, SymbolListener, TelegramIdType } from './common/Interface';
 import * as mysql from './WebConfig/lib/mysql';
 
 export class BotFather {

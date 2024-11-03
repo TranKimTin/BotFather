@@ -1,13 +1,13 @@
 import dotenv from 'dotenv';
-import * as util from '../util';
+import * as util from '../common/util';
 import SetupConfig from './setupConfig';
 import moment from 'moment';
 import { GoogleSheet } from './GoogleSheet';
-import Telegram from '../telegram';
+import Telegram from '../common/telegram';
 import updateSheet from './updateSheet';
 import delay from 'delay';
 import BinanceFuture from '../BinanceFuture';
-import { RateData } from '../Interface';
+import { RateData } from '../common/Interface';
 
 dotenv.config({ path: '../.env' });
 

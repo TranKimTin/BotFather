@@ -1,6 +1,6 @@
 import http from 'http';
 import fs from 'fs';
-import Telegram from '../telegram';
+import Telegram from '../common/telegram';
 
 export interface IConfigResistance {
     InVolumeUSD: number,
