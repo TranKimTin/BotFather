@@ -25,7 +25,7 @@ export class BinanceSocket {
         // console.log(symbolList.join(' '));
         console.log(`${BinanceSocket.broker}: Total ${symbolList.length} symbols`);
 
-        const timeframes = ['15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d', '1m', '3m', '5m',];
+        const timeframes = ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'];
         // timeframes = ['1m', '15m', '4h', '1d'];
         for (const symbol of symbolList) {
             this.gData[symbol] = {};
@@ -197,7 +197,7 @@ let symbolListener: { [key: string]: boolean } = {};
 
 io.on('connection', client => {
     cnt++;
-    console.log(`${BinanceSocket.broker}: client connected. total: ${cnt} connection`);
+    console.log(`${BinanceSocket.broker}: client connected. total: ${cnt} - ${io.sockets.sockets.size} connection`);
 
     client.on('disconnect', () => {
         cnt--;
@@ -222,7 +222,7 @@ function onCloseCandle(broker: string, symbol: string, timeframe: string, data: 
     let key = `${symbol}:${timeframe}`;
     if (!symbolListener[key]) return;
 
-    if (symbol === 'BTCUSDT') console.log(onCloseCandle, { broker, symbol, timeframe });
+    if (symbol === 'BTCUSDT') console.log('onCloseCandle', { broker, symbol, timeframe });
     io.emit('onCloseCandle', { broker, symbol, timeframe, data });
 }
 
