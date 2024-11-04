@@ -11,7 +11,7 @@
     "build-antlr": "antlr4ng -Dlanguage=TypeScript -o src/common/generated/ -visitor -no-listener -Xexact-output-dir src/common/Expr.g4",
     "build-ts": "tsc",
     "build-web": "cd ./front-end && npm run build",
-    "start": "node js/BinanceFuture.js"
+    "start": "node js/WebConfig/WebConfig.js"
   },
   "mocha": {
     "require": "ts-node/register",
