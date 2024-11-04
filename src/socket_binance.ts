@@ -205,8 +205,7 @@ io.on('connection', client => {
     });
 
     client.on('update_symbol_listener', (data: Array<SymbolListener>) => {
-        console.log(`${BinanceSocket.broker} on update_symbol_listener`);
-        console.log(JSON.stringify(data));
+        console.log(`${BinanceSocket.broker} on update_symbol_listener. length = ${data.length}`);
         symbolListener = {};
         for (const { symbol, timeframe, broker } of data) {
             if (broker !== BinanceSocket.broker) continue;

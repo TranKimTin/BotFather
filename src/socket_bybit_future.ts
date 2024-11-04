@@ -193,8 +193,7 @@ io.on('connection', client => {
     });
 
     client.on('update_symbol_listener', (data: Array<SymbolListener>) => {
-        console.log(`${BybitSocketFuture.broker} on update_symbol_listener`);
-        console.log(JSON.stringify(data));
+        console.log(`${BybitSocketFuture.broker} on update_symbol_listener. length = ${data.length}`);
         symbolListener = {};
         for (const { symbol, timeframe, broker } of data) {
             if (broker !== BybitSocketFuture.broker) continue;
