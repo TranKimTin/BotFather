@@ -48,9 +48,7 @@ export class BinanceSocket {
                     close: +candle.close,
                     volume: +candle.volume,
                     interval: tf,
-                    isFinal: candle.isFinal && util.checkFinal(tf, candle.startTime),
-                    change: (+candle.close - +candle.open) / +candle.open,
-                    ampl: (+candle.high - +candle.low) / +candle.open
+                    isFinal: candle.isFinal && util.checkFinal(tf, candle.startTime)
                 };
                 this.gLastPrice[data.symbol] = data.close;
 
@@ -63,8 +61,6 @@ export class BinanceSocket {
                     dataList[0].low = Math.min(dataList[0].low, data.low);
                     dataList[0].close = data.close;
                     dataList[0].volume += candle.isFinal ? data.volume : 0;
-                    dataList[0].change = (dataList[0].close - dataList[0].open) / dataList[0].open;
-                    dataList[0].ampl = (dataList[0].high - dataList[0].low) / dataList[0].open;
 
                     if (data.isFinal && !dataList[0].isFinal) {
                         dataList[0].isFinal = data.isFinal;

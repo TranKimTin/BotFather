@@ -84,8 +84,6 @@ export interface RateData {
     volume: number,
     interval: string,
     isFinal: boolean,
-    change: number,
-    ampl: number
 }
 
 export interface IParamsConstructor {

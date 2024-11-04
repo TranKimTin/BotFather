@@ -62,9 +62,7 @@ export class OkxSocket {
                     close: +candle[4],
                     volume: +candle[5],
                     interval: tf,
-                    isFinal: (!!+candle[8]) && util.checkFinal(tf, +candle[0]),
-                    change: (+candle[0] - +candle[1]) / +candle[1],
-                    ampl: (+candle[2] - +candle[3]) / +candle[1]
+                    isFinal: (!!+candle[8]) && util.checkFinal(tf, +candle[0])
                 };
                 this.gLastPrice[data.symbol] = data.close;
 
@@ -77,8 +75,6 @@ export class OkxSocket {
                     dataList[0].low = Math.min(dataList[0].low, data.low);
                     dataList[0].close = data.close;
                     dataList[0].volume += (!!+candle[8]) ? data.volume : 0;
-                    dataList[0].change = (dataList[0].close - dataList[0].open) / dataList[0].open;
-                    dataList[0].ampl = (dataList[0].high - dataList[0].low) / dataList[0].open;
 
                     if (data.isFinal && !dataList[0].isFinal) {
                         dataList[0].isFinal = data.isFinal;

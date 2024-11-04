@@ -143,6 +143,6 @@ js/public/*
 js/WebConfig/*
 .vscode/*
 src/test.ts
-/src/generated
+/src/common/generated
 !front-end/tailwind.config.js
 !front-end/postcss.config.js

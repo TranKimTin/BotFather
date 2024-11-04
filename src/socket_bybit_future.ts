@@ -73,9 +73,7 @@ export class BybitSocketFuture {
                     close: +candle.close,
                     volume: +candle.volume,
                     interval: tf,
-                    isFinal: candle.confirm && util.checkFinal(tf, candle.start),
-                    change: (+candle.close - +candle.open) / +candle.open,
-                    ampl: (+candle.high - +candle.low) / +candle.open
+                    isFinal: candle.confirm && util.checkFinal(tf, candle.start)
                 };
                 this.gLastPrice[data.symbol] = data.close;
 
@@ -88,8 +86,6 @@ export class BybitSocketFuture {
                     dataList[0].low = Math.min(dataList[0].low, data.low);
                     dataList[0].close = data.close;
                     dataList[0].volume += candle.confirm ? data.volume : 0;
-                    dataList[0].change = (dataList[0].close - dataList[0].open) / dataList[0].open;
-                    dataList[0].ampl = (dataList[0].high - dataList[0].low) / dataList[0].open;
 
                     if (data.isFinal && !dataList[0].isFinal) {
                         dataList[0].isFinal = data.isFinal;

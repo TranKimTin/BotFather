@@ -317,8 +317,6 @@ export default class Backtest {
                 data[0].low = Math.min(data[0].low, price);
                 data[0].close = price;
                 data[0].volume += volume;
-                data[0].change = (data[0].close - data[0].open) / data[0].open;
-                data[0].ampl = (data[0].high - data[0].low) / data[0].open;
                 if (close && util.getStartTime(tf, this.timeCurrent.valueOf() + 60000) != data[0].startTime) {
                     data[0].isFinal = true;
                     await this.onCloseCandle(symbol, tf, [...data]);
@@ -335,9 +333,7 @@ export default class Backtest {
                     close: price,
                     volume: volume,
                     interval: tf,
-                    isFinal: false,
-                    change: 0,
-                    ampl: 0
+                    isFinal: false
                 });
                 if (data[1] && !data[1].isFinal) {
                     data[1].isFinal = true;

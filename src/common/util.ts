@@ -480,8 +480,6 @@ export async function getOHLCVFromCache(symbol: string, timeframe: string, limit
             data[0].low = Math.min(data[0].low, candle.low);
             data[0].close = candle.close;
             data[0].volume += candle.isFinal ? candle.volume : 0;
-            data[0].change = (data[0].open - data[0].close) / data[0].open;
-            data[0].ampl = (data[0].high - data[0].low) / data[0].open;
         }
     }
     data = data.slice(0, limit);
