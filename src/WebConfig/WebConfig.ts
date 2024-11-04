@@ -15,15 +15,12 @@ const io = new Server(server, {
     pingTimeout: 60000
 });
 
-let cnt = 0;
 const TAG = 'WebConfigSocket';
 io.on('connection', client => {
-    cnt++;
-    console.log(`${TAG}: client connected. total: ${cnt} connection`);
+    console.log(`${TAG}: client connected. total: ${io.sockets.sockets.size} connection`);
 
     client.on('disconnect', () => {
-        cnt--;
-        console.log(`${TAG}: onDisconnect - Client disconnected. total: ${cnt} connection`);
+        console.log(`${TAG}: onDisconnect - Client disconnected. total: ${io.sockets.sockets.size} connection`);
     });
 });
 

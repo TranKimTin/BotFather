@@ -184,16 +184,13 @@ const io = new Server(server, {
     pingTimeout: 60000
 });
 const port = 82;
-let cnt = 0;
 let symbolListener: { [key: string]: boolean } = {};
 
 io.on('connection', client => {
-    cnt++;
-    console.log(`${BybitSocket.broker}: client connected. total: ${cnt} connection`);
+    console.log(`${BybitSocket.broker}: client connected. total: ${io.sockets.sockets.size} connection`);
 
     client.on('disconnect', () => {
-        cnt--;
-        console.log(`${BybitSocket.broker}: onDisconnect - Client disconnected. total: ${cnt} connection`);
+        console.log(`${BybitSocket.broker}: onDisconnect - Client disconnected. total: ${io.sockets.sockets.size} connection`);
     });
 
     client.on('update_symbol_listener', (data: Array<SymbolListener>) => {
