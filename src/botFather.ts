@@ -169,6 +169,7 @@ export class BotFather {
         visited[id] = true;
         if (this.handleLogic(nodeData, broker, symbol, timeframe, data, idTelegram)) {
             for (const child of next) {
+                if (broker === 'binance' && symbol === 'BTCUSDT') console.log('handle logic', child)
                 this.dfs_handleLogic(child, broker, symbol, timeframe, data, idTelegram, visited);
             }
         }
@@ -225,6 +226,7 @@ export class BotFather {
 
             const ids = idTelegram.toString().split(',').map(item => item.trim());
             for (const id of ids) {
+                if (broker === 'binance' && symbol === 'BTCUSDT') console.log('send tele', { mess, id, ids });
                 this.telegram.sendMessage(mess, id);
             }
             return true;
