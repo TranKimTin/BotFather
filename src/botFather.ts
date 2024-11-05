@@ -147,7 +147,7 @@ export class BotFather {
     }
 
     private async onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
-        if (broker === 'binance' && symbol === 'BTCUSDT') console.log('onCloseCandle', { broker, symbol, timeframe })
+        if (broker === 'binance' && symbol === 'BTCUSDT') console.log('onCloseCandle', { botSize: this.botChildren.length, broker, symbol, timeframe },)
         for (const botInfo of this.botChildren) {
             const { botName, idTelegram, symbolList, timeframes, treeData, route } = botInfo;
 
