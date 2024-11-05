@@ -106,9 +106,9 @@ export class BotFather {
     }
 
     private async initBotChildren(botName?: string) {
+        const botList: Array<any> = await mysql.query(`SELECT botName, idTelegram, route, symbolList, timeframes, treeData FROM Bot`);
         this.botChildren = [];
 
-        const botList: Array<any> = await mysql.query(`SELECT botName, idTelegram, route, symbolList, timeframes, treeData FROM Bot`);
         for (let bot of botList) {
             const botInfo: BotInfo = {
                 botName: bot.botName,
@@ -147,7 +147,6 @@ export class BotFather {
     }
 
     private async onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
-        if (broker === 'binance' && symbol === 'BTCUSDT') console.log('onCloseCandle', { botSize: this.botChildren.length, broker, symbol, timeframe },)
         for (const botInfo of this.botChildren) {
             const { botName, idTelegram, symbolList, timeframes, treeData, route } = botInfo;
 
@@ -169,7 +168,6 @@ export class BotFather {
         visited[id] = true;
         if (this.handleLogic(nodeData, broker, symbol, timeframe, data, idTelegram)) {
             for (const child of next) {
-                if (broker === 'binance' && symbol === 'BTCUSDT') console.log('handle logic', child)
                 this.dfs_handleLogic(child, broker, symbol, timeframe, data, idTelegram, visited);
             }
         }
@@ -226,7 +224,6 @@ export class BotFather {
 
             const ids = idTelegram.toString().split(',').map(item => item.trim());
             for (const id of ids) {
-                if (broker === 'binance' && symbol === 'BTCUSDT') console.log('send tele', { mess, id, ids });
                 this.telegram.sendMessage(mess, id);
             }
             return true;

@@ -219,7 +219,6 @@ function onCloseCandle(broker: string, symbol: string, timeframe: string, data: 
     let key = `${symbol}:${timeframe}`;
     if (!symbolListener[key]) return;
 
-    if (symbol === 'BTCUSDT') console.log('onCloseCandle', { broker, symbol, timeframe });
     io.emit('onCloseCandle', { broker, symbol, timeframe, data });
 }
 
