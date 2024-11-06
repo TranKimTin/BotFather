@@ -176,13 +176,13 @@ io.on('connection', client => {
     });
 
     client.on('update_symbol_listener', (data: Array<SymbolListener>) => {
-        console.log(`${OkxSocket.broker} on update_symbol_listener. length = ${data.length}`);
         symbolListener = {};
         for (const { symbol, timeframe, broker } of data) {
             if (broker !== OkxSocket.broker) continue;
             let key = `${symbol}:${timeframe}`;
             symbolListener[key] = true;
         }
+        console.log(`${OkxSocket.broker} on update_symbol_listener. length = ${Object.keys(symbolListener).length}`);
     });
 });
 server.listen(port);
