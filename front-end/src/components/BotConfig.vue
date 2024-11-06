@@ -103,7 +103,7 @@
                     <InputText
                         v-if="['openBuyLimit', 'openBuyStopMarket', 'openBuyStopLimit', 'openSellLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(r_currentNode.type)"
                         v-model="r_currentNode.expiredTime" autocomplete="off" class="flex-auto" id="expiredTime"
-                        placeholder="Nhập biểu thức" />
+                        placeholder="Không hủy thì nhập 0" />
                     <Select
                         v-if="['openBuyLimit', 'openBuyStopMarket', 'openBuyStopLimit', 'openSellLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(r_currentNode.type)"
                         v-model="r_currentNode.unitExpiredTime" :options="unitExpiredTime" optionLabel="name" optionValue="value"
