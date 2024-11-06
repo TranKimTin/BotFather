@@ -117,16 +117,12 @@ export class BinanceSocketFuture {
 
             rws.addEventListener('error', (err) => {
                 console.error(`binance: WebSocket error ${symbol}`, err);
-                setTimeout(() => {
-                    throw err;
-                }, 5000);
+                throw err;
             });
 
             rws.addEventListener('close', (event) => {
                 console.error(`${BinanceSocketFuture.broker}: WebSocket connection closed ${symbol}, ${event.code} ${event.reason}`);
-                setTimeout(() => {
-                    throw `${BinanceSocketFuture.broker}: WebSocket connection closed ${symbol}, ${event.code} ${event.reason}`;
-                }, 5000);
+                throw `${BinanceSocketFuture.broker}: WebSocket connection closed ${symbol}, ${event.code} ${event.reason}`;
             });
             await delay(10);
         }
