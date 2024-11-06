@@ -122,13 +122,13 @@ export class BybitSocket {
         // ws.on('close', function close() {
         rws.addEventListener('close', (event) => {
             console.error(`${BybitSocket.broker}: WebSocket connection closed ${event.code} ${event.reason}`);
-            throw `${BybitSocket.broker}: WebSocket connection closed ${event.code} ${event.reason}`;
+            util.restartApp();
         });
 
         // ws.on('error', function error(err) {
         rws.addEventListener('error', (err) => {
             console.error(`${BybitSocket.broker}: WebSocket error: `, err);
-            throw err;
+            util.restartApp();
         });
 
 

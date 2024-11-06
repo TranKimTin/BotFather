@@ -110,13 +110,13 @@ export class OkxSocket {
         // ws.on('close', function close() {
         rws.addEventListener('close', (event) => {
             console.error(`${OkxSocket.broker}: WebSocket connection closed ${event.code} ${event.reason}`);
-            throw `${OkxSocket.broker}: WebSocket connection closed ${event.code} ${event.reason}`;
+            util.restartApp();
         });
 
         // ws.on('error', function error(err) {
         rws.addEventListener('error', (err) => {
             console.error(`${OkxSocket.broker}: WebSocket error: `, err);
-            throw err;
+            util.restartApp();
         });
 
 

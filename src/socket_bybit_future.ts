@@ -119,12 +119,12 @@ export class BybitSocketFuture {
 
         rws.addEventListener('close', (event) => {
             console.error(`${BybitSocketFuture.broker}: WebSocket connection closed ${event.code} ${event.reason}`);
-            throw `${BybitSocketFuture.broker}: WebSocket connection closed ${event.code} ${event.reason}`;
+            util.restartApp();
         });
 
         rws.addEventListener('error', (err) => {
             console.error(`${BybitSocketFuture.broker}: WebSocket error: `, err);
-            throw err;
+            util.restartApp();
         });
 
 

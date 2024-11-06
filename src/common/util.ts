@@ -6,6 +6,7 @@ import * as indicator from 'technicalindicators';
 import _ from 'lodash';
 import axios from 'axios';
 import { RateData } from './Interface';
+import pm2 from 'pm2';
 
 let binance = new ccxt.binance({ 'timeout': 30000 });
 let binanceFuture = new ccxt.binanceusdm({ 'timeout': 30000 });
@@ -26,6 +27,31 @@ interface OHLCV {
     low: number,
     close: number,
     volume: number
+}
+
+export function restartApp() {
+    pm2.connect((err) => {
+        if (err) {
+            console.error('Error connecting to PM2:', err);
+            return;
+        }
+
+        const pmId = process.env.pm_id;
+        console.log('Restart app', { pmId });
+        if (pmId !== undefined) {
+            pm2.restart(pmId, (err) => {
+                pm2.disconnect();
+                if (err) {
+                    console.error('Error restarting app:', err);
+                } else {
+                    console.log('App restarted successfully!');
+                }
+            });
+        } else {
+            console.error('PM2 ID not found. Are you running this app with PM2?');
+            pm2.disconnect();
+        }
+    });
 }
 
 export function iCCI(data: Array<RateData>, period: number) {
