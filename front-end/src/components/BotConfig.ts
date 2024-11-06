@@ -23,11 +23,13 @@ interface NodeData {
     entry?: string,
     tp?: string,
     sl?: string,
+    expiredTime?: string,
     unitVolume?: string,
     unitStop?: string,
     unitEntry?: string,
     unitTP?: string,
-    unitSL?: string
+    unitSL?: string,
+    unitExpiredTime?: string
 }
 
 export default defineComponent({
@@ -62,6 +64,7 @@ export default defineComponent({
         ];
         const unitsEntry = [{ name: 'Theo giá', value: 'price' }, { name: '% so với entry', value: 'percent' }];
         const unitsVulume = [{ name: 'USD', value: 'usd' }, { name: 'token', value: 'token' }];
+        const unitExpiredTime = [{ name: 'Nến', value: 'candle' }, { name: 'Phút', value: 'minute' }];
 
         let allBotList: Array<string> = [];
         let cy: Core;
@@ -208,11 +211,15 @@ export default defineComponent({
             const entry = node.data('entry');
             const tp = node.data('tp');
             const sl = node.data('sl');
+            const expiredTime = node.data('expiredTime');
+
             const unitVolume = node.data('unitVolume');
             const unitStop = node.data('unitStop');
             const unitEntry = node.data('unitEntry');
             const unitTP = node.data('unitTP');
             const unitSL = node.data('unitSL');
+            const unitexpiredTime = node.data('unitexpiredTime');
+
 
             const getUnit = (unit: string) => {
                 if (unit === 'price') return 'USD';
@@ -459,8 +466,9 @@ export default defineComponent({
             const unitTP = 'price';
             const unitSL = 'price';
             const unitStop = 'price';
+            const unitExpiredTime = 'candle';
 
-            r_currentNode.value = { id, value, type, unitVolume, unitEntry, unitTP, unitSL, unitStop };
+            r_currentNode.value = { id, value, type, unitVolume, unitEntry, unitTP, unitSL, unitStop, unitExpiredTime };
         }
 
         function updateNode() {
@@ -482,13 +490,15 @@ export default defineComponent({
             const entry = node.data('entry');
             const tp = node.data('tp');
             const sl = node.data('sl');
+            const expiredTime = node.data('expiredTime')
             const unitVolume = node.data('unitVolume');
             const unitStop = node.data('unitStop');
             const unitEntry = node.data('unitEntry');
             const unitTP = node.data('unitTP');
             const unitSL = node.data('unitSL');
+            const unitExpiredTime = node.data('unitExpiredTime');
 
-            r_currentNode.value = { id, value, type, volume, stop, entry, tp, sl, unitVolume, unitStop, unitTP, unitEntry, unitSL };
+            r_currentNode.value = { id, value, type, volume, stop, entry, tp, sl, expiredTime, unitVolume, unitStop, unitTP, unitEntry, unitSL, unitExpiredTime };
         }
 
         async function applyNode() {
@@ -518,11 +528,13 @@ export default defineComponent({
                     node.data('entry', data.entry);
                     node.data('tp', data.tp);
                     node.data('sl', data.sl);
+                    node.data('expiredTime', data.expiredTime);
                     node.data('unitVolume', data.unitVolume);
                     node.data('unitStop', data.unitStop);
                     node.data('unitEntry', data.unitEntry);
                     node.data('unitTP', data.unitTP);
                     node.data('unitSL', data.unitSL);
+                    node.data('unitExpiredTime', data.unitExpiredTime);
                     updateDisplay(node);
                 }
 
@@ -607,6 +619,7 @@ export default defineComponent({
             nodeTypes,
             unitsEntry,
             unitsVulume,
+            unitExpiredTime,
             getBotInfo,
             toogleAllSymbol,
             filterDuplicate,

@@ -31,27 +31,33 @@
                 </div>
 
                 <!-- stop -->
-                <label v-if="['openBuyStopMarket', 'openBuyStopLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(r_currentNode.type)" class="font-semibold"
-                    for="stop">Stop:</label>
+                <label
+                    v-if="['openBuyStopMarket', 'openBuyStopLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(r_currentNode.type)"
+                    class="font-semibold" for="stop">Stop:</label>
                 <div v-if="['openBuyStopMarket', 'openBuyStopLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(r_currentNode.type)"
                     class="grid grid-cols-[2fr_2fr] gap-2 p-2 flex-auto">
-                    <InputText v-if="['openBuyStopMarket', 'openBuyStopLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(r_currentNode.type)"
+                    <InputText
+                        v-if="['openBuyStopMarket', 'openBuyStopLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(r_currentNode.type)"
                         v-model="r_currentNode.stop" autocomplete="off" class="flex-auto" id="stop"
                         placeholder="Nhập biểu thức" />
-                    <Select v-if="['openBuyStopMarket', 'openBuyStopLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(r_currentNode.type)"
+                    <Select
+                        v-if="['openBuyStopMarket', 'openBuyStopLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(r_currentNode.type)"
                         v-model="r_currentNode.unitSL" :options="unitsEntry" optionLabel="name" optionValue="value"
                         placeholder="Đơn vị" class="flex-auto" />
                 </div>
 
                 <!-- entry -->
-                <label v-if="['openBuyLimit', 'openBuyStopLimit', 'openSellLimit', 'openSellStopLimit'].includes(r_currentNode.type)" class="font-semibold"
-                    for="entry">Entry:</label>
+                <label
+                    v-if="['openBuyLimit', 'openBuyStopLimit', 'openSellLimit', 'openSellStopLimit'].includes(r_currentNode.type)"
+                    class="font-semibold" for="entry">Entry:</label>
                 <div v-if="['openBuyLimit', 'openBuyStopLimit', 'openSellLimit', 'openSellStopLimit'].includes(r_currentNode.type)"
                     class="grid grid-cols-[2fr_2fr] gap-2 p-2 flex-auto">
-                    <InputText v-if="['openBuyLimit', 'openBuyStopLimit', 'openSellLimit', 'openSellStopLimit'].includes(r_currentNode.type)"
+                    <InputText
+                        v-if="['openBuyLimit', 'openBuyStopLimit', 'openSellLimit', 'openSellStopLimit'].includes(r_currentNode.type)"
                         v-model="r_currentNode.entry" autocomplete="off" class="flex-auto" id="entry"
                         placeholder="Nhập biểu thức" />
-                    <Select v-if="['openBuyLimit', 'openBuyStopLimit', 'openSellLimit', 'openSellStopLimit'].includes(r_currentNode.type)"
+                    <Select
+                        v-if="['openBuyLimit', 'openBuyStopLimit', 'openSellLimit', 'openSellStopLimit'].includes(r_currentNode.type)"
                         v-model="r_currentNode.unitEntry" :options="unitsEntry" optionLabel="name" optionValue="value"
                         placeholder="Đơn vị" class="flex-auto" />
                 </div>
@@ -85,6 +91,22 @@
                     <Select
                         v-if="['openBuyMarket', 'openBuyLimit', 'openBuyStopMarket', 'openBuyStopLimit', 'openSellMarket', 'openSellLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(r_currentNode.type)"
                         v-model="r_currentNode.unitSL" :options="unitsEntry" optionLabel="name" optionValue="value"
+                        placeholder="Đơn vị" class="flex-auto" />
+                </div>
+
+                <!-- Expired Time -->
+                <label
+                    v-if="['openBuyLimit', 'openBuyStopMarket', 'openBuyStopLimit', 'openSellLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(r_currentNode.type)"
+                    class="font-semibold" for="expiredTime">Thời gian hủy lệnh:</label>
+                <div v-if="['openBuyLimit', 'openBuyStopMarket', 'openBuyStopLimit', 'openSellLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(r_currentNode.type)"
+                    class="grid grid-cols-[2fr_2fr] gap-2 p-2 flex-auto">
+                    <InputText
+                        v-if="['openBuyLimit', 'openBuyStopMarket', 'openBuyStopLimit', 'openSellLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(r_currentNode.type)"
+                        v-model="r_currentNode.expiredTime" autocomplete="off" class="flex-auto" id="expiredTime"
+                        placeholder="Nhập biểu thức" />
+                    <Select
+                        v-if="['openBuyLimit', 'openBuyStopMarket', 'openBuyStopLimit', 'openSellLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(r_currentNode.type)"
+                        v-model="r_currentNode.unitExpiredTime" :options="unitExpiredTime" optionLabel="name" optionValue="value"
                         placeholder="Đơn vị" class="flex-auto" />
                 </div>
 

@@ -804,6 +804,15 @@ export function isValidCondition(data: NodeData) {
         if (!isValidExpr(expr)) return false;
     }
 
+    //expired time
+    if (['openBuyLimit', 'openBuyStopMarket', 'openBuyStopLimit', 'openSellLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(data.type)) {
+        if (!data.expiredTime) return false;
+        let expr: string = data.expiredTime;
+        expr = replaceSubExprs(expr);
+        if (!expr) return false;
+        if (!isValidExpr(expr)) return false;
+    }
+
     if (['openBuyMarket', 'openBuyLimit', 'openBuyStopMarket', 'openBuyStopLimit', 'openSellMarket', 'openSellLimit', 'openSellStopMarket', 'openSellStopLimit', 'closeAllOrder', 'closeAllPosition'].includes(data.type)) {
         return true;
     }

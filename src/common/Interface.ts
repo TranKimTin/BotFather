@@ -16,11 +16,13 @@ export interface NodeData {
     entry?: string,
     tp?: string,
     sl?: string,
+    expiredTime?: string,
     unitVolume?: string,
     unitStop?: string,
     unitEntry?: string,
     unitTP?: string,
-    unitSL?: string
+    unitSL?: string,
+    unitExpiredTime?: string
 }
 
 export interface Elements {
