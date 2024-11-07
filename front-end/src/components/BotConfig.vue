@@ -87,7 +87,7 @@
                     <InputText
                         v-if="['openBuyMarket', 'openBuyLimit', 'openBuyStopMarket', 'openBuyStopLimit', 'openSellMarket', 'openSellLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(r_currentNode.type)"
                         v-model="r_currentNode.sl" autocomplete="off" class="flex-auto" id="sl"
-                        placeholder="Nhập biểu thức" />
+                        placeholder="Nhập biểu thức, số âm" />
                     <Select
                         v-if="['openBuyMarket', 'openBuyLimit', 'openBuyStopMarket', 'openBuyStopLimit', 'openSellMarket', 'openSellLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(r_currentNode.type)"
                         v-model="r_currentNode.unitSL" :options="unitsEntry" optionLabel="name" optionValue="value"

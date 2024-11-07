@@ -253,6 +253,11 @@ export function timeframeToNumberMinutes(tf: string) {
     }
 }
 
+export function nextTime(startTime: number, timeframe: string) {
+    const offsetTime = timeframeToNumberMinutes(timeframe) * 60 * 1000;
+    return startTime + offsetTime;
+}
+
 export async function compress(data: string): Promise<Buffer> {
     return new Promise((resolve, reject) => {
         zlib.deflate(data, { level: 9 }, (err, result) => {

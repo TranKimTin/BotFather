@@ -139,3 +139,22 @@ export interface ExprArgs {
 export interface CustomRequest extends Request {
     onChangeConfig: (botName: string) => void;
 }
+
+export enum ORDER_STATUS {
+    OPENED,
+    MATCH_STOP,
+    MATCH_LIMIT,
+    MATCH_ENTRY,
+    MATCH_TP,
+    MATCH_SL,
+    CANCELED
+}
+
+export enum UNIT {
+    PRICE = 'price',
+    PERCENT = 'percent',
+    USD = 'usd',
+    TOKEN = 'token',
+    CANDLE = 'candle',
+    MINUTE = 'minute'
+}

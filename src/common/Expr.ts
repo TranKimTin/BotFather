@@ -671,7 +671,7 @@ export class Expr extends ExprVisitor<any> {
 
 export function calculate(condition: string, args: ExprArgs): any {
     try {
-        const inputStream = CharStream.fromString(condition);
+        const inputStream = CharStream.fromString(condition.toLowerCase().trim());
         const lexer = new ExprLexer(inputStream);
         const tokenStream = new CommonTokenStream(lexer);
         const parser = new ExprParser(tokenStream);
