@@ -244,7 +244,7 @@ export class BotFather {
             expr = calculateSubExpr(expr, args);
             if (data.unitTP === UNIT.PERCENT) expr = `(${data.entry}) * (100 - abs(${expr})) / 100`;
             data.tp = calculate(expr, args);
-    }
+        }
         else {
             data.tp = undefined;
         }
@@ -362,7 +362,7 @@ export class BotFather {
                 node.entry,
                 node.tp,
                 node.sl,
-                ORDER_STATUS.OPENED,
+                (node.type === NODE_TYPE.BUY_MARKET || node.type === NODE_TYPE.SELL_MARKET) ? ORDER_STATUS.MATCH_ENTRY : ORDER_STATUS.OPENED,
                 util.nextTime(data[0].startTime, timeframe),
                 node.expiredTime,
                 botID

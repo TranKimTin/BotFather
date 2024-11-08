@@ -141,13 +141,12 @@ export interface CustomRequest extends Request {
 }
 
 export enum ORDER_STATUS {
-    OPENED,
-    MATCH_STOP,
-    MATCH_LIMIT,
-    MATCH_ENTRY,
-    MATCH_TP,
-    MATCH_SL,
-    CANCELED
+    OPENED = 'Mở lệnh',
+    MATCH_STOP = 'Khớp stop',
+    MATCH_ENTRY = 'Khớp entry',
+    MATCH_TP = 'Khớp TP',
+    MATCH_SL = 'Khớp SL',
+    CANCELED = 'Đã hủy'
 }
 
 export enum UNIT {

@@ -8,6 +8,7 @@ import PrimeVue from 'primevue/config';
 import ToastService from 'primevue/toastservice';
 import Aura from '@primevue/themes/aura';
 import ConfirmationService from 'primevue/confirmationservice';
+import router from './router/router';
 
 
 const app = createApp(App);
@@ -18,5 +19,6 @@ app.use(PrimeVue, {
 });
 app.use(ToastService);
 app.use(ConfirmationService);
+app.use(router);
 
 app.mount('#app');

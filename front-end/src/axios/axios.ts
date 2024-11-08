@@ -11,8 +11,8 @@ interface Response {
     message: string
 }
 
-// const URL = 'http://103.82.25.144:8080/api';
-const URL = '/api';
+const URL = 'http://103.82.25.144:8080/api';
+// const URL = '/api';
 
 export async function get(url: string, params: Params = {}): Promise<any> {
     const response = await axios.get(`${URL}${url}`, { params });
