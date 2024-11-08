@@ -9,7 +9,7 @@ export interface Node {
 
 export interface NodeData {
     id: string,
-    type: string,
+    type: NODE_TYPE,
     value?: string,
     volume?: string,
     stop?: string,
@@ -157,4 +157,20 @@ export enum UNIT {
     TOKEN = 'token',
     CANDLE = 'candle',
     MINUTE = 'minute'
+}
+
+export enum NODE_TYPE {
+    START = 'start',
+    EXPR = 'expr',
+    TELEGRAM = 'telegram',
+    BUY_MARKET = 'openBuyMarket',
+    BUY_LIMIT = 'openBuyLimit',
+    BUY_STOP_MARKET = 'openBuyStopMarket',
+    BUY_STOP_LIMIT = 'openBuyStopLimit',
+    SELL_MARKET = 'openSellMarket',
+    SELL_LIMIT = 'openSellLimit',
+    SELL_STOP_MARKET = 'openSellStopMarket',
+    SELL_STOP_LIMIT = 'openSellStopLimit',
+    CLOSE_ALL_ORDER = 'closeAllOrder',
+    CLOSE_ALL_POSITION = 'closeAllPosition'
 }

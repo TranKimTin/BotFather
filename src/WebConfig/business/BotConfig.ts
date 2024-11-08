@@ -1,4 +1,4 @@
-import { BotInfo, CustomRequest, Node, NodeData } from '../../common/Interface';
+import { BotInfo, CustomRequest, NODE_TYPE, Node, NodeData } from '../../common/Interface';
 import { Server } from 'socket.io';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 import { isValidCondition } from '../../common/Expr';
@@ -65,7 +65,7 @@ export async function getBotInfo(botName: string) {
         route: {
             data: {
                 id: "start",
-                type: "start",
+                type: NODE_TYPE.START,
                 value: "Start",
             }, id: 'start', next: []
         }

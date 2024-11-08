@@ -2,7 +2,7 @@ import fs from 'fs';
 import Telegram from './common/telegram';
 import io from 'socket.io-client';
 import { calculate } from './common/Expr';
-import { BotInfo, ExprArgs, Node, NodeData, ORDER_STATUS, RateData, SocketInfo, SymbolListener, TelegramIdType, UNIT } from './common/Interface';
+import { BotInfo, ExprArgs, NODE_TYPE, Node, NodeData, ORDER_STATUS, RateData, SocketInfo, SymbolListener, TelegramIdType, UNIT } from './common/Interface';
 import * as mysql from './WebConfig/lib/mysql';
 import * as util from './common/util';
 import dotenv from 'dotenv';
@@ -195,7 +195,7 @@ export class BotFather {
 
     private adjustParam(data: NodeData, args: ExprArgs) {
         //stop
-        if (['openBuyStopMarket', 'openBuyStopLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(data.type)) {
+        if ([NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
             if (!data.stop) return false;
             let expr: string = data.stop;
             if (data.unitStop === UNIT.PERCENT) expr = `{close()} * (100 + (${expr})) / 100`;
@@ -204,19 +204,19 @@ export class BotFather {
         }
 
         //entry
-        if (['openBuyLimit', 'openBuyStopLimit', 'openSellLimit', 'openSellStopLimit'].includes(data.type)) {
+        if ([NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_LIMIT, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
             if (!data.entry) return false;
             let expr: string = data.entry;
             if (data.unitEntry === UNIT.PERCENT) expr = `{close()} * (100 + (${expr})) / 100`;
             expr = this.calculateSubExpr(expr, args);
             data.entry = calculate(expr, args);
         }
-        else if (['openBuyMarket', 'openSellMarket'].includes(data.type)) {
+        else if ([NODE_TYPE.BUY_MARKET, NODE_TYPE.SELL_MARKET].includes(data.type)) {
             data.entry = calculate(`close()`, args);
         }
 
         //tp
-        if (['openBuyMarket', 'openBuyLimit', 'openBuyStopMarket', 'openBuyStopLimit', 'openSellMarket', 'openSellLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(data.type)) {
+        if ([NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT, NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
             if (!data.tp) return false;
             let expr: string = data.tp;
             if (data.unitTP === UNIT.PERCENT) expr = `(${data.entry}) * (100 + (${expr})) / 100`;
@@ -225,7 +225,7 @@ export class BotFather {
         }
 
         //sl
-        if (['openBuyMarket', 'openBuyLimit', 'openBuyStopMarket', 'openBuyStopLimit', 'openSellMarket', 'openSellLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(data.type)) {
+        if ([NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT, NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
             if (!data.sl) return false;
             let expr: string = data.sl;
             if (data.unitSL === UNIT.PERCENT) expr = `(${data.entry}) * (100 + (${expr})) / 100`;
@@ -234,7 +234,7 @@ export class BotFather {
         }
 
         //volume
-        if (['openBuyMarket', 'openBuyLimit', 'openBuyStopMarket', 'openBuyStopLimit', 'openSellMarket', 'openSellLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(data.type)) {
+        if ([NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT, NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
             if (!data.volume) return false;
             let expr: string = data.volume;
             if (data.unitVolume === UNIT.USD) expr = `(${expr}) / ${data.entry}`;
@@ -243,7 +243,7 @@ export class BotFather {
         }
 
         //expired time
-        if (['openBuyLimit', 'openBuyStopMarket', 'openBuyStopLimit', 'openSellLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(data.type)) {
+        if ([NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
             if (!data.expiredTime) return false;
             let expr: string = data.expiredTime;
             if (data.unitExpiredTime === UNIT.MINUTE) {
@@ -309,7 +309,7 @@ export class BotFather {
         const node: NodeData = { ...nodeData };
         if (!this.adjustParam(node, exprArgs)) return false;
 
-        if (node.type === 'openBuyMarket' || nodeData.type === 'openSellMarket') {
+        if (node.type === NODE_TYPE.BUY_MARKET || nodeData.type === NODE_TYPE.SELL_MARKET) {
             const sql = `INSERT INTO botfather.order(symbol,broker,timeframe,orderType,volume,entry,tp,sl,status,createdTime,botID) VALUES(?,?,?,?,?,?,?,?,?,?,?)`;
             const args = [
                 symbol,
@@ -329,27 +329,27 @@ export class BotFather {
             await mysql.query(sql, args);
             return true;
         }
-        if (node.type === 'openBuyLimit' || node.type === 'openSellLimit') {
+        if (node.type === NODE_TYPE.BUY_LIMIT || node.type === NODE_TYPE.SELL_LIMIT) {
 
             return true;
         }
-        if (node.type === 'openBuyStopMarket') {
+        if (node.type === NODE_TYPE.BUY_STOP_MARKET) {
             return true;
         }
-        if (node.type === 'openBuyStopLimit') {
+        if (node.type === NODE_TYPE.BUY_STOP_LIMIT) {
             return true;
         }
 
-        if (node.type === 'openSellStopMarket') {
+        if (node.type === NODE_TYPE.SELL_STOP_MARKET) {
             return true;
         }
-        if (node.type === 'openSellStopLimit') {
+        if (node.type === NODE_TYPE.SELL_STOP_LIMIT) {
             return true;
         }
-        if (node.type === 'closeAllOrder') {
+        if (node.type === NODE_TYPE.CLOSE_ALL_ORDER) {
             return true;
         }
-        if (node.type === 'closeAllPosition') {
+        if (node.type === NODE_TYPE.CLOSE_ALL_POSITION) {
             return true;
         }
 

@@ -5,7 +5,7 @@ import { AddSubContext, AmplContext, AmplPContext, Bb_lowerContext, Bb_middleCon
 import { ExprVisitor } from './generated/ExprVisitor';
 import * as util from '../common/util';
 import moment from "moment";
-import { ExprArgs, NodeData, RateData } from "../common/Interface";
+import { ExprArgs, NodeData, NODE_TYPE, RateData } from "../common/Interface";
 
 export class CustomErrorListener extends BaseErrorListener {
     syntaxError<S extends Token, T extends antlr.ATNSimulator>(recognizer: Recognizer<T>, offendingSymbol: S | null, line: number, column: number, msg: string, e: RecognitionException | null): void {
@@ -735,10 +735,10 @@ function replaceSubExprs(expr: string) {
 }
 
 export function isValidCondition(data: NodeData) {
-    if (data.type == 'start') return true;
+    if (data.type == NODE_TYPE.START) return true;
 
     //expr
-    if (data.type === 'expr') {
+    if (data.type === NODE_TYPE.EXPR) {
         if (!data.value) return false;
 
         let expr = data.value.toLowerCase().trim();
@@ -749,7 +749,7 @@ export function isValidCondition(data: NodeData) {
     }
 
     //telegram
-    if (data.type === 'telegram') {
+    if (data.type === NODE_TYPE.TELEGRAM) {
         if (!data.value) return false;
 
         let expr = data.value.toLowerCase().trim();
@@ -760,7 +760,7 @@ export function isValidCondition(data: NodeData) {
     }
 
     //stop
-    if (['openBuyStopMarket', 'openBuyStopLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(data.type)) {
+    if ([NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
         if (!data.stop) return false;
         let expr: string = data.stop;
         expr = replaceSubExprs(expr);
@@ -769,7 +769,7 @@ export function isValidCondition(data: NodeData) {
     }
 
     //entry
-    if (['openBuyLimit', 'openBuyStopLimit', 'openSellLimit', 'openSellStopLimit'].includes(data.type)) {
+    if ([NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
         if (!data.entry) return false;
         let expr: string = data.entry;
         expr = replaceSubExprs(expr);
@@ -778,7 +778,7 @@ export function isValidCondition(data: NodeData) {
     }
 
     //tp
-    if (['openBuyMarket', 'openBuyLimit', 'openBuyStopMarket', 'openBuyStopLimit', 'openSellMarket', 'openSellLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(data.type)) {
+    if ([NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
         if (!data.tp) return false;
         let expr: string = data.tp;
         expr = replaceSubExprs(expr);
@@ -787,7 +787,7 @@ export function isValidCondition(data: NodeData) {
     }
 
     //sl
-    if (['openBuyMarket', 'openBuyLimit', 'openBuyStopMarket', 'openBuyStopLimit', 'openSellMarket', 'openSellLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(data.type)) {
+    if ([NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
         if (!data.sl) return false;
         let expr: string = data.sl;
         expr = replaceSubExprs(expr);
@@ -796,7 +796,7 @@ export function isValidCondition(data: NodeData) {
     }
 
     //volume
-    if (['openBuyMarket', 'openBuyLimit', 'openBuyStopMarket', 'openBuyStopLimit', 'openSellMarket', 'openSellLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(data.type)) {
+    if ([NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
         if (!data.volume) return false;
         let expr: string = data.volume;
         expr = replaceSubExprs(expr);
@@ -805,7 +805,7 @@ export function isValidCondition(data: NodeData) {
     }
 
     //expired time
-    if (['openBuyLimit', 'openBuyStopMarket', 'openBuyStopLimit', 'openSellLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(data.type)) {
+    if ([NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
         if (!data.expiredTime) return false;
         let expr: string = data.expiredTime;
         expr = replaceSubExprs(expr);
@@ -813,7 +813,7 @@ export function isValidCondition(data: NodeData) {
         if (!isValidExpr(expr)) return false;
     }
 
-    if (['openBuyMarket', 'openBuyLimit', 'openBuyStopMarket', 'openBuyStopLimit', 'openSellMarket', 'openSellLimit', 'openSellStopMarket', 'openSellStopLimit', 'closeAllOrder', 'closeAllPosition'].includes(data.type)) {
+    if ([NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT, 'closeAllOrder', 'closeAllPosition'].includes(data.type)) {
         return true;
     }
     else {
