@@ -1,7 +1,7 @@
 import fs from 'fs';
 import Telegram from './common/telegram';
 import io from 'socket.io-client';
-import { calculate } from './common/Expr';
+import { calculate, calculateSubExpr } from './common/Expr';
 import { BotInfo, ExprArgs, NODE_TYPE, Node, NodeData, ORDER_STATUS, RateData, SocketInfo, SymbolListener, TelegramIdType, UNIT } from './common/Interface';
 import * as mysql from './WebConfig/lib/mysql';
 import * as util from './common/util';
@@ -159,15 +159,19 @@ export class BotFather {
 
     private onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
         for (const botInfo of this.botChildren) {
-            const { botName, idTelegram, symbolList, timeframes, treeData, route } = botInfo;
+            try {
+                const { botName, idTelegram, symbolList, timeframes, treeData, route } = botInfo;
 
-            if (!timeframes.includes(timeframe) || !symbolList.includes(`${broker}:${symbol}`)) continue;
+                if (!timeframes.includes(timeframe) || !symbolList.includes(`${broker}:${symbol}`)) continue;
 
-            // console.log("onCloseCandle", { symbol, timeframe });
+                // console.log("onCloseCandle", { symbol, timeframe });
 
-            const visited: { [key: string]: boolean } = {};
-            this.dfs_handleLogic(route, broker, symbol, timeframe, data, idTelegram, visited, this.botIDs[this, botName]);
-
+                const visited: { [key: string]: boolean } = {};
+                this.dfs_handleLogic(route, broker, symbol, timeframe, data, idTelegram, visited, this.botIDs[this, botName]);
+            }
+            catch (err) {
+                console.error({ symbol, timeframe }, err);
+            }
         }
     }
 
@@ -184,76 +188,113 @@ export class BotFather {
         }
     }
 
-    private calculateSubExpr(expr: string, args: ExprArgs) {
-        const subExprs = [...new Set([...expr.matchAll(/\{(.*?)\}/g)].map(match => match[1]))];
-        for (const subExpr of subExprs) {
-            const result = calculate(subExpr, args);
-            expr = expr.replaceAll(`{${subExpr}}`, result);
-        }
-        return expr;
-    }
-
     private adjustParam(data: NodeData, args: ExprArgs) {
         //stop
-        if ([NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
+        if ([NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT].includes(data.type)) {
             if (!data.stop) return false;
             let expr: string = data.stop;
-            if (data.unitStop === UNIT.PERCENT) expr = `{close()} * (100 + (${expr})) / 100`;
-            expr = this.calculateSubExpr(expr, args);
+            expr = calculateSubExpr(expr, args);
+            if (data.unitStop === UNIT.PERCENT) expr = `close() * (100 + abs(${expr})) / 100`;
             data.stop = calculate(expr, args);
+        }
+        else if ([NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
+            if (!data.stop) return false;
+            let expr: string = data.stop;
+            expr = calculateSubExpr(expr, args);
+            if (data.unitStop === UNIT.PERCENT) expr = `close() * (100 - abs(${expr})) / 100`;
+            data.stop = calculate(expr, args);
+        }
+        else {
+            data.stop = undefined;
         }
 
         //entry
-        if ([NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_LIMIT, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
+        if ([NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_LIMIT].includes(data.type)) {
             if (!data.entry) return false;
             let expr: string = data.entry;
-            if (data.unitEntry === UNIT.PERCENT) expr = `{close()} * (100 + (${expr})) / 100`;
-            expr = this.calculateSubExpr(expr, args);
+            expr = calculateSubExpr(expr, args);
+            if (data.unitEntry === UNIT.PERCENT) expr = `close() * (100 - abs(${expr})) / 100`;
             data.entry = calculate(expr, args);
+        }
+        else if ([NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
+            if (!data.entry) return false;
+            let expr: string = data.entry;
+            expr = calculateSubExpr(expr, args);
+            if (data.unitEntry === UNIT.PERCENT) expr = `close() * (100 + abs(${expr})) / 100`;
+            data.entry = calculate(expr, args);
+        }
+        else if ([NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.SELL_STOP_MARKET].includes(data.type)) {
+            data.entry = data.stop;
         }
         else if ([NODE_TYPE.BUY_MARKET, NODE_TYPE.SELL_MARKET].includes(data.type)) {
             data.entry = calculate(`close()`, args);
         }
 
         //tp
-        if ([NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT, NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
+        if ([NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT].includes(data.type)) {
             if (!data.tp) return false;
             let expr: string = data.tp;
-            if (data.unitTP === UNIT.PERCENT) expr = `(${data.entry}) * (100 + (${expr})) / 100`;
-            expr = this.calculateSubExpr(expr, args);
+            expr = calculateSubExpr(expr, args);
+            if (data.unitTP === UNIT.PERCENT) expr = `(${data.entry}) * (100 + abs(${expr})) / 100`;
             data.tp = calculate(expr, args);
+        }
+        else if ([NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
+            if (!data.tp) return false;
+            let expr: string = data.tp;
+            expr = calculateSubExpr(expr, args);
+            if (data.unitTP === UNIT.PERCENT) expr = `(${data.entry}) * (100 - abs(${expr})) / 100`;
+            data.tp = calculate(expr, args);
+    }
+        else {
+            data.tp = undefined;
         }
 
         //sl
-        if ([NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT, NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
+        if ([NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT].includes(data.type)) {
             if (!data.sl) return false;
             let expr: string = data.sl;
-            if (data.unitSL === UNIT.PERCENT) expr = `(${data.entry}) * (100 + (${expr})) / 100`;
-            expr = this.calculateSubExpr(expr, args);
+            expr = calculateSubExpr(expr, args);
+            if (data.unitSL === UNIT.PERCENT) expr = `(${data.entry}) * (100 - abs(${expr})) / 100`;
             data.sl = calculate(expr, args);
+        }
+        else if ([NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
+            if (!data.sl) return false;
+            let expr: string = data.sl;
+            expr = calculateSubExpr(expr, args);
+            if (data.unitSL === UNIT.PERCENT) expr = `(${data.entry}) * (100 + abs(${expr})) / 100`;
+            data.sl = calculate(expr, args);
+        }
+        else {
+            data.sl = undefined;
         }
 
         //volume
         if ([NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT, NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
             if (!data.volume) return false;
             let expr: string = data.volume;
+            expr = calculateSubExpr(expr, args);
             if (data.unitVolume === UNIT.USD) expr = `(${expr}) / ${data.entry}`;
-            expr = this.calculateSubExpr(expr, args);
             data.volume = calculate(expr, args);
+        }
+        else {
+            data.volume = undefined;
         }
 
         //expired time
         if ([NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
             if (!data.expiredTime) return false;
             let expr: string = data.expiredTime;
+            expr = calculateSubExpr(expr, args);
             if (data.unitExpiredTime === UNIT.MINUTE) {
                 expr = `((${expr}) * 60000) + ${util.nextTime(args.data[0].startTime, args.timeframe)}`;
             }
             else if (data.unitExpiredTime === UNIT.CANDLE) {
                 expr = `((${expr}) * 60000 * ${util.timeframeToNumberMinutes(args.timeframe)}) + ${util.nextTime(args.data[0].startTime, args.timeframe)}`;
             }
-            expr = this.calculateSubExpr(expr, args);
             data.expiredTime = calculate(expr, args);
+        }
+        else {
+            data.expiredTime = undefined;
         }
 
         return true;
@@ -273,7 +314,7 @@ export class BotFather {
             if (!nodeData.value) return false;
 
             let expr = nodeData.value;
-            expr = this.calculateSubExpr(expr, exprArgs);
+            expr = calculateSubExpr(expr, exprArgs);
 
             const result = calculate(expr, exprArgs);
             return Boolean(result);
@@ -283,7 +324,7 @@ export class BotFather {
             if (!nodeData.value) return false;
 
             let content: string = nodeData.value.trim();
-            content = this.calculateSubExpr(content, exprArgs);
+            content = calculateSubExpr(content, exprArgs);
 
             const emoji: { [key: string]: string } = {
                 'binance': '🥇🥇🥇',
@@ -309,47 +350,26 @@ export class BotFather {
         const node: NodeData = { ...nodeData };
         if (!this.adjustParam(node, exprArgs)) return false;
 
-        if (node.type === NODE_TYPE.BUY_MARKET || nodeData.type === NODE_TYPE.SELL_MARKET) {
-            const sql = `INSERT INTO botfather.order(symbol,broker,timeframe,orderType,volume,entry,tp,sl,status,createdTime,botID) VALUES(?,?,?,?,?,?,?,?,?,?,?)`;
+        if ([NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT, NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(node.type)) {
+            const sql = `INSERT INTO botfather.order(symbol,broker,timeframe,orderType,volume,stop,entry,tp,sl,status,createdTime,expiredTime,botID) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)`;
             const args = [
                 symbol,
                 broker,
                 timeframe,
                 node.type,
                 node.volume,
+                node.stop,
                 node.entry,
                 node.tp,
                 node.sl,
                 ORDER_STATUS.OPENED,
                 util.nextTime(data[0].startTime, timeframe),
+                node.expiredTime,
                 botID
             ];
             console.log(`new order`, args);
 
             await mysql.query(sql, args);
-            return true;
-        }
-        if (node.type === NODE_TYPE.BUY_LIMIT || node.type === NODE_TYPE.SELL_LIMIT) {
-
-            return true;
-        }
-        if (node.type === NODE_TYPE.BUY_STOP_MARKET) {
-            return true;
-        }
-        if (node.type === NODE_TYPE.BUY_STOP_LIMIT) {
-            return true;
-        }
-
-        if (node.type === NODE_TYPE.SELL_STOP_MARKET) {
-            return true;
-        }
-        if (node.type === NODE_TYPE.SELL_STOP_LIMIT) {
-            return true;
-        }
-        if (node.type === NODE_TYPE.CLOSE_ALL_ORDER) {
-            return true;
-        }
-        if (node.type === NODE_TYPE.CLOSE_ALL_POSITION) {
             return true;
         }
 

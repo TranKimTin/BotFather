@@ -1,7 +1,7 @@
 import * as antlr from "antlr4ng";
 import { BaseErrorListener, CharStream, CommonTokenStream, RecognitionException, Recognizer, Token } from 'antlr4ng';
 import { ExprLexer } from './generated/ExprLexer';
-import { AddSubContext, AmplContext, AmplPContext, Bb_lowerContext, Bb_middleContext, Bb_upperContext, Bearish_engulfingContext, Bearish_hammerContext, BearishContext, BrokerContext, Bull_bear_listContext, Bullish_engulfingContext, Bullish_hammerContext, BullishContext, ChangeContext, ChangePContext, CloseContext, ComparisonContext, DojiContext, EmaContext, ExprParser, FloatContext, HighContext, HourContext, IntContext, IRSIContext, LowContext, Lower_shadowContext, Lower_shadowPContext, Macd_histogramContext, Macd_n_dinhContext, Macd_signalContext, Macd_slopeContext, Macd_valueContext, MaContext, MarsiContext, MinuteContext, MulDivContext, NumberContext, OpenContext, ParensContext, Rsi_phan_kiContext, Rsi_slopeContext, RsiContext, StringContext, SymbolContext, TimeframeContext, Upper_shadowContext, Upper_shadowPContext, Volume24h_in_usdContext, VolumeContext } from './generated/ExprParser';
+import { ABSContext, AddSubContext, AmplContext, AmplPContext, Bb_lowerContext, Bb_middleContext, Bb_upperContext, Bearish_engulfingContext, Bearish_hammerContext, BearishContext, BrokerContext, Bull_bear_listContext, Bullish_engulfingContext, Bullish_hammerContext, BullishContext, ChangeContext, ChangePContext, CloseContext, ComparisonContext, DojiContext, EmaContext, ExprParser, FloatContext, HighContext, HourContext, IntContext, IRSIContext, LowContext, Lower_shadowContext, Lower_shadowPContext, Macd_histogramContext, Macd_n_dinhContext, Macd_signalContext, Macd_slopeContext, Macd_valueContext, MaContext, MarsiContext, MinuteContext, MulDivContext, NegativeContext, NumberContext, OpenContext, ParensContext, PositiveContext, Rsi_phan_kiContext, Rsi_slopeContext, RsiContext, StringContext, SymbolContext, TimeframeContext, Upper_shadowContext, Upper_shadowPContext, Volume24h_in_usdContext, VolumeContext } from './generated/ExprParser';
 import { ExprVisitor } from './generated/ExprVisitor';
 import * as util from '../common/util';
 import moment from "moment";
@@ -55,6 +55,14 @@ export class Expr extends ExprVisitor<any> {
         return ctx.children[1].getText() === '*' ? left * right : left / right;
     };
 
+    visitNegative = (ctx: NegativeContext) => {
+        return -this.visit(ctx.expr());
+    };
+
+    visitPositive = (ctx: PositiveContext) => {
+        return +this.visit(ctx.expr());
+    };
+
     visitComparison = (ctx: ComparisonContext) => {
         const A = ctx.expr(0);
         const B = ctx.expr(1);
@@ -102,6 +110,10 @@ export class Expr extends ExprVisitor<any> {
 
     visitParens = (ctx: ParensContext) => {
         return this.visit(ctx.expr());
+    };
+
+    visitABS = (ctx: ABSContext) => {
+        return Math.abs(this.visit(ctx.expr()));
     };
 
     visitBroker = (ctx: BrokerContext) => {
@@ -671,7 +683,8 @@ export class Expr extends ExprVisitor<any> {
 
 export function calculate(condition: string, args: ExprArgs): any {
     try {
-        const inputStream = CharStream.fromString(condition.toLowerCase().trim());
+        // const inputStream = CharStream.fromString(condition.toLowerCase().replace(/\s+/g, ''));
+        const inputStream = CharStream.fromString(condition.toLowerCase());
         const lexer = new ExprLexer(inputStream);
         const tokenStream = new CommonTokenStream(lexer);
         const parser = new ExprParser(tokenStream);
@@ -760,7 +773,7 @@ export function isValidCondition(data: NodeData) {
     }
 
     //stop
-    if ([NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
+    if ([NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
         if (!data.stop) return false;
         let expr: string = data.stop;
         expr = replaceSubExprs(expr);
@@ -769,7 +782,7 @@ export function isValidCondition(data: NodeData) {
     }
 
     //entry
-    if ([NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
+    if ([NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_LIMIT, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
         if (!data.entry) return false;
         let expr: string = data.entry;
         expr = replaceSubExprs(expr);
@@ -778,7 +791,7 @@ export function isValidCondition(data: NodeData) {
     }
 
     //tp
-    if ([NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
+    if ([NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
         if (!data.tp) return false;
         let expr: string = data.tp;
         expr = replaceSubExprs(expr);
@@ -787,7 +800,7 @@ export function isValidCondition(data: NodeData) {
     }
 
     //sl
-    if ([NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
+    if ([NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT, NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
         if (!data.sl) return false;
         let expr: string = data.sl;
         expr = replaceSubExprs(expr);
@@ -796,7 +809,7 @@ export function isValidCondition(data: NodeData) {
     }
 
     //volume
-    if ([NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
+    if ([NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT, NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
         if (!data.volume) return false;
         let expr: string = data.volume;
         expr = replaceSubExprs(expr);
@@ -805,7 +818,7 @@ export function isValidCondition(data: NodeData) {
     }
 
     //expired time
-    if ([NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
+    if ([NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
         if (!data.expiredTime) return false;
         let expr: string = data.expiredTime;
         expr = replaceSubExprs(expr);
@@ -813,7 +826,7 @@ export function isValidCondition(data: NodeData) {
         if (!isValidExpr(expr)) return false;
     }
 
-    if ([NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT, 'closeAllOrder', 'closeAllPosition'].includes(data.type)) {
+    if ([NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT, NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT, NODE_TYPE.CLOSE_ALL_ORDER, NODE_TYPE.CLOSE_ALL_POSITION].includes(data.type)) {
         return true;
     }
     else {
@@ -821,6 +834,26 @@ export function isValidCondition(data: NodeData) {
     }
 }
 
+export function calculateSubExpr(expr: string, args: ExprArgs) {
+    const stack: Array<string> = [];
+    let s = '';
+    for (const i of expr) {
+        if (i === '{') {
+            stack.push(s);
+            s = '';
+        }
+        else if (i === '}') {
+            if (stack.length == 0 || s === '') throw `Invalid expr ${expr}`;
+            const lastS = stack.pop();
+            s = lastS + ' ' + calculate(s, args);
+        }
+        else {
+            s += i;
+        }
+    }
+    if (stack.length > 1) throw `Invalid expr ${expr}`;
+    return (stack[0] || '') + s;
+}
 
 async function test() {
     const broker = 'binance_future';
@@ -839,24 +872,13 @@ async function test() {
         timeframe: timeframe,
         data: data
     };
-    const idTelegram = 'id_tele_tin';
 
-    let condition = "telegram: bull: {bullish()}, bear: {bearish()}, list: {bull_bear_list()}";
+    let condition = "{close() - 0.1 + ---1}";
 
-    const subExprs = [...new Set([...condition.matchAll(/\{(.*?)\}/g)].map(match => match[1]))];
-    for (const expr of subExprs) {
-        const result = calculate(expr, args);
-        condition = condition.replaceAll(`{${expr}}`, result);
-    }
+    condition = calculateSubExpr(condition, args);
 
-    if (condition.startsWith('telegram:')) {
-        console.log({ condition });
-    }
+    console.log({ condition });
 
-    else {
-        let result = calculate(condition, args);
-        console.log({ condition, result });
-    }
 }
 
 // test();

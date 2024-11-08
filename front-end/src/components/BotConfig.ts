@@ -62,7 +62,7 @@ export default defineComponent({
             { name: 'Đóng toàn bộ lệnh chưa khớp entry', value: 'closeAllOrder' },
             { name: 'Đóng toàn bộ vị thế', value: 'closeAllPosition' }
         ];
-        const unitsEntry = [{ name: 'Theo giá', value: 'price' }, { name: '% so với entry', value: 'percent' }];
+        const unitsEntry = [{ name: 'Theo giá', value: 'price' }, { name: '%', value: 'percent' }];
         const unitsVulume = [{ name: 'USD', value: 'usd' }, { name: 'token', value: 'token' }];
         const unitExpiredTime = [{ name: 'Nến', value: 'candle' }, { name: 'Phút', value: 'minute' }];
 
@@ -467,8 +467,9 @@ export default defineComponent({
             const unitSL = 'price';
             const unitStop = 'price';
             const unitExpiredTime = 'candle';
+            const expiredTime = '0';
 
-            r_currentNode.value = { id, value, type, unitVolume, unitEntry, unitTP, unitSL, unitStop, unitExpiredTime };
+            r_currentNode.value = { id, value, type, unitVolume, unitEntry, unitTP, unitSL, unitStop, unitExpiredTime, expiredTime };
         }
 
         function updateNode() {

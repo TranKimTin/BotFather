@@ -3,8 +3,11 @@ grammar Expr;
 expr
     : expr ('*' | '/') expr     # MulDiv
     | expr ('+' | '-') expr     # AddSub
+    | '-' expr                  # Negative
+    | '+' expr                  # Positive
     | expr comparisonOp expr    # Comparison
     | '(' expr ')'              # Parens
+    | 'abs' '(' expr ')'        # ABS
     | INT                       # Int
     | FLOAT                     # Float
     | STRING                    # String
@@ -92,7 +95,6 @@ bearish: 'bearish' '(' INT? ')';
 marsi: 'marsi' '(' INT ',' INT (',' INT)? ')';
 bull_bear_list: 'bull_bear_list' '(' INT? ')';
 doji: 'doji' '(' INT? ')';
-
 
 comparisonOp
     : '>'
