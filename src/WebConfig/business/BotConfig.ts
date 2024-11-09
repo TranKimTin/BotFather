@@ -127,6 +127,14 @@ export async function getBotList() {
     return data;
 }
 
+export async function getHistoryOrder(botName: string) {
+    const orders = await mysql.query(`SELECT b.id,o.symbol,o.broker,o.timeframe,o.orderType,o.volume,o.stop,o.entry,o.tp,o.sl,o.status,o.createdTime,o.expiredTime,o.timeStop,o.timeEntry,o.timeTP,o.timeSL
+                                        FROM botfather.Order o
+                                        JOIN Bot b ON b.id = o.botID
+                                        WHERE b.botName = ?`, [botName]);
+    return orders;
+}
+
 export async function saveBot(data: BotInfo) {
     const botName = data.botName;
     if (!validatekBotName(botName)) {

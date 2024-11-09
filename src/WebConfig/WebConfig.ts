@@ -51,6 +51,10 @@ app.delete('*', (req, res, next) => {
 
 app.use('/api/', routes);
 
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 const port = 8080;
 server.listen(port, () => {
     console.log(`\nStart server at: ${new Date()}

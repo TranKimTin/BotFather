@@ -36,6 +36,18 @@ export async function getBotList(req: any, res: any) {
     }
 }
 
+export async function getHistoryOrder(req: any, res: any) {
+    try {
+        const botName: string = req.params.botName;
+        const data = await BotConfig.getHistoryOrder(botName);
+        res.json({ code: 200, message: "ok", data });
+    }
+    catch (err: any) {
+        console.error(err);
+        res.json({ code: 400, message: err, data: [] });
+    }
+}
+
 export async function saveBot(req: any, res: any) {
     try {
         const data: BotInfo = req.body;

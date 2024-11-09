@@ -10,6 +10,8 @@ import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import Select from 'primevue/select';
 import { useRoute } from 'vue-router';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
 
 interface Order {
     id: number,
@@ -24,21 +26,32 @@ interface Order {
     sl: number,
     status: string,
     createdTime: number,
-    expiredTime: number
+    expiredTime: number,
+    timeStop: number,
+    timeEntry: number,
+    timeTP: number,
+    timeSL: number
 };
 
 export default defineComponent({
-    components: {},
+    components: { DataTable, Column },
     setup() {
         const route = useRoute();
+        const botName = route.params.botName;
 
+        const r_orderList = ref<Array<Order>>([]);
 
         onMounted(async () => {
+            axios.get(`/getHistoryOrder/${botName}`).then(result => {
+                r_orderList.value = result;
+            });
+
 
         });
 
         return {
-            botName: route.params.botName
+            botName,
+            r_orderList
         };
     }
 });
