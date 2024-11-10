@@ -82,7 +82,7 @@ export class BinanceSocket {
 
         // this.gBinance.ws.candles(symbolList, '1m', fetchCandles);
         for (const symbol of symbolList) {
-            let url = `wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@kline_1m`;
+            let url = `wss://stream.binance.com:443/ws/${symbol.toLowerCase()}@kline_1m`;
 
             // const ws = new WebSocket(url);
             const rws = new ReconnectingWebSocket(url, [], { WebSocket: WebSocket });
