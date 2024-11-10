@@ -7,7 +7,8 @@
   "description": "",
   "scripts": {
     "test": "mocha",
-    "build": "npm run build-antlr && npm run build-ts && npm run build-web",
+    "build": "npm run remove-js && npm run build-antlr && npm run build-ts && npm run build-web",
+    "remove-js": "rimraf js",
     "build-antlr": "antlr4ng -Dlanguage=TypeScript -o src/common/generated/ -visitor -no-listener -Xexact-output-dir src/common/Expr.g4",
     "build-ts": "tsc",
     "build-web": "cd ./front-end && npm run build",
@@ -34,7 +35,8 @@
     "@types/mysql": "^2.15.26",
     "@types/node-telegram-bot-api": "^0.63.1",
     "@types/ws": "^8.5.12",
-    "antlr4ng-cli": "^2.0.0"
+    "antlr4ng-cli": "^2.0.0",
+    "rimraf": "^6.0.1"
   },
   "dependencies": {
     "@types/socket.io": "^3.0.2",

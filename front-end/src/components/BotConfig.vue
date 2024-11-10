@@ -106,8 +106,8 @@
                         placeholder="Không hủy thì nhập 0" />
                     <Select
                         v-if="['openBuyLimit', 'openBuyStopMarket', 'openBuyStopLimit', 'openSellLimit', 'openSellStopMarket', 'openSellStopLimit'].includes(r_currentNode.type)"
-                        v-model="r_currentNode.unitExpiredTime" :options="unitExpiredTime" optionLabel="name" optionValue="value"
-                        placeholder="Đơn vị" class="flex-auto" />
+                        v-model="r_currentNode.unitExpiredTime" :options="unitExpiredTime" optionLabel="name"
+                        optionValue="value" placeholder="Đơn vị" class="flex-auto" />
                 </div>
 
 
@@ -161,6 +161,9 @@
             <button class="btn btn-outline-primary mr-1" @click="updateNode">Sửa nút đã chọn</button>
             <button class="btn btn-outline-danger mr-1" @click="removeNode">Xóa nút đã chọn</button>
             <button class="btn btn-outline-success mr-1" @click="saveBot">Lưu cấu hình bot</button>
+            <router-link :to="{ path: `/history/${r_botName}` }">
+                <button class=" btn btn-outline-success mr-1">Xem lịch sử lệnh</button>
+            </router-link>
         </div>
     </div>
     <div id="cy"></div>

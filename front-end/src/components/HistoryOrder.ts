@@ -25,12 +25,12 @@ interface Order {
     tp: number,
     sl: number,
     status: string,
-    createdTime: number,
-    expiredTime: number,
-    timeStop: number,
-    timeEntry: number,
-    timeTP: number,
-    timeSL: number
+    createdTime: string,
+    expiredTime: string,
+    timeStop: string,
+    timeEntry: string,
+    timeTP: string,
+    timeSL: string
 };
 
 export default defineComponent({

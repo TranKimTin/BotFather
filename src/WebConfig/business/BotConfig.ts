@@ -6,6 +6,7 @@ import path from 'path';
 import * as util from '../../common/util'
 import fs from "fs";
 import * as mysql from '../lib/mysql';
+import moment from 'moment';
 
 function validatekBotName(botName: string) {
     const invalidChars = /[\/\\:*?"<>|]/;
@@ -129,9 +130,19 @@ export async function getBotList() {
 
 export async function getHistoryOrder(botName: string) {
     const orders = await mysql.query(`SELECT b.id,o.symbol,o.broker,o.timeframe,o.orderType,o.volume,o.stop,o.entry,o.tp,o.sl,o.status,o.createdTime,o.expiredTime,o.timeStop,o.timeEntry,o.timeTP,o.timeSL
-                                        FROM botfather.Order o
+                                        FROM Orders o
                                         JOIN Bot b ON b.id = o.botID
-                                        WHERE b.botName = ?`, [botName]);
+                                        WHERE b.botName = ?
+                                        ORDER BY o.createdTime`, [botName]);
+
+    for (let order of orders) {
+        order.createdTime = order.createdTime ? moment(order.createdTime).format('YYYY-MM-DD HH:mm') : '';
+        order.expiredTime = order.expiredTime ? moment(order.expiredTime).format('YYYY-MM-DD HH:mm') : '';
+        order.timeStop = order.timeStop ? moment(order.timeStop).format('YYYY-MM-DD HH:mm') : '';
+        order.timeEntry = order.timeEntry ? moment(order.timeEntry).format('YYYY-MM-DD HH:mm') : '';
+        order.timeTP = order.timeTP ? moment(order.timeTP).format('YYYY-MM-DD HH:mm') : '';
+        order.timeSL = order.timeSL ? moment(order.timeSL).format('YYYY-MM-DD HH:mm') : '';
+    }
     return orders;
 }
 
