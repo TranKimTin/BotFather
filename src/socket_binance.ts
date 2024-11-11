@@ -84,17 +84,17 @@ export class BinanceSocket {
         for (const symbol of symbolList) {
             let url = `wss://stream.binance.com:443/ws/${symbol.toLowerCase()}@kline_1m`;
 
-            // const ws = new WebSocket(url);
-            const rws = new ReconnectingWebSocket(url, [], { WebSocket: WebSocket });
+            const ws = new WebSocket(url);
+            // const rws = new ReconnectingWebSocket(url, [], { WebSocket: WebSocket });
 
-            // ws.on('open', () => {
-            rws.addEventListener('open', () => {
+            ws.on('open', () => {
+            // rws.addEventListener('open', () => {
                 // console.log(`binance: Connected to ${url}`);
             });
 
-            // ws.on('message', (mess) => {
-            rws.addEventListener('message', (event) => {
-                const mess = event.data;
+            ws.on('message', (mess) => {
+            // rws.addEventListener('message', (event) => {
+                // const mess = event.data;
                 const data = JSON.parse(mess.toString());
                 const kline = data.k;
                 const candle: Candle = {
@@ -121,14 +121,14 @@ export class BinanceSocket {
                 fetchCandles(candle);
             });
 
-            // ws.on('error', (err) => {
-            rws.addEventListener('error', (err) => {
+            ws.on('error', (err) => {
+            // rws.addEventListener('error', (err) => {
                 console.error(`${BinanceSocket.broker}: WebSocket error ${symbol}`, err);
                 util.restartApp();
             });
 
-            // ws.on('close', () => {
-            rws.addEventListener('close', (event) => {
+            ws.on('close', () => {
+            // rws.addEventListener('close', (event) => {
                 console.error(`${BinanceSocket.broker}: WebSocket connection closed ${symbol}, ${event.code} ${event.reason}`);
                 util.restartApp();
             });
