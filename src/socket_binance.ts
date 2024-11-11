@@ -132,7 +132,7 @@ export class BinanceSocket {
                 console.error(`${BinanceSocket.broker}: WebSocket connection closed ${symbol}, ${event.code} ${event.reason}`);
                 util.restartApp();
             });
-            await delay(100);
+            await delay(1000);
         }
 
         const initCandle = async (symbol: string, tf: string) => {
