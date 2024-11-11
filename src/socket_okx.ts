@@ -110,13 +110,13 @@ export class OkxSocket {
         // ws.on('close', function close() {
         rws.addEventListener('close', (event) => {
             console.error(`${OkxSocket.broker}: WebSocket connection closed ${event.code} ${event.reason}`);
-            util.restartApp();
+            // util.restartApp();
         });
 
         // ws.on('error', function error(err) {
         rws.addEventListener('error', (err) => {
             console.error(`${OkxSocket.broker}: WebSocket error: `, err);
-            util.restartApp();
+            // util.restartApp();
         });
 
 
@@ -150,7 +150,8 @@ export class OkxSocket {
                 const lastTimeUpdated = this.gLastUpdated[symbol];
                 if (now - lastTimeUpdated > timeInterval) {
                     console.error(`${OkxSocket.broker}: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`);
-                    throw `${OkxSocket.broker}: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`;
+                    util.restartApp();
+                    // throw `${OkxSocket.broker}: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`;
                 }
             }
         }, timeInterval);

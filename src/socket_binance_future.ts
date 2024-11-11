@@ -117,12 +117,12 @@ export class BinanceSocketFuture {
 
         rws.addEventListener('error', (err) => {
             console.error(`binance: WebSocket error`, err);
-            util.restartApp();
+            // util.restartApp();
         });
 
         rws.addEventListener('close', (event) => {
             console.error(`${BinanceSocketFuture.broker}: WebSocket connection closed, ${event.code} ${event.reason}`);
-            util.restartApp();
+            // util.restartApp();
         });
 
 
@@ -156,7 +156,8 @@ export class BinanceSocketFuture {
                 const lastTimeUpdated = this.gLastUpdated[symbol];
                 if (now - lastTimeUpdated > timeInterval) {
                     console.error(`${BinanceSocketFuture.broker}: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`);
-                    throw `${BinanceSocketFuture.broker}: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`;
+                    util.restartApp();
+                    // throw `${BinanceSocketFuture.broker}: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`;
                 }
             }
         }, timeInterval);

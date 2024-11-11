@@ -119,12 +119,12 @@ export class BybitSocketFuture {
 
         rws.addEventListener('close', (event) => {
             console.error(`${BybitSocketFuture.broker}: WebSocket connection closed ${event.code} ${event.reason}`);
-            util.restartApp();
+            // util.restartApp();
         });
 
         rws.addEventListener('error', (err) => {
             console.error(`${BybitSocketFuture.broker}: WebSocket error: `, err);
-            util.restartApp();
+            // util.restartApp();
         });
 
 
@@ -158,7 +158,8 @@ export class BybitSocketFuture {
                 const lastTimeUpdated = this.gLastUpdated[symbol];
                 if (now - lastTimeUpdated > timeInterval) {
                     console.error(`${BybitSocketFuture.broker}: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`);
-                    throw `${BybitSocketFuture.broker}: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`;
+                    util.restartApp();
+                    // throw `${BybitSocketFuture.broker}: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`;
                 }
             }
         }, timeInterval);
