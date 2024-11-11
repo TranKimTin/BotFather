@@ -78,54 +78,53 @@ export class BinanceSocketFuture {
             }
         }
 
-        for (const symbol of symbolList) {
-            let url = `wss://fstream.binance.com/ws/${symbol.toLowerCase()}@kline_1m`;
+        const streams = symbolList.map(symbol => `${symbol.toLowerCase()}@kline_1m`).join("/");
+        const url = `wss://stream.binance.com:9443/stream?streams=${streams}`;
 
-            const rws = new ReconnectingWebSocket(url, [], { WebSocket: WebSocket });
+        const rws = new ReconnectingWebSocket(url, [], { WebSocket: WebSocket });
 
-            rws.addEventListener('open', () => {
-                // console.log(`binance: Connected to ${url}`);
-            });
+        rws.addEventListener('open', () => {
+            console.log(`binance: Socket connected`);
+        });
 
-            rws.addEventListener('message', (event) => {
-                const mess = event.data;
-                const data = JSON.parse(mess.toString());
-                const kline = data.k;
-                const candle: Candle = {
-                    eventType: data.e,
-                    eventTime: data.E,
-                    symbol: symbol,
-                    startTime: kline.t,
-                    closeTime: kline.T,
-                    firstTradeId: kline.f,
-                    lastTradeId: kline.L,
-                    open: kline.o,
-                    high: kline.h,
-                    low: kline.l,
-                    close: kline.c,
-                    volume: kline.v,
-                    trades: kline.n,
-                    interval: kline.i,
-                    isFinal: kline.x,
-                    quoteVolume: kline.q,
-                    buyVolume: kline.V,
-                    quoteBuyVolume: kline.Q
-                };
+        rws.addEventListener('message', (event) => {
+            const mess = event.data;
+            const { stream, data } = JSON.parse(mess.toString());
+            const kline = data.k;
+            const candle: Candle = {
+                eventType: data.e,
+                eventTime: data.E,
+                symbol: data.s,
+                startTime: kline.t,
+                closeTime: kline.T,
+                firstTradeId: kline.f,
+                lastTradeId: kline.L,
+                open: kline.o,
+                high: kline.h,
+                low: kline.l,
+                close: kline.c,
+                volume: kline.v,
+                trades: kline.n,
+                interval: kline.i,
+                isFinal: kline.x,
+                quoteVolume: kline.q,
+                buyVolume: kline.V,
+                quoteBuyVolume: kline.Q
+            };
 
-                fetchCandles(candle);
-            });
+            fetchCandles(candle);
+        });
 
-            rws.addEventListener('error', (err) => {
-                console.error(`binance: WebSocket error ${symbol}`, err);
-                util.restartApp();
-            });
+        rws.addEventListener('error', (err) => {
+            console.error(`binance: WebSocket error`, err);
+            util.restartApp();
+        });
 
-            rws.addEventListener('close', (event) => {
-                console.error(`${BinanceSocketFuture.broker}: WebSocket connection closed ${symbol}, ${event.code} ${event.reason}`);
-                util.restartApp();
-            });
-            await delay(10);
-        }
+        rws.addEventListener('close', (event) => {
+            console.error(`${BinanceSocketFuture.broker}: WebSocket connection closed, ${event.code} ${event.reason}`);
+            util.restartApp();
+        });
+
 
         const initCandle = async (symbol: string, tf: string) => {
             const rates = await util.getBinanceFutureOHLCV(symbol, tf, numbler_candle_load);

@@ -81,59 +81,57 @@ export class BinanceSocket {
         }
 
         // this.gBinance.ws.candles(symbolList, '1m', fetchCandles);
-        for (const symbol of symbolList) {
-            let url = `wss://stream.binance.com:443/ws/${symbol.toLowerCase()}@kline_1m`;
+        const streams = symbolList.map(symbol => `${symbol.toLowerCase()}@kline_1m`).join("/");
+        const url = `wss://stream.binance.com:9443/stream?streams=${streams}`;
 
-            const ws = new WebSocket(url);
-            const rws = new ReconnectingWebSocket(url, [], { WebSocket: WebSocket });
+        // const ws = new WebSocket(url);
+        const rws = new ReconnectingWebSocket(url, [], { WebSocket: WebSocket });
 
-            // ws.on('open', () => {
-            rws.addEventListener('open', () => {
-                // console.log(`binance: Connected to ${url}`);
-            });
+        // ws.on('open', () => {
+        rws.addEventListener('open', () => {
+            console.log(`binance: Socket connected`);
+        });
 
-            // ws.on('message', (mess) => {
-            rws.addEventListener('message', (event) => {
-                const mess = event.data;
-                const data = JSON.parse(mess.toString());
-                const kline = data.k;
-                const candle: Candle = {
-                    eventType: data.e,
-                    eventTime: data.E,
-                    symbol: symbol,
-                    startTime: kline.t,
-                    closeTime: kline.T,
-                    firstTradeId: kline.f,
-                    lastTradeId: kline.L,
-                    open: kline.o,
-                    high: kline.h,
-                    low: kline.l,
-                    close: kline.c,
-                    volume: kline.v,
-                    trades: kline.n,
-                    interval: kline.i,
-                    isFinal: kline.x,
-                    quoteVolume: kline.q,
-                    buyVolume: kline.V,
-                    quoteBuyVolume: kline.Q
-                };
+        // ws.on('message', (mess) => {
+        rws.addEventListener('message', (event) => {
+            const mess = event.data;
+            const { stream, data } = JSON.parse(mess.toString());
+            const kline = data.k;
+            const candle: Candle = {
+                eventType: data.e,
+                eventTime: data.E,
+                symbol: data.s,
+                startTime: kline.t,
+                closeTime: kline.T,
+                firstTradeId: kline.f,
+                lastTradeId: kline.L,
+                open: kline.o,
+                high: kline.h,
+                low: kline.l,
+                close: kline.c,
+                volume: kline.v,
+                trades: kline.n,
+                interval: kline.i,
+                isFinal: kline.x,
+                quoteVolume: kline.q,
+                buyVolume: kline.V,
+                quoteBuyVolume: kline.Q
+            };
 
-                fetchCandles(candle);
-            });
+            fetchCandles(candle);
+        });
 
-            // ws.on('error', (err) => {
-            rws.addEventListener('error', (err) => {
-                console.error(`${BinanceSocket.broker}: WebSocket error ${symbol}`, err);
-                util.restartApp();
-            });
+        // ws.on('error', (err) => {
+        rws.addEventListener('error', (err) => {
+            console.error(`${BinanceSocket.broker}: WebSocket error`, err);
+            util.restartApp();
+        });
 
-            // ws.on('close', () => {
-            rws.addEventListener('close', (event) => {
-                console.error(`${BinanceSocket.broker}: WebSocket connection closed ${symbol}, ${event.code} ${event.reason}`);
-                util.restartApp();
-            });
-            await delay(10);
-        }
+        // ws.on('close', () => {
+        rws.addEventListener('close', (event) => {
+            console.error(`${BinanceSocket.broker}: WebSocket connection closed , ${event.code} ${event.reason}`);
+            util.restartApp();
+        });
 
         const initCandle = async (symbol: string, tf: string) => {
             const rates = await util.getBinanceOHLCV(symbol, tf, numbler_candle_load);
