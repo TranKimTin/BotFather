@@ -54,6 +54,11 @@ expr
     | marsi                     # iMARSI
     | bull_bear_list            # iBullBearList
     | doji                      # iDoji
+    | avg_open                  # iAvgOpen
+    | avg_high                  # iAvgHigh
+    | avg_low                   # iAvgLow
+    | avg_close                 # iAvgClose    
+    | avg_ampl                  # iAvgAmpl    
     ;
 
 broker: 'broker' '(' ')';
@@ -97,6 +102,11 @@ bearish: 'bearish' '(' INT? ')';
 marsi: 'marsi' '(' INT ',' INT (',' INT)? ')';
 bull_bear_list: 'bull_bear_list' '(' INT? ')';
 doji: 'doji' '(' INT? ')';
+avg_open: 'avg_open' '(' INT (',' INT)? ')';
+avg_high: 'avg_high' '(' INT (',' INT)? ')';
+avg_low: 'avg_low' '(' INT (',' INT)? ')';
+avg_close: 'avg_close' '(' INT (',' INT)? ')';
+avg_ampl: 'avg_ampl' '(' INT (',' INT)? ')';
 
 comparisonOp
     : '>'
