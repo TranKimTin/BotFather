@@ -207,8 +207,6 @@ export async function saveBot(data: BotInfo) {
                 data.botName
             ]);
     }
-
-
 }
 
 export async function checkNode(data: NodeData) {

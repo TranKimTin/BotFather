@@ -2,17 +2,29 @@
     <h1>{{ botName }}</h1>
     <div>
         <DataTable :value="r_orderList" tableStyle="min-width: 50rem">
-            <Column field="symbol" header="symbol"></Column>
-            <Column field="broker" header="broker"></Column>
-            <Column field="timeframe" header="timeframe"></Column>
-            <Column field="orderType" header="orderType"></Column>
+            <Column field="symbol" header="symbol" sortable></Column>
+            <Column field="broker" header="broker" sortable></Column>
+            <Column field="timeframe" header="timeframe" sortable></Column>
+            <Column field="orderType" header="orderType" sortable></Column>
             <Column field="volume" header="volume"></Column>
             <Column field="stop" header="stop"></Column>
-            <Column field="entry" header="entry"></Column>
-            <Column field="tp" header="tp"></Column>
-            <Column field="sl" header="sl"></Column>
-            <Column field="status" header="status"></Column>
-            <Column field="createdTime" header="createdTime"></Column>
+            <Column header="entry">
+                <template #body="order">
+                    <span :title="order.data.timeEntry">{{ order.data.entry }}</span>
+                </template>
+            </Column>
+            <Column header="tp">
+                <template #body="order">
+                    <span :title="order.data.timeTP">{{ order.data.tp }}</span>
+                </template>
+            </Column>
+            <Column header="sl">
+                <template #body="order">
+                    <span :title="order.data.timeSL">{{ order.data.sl }}</span>
+                </template>
+            </Column>
+            <Column field="status" header="status" sortable></Column>
+            <Column field="createdTime" header="createdTime" sortable></Column>
             <Column field="expiredTime" header="expiredTime"></Column>
         </DataTable>
     </div>

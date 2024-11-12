@@ -362,7 +362,7 @@ export class BotFather {
                 node.entry,
                 node.tp,
                 node.sl,
-                (node.type === NODE_TYPE.BUY_MARKET || node.type === NODE_TYPE.SELL_MARKET) ? ORDER_STATUS.MATCH_ENTRY : ORDER_STATUS.OPENED,
+                ORDER_STATUS.OPENED,
                 util.nextTime(data[0].startTime, timeframe),
                 node.expiredTime,
                 botID
