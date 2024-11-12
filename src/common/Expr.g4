@@ -59,6 +59,7 @@ expr
     | avg_low                   # iAvgLow
     | avg_close                 # iAvgClose    
     | avg_ampl                  # iAvgAmpl    
+    | avg_amplP                 # iAmplP
     ;
 
 broker: 'broker' '(' ')';
@@ -107,6 +108,7 @@ avg_high: 'avg_high' '(' INT (',' INT)? ')';
 avg_low: 'avg_low' '(' INT (',' INT)? ')';
 avg_close: 'avg_close' '(' INT (',' INT)? ')';
 avg_ampl: 'avg_ampl' '(' INT (',' INT)? ')';
+avg_amplP: 'avg_ampl%' '(' INT (',' INT)? ')';
 
 comparisonOp
     : '>'
