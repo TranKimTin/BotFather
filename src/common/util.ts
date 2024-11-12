@@ -276,11 +276,10 @@ export async function decompress(data: Buffer): Promise<Buffer> {
     });
 }
 
-export async function getBinanceOHLCV(symbol: string, timeframe: string, limit: number): Promise<Array<RateData>> {
+export async function getBinanceOHLCV(symbol: string, timeframe: string, limit: number, since?: number): Promise<Array<RateData>> {
     const result = [];
     const maxCall = 1000;
     const check: { [key: number]: boolean } = {};
-    let since: number | undefined = undefined;
     while (limit > 0) {
         if (limit > maxCall) console.log(`getBinanceOHLCV pending ${symbol} ${timeframe} ${limit}`);
         const ohlcv = await binance.fetchOHLCV(symbol, timeframe, since, Math.min(limit, maxCall));
@@ -313,11 +312,10 @@ export async function getBinanceOHLCV(symbol: string, timeframe: string, limit: 
     return result;
 }
 
-export async function getBinanceFutureOHLCV(symbol: string, timeframe: string, limit: number): Promise<Array<RateData>> {
+export async function getBinanceFutureOHLCV(symbol: string, timeframe: string, limit: number, since?: number): Promise<Array<RateData>> {
     const result = [];
     const maxCall = 1000;
     const check: { [key: number]: boolean } = {};
-    let since: number | undefined = undefined;
     while (limit > 0) {
         if (limit > maxCall) console.log(`getBinanceFutureOHLCV pending ${symbol} ${timeframe} ${limit}`);
         const ohlcv = await binanceFuture.fetchOHLCV(symbol, timeframe, since, Math.min(limit, maxCall));
@@ -350,7 +348,7 @@ export async function getBinanceFutureOHLCV(symbol: string, timeframe: string, l
     return result;
 }
 
-export async function getBybitOHLCV(symbol: string, timeframe: string, limit: number): Promise<Array<RateData>> {
+export async function getBybitOHLCV(symbol: string, timeframe: string, limit: number, since?: number): Promise<Array<RateData>> {
     // https://bybit-exchange.github.io/docs/v5/market/kline
     let tf: string | number = timeframe;
     switch (timeframe) {
@@ -375,7 +373,8 @@ export async function getBybitOHLCV(symbol: string, timeframe: string, limit: nu
             break;
     }
 
-    const url = `https://api.bybit.com/v5/market/kline?category=spot&symbol=${symbol}&interval=${tf}&limit=${limit}`;
+    let url = `https://api.bybit.com/v5/market/kline?category=spot&symbol=${symbol}&interval=${tf}&limit=${limit}`;
+    if (since) url += `&start=${since}`;
     const res = await axios.get(url);
 
     const data = res.data as { result: { list: Array<string> } };
@@ -399,7 +398,7 @@ export async function getBybitOHLCV(symbol: string, timeframe: string, limit: nu
     return result;
 }
 
-export async function getBybitFutureOHLCV(symbol: string, timeframe: string, limit: number): Promise<Array<RateData>> {
+export async function getBybitFutureOHLCV(symbol: string, timeframe: string, limit: number, since?: number): Promise<Array<RateData>> {
     // https://bybit-exchange.github.io/docs/v5/market/kline
     let tf: string | number = timeframe;
     switch (timeframe) {
@@ -424,7 +423,8 @@ export async function getBybitFutureOHLCV(symbol: string, timeframe: string, lim
             break;
     }
 
-    const url = `https://api.bybit.com/v5/market/kline?category=linear&symbol=${symbol}&interval=${tf}&limit=${limit}`;
+    let url = `https://api.bybit.com/v5/market/kline?category=linear&symbol=${symbol}&interval=${tf}&limit=${limit}`;
+    if (since) url += `&start=${since}`;
     const res = await axios.get(url);
 
     const data = res.data as { result: { list: Array<string> } };
@@ -476,6 +476,57 @@ export async function getOkxOHLCV(symbol: string, timeframe: string, limit: numb
     }
 
     const url = `https://www.okx.com/api/v5/market/candles?instId=${symbol}&bar=${tf}&limit=${limit}`;
+    const res = await axios.get(url);
+
+    const data = res.data as { data: Array<string> };
+    const result = data.data.map(item => {
+        const startTime = +item[0] || 0;
+        const open = +item[1] || 0;
+        const high = +item[2] || 0;
+        const low = +item[3] || 0;
+        const close = +item[4] || 0;
+        const volume = +item[5] || 0;
+        const interval = timeframe;
+        const isFinal = true;
+        const change = (close - open) / open;
+        const ampl = (high - low) / open;
+        const timestring = moment(startTime).format('YYYY-MM-DD HH:mm:SS');
+        return { symbol, startTime, timestring, open, high, low, close, volume, interval, isFinal, change, ampl };
+    });
+    result.sort((a, b) => b.startTime - a.startTime);
+    if (result.length) result[0].isFinal = false;
+
+    return result;
+}
+
+export async function getOkxOHLCVHistory(symbol: string, timeframe: string, limit: number, since: number): Promise<Array<RateData>> {
+    //max limit: 300
+    let tf: string = timeframe;
+    switch (timeframe) {
+        case '1m':
+        case '3m':
+        case '5m':
+        case '15m':
+        case '30m':
+            break;
+        case '1h':
+        case '2h':
+        case '4h':
+            tf = timeframe.replace('h', 'H');
+            break;
+        case '6h':
+        case '8h':
+        case '12h':
+            tf = timeframe.replace('h', 'Hutc');
+            break;
+        case '1d':
+            tf = timeframe.replace('d', 'Dutc');
+            break;
+        default:
+            break;
+    }
+
+    const url = `https://www.okx.com/api/v5/market/history-candles?instId=${symbol}&bar=${tf}&limit=${limit}&after=${since + limit * timeframeToNumberMinutes(tf) * 60000}`;
     const res = await axios.get(url);
 
     const data = res.data as { data: Array<string> };

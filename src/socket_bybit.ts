@@ -31,7 +31,7 @@ export class BybitSocket {
         this.gLastUpdated = {};
     }
 
-    async init(numbler_candle_load: number, onCloseCandle: (broker: string, symbol: string, timeframe: string, data: Array<RateData>) => void) {
+    public async init(numbler_candle_load: number, onCloseCandle: (broker: string, symbol: string, timeframe: string, data: Array<RateData>) => void) {
         const symbolList = await util.getBybitSymbolList();
         // console.log(symbolList.join(' '));
         console.log(`${BybitSocket.broker}: Total ${symbolList.length} symbols`);
@@ -168,13 +168,48 @@ export class BybitSocket {
             }
         }, timeInterval);
     }
+
+    public getData(symbol: string, timeframe: string) {
+        return this.gData[symbol][timeframe];
+    }
 };
 
 
 import http from 'http';
 import { Server } from "socket.io";
 import { RateData, SymbolListener } from './common/Interface';
-const server = http.createServer();
+import express from "express";
+import cors from "cors";
+import body_parser from "body-parser";
+
+const app = express();
+const server = http.createServer(app);
+app.disable("x-powered-by");
+app.set("trust proxy", true);
+app.use(cors());
+app.use(body_parser.json({ limit: "50mb" }));
+app.use(body_parser.urlencoded({ extended: false, limit: "50mb" }));
+app.get('/api/getOHLCV', async (req: any, res) => {
+    try {
+        const { symbol, timeframe } = req.query;
+        const since = parseInt(req.query.since);
+
+        let data: Array<RateData> = bybitSocket.getData(symbol, timeframe);
+
+        while (data.length > 0 && data[data.length - 1].startTime <= since) data.pop();
+
+        if (data.length === 0 || data[0].startTime > since) {
+            data = await util.getBybitOHLCV(symbol, timeframe, 300, since);
+        }
+
+        res.json(data);
+    }
+    catch (err) {
+        console.error(err);
+        res.json([]);
+    }
+});
+
 const io = new Server(server, {
     pingInterval: 25000,
     pingTimeout: 60000
