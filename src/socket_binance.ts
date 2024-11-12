@@ -199,7 +199,7 @@ app.get('/api/getOHLCV', async (req: any, res) => {
 
         while (data.length > 0 && data[data.length - 1].startTime <= since) data.pop();
 
-        if (data.length === 0 || data[0].startTime > since) {
+        if (data.length === 0 || data[data.length - 1].startTime > since) {
             data = await util.getBinanceOHLCV(symbol, timeframe, 300, since);
         }
 
