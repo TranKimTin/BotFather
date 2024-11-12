@@ -19,6 +19,6 @@ routes.post("/save", BotConfig.saveBot);
 routes.post("/check", BotConfig.checkNode);
 
 
-routes.put('/delete', BotConfig.deleteBot);
+routes.delete('/delete', BotConfig.deleteBot);
 
 export default routes;

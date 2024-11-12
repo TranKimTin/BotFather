@@ -438,7 +438,7 @@ export default defineComponent({
                 accept: async () => {
                     try {
                         const botName = r_botName.value;
-                        await axios.put('/delete', { botName });
+                        await axios.delete_('/delete', { botName });
                         Toast.showWarning(`Xóa bot ${botName} thành công`);
                         Cookies.set("botName", '');
                         setTimeout(() => {
