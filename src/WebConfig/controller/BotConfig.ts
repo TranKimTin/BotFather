@@ -78,9 +78,9 @@ export async function checkNode(req: any, res: any) {
 export async function deleteBot(req: any, res: any) {
     try {
         const botName: string = req.query.botName;
-        await BotConfig.deleteBot(botName);
+        const data = await BotConfig.deleteBot(botName);
         (req as unknown as CustomRequest).onChangeConfig(botName);
-        res.json({ code: 200, message: "Xóa thành công", data: [] });
+        res.json({ code: 200, message: "Xóa thành công", data: data });
     }
     catch (err: any) {
         console.error(err);

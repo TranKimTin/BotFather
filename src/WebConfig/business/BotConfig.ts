@@ -220,5 +220,5 @@ export async function checkNode(data: NodeData) {
 }
 
 export async function deleteBot(botName: string) {
-    await mysql.query(`DELETE FROM Bot WHERE botName = ?`, [botName]);
+    return await mysql.query(`DELETE FROM Bot WHERE botName = ?`, [botName]);
 }
