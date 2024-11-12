@@ -1,7 +1,7 @@
 import * as antlr from "antlr4ng";
 import { BaseErrorListener, CharStream, CommonTokenStream, RecognitionException, Recognizer, Token } from 'antlr4ng';
 import { ExprLexer } from './generated/ExprLexer';
-import { ABSContext, AddSubContext, AmplContext, AmplPContext, Bb_lowerContext, Bb_middleContext, Bb_upperContext, Bearish_engulfingContext, Bearish_hammerContext, BearishContext, BrokerContext, Bull_bear_listContext, Bullish_engulfingContext, Bullish_hammerContext, BullishContext, ChangeContext, ChangePContext, CloseContext, ComparisonContext, DojiContext, EmaContext, ExprParser, FloatContext, HighContext, HourContext, IntContext, IRSIContext, LowContext, Lower_shadowContext, Lower_shadowPContext, Macd_histogramContext, Macd_n_dinhContext, Macd_signalContext, Macd_slopeContext, Macd_valueContext, MaContext, MarsiContext, MinuteContext, MulDivContext, NegativeContext, NumberContext, OpenContext, ParensContext, PositiveContext, Rsi_phan_kiContext, Rsi_slopeContext, RsiContext, StringContext, SymbolContext, TimeframeContext, Upper_shadowContext, Upper_shadowPContext, Volume24h_in_usdContext, VolumeContext } from './generated/ExprParser';
+import { ABSContext, AddSubContext, AmplContext, AmplPContext, Bb_lowerContext, Bb_middleContext, Bb_upperContext, Bearish_engulfingContext, Bearish_hammerContext, BearishContext, BrokerContext, Bull_bear_listContext, Bullish_engulfingContext, Bullish_hammerContext, BullishContext, ChangeContext, ChangePContext, CloseContext, ComparisonContext, DojiContext, EmaContext, ExprParser, FloatContext, HighContext, HourContext, IntContext, IRSIContext, LowContext, Lower_shadowContext, Lower_shadowPContext, Macd_histogramContext, Macd_n_dinhContext, Macd_signalContext, Macd_slopeContext, Macd_valueContext, MaContext, MarsiContext, MAXContext, MINContext, MinuteContext, MulDivContext, NegativeContext, NumberContext, OpenContext, ParensContext, PositiveContext, Rsi_phan_kiContext, Rsi_slopeContext, RsiContext, StringContext, SymbolContext, TimeframeContext, Upper_shadowContext, Upper_shadowPContext, Volume24h_in_usdContext, VolumeContext } from './generated/ExprParser';
 import { ExprVisitor } from './generated/ExprVisitor';
 import * as util from '../common/util';
 import moment from "moment";
@@ -114,6 +114,36 @@ export class Expr extends ExprVisitor<any> {
 
     visitABS = (ctx: ABSContext) => {
         return Math.abs(this.visit(ctx.expr()));
+    };
+
+    visitMIN = (ctx: MINContext) => {
+        const parmas = [];
+
+        let i = 0;
+        while (1) {
+            const expr = ctx.expr(i);
+            if (expr === null) break;
+            const value = this.visit(expr);
+            parmas.push(value);
+            i++;
+        }
+
+        return Math.min(...parmas);
+    };
+
+    visitMAX = (ctx: MAXContext) => {
+        const parmas = [];
+
+        let i = 0;
+        while (1) {
+            const expr = ctx.expr(i);
+            if (expr === null) break;
+            const value = this.visit(expr);
+            parmas.push(value);
+            i++;
+        }
+
+        return Math.max(...parmas);
     };
 
     visitBroker = (ctx: BrokerContext) => {
@@ -873,7 +903,7 @@ async function test() {
         data: data
     };
 
-    let condition = "{close() - 0.1 + ---1}";
+    let condition = "{max(open(), close())}";
 
     condition = calculateSubExpr(condition, args);
 

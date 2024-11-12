@@ -7,7 +7,9 @@ expr
     | '+' expr                  # Positive
     | expr comparisonOp expr    # Comparison
     | '(' expr ')'              # Parens
-    | 'abs' '(' expr ')'        # ABS
+    | 'abs(' expr ')'           # ABS
+    | 'min(' expr (',' expr)*  ')' # MIN
+    | 'max(' expr (',' expr)*  ')' # MAX
     | INT                       # Int
     | FLOAT                     # Float
     | STRING                    # String
