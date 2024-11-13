@@ -3,15 +3,16 @@
         '+' : '' }}
             {{ r_totalProfit }} $</span></h1>
     <div>
-        <DataTable :value="r_orderList" tableStyle="min-width: 50rem" scrollable scrollHeight="90vh"
-            :virtualScrollerOptions="{ itemSize: 50 }">
+        <DataTable :filters="filters" :globalFilterFields=filterFields filterDisplay="row" :value="r_orderList"
+            tableStyle="min-width: 50rem" scrollable scrollHeight="90vh" :virtualScrollerOptions="{ itemSize: 50 }"
+            stripedRows>
             <Column :header="`STT (${r_orderList.length})`">
                 <template #body="order">
                     {{ order.index + 1 }}
                 </template>
             </Column>
             <Column field="symbol" header="symbol" sortable></Column>
-            <Column field="broker" header="Sàn" sortable></Column>
+            <Column field="broker" header="broker" sortable> </Column>
             <Column field="timeframe" header="Khung" sortable></Column>
             <Column field="createdTime" header="Thời gian" sortable></Column>
             <Column header="orderType" sortable>
@@ -39,7 +40,7 @@
                     <span :title="order.data.timeSL">{{ order.data.sl }}</span>
                 </template>
             </Column>
-            <Column header="status" sortable>
+            <Column sortField="status" header="status" sortable>
                 <template #body="order">
                     <span v-if="!order.data.timeTP && !order.data.timeSL">
                         {{ order.data.status }}

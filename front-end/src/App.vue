@@ -12,5 +12,4 @@
 <script setup lang="ts">
 import Toast from 'primevue/toast';
 import ConfirmDialog from 'primevue/confirmdialog';
-import BotConfig from './components/BotConfig/BotConfig.vue';
 </script>

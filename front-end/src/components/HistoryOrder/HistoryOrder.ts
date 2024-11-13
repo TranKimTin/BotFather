@@ -1,17 +1,9 @@
-import { defineComponent, onMounted, ref, watch } from 'vue';
+import { defineComponent, onMounted, ref } from 'vue';
 import * as axios from '../../axios/axios';
-import Cookies from 'js-cookie';
-import MultiSelect from 'primevue/multiselect';
-import AutoComplete from 'primevue/autocomplete';
-import * as Toast from '../../toast/toast';
-import Button from 'primevue/button';
-import { useConfirm } from "primevue/useconfirm";
-import Dialog from 'primevue/dialog';
-import InputText from 'primevue/inputtext';
-import Select from 'primevue/select';
 import { useRoute } from 'vue-router';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import { FilterMatchMode } from '@primevue/core/api';
 
 interface Order {
     id: number,
@@ -42,6 +34,11 @@ export default defineComponent({
         const r_orderList = ref<Array<Order>>([]);
         const r_totalProfit = ref<number>(0);
 
+        const filters = {
+            broker: { value: null, matchMode: FilterMatchMode.CONTAINS }
+        };
+        const filterFields = ['broker'];
+
         onMounted(async () => {
             axios.get(`/getHistoryOrder/${botName}`).then(result => {
                 r_orderList.value = result;
@@ -60,7 +57,9 @@ export default defineComponent({
         return {
             botName,
             r_orderList,
-            r_totalProfit
+            r_totalProfit,
+            filters,
+            filterFields
         };
     }
 });
