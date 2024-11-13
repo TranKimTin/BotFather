@@ -40,18 +40,27 @@ export default defineComponent({
         const botName = route.params.botName;
 
         const r_orderList = ref<Array<Order>>([]);
+        const r_totalProfit = ref<number>(0);
 
         onMounted(async () => {
             axios.get(`/getHistoryOrder/${botName}`).then(result => {
                 r_orderList.value = result;
+
+                let totalProfit = 0;
+                for (let order of r_orderList.value) {
+                    if (order.timeTP || order.timeSL) {
+                        const profit = (order.volume * (order.tp - order.entry)) * (order.timeTP ? 1 : -1);
+                        totalProfit += profit;
+                    }
+                }
+                r_totalProfit.value = parseFloat(totalProfit.toFixed(2));
             });
-
-
         });
 
         return {
             botName,
-            r_orderList
+            r_orderList,
+            r_totalProfit
         };
     }
 });

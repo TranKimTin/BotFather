@@ -1,5 +1,7 @@
 <template>
-    <h1>{{ botName }}</h1>
+    <h1>{{ botName }}. Tổng lãi: <span :style="{ color: r_totalProfit >= 0 ? 'green' : 'red' }"> {{ r_totalProfit >= 0 ?
+        '+' : '' }}
+            {{ r_totalProfit }} $</span></h1>
     <div>
         <DataTable :value="r_orderList" tableStyle="min-width: 50rem" scrollable scrollHeight="90vh"
             :virtualScrollerOptions="{ itemSize: 50 }">
@@ -39,15 +41,14 @@
             </Column>
             <Column header="status" sortable>
                 <template #body="order">
-                    <span
-                        :style="{ color: order.data.status.toLowerCase().includes('tp') ? 'green' : order.data.status.toLowerCase().includes('sl') ? 'red' : 'black' }">
+                    <span v-if="!order.data.timeTP && !order.data.timeSL">
                         {{ order.data.status }}
                     </span>
-                    <span v-if="order.data.status.toLowerCase().includes('tp')" style="color: green;">
+                    <span v-if="order.data.timeTP" style="color: green;">
                         (+{{ +Math.abs(order.data.volume * (order.data.tp - order.data.entry)).toFixed(2) }} $)
                         (+{{ +Math.abs((order.data.tp - order.data.entry) / order.data.entry * 100).toFixed(2) }} %)
                     </span>
-                    <span v-if="order.data.status.toLowerCase().includes('sl')" style="color: red;">
+                    <span v-if="order.data.timeSL" style="color: red;">
                         (-{{ +Math.abs(order.data.volume * (order.data.tp - order.data.entry)).toFixed(2) }} $)
                         (-{{ +Math.abs((order.data.tp - order.data.entry) / order.data.entry * 100).toFixed(2) }} %)
                     </span>
