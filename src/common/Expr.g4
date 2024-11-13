@@ -59,7 +59,15 @@ expr
     | avg_low                   # iAvgLow
     | avg_close                 # iAvgClose    
     | avg_ampl                  # iAvgAmpl    
-    | avg_amplP                 # iAmplP
+    | avg_amplP                 # iAvgAmplP
+    | max_open                  # iMaxOpen
+    | max_high                  # iMaxHigh
+    | max_low                   # iMaxLow
+    | max_close                 # iMaxClose   
+    | min_open                  # iMinOpen
+    | min_high                  # iMinHigh
+    | min_low                   # iMinLow
+    | min_close                 # iMinClose    
     ;
 
 broker: 'broker' '(' ')';
@@ -109,6 +117,14 @@ avg_low: 'avg_low' '(' INT (',' INT)? ')';
 avg_close: 'avg_close' '(' INT (',' INT)? ')';
 avg_ampl: 'avg_ampl' '(' INT (',' INT)? ')';
 avg_amplP: 'avg_ampl%' '(' INT (',' INT)? ')';
+max_open: 'max_open' '(' INT (',' INT)? ')';
+max_high: 'max_high' '(' INT (',' INT)? ')';
+max_low: 'max_low' '(' INT (',' INT)? ')';
+max_close: 'max_close' '(' INT (',' INT)? ')';
+min_open: 'min_open' '(' INT (',' INT)? ')';
+min_high: 'min_high' '(' INT (',' INT)? ')';
+min_low: 'min_low' '(' INT (',' INT)? ')';
+min_close: 'min_close' '(' INT (',' INT)? ')';
 
 comparisonOp
     : '>'
