@@ -164,6 +164,9 @@
             <router-link :to="{ path: `/history/${r_botName}` }">
                 <button class=" btn btn-outline-success mr-1">Xem lịch sử lệnh</button>
             </router-link>
+            <router-link :to="{ path: `/calculator` }">
+                <button class=" btn btn-outline-success mr-1">Máy tính</button>
+            </router-link>
         </div>
     </div>
     <div id="cy"></div>

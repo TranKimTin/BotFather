@@ -1,9 +1,9 @@
 import { defineComponent, onMounted, ref, watch } from 'vue';
-import * as axios from '../axios/axios';
+import * as axios from '../../axios/axios';
 import Cookies from 'js-cookie';
 import MultiSelect from 'primevue/multiselect';
 import AutoComplete from 'primevue/autocomplete';
-import * as Toast from '../toast/toast';
+import * as Toast from '../../toast/toast';
 import Button from 'primevue/button';
 import { useConfirm } from "primevue/useconfirm";
 import Dialog from 'primevue/dialog';

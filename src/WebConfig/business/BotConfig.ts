@@ -1,12 +1,13 @@
-import { BotInfo, CustomRequest, NODE_TYPE, Node, NodeData } from '../../common/Interface';
+import { BotInfo, CustomRequest, NODE_TYPE, Node, NodeData, RateData } from '../../common/Interface';
 import { Server } from 'socket.io';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
-import { isValidCondition } from '../../common/Expr';
+import { calculate, calculateSubExpr, isValidCondition } from '../../common/Expr';
 import path from 'path';
 import * as util from '../../common/util'
 import fs from "fs";
 import * as mysql from '../lib/mysql';
 import moment from 'moment';
+import exp from 'constants';
 
 function validatekBotName(botName: string) {
     const invalidChars = /[\/\\:*?"<>|]/;
@@ -144,6 +145,34 @@ export async function getHistoryOrder(botName: string) {
         order.timeSL = order.timeSL ? moment(order.timeSL).format('YYYY-MM-DD HH:mm') : '';
     }
     return orders;
+}
+
+export async function calculator(broker: string, symbol: string, timeframe: string, expr: string) {
+    let data: Array<RateData> = [];
+    if (broker === 'binance') data = await util.getBinanceOHLCV(symbol, timeframe, 300);
+    else if (broker === 'binance_future') data = await util.getBinanceFutureOHLCV(symbol, timeframe, 300);
+    else if (broker === 'bybit') data = await util.getBybitOHLCV(symbol, timeframe, 300);
+    else if (broker === 'bybit_future') data = await util.getBybitFutureOHLCV(symbol, timeframe, 300);
+    else if (broker === 'okx') data = await util.getOkxOHLCV(symbol, timeframe, 300);
+    else throw 'Tên sàn không hợp lệ';
+
+    if (data[0] && !data[0].isFinal) {
+        data.shift();
+    }
+
+    const args = {
+        broker: broker,
+        symbol: symbol,
+        timeframe: timeframe,
+        data: data
+    };
+
+
+    expr = calculateSubExpr(expr, args);
+
+    const value = calculate(expr, args);
+    if (value === null) throw 'Biểu thức không hợp lệ';
+    return value;
 }
 
 export async function saveBot(data: BotInfo) {

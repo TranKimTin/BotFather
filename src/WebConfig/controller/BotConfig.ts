@@ -48,6 +48,28 @@ export async function getHistoryOrder(req: any, res: any) {
     }
 }
 
+export async function calculator(req: any, res: any) {
+    try {
+        const broker: string = req.query.broker;
+        const symbol: string = req.query.symbol;
+        const timeframe: string = req.query.timeframe;
+        const expr: string = req.query.expr;
+
+        if (!broker) throw 'broker không hợp lệ';
+        if (!symbol) throw 'symbol không hợp lệ';
+        if (!timeframe) throw 'timeframe không hợp lệ';
+        if (!expr) throw 'biểu thức không hợp lệ';
+
+
+        const data = await BotConfig.calculator(broker, symbol, timeframe, expr);
+        res.json({ code: 200, message: "ok", data });
+    }
+    catch (err: any) {
+        console.error(err);
+        res.json({ code: 400, message: err, data: [] });
+    }
+}
+
 export async function saveBot(req: any, res: any) {
     try {
         const data: BotInfo = req.body;
