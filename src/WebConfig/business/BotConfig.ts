@@ -133,7 +133,7 @@ export async function getHistoryOrder(botName: string) {
                                         FROM Orders o
                                         JOIN Bot b ON b.id = o.botID
                                         WHERE b.botName = ?
-                                        ORDER BY o.createdTime`, [botName]);
+                                        ORDER BY o.createdTime DESC`, [botName]);
 
     for (let order of orders) {
         order.createdTime = order.createdTime ? moment(order.createdTime).format('YYYY-MM-DD HH:mm') : '';
