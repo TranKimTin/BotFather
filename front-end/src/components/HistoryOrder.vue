@@ -44,10 +44,12 @@
                         {{ order.data.status }}
                     </span>
                     <span v-if="order.data.status.toLowerCase().includes('tp')" style="color: green;">
-                        (+{{ +Math.abs(order.data.volume * (order.data.tp - order.data.entry)).toFixed(2) }}%)
+                        (+{{ +Math.abs(order.data.volume * (order.data.tp - order.data.entry)).toFixed(2) }} $)
+                        (+{{ +Math.abs((order.data.tp - order.data.entry) / order.data.entry * 100).toFixed(2) }} %)
                     </span>
                     <span v-if="order.data.status.toLowerCase().includes('sl')" style="color: red;">
-                        (-{{ +Math.abs(order.data.volume * (order.data.tp - order.data.entry)).toFixed(2) }}%)
+                        (-{{ +Math.abs(order.data.volume * (order.data.tp - order.data.entry)).toFixed(2) }} $)
+                        (-{{ +Math.abs((order.data.tp - order.data.entry) / order.data.entry * 100).toFixed(2) }} %)
                     </span>
                 </template>
             </Column>
