@@ -1,12 +1,26 @@
 <template>
     <h1>{{ botName }}</h1>
     <div>
-        <DataTable :value="r_orderList" tableStyle="min-width: 50rem">
+        <DataTable :value="r_orderList" tableStyle="min-width: 50rem" scrollable scrollHeight="90vh"
+            :virtualScrollerOptions="{ itemSize: 50 }">
+            <Column :header="`STT (${r_orderList.length})`">
+                <template #body="order">
+                    {{ order.index + 1 }}
+                </template>
+            </Column>
             <Column field="symbol" header="symbol" sortable></Column>
-            <Column field="broker" header="broker" sortable></Column>
-            <Column field="timeframe" header="timeframe" sortable></Column>
-            <Column field="orderType" header="orderType" sortable></Column>
-            <Column field="volume" header="volume"></Column>
+            <Column field="broker" header="Sàn" sortable></Column>
+            <Column field="timeframe" header="Khung" sortable></Column>
+            <Column field="createdTime" header="Thời gian" sortable></Column>
+            <Column header="orderType" sortable>
+                <template #body="order">
+                    <span :style="{ color: order.data.orderType.toLowerCase().includes('buy') ? 'green' : 'red' }">
+                        {{ order.data.orderType }}
+                    </span>
+                </template>
+            </Column>
+            <Column field="volume" header="volume">
+            </Column>
             <Column field="stop" header="stop"></Column>
             <Column header="entry">
                 <template #body="order">
@@ -23,8 +37,20 @@
                     <span :title="order.data.timeSL">{{ order.data.sl }}</span>
                 </template>
             </Column>
-            <Column field="status" header="status" sortable></Column>
-            <Column field="createdTime" header="createdTime" sortable></Column>
+            <Column header="status" sortable>
+                <template #body="order">
+                    <span
+                        :style="{ color: order.data.status.toLowerCase().includes('tp') ? 'green' : order.data.status.toLowerCase().includes('sl') ? 'red' : 'black' }">
+                        {{ order.data.status }}
+                    </span>
+                    <span v-if="order.data.status.toLowerCase().includes('tp')" style="color: green;">
+                        (+{{ +Math.abs(order.data.volume * (order.data.tp - order.data.entry)).toFixed(2) }}%)
+                    </span>
+                    <span v-if="order.data.status.toLowerCase().includes('sl')" style="color: red;">
+                        (-{{ +Math.abs(order.data.volume * (order.data.tp - order.data.entry)).toFixed(2) }}%)
+                    </span>
+                </template>
+            </Column>
             <Column field="expiredTime" header="expiredTime"></Column>
         </DataTable>
     </div>
