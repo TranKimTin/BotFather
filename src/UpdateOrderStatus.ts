@@ -44,7 +44,7 @@ async function handleOrder(order: Order) {
         const params = {
             symbol,
             timeframe: '1m',
-            since: lastTimeUpdated ? (lastTimeUpdated + 60000) : (order.createdTime - 60000)
+            since: lastTimeUpdated ? (lastTimeUpdated + 60000) : order.createdTime
         };
         const data: Array<RateData> = await axios.get(url, { params })
             .then(res => res.data.reverse()); //time tang dan
