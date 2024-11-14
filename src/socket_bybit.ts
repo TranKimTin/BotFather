@@ -212,6 +212,18 @@ app.get('/api/getOHLCV', async (req: any, res) => {
     }
 });
 
+app.get('/api/getData', (req: any, res) => {
+    try {
+        const { symbol, timeframe } = req.query;
+        let data: Array<RateData> = bybitSocket.getData(symbol, timeframe);
+        res.json(data);
+    }
+    catch (err) {
+        console.error(err);
+        res.json([]);
+    }
+});
+
 const io = new Server(server, {
     pingInterval: 25000,
     pingTimeout: 60000

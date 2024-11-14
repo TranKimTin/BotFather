@@ -3,6 +3,10 @@ import { calculate, calculateSubExpr, isValidCondition } from '../../common/Expr
 import * as util from '../../common/util'
 import * as mysql from '../lib/mysql';
 import moment from 'moment';
+import dotenv from 'dotenv';
+import axios from 'axios';
+
+dotenv.config({ path: `${__dirname}/../../../.env` });
 
 function validatekBotName(botName: string) {
     const invalidChars = /[\/\\:*?"<>|]/;
@@ -143,13 +147,19 @@ export async function getHistoryOrder(botName: string) {
 }
 
 export async function calculator(broker: string, symbol: string, timeframe: string, expr: string) {
-    let data: Array<RateData> = [];
-    if (broker === 'binance') data = await util.getBinanceOHLCV(symbol, timeframe, 300);
-    else if (broker === 'binance_future') data = await util.getBinanceFutureOHLCV(symbol, timeframe, 300);
-    else if (broker === 'bybit') data = await util.getBybitOHLCV(symbol, timeframe, 300);
-    else if (broker === 'bybit_future') data = await util.getBybitFutureOHLCV(symbol, timeframe, 300);
-    else if (broker === 'okx') data = await util.getOkxOHLCV(symbol, timeframe, 300);
-    else throw 'Tên sàn không hợp lệ';
+    const hostSocketServer = process.env.HOST_SOCKET_SERVER || 'http://localhost';
+    const ports: { [key: string]: number } = {
+        'binance': 81,
+        'bybit': 82,
+        'okx': 83,
+        'bybit_future': 84,
+        'binance_future': 85
+    };
+    const url = `${hostSocketServer}:${ports[broker]}/api/getData`;
+    const params = { symbol, timeframe };
+
+    let data: Array<RateData> = await axios.get(url, { params })
+        .then(res => res.data);
 
     if (data[0] && !data[0].isFinal) {
         data.shift();
