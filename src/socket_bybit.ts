@@ -196,12 +196,12 @@ app.get('/api/getOHLCV', async (req: any, res) => {
 
         let data: Array<RateData> = bybitSocket.getData(symbol, timeframe);
 
-        while (data.length > 0 && data[data.length - 1].startTime <= since) data.pop();
+        while (data.length > 0 && data[data.length - 1].startTime < since) data.pop();
 
         if (data.length === 0 || data[data.length - 1].startTime > since) {
             data = await util.getBybitOHLCV(symbol, timeframe, 300, since);
         }
-        while (data.length > 0 && data[data.length - 1].startTime <= since) data.pop();
+        while (data.length > 0 && data[data.length - 1].startTime < since) data.pop();
 
         res.json(data);
     }
