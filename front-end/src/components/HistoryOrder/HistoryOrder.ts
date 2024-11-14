@@ -46,10 +46,10 @@ export default defineComponent({
                 let totalProfit = 0;
                 for (let order of r_orderList.value) {
                     if (order.timeTP) {
-                        totalProfit += (order.volume * (order.tp - order.entry));
+                        totalProfit += Math.abs(order.volume * (order.tp - order.entry));
                     }
                     else if (order.timeSL) {
-                        totalProfit += (order.volume * (order.entry - order.tp));
+                        totalProfit -= Math.abs(order.volume * (order.sl - order.entry));
                     }
                 }
                 r_totalProfit.value = parseFloat(totalProfit.toFixed(2));
