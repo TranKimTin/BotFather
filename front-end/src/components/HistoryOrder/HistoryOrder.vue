@@ -1,11 +1,31 @@
 <template>
-    <h1>{{ botName }}. Tổng lãi: <span :style="{ color: r_totalProfit >= 0 ? 'green' : 'red' }"> {{ r_totalProfit >= 0 ?
-        '+' : '' }}
-            {{ r_totalProfit }} $</span></h1>
+    <h1>{{ botName }}</h1>
+    <div class="grid grid-cols-6 gap-2 p-2">
+        <div class="flex-auto">
+            Lãi:
+            <span style="color: green;">{{ r_totalGain }}</span>-<span style="color: red;">{{ -r_totalLoss }}</span> =
+            <strong :style="{ color: (r_totalGain + r_totalLoss) >= 0 ? 'green' : 'red' }">{{
+                +(r_totalGain + r_totalLoss).toFixed(2) }} $</strong>
+        </div>
+        <dir class="flex-auto">
+            Số lệnh lãi: {{ r_cntGain }}
+        </dir>
+        <dir class="flex-auto">
+            Số lệnh lỗ: {{ r_cntLoss }}
+        </dir>
+        <div class="flex-auto">
+            Win rate: {{ +((r_cntGain / (r_cntGain + r_cntLoss)) * 100).toFixed(2) }} %
+        </div>
+        <div class="flex-auto">
+            Profit factor: {{ +((r_totalGain / (-r_totalLoss))).toFixed(2) }}
+        </div>
+        <div class="flex-auto">
+            Drawdown: <span v-if="r_maxDD > 0">-</span> {{ r_maxDD }} $
+        </div>
+    </div>
     <div>
-        <DataTable :filters="filters" :globalFilterFields=filterFields filterDisplay="row" :value="r_orderList"
-            tableStyle="min-width: 50rem" scrollable scrollHeight="90vh" :virtualScrollerOptions="{ itemSize: 50 }"
-            stripedRows>
+        <DataTable :value="r_orderList" tableStyle="min-width: 50rem" scrollable scrollHeight="90vh"
+            :virtualScrollerOptions="{ itemSize: 50 }" stripedRows>
             <Column :header="`STT (${r_orderList.length})`">
                 <template #body="order">
                     {{ order.index + 1 }}

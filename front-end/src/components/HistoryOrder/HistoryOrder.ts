@@ -32,36 +32,61 @@ export default defineComponent({
         const botName = route.params.botName;
 
         const r_orderList = ref<Array<Order>>([]);
-        const r_totalProfit = ref<number>(0);
-
-        const filters = {
-            broker: { value: null, matchMode: FilterMatchMode.CONTAINS }
-        };
-        const filterFields = ['broker'];
+        const r_totalGain = ref<number>(0);
+        const r_totalLoss = ref<number>(0);
+        const r_cntGain = ref<number>(0);
+        const r_cntLoss = ref<number>(0);
+        const r_maxDD = ref<number>(0);
 
         onMounted(async () => {
-            axios.get(`/getHistoryOrder/${botName}`).then(result => {
-                r_orderList.value = result;
+            axios.get(`/getHistoryOrder/${botName}`).then((result: Array<Order>) => {
+                let gain = 0;
+                let loss = 0;
+                let cntGain = 0;
+                let cntLoss = 0;
+                let maxProfit = 0;
+                let maxDD = 0;
 
-                let totalProfit = 0;
-                for (let order of r_orderList.value) {
+                let sortedData = result;
+                sortedData.sort((a, b) => {
+                    let timeA = 0, timeB = 0;
+                    if (a.timeTP) timeA = new Date(a.timeTP).getTime();
+                    if (a.timeSL) timeA = new Date(a.timeSL).getTime();
+                    if (b.timeTP) timeB = new Date(b.timeTP).getTime();
+                    if (b.timeSL) timeB = new Date(b.timeSL).getTime();
+                    return timeA - timeB;
+                });
+
+                for (let order of sortedData) {
                     if (order.timeTP) {
-                        totalProfit += Math.abs(order.volume * (order.tp - order.entry));
+                        gain += Math.abs(order.volume * (order.tp - order.entry));
+                        cntGain++;
                     }
                     else if (order.timeSL) {
-                        totalProfit -= Math.abs(order.volume * (order.sl - order.entry));
+                        loss -= Math.abs(order.volume * (order.sl - order.entry));
+                        cntLoss++;
                     }
+                    maxProfit = Math.max(maxProfit, gain + loss);
+                    maxDD = Math.max(maxDD, maxProfit - (gain + loss))
                 }
-                r_totalProfit.value = parseFloat(totalProfit.toFixed(2));
+
+                r_orderList.value = result;
+                r_totalGain.value = parseFloat(gain.toFixed(2));
+                r_totalLoss.value = parseFloat(loss.toFixed(2));
+                r_maxDD.value = parseFloat(maxDD.toFixed(2));
+                r_cntGain.value = cntGain;
+                r_cntLoss.value = cntLoss;
             });
         });
 
         return {
             botName,
             r_orderList,
-            r_totalProfit,
-            filters,
-            filterFields
+            r_totalGain,
+            r_totalLoss,
+            r_cntGain,
+            r_cntLoss,
+            r_maxDD
         };
     }
 });
