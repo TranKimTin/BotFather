@@ -99,6 +99,7 @@ export class BybitSocketFuture {
                     }
                     if (dataList[1] && !dataList[1].isFinal) {
                         dataList[1].isFinal = true;
+                        console.log('forces final', dataList[1]);
                         onCloseCandle(BybitSocketFuture.broker, data.symbol, data.interval, dataList.slice(1));
                     }
                 }
