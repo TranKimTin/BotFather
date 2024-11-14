@@ -227,7 +227,7 @@ export class BotFather {
             data.entry = data.stop;
         }
         else if ([NODE_TYPE.BUY_MARKET, NODE_TYPE.SELL_MARKET].includes(data.type)) {
-            data.entry = calculate(`close()`, args);
+            data.entry = args.data[0].close;
         }
 
         //tp
@@ -295,6 +295,37 @@ export class BotFather {
         }
         else {
             data.expiredTime = undefined;
+        }
+
+        const closePrice: number = args.data[0].close;
+        const entry: number = parseFloat(data.entry);
+        const stop: number = parseFloat(data.stop);
+        const tp: number = parseFloat(data.tp);
+        const sl: number = parseFloat(data.sl);
+
+
+        // match entry immediately
+        if (data.type === NODE_TYPE.BUY_LIMIT && entry <= closePrice) {
+            data.entry = closePrice;
+        }
+        else if (data.type === NODE_TYPE.BUY_STOP_LIMIT && entry <= closePrice && stop >= closePrice) {
+            data.entry = closePrice;
+        }
+        else if (data.type === NODE_TYPE.SELL_LIMIT && entry >= closePrice) {
+            data.entry = closePrice;
+        }
+        else if (data.type === NODE_TYPE.SELL_STOP_LIMIT && entry <= closePrice) {
+            data.entry = closePrice;
+        }
+
+        // match TP, SL immediately
+        if (data.entry === closePrice && [NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT].includes(data.type)) {
+            if (sl >= closePrice) data.sl = closePrice;
+            if (tp <= closePrice) data.tp = closePrice;
+        }
+        else if (data.entry === closePrice && [NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
+            if (sl <= closePrice) data.sl = closePrice;
+            if (tp >= closePrice) data.tp = closePrice;
         }
 
         return true;
