@@ -1,13 +1,8 @@
 import { BotInfo, CustomRequest, NODE_TYPE, Node, NodeData, RateData } from '../../common/Interface';
-import { Server } from 'socket.io';
-import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 import { calculate, calculateSubExpr, isValidCondition } from '../../common/Expr';
-import path from 'path';
 import * as util from '../../common/util'
-import fs from "fs";
 import * as mysql from '../lib/mysql';
 import moment from 'moment';
-import exp from 'constants';
 
 function validatekBotName(botName: string) {
     const invalidChars = /[\/\\:*?"<>|]/;
@@ -247,5 +242,10 @@ export async function checkNode(data: NodeData) {
 }
 
 export async function deleteBot(botName: string) {
-    return await mysql.query(`DELETE FROM Bot WHERE botName = ?`, [botName]);
+    const conncection = await mysql.getConnection();
+    const [{ id }] = await mysql.query_transaction(conncection, `Select id FROM Bot WHERE botName = ?`, [botName]);
+    await mysql.query_transaction(conncection, `DELETE FROM Orders WHERE botID = ?`, [id]);
+    await mysql.query_transaction(conncection, `DELETE FROM Bot WHERE id = ?`, [id]);
+    conncection.release();
+    return [];
 }

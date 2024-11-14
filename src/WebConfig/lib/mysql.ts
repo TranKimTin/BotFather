@@ -1,4 +1,4 @@
-import mysql, { Connection, PoolConnection } from 'mysql';
+import mysql, { PoolConnection } from 'mysql';
 import dotenv from 'dotenv';
 dotenv.config({ path: `${__dirname}/../../../.env` });
 let pool: mysql.Pool;
@@ -25,8 +25,7 @@ export function getConnection(): Promise<PoolConnection> {
     });
 }
 
-export function query_transaction(connection: PoolConnection, query: string, params: Array<any>) {
-    init();
+export function query_transaction(connection: PoolConnection, query: string, params: Array<any>): Promise<any> {
     return new Promise((resolve, reject) => {
         if (!connection) return reject('connection undefined');
         connection.query(query, params, (err, rows) => {
