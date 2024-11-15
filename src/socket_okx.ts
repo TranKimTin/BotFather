@@ -54,7 +54,9 @@ export class OkxSocket {
             this.gLastPrice[data.symbol] = data.close;
 
             const dataList = this.gData[data.symbol][data.interval];
-            if (!dataList[0]) return;
+            if (dataList.length === 0) {
+                dataList.push(data);
+            }
 
             if (dataList[0].startTime == data.startTime) {
                 // dataList[0] = data;

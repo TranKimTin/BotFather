@@ -67,7 +67,7 @@ export class BybitSocket {
             this.gLastPrice[data.symbol] = data.close;
 
             const dataList = this.gData[data.symbol][data.interval];
-            if (dataList[0]) {
+            if (dataList.length === 0) {
                 dataList.push(data);
             }
 
