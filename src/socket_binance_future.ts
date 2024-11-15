@@ -27,6 +27,7 @@ export class BinanceSocketFuture {
         // timeframes = ['1m', '15m', '4h', '1d'];
         for (const symbol of symbolList) {
             this.gData[symbol] = {};
+            this.gLastUpdated[symbol] = new Date().getTime();
             for (const tf of timeframes) {
                 this.gData[symbol][tf] = [];
             }
