@@ -3,6 +3,7 @@ import * as mysql from './WebConfig/lib/mysql';
 import * as util from './common/util';
 import axios from 'axios';
 import dotenv from 'dotenv';
+import moment from 'moment';
 
 dotenv.config({ path: `${__dirname}/../.env` });
 
@@ -17,6 +18,7 @@ interface Order {
     entry: number,
     tp: number,
     sl: number,
+    profit: number,
     status: ORDER_STATUS,
     createdTime: number,
     expiredTime: number,
@@ -49,8 +51,9 @@ async function handleOrder(order: Order) {
         const data: Array<RateData> = await axios.get(url, { params })
             .then(res => res.data.reverse()); //time tang dan
 
-        console.log(order.id, order.symbol, order.broker, order.timeframe, order.status, data.length)
-        for (let rate of data) {
+        console.log(moment(order.lastTimeUpdated).format('YYYY-MM-DD HH:mm'), order.id, order.symbol, order.broker, order.timeframe, order.status, data.length);
+        let isUpdated: boolean = false;
+        for (const rate of data) {
             if (!rate.isFinal) break;
             if ([ORDER_STATUS.CANCELED, ORDER_STATUS.MATCH_TP, ORDER_STATUS.MATCH_SL].includes(order.status)) break;
 
@@ -133,12 +136,40 @@ async function handleOrder(order: Order) {
                 }
             }
 
+            //profit, unrealized
+            if ([NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_STOP_LIMIT, NODE_TYPE.BUY_STOP_MARKET].includes(order.orderType)) {
+                if (order.status === ORDER_STATUS.MATCH_ENTRY) {
+                    order.profit = order.volume * (rate.close - order.entry);
+                }
+                else if (order.status === ORDER_STATUS.MATCH_TP) {
+                    order.profit = order.volume * (order.tp - order.entry);
+                }
+                else if (order.status === ORDER_STATUS.MATCH_SL) {
+                    order.profit = order.volume * (order.sl - order.entry);
+                }
+            }
+            else if ([NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_STOP_LIMIT, NODE_TYPE.SELL_STOP_MARKET].includes(order.orderType)) {
+                if (order.status === ORDER_STATUS.MATCH_ENTRY) {
+                    order.profit = order.volume * (order.entry - rate.close);
+                }
+                else if (order.status === ORDER_STATUS.MATCH_TP) {
+                    order.profit = order.volume * (order.entry - order.tp);
+                }
+                else if (order.status === ORDER_STATUS.MATCH_SL) {
+                    order.profit = order.volume * (order.entry - order.sl);
+                }
+            }
+
             order.lastTimeUpdated = rate.startTime;
+            isUpdated = true;
         }
+
+        if (!isUpdated) return;
+
         const sql = `UPDATE Orders 
-                        SET status = ?, timeStop = ?, timeEntry=?, timeTP = ?, timeSL = ?, lastTimeUpdated = ?
+                        SET profit = ?, status = ?, timeStop = ?, timeEntry=?, timeTP = ?, timeSL = ?, lastTimeUpdated = ?
                         WHERE id = ?`;
-        const args = [order.status, order.timeStop, order.timeEntry, order.timeTP, order.timeSL, order.lastTimeUpdated, order.id];
+        const args = [order.profit, order.status, order.timeStop, order.timeEntry, order.timeTP, order.timeSL, order.lastTimeUpdated, order.id];
         await mysql.query(sql, args);
     }
     catch (err) {
@@ -169,7 +200,7 @@ async function main() {
         console.error(err);
     }
     finally {
-        setTimeout(main, 5 * 60 * 1000);
+        setTimeout(main, 1 * 1 * 1000);
     }
 }
 

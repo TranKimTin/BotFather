@@ -16,13 +16,15 @@ interface Order {
     entry: number,
     tp: number,
     sl: number,
+    profit: number,
     status: string,
     createdTime: string,
     expiredTime: string,
     timeStop: string,
     timeEntry: string,
     timeTP: string,
-    timeSL: string
+    timeSL: string,
+    lastTimeUpdated: string
 };
 
 export default defineComponent({
@@ -32,8 +34,10 @@ export default defineComponent({
         const botName = route.params.botName;
 
         const r_orderList = ref<Array<Order>>([]);
-        const r_totalGain = ref<number>(0);
-        const r_totalLoss = ref<number>(0);
+        const r_gain = ref<number>(0);
+        const r_loss = ref<number>(0);
+        const r_unrealizedGain = ref<number>(0);
+        const r_unrealizedLoss = ref<number>(0);
         const r_cntGain = ref<number>(0);
         const r_cntLoss = ref<number>(0);
         const r_maxDD = ref<number>(0);
@@ -42,10 +46,13 @@ export default defineComponent({
             axios.get(`/getHistoryOrder/${botName}`).then((result: Array<Order>) => {
                 let gain = 0;
                 let loss = 0;
+                let unrealizedGain = 0;
+                let unrealizedLoss = 0;
                 let cntGain = 0;
                 let cntLoss = 0;
                 let maxProfit = 0;
                 let maxDD = 0;
+
 
                 let sortedData = [...result];
                 sortedData.sort((a, b) => {
@@ -59,20 +66,26 @@ export default defineComponent({
 
                 for (let order of sortedData) {
                     if (order.timeTP) {
-                        gain += Math.abs(order.volume * (order.tp - order.entry));
+                        gain += order.profit;
                         cntGain++;
                     }
                     else if (order.timeSL) {
-                        loss -= Math.abs(order.volume * (order.sl - order.entry));
+                        loss += order.profit;
                         cntLoss++;
+                    }
+                    else if (order.profit) {
+                        if (order.profit > 0) unrealizedGain += order.profit;
+                        else unrealizedLoss += order.profit;
                     }
                     maxProfit = Math.max(maxProfit, gain + loss);
                     maxDD = Math.max(maxDD, maxProfit - (gain + loss))
                 }
 
                 r_orderList.value = result;
-                r_totalGain.value = parseFloat(gain.toFixed(2));
-                r_totalLoss.value = parseFloat(loss.toFixed(2));
+                r_gain.value = parseFloat(gain.toFixed(2));
+                r_loss.value = parseFloat(loss.toFixed(2));
+                r_unrealizedGain.value = parseFloat(unrealizedGain.toFixed(2));
+                r_unrealizedLoss.value = parseFloat(unrealizedLoss.toFixed(2));
                 r_maxDD.value = parseFloat(maxDD.toFixed(2));
                 r_cntGain.value = cntGain;
                 r_cntLoss.value = cntLoss;
@@ -82,8 +95,10 @@ export default defineComponent({
         return {
             botName,
             r_orderList,
-            r_totalGain,
-            r_totalLoss,
+            r_gain,
+            r_loss,
+            r_unrealizedGain,
+            r_unrealizedLoss,
             r_cntGain,
             r_cntLoss,
             r_maxDD

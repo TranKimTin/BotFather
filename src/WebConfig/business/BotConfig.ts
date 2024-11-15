@@ -129,7 +129,7 @@ export async function getBotList() {
 }
 
 export async function getHistoryOrder(botName: string) {
-    const orders = await mysql.query(`SELECT b.id,o.symbol,o.broker,o.timeframe,o.orderType,o.volume,o.stop,o.entry,o.tp,o.sl,o.status,o.createdTime,o.expiredTime,o.timeStop,o.timeEntry,o.timeTP,o.timeSL
+    const orders = await mysql.query(`SELECT b.id,o.symbol,o.broker,o.timeframe,o.orderType,o.volume,o.stop,o.entry,o.tp,o.sl,o.profit,o.status,o.createdTime,o.expiredTime,o.timeStop,o.timeEntry,o.timeTP,o.timeSL,o.lastTimeUpdated
                                         FROM Orders o
                                         JOIN Bot b ON b.id = o.botID
                                         WHERE b.botName = ?
@@ -142,6 +142,7 @@ export async function getHistoryOrder(botName: string) {
         order.timeEntry = order.timeEntry ? moment(order.timeEntry).format('YYYY-MM-DD HH:mm') : '';
         order.timeTP = order.timeTP ? moment(order.timeTP).format('YYYY-MM-DD HH:mm') : '';
         order.timeSL = order.timeSL ? moment(order.timeSL).format('YYYY-MM-DD HH:mm') : '';
+        order.lastTimeUpdated = order.lastTimeUpdated ? moment(order.lastTimeUpdated).format('YYYY-MM-DD HH:mm') : '';
     }
     return orders;
 }
