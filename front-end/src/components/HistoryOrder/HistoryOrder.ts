@@ -47,7 +47,7 @@ export default defineComponent({
                 let maxProfit = 0;
                 let maxDD = 0;
 
-                let sortedData = result;
+                let sortedData = [...result];
                 sortedData.sort((a, b) => {
                     let timeA = 0, timeB = 0;
                     if (a.timeTP) timeA = new Date(a.timeTP).getTime();
