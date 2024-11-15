@@ -12,7 +12,8 @@
     "build-antlr": "antlr4ng -Dlanguage=TypeScript -o src/common/generated/ -visitor -no-listener -Xexact-output-dir src/common/Expr.g4",
     "build-ts": "tsc",
     "build-web": "cd ./front-end && npm run build",
-    "start": "node js/WebConfig/WebConfig.js"
+    "start": "node js/WebConfig/WebConfig.js",
+    "chinh": "tsc src/chinh.ts && node src/chinh.js"
   },
   "mocha": {
     "require": "ts-node/register",
@@ -45,6 +46,7 @@
     "binance-api-node": "^0.12.9",
     "body-parser": "^1.20.2",
     "bootstrap": "^5.3.3",
+    "bs58": "^6.0.0",
     "ccxt": "^4.1.43",
     "cors": "^2.8.5",
     "delay": "^5.0.0",
@@ -57,13 +59,16 @@
     "moment": "^2.29.4",
     "morgan": "^1.10.0",
     "mysql": "^2.18.1",
+    "needle": "^3.3.1",
     "node-telegram-bot-api": "^0.64.0",
     "pm2": "^5.4.2",
     "primeicons": "^7.0.0",
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",
     "technicalindicators": "^3.1.0",
+    "tough-cookie": "^2.5.0",
     "ts-node": "^10.9.2",
+    "tweetnacl": "^1.0.3",
     "ws": "^8.18.0"
   }
 }

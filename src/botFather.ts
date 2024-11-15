@@ -366,7 +366,9 @@ export class BotFather {
             }
 
             let mess = emoji[broker];
-            mess += `\n${broker}:${symbol} ${timeframe} ${data[0].timestring}`
+            mess += `\n${broker}:         <b>${symbol}</b>\n\n
+            ${timeframe} ${data[0].timestring}`
+
             mess += `\n${content}`;
 
             if (content === '<--->') mess = '--------------------';
