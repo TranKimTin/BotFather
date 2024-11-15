@@ -69,6 +69,7 @@ export class BybitSocket {
             const dataList = this.gData[data.symbol][data.interval];
             if (dataList.length === 0) {
                 dataList.push(data);
+                return;
             }
 
             if (dataList[0].startTime == data.startTime) {
