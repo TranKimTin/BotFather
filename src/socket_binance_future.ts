@@ -37,7 +37,10 @@ export class BinanceSocketFuture {
             this.gLastPrice[data.symbol] = data.close;
 
             const dataList = this.gData[data.symbol][data.interval];
-            if (!dataList[0]) return;
+            if (dataList.length === 0) {
+                dataList.push(data);
+                return;
+            }
 
             if (dataList[0].startTime == data.startTime) {
                 // dataList[0] = data;
@@ -141,7 +144,6 @@ export class BinanceSocketFuture {
             for (const data of lastData) {
                 const lastRate = this.gData[symbol][tf][0];
                 if (data.startTime >= lastRate.startTime) {
-                    if (data.startTime > lastRate.startTime) console.log('merge forces', data, lastRate)
                     mergeData(data, data.isFinal);
                 }
             }
