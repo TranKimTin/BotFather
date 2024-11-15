@@ -50,6 +50,39 @@ export class OkxSocket {
             }));
         });
 
+        const mergeData = (data: RateData, isFinalMinute: boolean) => {
+            this.gLastPrice[data.symbol] = data.close;
+
+            const dataList = this.gData[data.symbol][data.interval];
+            if (!dataList[0]) return;
+
+            if (dataList[0].startTime == data.startTime) {
+                // dataList[0] = data;
+                dataList[0].high = Math.max(dataList[0].high, data.high);
+                dataList[0].low = Math.min(dataList[0].low, data.low);
+                dataList[0].close = data.close;
+                dataList[0].volume += isFinalMinute ? data.volume : 0;
+
+                if (data.isFinal && !dataList[0].isFinal) {
+                    dataList[0].isFinal = data.isFinal;
+                    onCloseCandle(OkxSocket.broker, data.symbol, data.interval, [...dataList]);
+                }
+            }
+            else if (dataList[0].startTime < data.startTime) {
+                dataList.unshift(data);
+                if (dataList.length > numbler_candle_load) {
+                    dataList.pop();
+                }
+                if (dataList[1] && !dataList[1].isFinal) {
+                    dataList[1].isFinal = true;
+                    console.log('forces final', dataList[1]);
+                    onCloseCandle(OkxSocket.broker, data.symbol, data.interval, dataList.slice(1));
+                }
+            }
+            else {
+                console.log('merge error');
+            }
+        };
         const fetchCandles = (symbol: string, candle: Array<string>) => {
             this.gLastUpdated[symbol] = new Date().getTime();
             for (const tf of timeframes) {
@@ -65,34 +98,7 @@ export class OkxSocket {
                     interval: tf,
                     isFinal: (!!+candle[8]) && util.checkFinal(tf, +candle[0])
                 };
-                this.gLastPrice[data.symbol] = data.close;
-
-                const dataList = this.gData[data.symbol][data.interval];
-                if (!dataList[0]) return;
-
-                if (dataList[0].startTime == data.startTime) {
-                    // dataList[0] = data;
-                    dataList[0].high = Math.max(dataList[0].high, data.high);
-                    dataList[0].low = Math.min(dataList[0].low, data.low);
-                    dataList[0].close = data.close;
-                    dataList[0].volume += (!!+candle[8]) ? data.volume : 0;
-
-                    if (data.isFinal && !dataList[0].isFinal) {
-                        dataList[0].isFinal = data.isFinal;
-                        onCloseCandle(OkxSocket.broker, data.symbol, data.interval, [...dataList]);
-                    }
-                }
-                else if (dataList[0].startTime < data.startTime) {
-                    dataList.unshift(data);
-                    if (dataList.length > numbler_candle_load) {
-                        dataList.pop();
-                    }
-                    if (dataList[1] && !dataList[1].isFinal) {
-                        dataList[1].isFinal = true;
-                        console.log('forces final', dataList[1]);
-                        onCloseCandle(OkxSocket.broker, data.symbol, data.interval, dataList.slice(1));
-                    }
-                }
+                mergeData(data, (!!+candle[8]));
             }
         }
 
@@ -124,9 +130,16 @@ export class OkxSocket {
 
         const initCandle = async (symbol: string, tf: string) => {
             const rates = await util.getOkxOHLCV(symbol, tf, numbler_candle_load);
+            const lastData = this.gData[symbol][tf].reverse();
             this.gData[symbol][tf] = rates;
             this.gLastPrice[symbol] = this.gData[symbol][tf][0]?.close || 0;
-            // console.log('init candle', { symbol, tf })
+
+            for (const data of lastData) {
+                const lastRate = this.gData[symbol][tf][0];
+                if (data.startTime >= lastRate.startTime) {
+                    mergeData(data, data.isFinal);
+                }
+            }
         }
 
         for (const tf of timeframes) {
@@ -240,6 +253,7 @@ server.listen(port);
 
 function onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
     let key = `${symbol}:${timeframe}`;
+    if (data.length <= 15) return;
     if (!symbolListener[key]) return;
 
     io.emit('onCloseCandle', { broker, symbol, timeframe, data });

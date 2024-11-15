@@ -65,7 +65,10 @@ export class BinanceSocketFuture {
                     onCloseCandle(BinanceSocketFuture.broker, data.symbol, data.interval, dataList.slice(1));
                 }
             }
-        }
+            else {
+                console.log('merge error');
+            }
+        };
 
         console.log(`${BinanceSocketFuture.broker}: init timeframe`, timeframes);
         const fetchCandles = (candle: Candle) => {
