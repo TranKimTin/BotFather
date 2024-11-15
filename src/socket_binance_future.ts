@@ -88,7 +88,7 @@ export class BinanceSocketFuture {
         }
 
         const streams = symbolList.map(symbol => `${symbol.toLowerCase()}@kline_1m`).join("/");
-        const url = `wss://stream.binance.com:9443/stream?streams=${streams}`;
+        const url = `wss://fstream.binance.com/stream?streams=${streams}`;
 
         const rws = new ReconnectingWebSocket(url, [], { WebSocket: WebSocket });
 
