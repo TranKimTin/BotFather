@@ -81,7 +81,6 @@ export class BybitSocket {
 
                 if (data.isFinal && !dataList[0].isFinal) {
                     dataList[0].isFinal = data.isFinal;
-                    console.log('forces final', dataList[1]);
                     onCloseCandle(BybitSocket.broker, data.symbol, data.interval, [...dataList]);
                 }
             }
@@ -92,6 +91,7 @@ export class BybitSocket {
                 }
                 if (dataList[1] && !dataList[1].isFinal) {
                     dataList[1].isFinal = true;
+                    console.log('forces final', dataList[1]);
                     onCloseCandle(BybitSocket.broker, data.symbol, data.interval, dataList.slice(1));
                 }
             }
