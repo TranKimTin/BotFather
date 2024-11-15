@@ -51,7 +51,6 @@ async function handleOrder(order: Order) {
         const data: Array<RateData> = await axios.get(url, { params })
             .then(res => res.data.reverse()); //time tang dan
 
-        console.log(moment(order.lastTimeUpdated).format('YYYY-MM-DD HH:mm'), order.id, order.symbol, order.broker, order.timeframe, order.status, data.length);
         let isUpdated: boolean = false;
         for (const rate of data) {
             if (!rate.isFinal) break;
@@ -165,6 +164,8 @@ async function handleOrder(order: Order) {
         }
 
         if (!isUpdated) return;
+
+        console.log(moment(order.lastTimeUpdated).format('YYYY-MM-DD HH:mm'), order.id, order.symbol, order.broker, order.timeframe, order.status, data.length);
 
         const sql = `UPDATE Orders 
                         SET profit = ?, status = ?, timeStop = ?, timeEntry=?, timeTP = ?, timeSL = ?, lastTimeUpdated = ?
