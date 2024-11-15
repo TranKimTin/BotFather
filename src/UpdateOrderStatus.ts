@@ -200,7 +200,7 @@ async function main() {
         console.error(err);
     }
     finally {
-        setTimeout(main, 1 * 1 * 1000);
+        setTimeout(main, 1 * 60 * 1000);
     }
 }
 
