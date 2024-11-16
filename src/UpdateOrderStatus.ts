@@ -205,4 +205,4 @@ async function main() {
     }
 }
 
-main();
+setTimeout(main, 60 * 1000);
