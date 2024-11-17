@@ -43,10 +43,10 @@ export default class Telegram {
 
     private encodeHTML(str: string) {
         return str
-            .replace(/&/g, '&amp;')
+            // .replace(/&/g, '&amp;')
             // .replace(/</g, '&lt;')
             // .replace(/>/g, '&az')
-            .replace(/"/g, '&quot;');
+            // .replace(/"/g, '&quot;');
     }
 
     setChatID(id: string | number) {

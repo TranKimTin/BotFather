@@ -364,11 +364,17 @@ export class BotFather {
                 'binance_future': '🥇🥇🥇',
                 'bybit_future': ''
             }
+            const url: { [key: string]: string } = {
+                'binance': `https://www.binance.com/en/trade/${symbol}?_from=markets&type=spot`,
+                'bybit': `https://www.bybit.com/vi-VN/trade/spot/${symbol.replace('USDT', '')}/USDT`,
+                'okx': `https://www.okx.com/vi/trade-spot/${symbol}`,
+                'binance_future': `https://www.binance.com/en/futures/${symbol}?_from=markets`,
+                'bybit_future': `https://www.bybit.com/trade/usdt/${symbol}`
+            }
 
             let mess = emoji[broker];
-            mess += `\n${broker}:         <b>${symbol}</b>\n\n
-            ${timeframe} ${data[0].timestring}`
-
+            mess += `\n${broker}:         <a href="${url[broker]}"><b>${symbol}</b></a>\n`;
+            mess += `${timeframe} ${data[0].timestring}\n`;
             mess += `\n${content}`;
 
             if (content === '<--->') mess = '--------------------';
