@@ -24,7 +24,6 @@ export default class Telegram {
 
     constructor(tag?: string, token?: string, polling?: boolean) {
         const botToken: any = token || process.env.TELEGRAM_TOKEN;
-
         this.timeoutMess = {};
         this.listMess = {};
         this.listErr = [];
@@ -43,9 +42,10 @@ export default class Telegram {
     }
 
     private encodeHTML(str: string) {
-        return str.replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
+        return str
+            .replace(/&/g, '&amp;')
+            // .replace(/</g, '&lt;')
+            // .replace(/>/g, '&az')
             .replace(/"/g, '&quot;');
     }
 
