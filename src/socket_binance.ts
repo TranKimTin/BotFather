@@ -189,6 +189,7 @@ export class BinanceSocket {
     }
 
     public getData(symbol: string, timeframe: string) {
+        if (!this.gData || !this.gData[symbol] || !!this.gData[symbol][timeframe]) return [];
         return this.gData[symbol][timeframe];
     }
 };
