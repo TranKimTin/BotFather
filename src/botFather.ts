@@ -373,8 +373,8 @@ export class BotFather {
             }
 
             let mess = emoji[broker];
-            mess += `\n${broker}:         <a href="${url[broker]}"><b>${symbol}</b></a>\n`;
-            mess += `${timeframe} ${data[0].timestring}\n`;
+            mess += `\n${broker}:         <a href="${url[broker]}"><b>${symbol}</b></a>`;
+            mess += `\n${timeframe} ${data[0].timestring}`;
             mess += `\n${content}`;
 
             if (content === '<--->') mess = '--------------------';

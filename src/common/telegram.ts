@@ -43,10 +43,10 @@ export default class Telegram {
 
     private encodeHTML(str: string) {
         return str
-            // .replace(/&/g, '&amp;')
-            // .replace(/</g, '&lt;')
-            // .replace(/>/g, '&az')
-            // .replace(/"/g, '&quot;');
+        // .replace(/&/g, '&amp;')
+        // .replace(/</g, '&lt;')
+        // .replace(/>/g, '&az')
+        // .replace(/"/g, '&quot;');
     }
 
     setChatID(id: string | number) {
@@ -64,7 +64,7 @@ export default class Telegram {
             clearTimeout(this.timeoutMess[id]);
             this.timeoutMess[id] = setTimeout(() => {
                 const s = this.TAG + this.listMess[id].join('\n\n\n');
-                this.bot.sendMessage(id, s, { parse_mode: 'HTML' });
+                this.bot.sendMessage(id, s, { parse_mode: 'HTML', disable_web_page_preview: true });
                 this.listMess[id] = [];
             }, 1000);
         }
