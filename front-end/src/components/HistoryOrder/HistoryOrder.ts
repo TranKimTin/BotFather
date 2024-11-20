@@ -41,8 +41,10 @@ export default defineComponent({
         const r_cntGain = ref<number>(0);
         const r_cntLoss = ref<number>(0);
         const r_maxDD = ref<number>(0);
+        const r_isLoading = ref<boolean>(true);
 
         onMounted(async () => {
+            r_isLoading.value = true;
             axios.get(`/getHistoryOrder/${botName}`).then((result: Array<Order>) => {
                 let gain = 0;
                 let loss = 0;
@@ -89,6 +91,7 @@ export default defineComponent({
                 r_maxDD.value = parseFloat(maxDD.toFixed(2));
                 r_cntGain.value = cntGain;
                 r_cntLoss.value = cntLoss;
+                r_isLoading.value = false;
             });
         });
 
@@ -101,7 +104,8 @@ export default defineComponent({
             r_unrealizedLoss,
             r_cntGain,
             r_cntLoss,
-            r_maxDD
+            r_maxDD,
+            r_isLoading
         };
     }
 });

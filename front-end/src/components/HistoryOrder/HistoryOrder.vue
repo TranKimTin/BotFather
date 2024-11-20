@@ -31,6 +31,7 @@
         </div>
     </div>
     <div>
+        <h3 v-if="r_isLoading">Đang load, đợi tí...</h3>
         <DataTable :value="r_orderList" tableStyle="min-width: 50rem" scrollable scrollHeight="90vh"
             :virtualScrollerOptions="{ itemSize: 50 }" stripedRows>
             <Column :header="`STT (${r_orderList.length})`">
@@ -38,7 +39,32 @@
                     {{ order.index + 1 }}
                 </template>
             </Column>
-            <Column field="symbol" header="Coin" sortable></Column>
+            <Column sort-field="symbol" header="Coin" sortable>
+                <template #body="order">
+                    <a v-if="order.data.broker === 'binance'"
+                        :href="`https://www.binance.com/en/trade/${order.data.symbol}?_from=markets&type=spot`"
+                        target="_blank">
+                        {{ order.data.symbol }}
+                    </a>
+                    <a v-if="order.data.broker === 'binance_future'"
+                        :href="`https://www.binance.com/en/futures/${order.data.symbol}?_from=markets`" target="_blank">
+                        {{ order.data.symbol }}
+                    </a>
+                    <a v-if="order.data.broker === 'bybit'"
+                        :href="`https://www.bybit.com/vi-VN/trade/spot/${order.data.symbol.replace('USDT', '')}/USDT`"
+                        target="_blank">
+                        {{ order.data.symbol }}
+                    </a>
+                    <a v-if="order.data.broker === 'bybit_future'"
+                        :href="`https://www.bybit.com/trade/usdt/${order.data.symbol}`" target="_blank">
+                        {{ order.data.symbol }}
+                    </a>
+                    <a v-if="order.data.broker === 'okx'"
+                        :href="`https://www.okx.com/vi/trade-spot/${order.data.symbol}`" target="_blank">
+                        {{ order.data.symbol }}
+                    </a>
+                </template>
+            </Column>
             <Column field="broker" header="Sàn" sortable> </Column>
             <Column field="timeframe" header="Khung" sortable></Column>
             <Column field="createdTime" header="Thời gian mở" sortable></Column>

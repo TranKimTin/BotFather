@@ -161,11 +161,11 @@
             <button class="btn btn-outline-primary mr-1" @click="updateNode">Sửa nút đã chọn</button>
             <button class="btn btn-outline-danger mr-1" @click="removeNode">Xóa nút đã chọn</button>
             <button class="btn btn-outline-success mr-1" @click="saveBot">Lưu cấu hình bot</button>
-            <router-link :to="{ path: `/history/${r_botName}` }">
-                <button class=" btn btn-outline-success mr-1">Xem lịch sử lệnh</button>
-            </router-link>
+            <a :href="`/history/${r_botName}`" target="_blank">
+                <button class="btn btn-outline-success mr-1">Xem lịch sử lệnh</button>
+            </a>
             <router-link :to="{ path: `/calculator` }">
-                <button class=" btn btn-outline-success mr-1">Máy tính</button>
+                <button class="btn btn-outline-success mr-1">Máy tính</button>
             </router-link>
         </div>
     </div>
