@@ -1,0 +1,10 @@
+- thêm nút copy node
+- ấn crl để vẽ node
+- tại tài khoản
+- đăng nhập
+- phân quyền, chỉ xem được bot mình tạo
+- bắn tín hiệu cho bot khác	
+- auto complete khi nhập biểu thức
+- market cap -> https://api.cryptorank.io/v0/coins/    https://www.binance.com/bapi/apex/v1/friendly/apex/marketing/simplifiedSymbolListWeb
+- is leader -> https://api.cryptorank.io/v0/coins/tensor/investors-list
+- vẽ chart, chỉ báo ->  https://www.npmjs.com/package/trading-vue-js   https://codesandbox.io/p/sandbox/vue-ocpqe?file=%2Fsrc%2FApp.vue%3A6%2C6-6%2C17
