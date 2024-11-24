@@ -108,8 +108,8 @@
                         (+{{ +Math.abs((order.data.tp - order.data.entry) / order.data.entry * 100).toFixed(2) }} %)
                     </span>
                     <span v-if="order.data.timeSL" :title="order.data.timeSL" style="color: red; cursor: pointer;">
-                        (-{{ +Math.abs(order.data.volume * (order.data.tp - order.data.entry)).toFixed(2) }} $)
-                        (-{{ +Math.abs((order.data.tp - order.data.entry) / order.data.entry * 100).toFixed(2) }} %)
+                        (-{{ +Math.abs(order.data.volume * (order.data.sl - order.data.entry)).toFixed(2) }} $)
+                        (-{{ +Math.abs((order.data.sl - order.data.entry) / order.data.entry * 100).toFixed(2) }} %)
                     </span>
                 </template>
             </Column>
