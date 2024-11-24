@@ -305,27 +305,27 @@ export class BotFather {
 
 
         // match entry immediately
-        if (data.type === NODE_TYPE.BUY_LIMIT && entry <= closePrice) {
+        if (data.type === NODE_TYPE.BUY_LIMIT && closePrice <= entry) {
             data.entry = closePrice;
         }
-        else if (data.type === NODE_TYPE.BUY_STOP_LIMIT && entry <= closePrice && stop >= closePrice) {
+        else if (data.type === NODE_TYPE.BUY_STOP_LIMIT && closePrice <= entry && closePrice >= stop) {
             data.entry = closePrice;
         }
-        else if (data.type === NODE_TYPE.SELL_LIMIT && entry >= closePrice) {
+        else if (data.type === NODE_TYPE.SELL_LIMIT && closePrice >= entry) {
             data.entry = closePrice;
         }
-        else if (data.type === NODE_TYPE.SELL_STOP_LIMIT && entry <= closePrice) {
+        else if (data.type === NODE_TYPE.SELL_STOP_LIMIT && closePrice >= entry && closePrice <= stop) {
             data.entry = closePrice;
         }
 
         // match TP, SL immediately
         if (data.entry === closePrice && [NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT].includes(data.type)) {
-            if (sl >= closePrice) data.sl = closePrice;
-            if (tp <= closePrice) data.tp = closePrice;
+            if (closePrice <= sl) data.sl = closePrice;
+            else if (closePrice >= tp) data.tp = closePrice;
         }
         else if (data.entry === closePrice && [NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
-            if (sl <= closePrice) data.sl = closePrice;
-            if (tp >= closePrice) data.tp = closePrice;
+            if (closePrice >= sl) data.sl = closePrice;
+            else if (closePrice <= tp) data.tp = closePrice;
         }
 
         return true;
