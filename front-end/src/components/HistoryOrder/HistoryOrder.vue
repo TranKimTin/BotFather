@@ -14,7 +14,7 @@
         <div class="flex-auto">
             Chưa chốt: <span style="color: green;">{{ r_unrealizedGain }}</span>-<span style="color: red;">{{
                 -r_unrealizedLoss
-                }}</span> =
+            }}</span> =
             <strong :style="{ color: (r_unrealizedGain + r_unrealizedLoss) >= 0 ? 'green' : 'red' }">{{
                 +(r_unrealizedGain + r_unrealizedLoss).toFixed(2) }} $</strong>
         </div>
@@ -28,6 +28,18 @@
         </div>
         <div class="flex-auto">
             Drawdown: <span v-if="r_maxDD > 0">-</span> {{ r_maxDD }} $
+        </div>
+    </div>
+    <div class="grid grid-cols-2 gap-2 p-2">
+        <div>
+            <label for="broker">Lọc sàn</label>
+            <MultiSelect v-model="r_brokerSelected" :options="brokers" filter placeholder="Khung thời gian"
+                class="w-full md:w-80 form-control" id="broker" />
+        </div>
+        <div>
+            <label for="timeframe">Lọc khung thời gian</label>
+            <MultiSelect v-model="r_timeframesSelected" :options="timeframes" filter placeholder="Khung thời gian"
+                class="w-full md:w-80 form-control" id="timeframe" />
         </div>
     </div>
     <div>
