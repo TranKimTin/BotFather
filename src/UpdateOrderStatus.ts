@@ -130,7 +130,7 @@ async function handleOrder(order: Order) {
 
             if (order.status === ORDER_STATUS.OPENED && order.expiredTime) {
                 //handle expired time
-                if (order.expiredTime >= rate.startTime) {
+                if (order.expiredTime <= rate.startTime) {
                     order.status = ORDER_STATUS.CANCELED;
                 }
             }
