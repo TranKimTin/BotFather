@@ -227,6 +227,7 @@ export default defineComponent({
                 if (unit === 'percent') return '%';
                 if (unit === 'usd') return 'USD';
                 if (unit === 'token') return 'Token';
+                if (unit === 'rr') return 'R';
                 return '';
             }
 
