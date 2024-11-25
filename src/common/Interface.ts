@@ -152,6 +152,7 @@ export enum ORDER_STATUS {
 export enum UNIT {
     PRICE = 'price',
     PERCENT = 'percent',
+    RR = 'rr',
     USD = 'usd',
     TOKEN = 'token',
     CANDLE = 'candle',

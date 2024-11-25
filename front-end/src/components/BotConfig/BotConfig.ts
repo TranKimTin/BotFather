@@ -63,6 +63,7 @@ export default defineComponent({
             { name: 'Đóng toàn bộ vị thế', value: 'closeAllPosition' }
         ];
         const unitsEntry = [{ name: 'Theo giá', value: 'price' }, { name: '%', value: 'percent' }];
+        const unitTP = [...unitsEntry, { name: 'Risk-Reward', value: 'rr' }];
         const unitsVulume = [{ name: 'USD', value: 'usd' }, { name: 'token', value: 'token' }];
         const unitExpiredTime = [{ name: 'Nến', value: 'candle' }, { name: 'Phút', value: 'minute' }];
 
@@ -619,6 +620,7 @@ export default defineComponent({
             brokerList,
             nodeTypes,
             unitsEntry,
+            unitTP,
             unitsVulume,
             unitExpiredTime,
             getBotInfo,
