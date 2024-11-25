@@ -128,7 +128,7 @@ export async function getBotList() {
     return data;
 }
 
-export async function getHistoryOrder(botName: string, filterBroker: string, filterTimeframe: string) {
+export async function getHistoryOrder(botName: string, filterBroker: Array<string>, filterTimeframe: Array<string>) {
     const orders = await mysql.query(`SELECT b.id,o.symbol,o.broker,o.timeframe,o.orderType,o.volume,o.stop,o.entry,o.tp,o.sl,o.profit,o.status,o.createdTime,o.expiredTime,o.timeStop,o.timeEntry,o.timeTP,o.timeSL,o.lastTimeUpdated
                                         FROM Orders o
                                         JOIN Bot b ON b.id = o.botID
