@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import MultiSelect from 'primevue/multiselect';
+import BalanceChart from "./BalanceChart.vue";
 
 interface Order {
     id: number,
@@ -27,8 +28,13 @@ interface Order {
     lastTimeUpdated: string
 };
 
+interface BalanceData {
+    timestamp: string,
+    balance: number
+}
+
 export default defineComponent({
-    components: { DataTable, Column, MultiSelect },
+    components: { DataTable, Column, MultiSelect, BalanceChart },
     setup() {
         const route = useRoute();
         const botName = route.params.botName;
@@ -46,6 +52,7 @@ export default defineComponent({
         const r_timeframesSelected = ref<Array<string>>([...timeframes]);
         const brokers: Array<string> = ['binance', 'bybit', 'okx', 'binance_future', 'bybit_future'];
         const r_brokerSelected = ref<Array<string>>([...brokers]);
+        const r_BalanceData = ref<Array<BalanceData>>([]);
 
         watch(r_timeframesSelected, (newValue) => {
             newValue.sort((a, b) => timeframes.indexOf(a) - timeframes.indexOf(b));
@@ -61,6 +68,7 @@ export default defineComponent({
             clearTimeout(timeout);
             timeout = setTimeout(() => {
                 r_isLoading.value = true;
+                r_BalanceData.value = [];
                 const params = {
                     filterBroker: r_brokerSelected.value.join(','),
                     filterTimeframe: r_timeframesSelected.value.join(',')
@@ -74,7 +82,7 @@ export default defineComponent({
                     let cntLoss = 0;
                     let maxProfit = 0;
                     let maxDD = 0;
-
+                    let balanceData: Array<BalanceData> = [];
 
                     let sortedData = [...result];
                     sortedData.sort((a, b) => {
@@ -90,17 +98,19 @@ export default defineComponent({
                         if (order.timeTP) {
                             gain += order.profit;
                             cntGain++;
+                            balanceData.push({ timestamp: order.timeTP, balance: gain + loss });
                         }
                         else if (order.timeSL) {
                             loss += order.profit;
                             cntLoss++;
+                            balanceData.push({ timestamp: order.timeSL, balance: gain + loss });
                         }
                         else if (order.profit) {
                             if (order.profit > 0) unrealizedGain += order.profit;
                             else unrealizedLoss += order.profit;
                         }
                         maxProfit = Math.max(maxProfit, gain + loss);
-                        maxDD = Math.max(maxDD, maxProfit - (gain + loss))
+                        maxDD = Math.max(maxDD, maxProfit - (gain + loss));
                     }
 
                     r_orderList.value = result;
@@ -112,6 +122,7 @@ export default defineComponent({
                     r_cntGain.value = cntGain;
                     r_cntLoss.value = cntLoss;
                     r_isLoading.value = false;
+                    r_BalanceData.value = balanceData;
                 });
             }, delay ? 1000 : 0);
         }
@@ -133,6 +144,7 @@ export default defineComponent({
             r_isLoading,
             r_timeframesSelected,
             r_brokerSelected,
+            r_BalanceData,
             timeframes,
             brokers
         };

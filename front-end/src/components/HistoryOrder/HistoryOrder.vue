@@ -14,7 +14,7 @@
         <div class="flex-auto">
             Chưa chốt: <span style="color: green;">{{ r_unrealizedGain }}</span>-<span style="color: red;">{{
                 -r_unrealizedLoss
-            }}</span> =
+                }}</span> =
             <strong :style="{ color: (r_unrealizedGain + r_unrealizedLoss) >= 0 ? 'green' : 'red' }">{{
                 +(r_unrealizedGain + r_unrealizedLoss).toFixed(2) }} $</strong>
         </div>
@@ -42,6 +42,7 @@
                 class="w-full md:w-80 form-control" id="timeframe" />
         </div>
     </div>
+    <BalanceChart :data="r_BalanceData" />
     <div>
         <h3 v-if="r_isLoading">Đang load, đợi tí...</h3>
         <DataTable :value="r_orderList" tableStyle="min-width: 50rem" scrollable scrollHeight="90vh"
