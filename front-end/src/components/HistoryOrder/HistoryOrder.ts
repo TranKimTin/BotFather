@@ -44,7 +44,7 @@ export default defineComponent({
         const r_isLoading = ref<boolean>(true);
         const timeframes: Array<string> = ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'];
         const r_timeframesSelected = ref<Array<string>>([...timeframes]);
-        const brokers: Array<string> = ['binance', 'bybit', 'okx', 'binance_future', 'bybit_futute'];
+        const brokers: Array<string> = ['binance', 'bybit', 'okx', 'binance_future', 'bybit_future'];
         const r_brokerSelected = ref<Array<string>>([...brokers]);
 
         watch(r_timeframesSelected, (newValue) => {
