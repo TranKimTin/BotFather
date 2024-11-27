@@ -67,12 +67,12 @@ export default {
             responsive: true,
             maintainAspectRatio: false,
             interaction: {
-                mode: 'index', // Cho phép hover trên tất cả các điểm có cùng tọa độ dọc
+                mode: "index" as "index", // Cho phép hover trên tất cả các điểm có cùng tọa độ dọc
                 intersect: false // Đảm bảo không cần phải chạm vào chính xác điểm đó
             },
             plugins: {
                 tooltip: {
-                    mode: 'index',
+                    mode: "index" as "index",
                     intersect: false
                 }
             },
@@ -80,16 +80,6 @@ export default {
                 x: {
                     ticks: {
                         maxTicksLimit: 10 // Giới hạn số lượng nhãn trên trục x
-                    }
-                },
-                y: {
-                    type: 'linear',
-                    position: 'left',
-                    ticks: {
-                        color: '#f87979', // Màu của nhãn trục y bên trái
-                    },
-                    grid: {
-                        drawOnChartArea: false // Không vẽ lưới phía sau từ trục bên trái
                     }
                 }
             }
