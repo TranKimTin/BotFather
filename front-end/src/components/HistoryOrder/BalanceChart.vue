@@ -15,7 +15,7 @@ import {
     Tooltip,
     Legend
 } from 'chart.js'
-import { onMounted, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { Line } from 'vue-chartjs'
 
 ChartJS.register(
@@ -46,22 +46,26 @@ export default {
         },
     },
     setup(props) {
-        const data = ref({
-            labels: props.data.map(item => item.timestamp),
-            datasets: [
-                {
-                    label: 'Balance chart',
-                    backgroundColor: '#FF9900',
-                    borderColor: '#FF9900',
-                    data: props.data.map(item => item.balance),
-                    fill: false,
-                    pointRadius: 1,
-                    pointHoverRadius: 5,
-                    pointBackgroundColor: '#ffffff',
-                    pointBorderColor: '#FF9900'
-                }
-            ]
-        });
+        function getDataChart(data: Array<PropData>) {
+            return {
+                labels: data.map(item => item.timestamp),
+                datasets: [
+                    {
+                        label: 'Balance chart',
+                        backgroundColor: '#FF9900',
+                        borderColor: '#FF9900',
+                        data: data.map(item => item.balance),
+                        fill: false,
+                        pointRadius: 1,
+                        pointHoverRadius: 5,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: '#FF9900'
+                    }
+                ]
+            }
+        }
+
+        const data = ref(getDataChart(props.data));
 
         const options = {
             responsive: true,
@@ -83,26 +87,11 @@ export default {
                     }
                 }
             }
-        }
+        };
 
         watch(props, (newValue) => {
             console.log(newValue)
-            data.value = {
-                labels: newValue.data.map(item => item.timestamp),
-                datasets: [
-                    {
-                        label: 'Balance chart',
-                        backgroundColor: '#FF9900',
-                        borderColor: '#FF9900',
-                        data: newValue.data.map(item => item.balance),
-                        fill: false,
-                        pointRadius: 1,
-                        pointHoverRadius: 5,
-                        pointBackgroundColor: '#ffffff',
-                        pointBorderColor: '#FF9900'
-                    }
-                ]
-            }
+            data.value = getDataChart(newValue.data)
         });
 
         return { data, options };
