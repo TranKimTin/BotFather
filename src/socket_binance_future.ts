@@ -208,15 +208,17 @@ app.get('/api/getOHLCV', async (req: any, res) => {
     try {
         const { symbol, timeframe } = req.query;
         const since = parseInt(req.query.since);
+        const limit = parseInt(req.query.limit || 299);
 
         let data: Array<RateData> = binanceSocketFuture.getData(symbol, timeframe);
 
         while (data.length > 0 && data[data.length - 1].startTime < since) data.pop();
 
         if (data.length === 0 || data[data.length - 1].startTime > since) {
-            data = await util.getBinanceFutureOHLCV(symbol, timeframe, 300, since);
+            data = await util.getBinanceFutureOHLCV(symbol, timeframe, limit + 1, since);
         }
         while (data.length > 0 && data[data.length - 1].startTime < since) data.pop();
+        if (data.length > limit) data = data.slice(data.length - limit);
 
         res.json(data);
     }
