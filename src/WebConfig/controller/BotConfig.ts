@@ -110,4 +110,17 @@ export async function deleteBot(req: any, res: any) {
         console.error(err);
         res.json({ code: 400, message: err, data: [] });
     }
+}
+
+
+export async function clearHistory(req: any, res: any) {
+    try {
+        const botName: string = req.query.botName;
+        const data = await BotConfig.clearHistory(botName);
+        res.json({ code: 200, message: "Xóa lịch sử thành công", data: data });
+    }
+    catch (err: any) {
+        console.error(err);
+        res.json({ code: 400, message: err, data: [] });
+    }
 }   

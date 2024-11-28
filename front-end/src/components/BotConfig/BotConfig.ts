@@ -425,7 +425,7 @@ export default defineComponent({
             }
             confirmation.require({
                 message: `Xác nhận xóa bot ${r_botName.value}`,
-                header: 'Danger Zone',
+                header: 'Xóa bot',
                 icon: 'pi pi-info-circle',
                 rejectLabel: 'Cancel',
                 rejectProps: {

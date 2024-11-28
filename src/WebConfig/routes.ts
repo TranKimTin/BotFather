@@ -22,5 +22,6 @@ routes.post("/check", BotConfig.checkNode);
 
 
 routes.delete('/delete', BotConfig.deleteBot);
+routes.delete('/clearHistory', BotConfig.clearHistory);
 
 export default routes;

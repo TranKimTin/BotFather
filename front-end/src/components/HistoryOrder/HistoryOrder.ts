@@ -5,6 +5,8 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import MultiSelect from 'primevue/multiselect';
 import BalanceChart from "./BalanceChart.vue";
+import { useConfirm } from "primevue/useconfirm";
+import * as Toast from '../../toast/toast';
 
 interface Order {
     id: number,
@@ -45,6 +47,8 @@ interface BalanceData {
 export default defineComponent({
     components: { DataTable, Column, MultiSelect, BalanceChart },
     setup() {
+        Toast.showInfo("Xin chào");
+
         const route = useRoute();
         const botName = route.params.botName;
 
@@ -71,6 +75,8 @@ export default defineComponent({
             newValue.sort((a, b) => brokers.indexOf(a) - brokers.indexOf(b));
             loadData(true);
         });
+
+        const confirmation = useConfirm();
 
         let timeout = 0;
         function loadData(delay: boolean) {
@@ -150,6 +156,37 @@ export default defineComponent({
             }, delay ? 1000 : 0);
         }
 
+        function clearHistory() {
+            confirmation.require({
+                message: `Xác nhận xóa lịch sử bot ${botName}`,
+                header: 'Xóa lịch sử',
+                icon: 'pi pi-info-circle',
+                rejectLabel: 'Cancel',
+                rejectProps: {
+                    label: 'Cancel',
+                    severity: 'secondary',
+                    outlined: true
+                },
+                acceptProps: {
+                    label: 'Delete',
+                    severity: 'danger'
+                },
+                accept: async () => {
+                    try {
+                        await axios.delete_('/clearHistory', { botName });
+                        Toast.showWarning(`Xóa bot ${botName} thành công`);
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    }
+                    catch (err: any) {
+                        Toast.showError(err.message);
+                    }
+                },
+                reject: () => {
+                }
+            });
+        }
         onMounted(() => {
             loadData(false);
         });
@@ -169,7 +206,8 @@ export default defineComponent({
             r_brokerSelected,
             r_BalanceData,
             timeframes,
-            brokers
+            brokers,
+            clearHistory
         };
     }
 });

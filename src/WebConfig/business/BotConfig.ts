@@ -262,3 +262,9 @@ export async function deleteBot(botName: string) {
     conncection.release();
     return [];
 }
+
+export async function clearHistory(botName: string) {
+    const [{ id }] = await mysql.query(`Select id FROM Bot WHERE botName = ?`, [botName]);
+    await mysql.query(`DELETE FROM Orders WHERE botID = ?`, [id]);
+    return [];
+}
