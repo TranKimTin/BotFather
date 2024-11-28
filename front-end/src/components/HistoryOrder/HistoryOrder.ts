@@ -39,9 +39,10 @@ export enum ORDER_STATUS {
     CANCELED = 'Đã hủy'
 }
 
-interface BalanceData {
+export interface PropData {
     timestamp: string,
-    balance: number
+    balance: number,
+    balanceNoFee: number
 }
 
 export default defineComponent({
@@ -65,7 +66,7 @@ export default defineComponent({
         const r_timeframesSelected = ref<Array<string>>([...timeframes]);
         const brokers: Array<string> = ['binance', 'bybit', 'okx', 'binance_future', 'bybit_future'];
         const r_brokerSelected = ref<Array<string>>([...brokers]);
-        const r_BalanceData = ref<Array<BalanceData>>([]);
+        const r_BalanceData = ref<Array<PropData>>([]);
 
         watch(r_timeframesSelected, (newValue) => {
             newValue.sort((a, b) => timeframes.indexOf(a) - timeframes.indexOf(b));
@@ -97,16 +98,21 @@ export default defineComponent({
                     let cntLoss = 0;
                     let maxProfit = 0;
                     let maxDD = 0;
-                    let balanceData: Array<BalanceData> = [];
+                    let balanceData: Array<PropData> = [];
                     const feeRate = 0.05 / 100;
+                    let totalFee = 0;
 
                     let sortedData = [...result];
                     sortedData.sort((a, b) => {
-                        let timeA = 0, timeB = 0;
+                        let timeA = new Date(a.createdTime).getTime();
+                        let timeB = new Date(a.createdTime).getTime();
+
                         if (a.timeTP) timeA = new Date(a.timeTP).getTime();
-                        if (a.timeSL) timeA = new Date(a.timeSL).getTime();
+                        else if (a.timeSL) timeA = new Date(a.timeSL).getTime();
+
                         if (b.timeTP) timeB = new Date(b.timeTP).getTime();
-                        if (b.timeSL) timeB = new Date(b.timeSL).getTime();
+                        else if (b.timeSL) timeB = new Date(b.timeSL).getTime();
+
                         return timeA - timeB;
                     });
 
@@ -116,30 +122,29 @@ export default defineComponent({
                         else if (order.status === ORDER_STATUS.MATCH_TP) fee = feeRate * order.volume * (order.entry + order.tp);
                         else if (order.status === ORDER_STATUS.MATCH_SL) fee = feeRate * order.volume * (order.entry + order.sl);
 
+                        totalFee += fee;
+
                         if (order.timeTP) {
-                            order.profit -= fee;
                             gain += order.profit;
                             cntGain++;
-                            balanceData.push({ timestamp: order.timeTP, balance: gain + loss });
+                            balanceData.push({ timestamp: order.timeTP, balance: gain + loss - totalFee, balanceNoFee: gain + loss });
                         }
                         else if (order.timeSL) {
-                            order.profit -= fee;
                             loss += order.profit;
                             cntLoss++;
-                            balanceData.push({ timestamp: order.timeSL, balance: gain + loss });
+                            balanceData.push({ timestamp: order.timeSL, balance: gain + loss - totalFee, balanceNoFee: gain + loss });
                         }
                         else if (order.profit) {
                             if (order.profit > 0) {
-                                gain -= fee;
                                 unrealizedGain += order.profit;
                             }
                             else {
-                                loss -= fee;
                                 unrealizedLoss += order.profit;
                             }
                         }
                         maxProfit = Math.max(maxProfit, gain + loss);
                         maxDD = Math.max(maxDD, maxProfit - (gain + loss));
+                        if (order.profit) order.profit -= fee;
                     }
 
                     r_orderList.value = result;

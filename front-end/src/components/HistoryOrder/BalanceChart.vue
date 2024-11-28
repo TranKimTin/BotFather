@@ -17,6 +17,7 @@ import {
 } from 'chart.js'
 import { ref, watch } from 'vue';
 import { Line } from 'vue-chartjs'
+import type { PropData } from './HistoryOrder';
 
 ChartJS.register(
     CategoryScale,
@@ -27,11 +28,6 @@ ChartJS.register(
     Tooltip,
     Legend
 )
-
-interface PropData {
-    timestamp: string,
-    balance: number
-}
 
 export default {
     name: 'BalanceChart',
@@ -51,7 +47,7 @@ export default {
                 labels: data.map(item => item.timestamp),
                 datasets: [
                     {
-                        label: 'Balance chart',
+                        label: 'Balance',
                         backgroundColor: '#FF9900',
                         borderColor: '#FF9900',
                         data: data.map(item => item.balance),
@@ -60,6 +56,17 @@ export default {
                         pointHoverRadius: 5,
                         pointBackgroundColor: '#ffffff',
                         pointBorderColor: '#FF9900'
+                    },
+                    {
+                        label: 'Balance no free',
+                        backgroundColor: '#6699FF',
+                        borderColor: '#6699FF',
+                        data: data.map(item => item.balanceNoFee),
+                        fill: false,
+                        pointRadius: 1,
+                        pointHoverRadius: 5,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: '#6699FF'
                     }
                 ]
             }
