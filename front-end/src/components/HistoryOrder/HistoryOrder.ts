@@ -100,6 +100,8 @@ export default defineComponent({
                     let maxDD = 0;
                     let balanceData: Array<PropData> = [];
                     const feeRate = 0.05 / 100;
+                    let feeGain = 0;
+                    let feeLoss = 0;
                     let totalFee = 0;
 
                     let sortedData = [...result];
@@ -126,20 +128,24 @@ export default defineComponent({
 
                         if (order.timeTP) {
                             gain += order.profit;
+                            feeGain += fee;
                             cntGain++;
                             balanceData.push({ timestamp: order.timeTP, balance: gain + loss - totalFee, balanceNoFee: gain + loss });
                         }
                         else if (order.timeSL) {
                             loss += order.profit;
+                            feeLoss += fee;
                             cntLoss++;
                             balanceData.push({ timestamp: order.timeSL, balance: gain + loss - totalFee, balanceNoFee: gain + loss });
                         }
                         else if (order.profit) {
                             if (order.profit > 0) {
                                 unrealizedGain += order.profit;
+                                feeGain += fee;
                             }
                             else {
                                 unrealizedLoss += order.profit;
+                                feeLoss += fee;
                             }
                         }
                         maxProfit = Math.max(maxProfit, gain + loss);
@@ -148,8 +154,8 @@ export default defineComponent({
                     }
 
                     r_orderList.value = result;
-                    r_gain.value = parseFloat(gain.toFixed(2));
-                    r_loss.value = parseFloat(loss.toFixed(2));
+                    r_gain.value = parseFloat((gain - feeGain).toFixed(2));
+                    r_loss.value = parseFloat((loss - feeLoss).toFixed(2));
                     r_unrealizedGain.value = parseFloat(unrealizedGain.toFixed(2));
                     r_unrealizedLoss.value = parseFloat(unrealizedLoss.toFixed(2));
                     r_maxDD.value = parseFloat(maxDD.toFixed(2));
