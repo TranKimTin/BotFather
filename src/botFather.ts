@@ -230,6 +230,24 @@ export class BotFather {
             data.entry = args.data[0].close;
         }
 
+        const closePrice: number = args.data[0].close;
+        const entry: number = parseFloat(data.entry);
+        const stop: number = parseFloat(data.stop);
+
+        // match entry immediately
+        if (data.type === NODE_TYPE.BUY_LIMIT && closePrice <= entry) {
+            data.entry = closePrice;
+        }
+        else if (data.type === NODE_TYPE.BUY_STOP_LIMIT && closePrice <= entry && closePrice >= stop) {
+            data.entry = closePrice;
+        }
+        else if (data.type === NODE_TYPE.SELL_LIMIT && closePrice >= entry) {
+            data.entry = closePrice;
+        }
+        else if (data.type === NODE_TYPE.SELL_STOP_LIMIT && closePrice >= entry && closePrice <= stop) {
+            data.entry = closePrice;
+        }
+
         //sl
         if ([NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT].includes(data.type)) {
             if (!data.sl) return false;
@@ -299,26 +317,8 @@ export class BotFather {
             data.expiredTime = undefined;
         }
 
-        const closePrice: number = args.data[0].close;
-        const entry: number = parseFloat(data.entry);
-        const stop: number = parseFloat(data.stop);
         const tp: number = parseFloat(data.tp);
         const sl: number = parseFloat(data.sl);
-
-
-        // match entry immediately
-        if (data.type === NODE_TYPE.BUY_LIMIT && closePrice <= entry) {
-            data.entry = closePrice;
-        }
-        else if (data.type === NODE_TYPE.BUY_STOP_LIMIT && closePrice <= entry && closePrice >= stop) {
-            data.entry = closePrice;
-        }
-        else if (data.type === NODE_TYPE.SELL_LIMIT && closePrice >= entry) {
-            data.entry = closePrice;
-        }
-        else if (data.type === NODE_TYPE.SELL_STOP_LIMIT && closePrice >= entry && closePrice <= stop) {
-            data.entry = closePrice;
-        }
 
         // match TP, SL immediately
         if (data.entry === closePrice && [NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT].includes(data.type)) {
