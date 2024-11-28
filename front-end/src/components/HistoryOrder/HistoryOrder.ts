@@ -18,7 +18,7 @@ interface Order {
     tp: number,
     sl: number,
     profit: number,
-    status: string,
+    status: ORDER_STATUS,
     createdTime: string,
     expiredTime: string,
     timeStop: string,
@@ -27,6 +27,15 @@ interface Order {
     timeSL: string,
     lastTimeUpdated: string
 };
+
+export enum ORDER_STATUS {
+    OPENED = 'Mở lệnh',
+    MATCH_STOP = 'Khớp stop',
+    MATCH_ENTRY = 'Khớp entry',
+    MATCH_TP = 'Khớp TP',
+    MATCH_SL = 'Khớp SL',
+    CANCELED = 'Đã hủy'
+}
 
 interface BalanceData {
     timestamp: string,
@@ -83,6 +92,7 @@ export default defineComponent({
                     let maxProfit = 0;
                     let maxDD = 0;
                     let balanceData: Array<BalanceData> = [];
+                    const feeRate = 0.05 / 100;
 
                     let sortedData = [...result];
                     sortedData.sort((a, b) => {
@@ -95,19 +105,32 @@ export default defineComponent({
                     });
 
                     for (let order of sortedData) {
+                        let fee = 0;
+                        if (order.status === ORDER_STATUS.MATCH_ENTRY) fee = feeRate * order.volume * order.entry;
+                        else if (order.status === ORDER_STATUS.MATCH_TP) fee = feeRate * order.volume * (order.entry + order.tp);
+                        else if (order.status === ORDER_STATUS.MATCH_SL) fee = feeRate * order.volume * (order.entry + order.sl);
+
                         if (order.timeTP) {
+                            order.profit -= fee;
                             gain += order.profit;
                             cntGain++;
                             balanceData.push({ timestamp: order.timeTP, balance: gain + loss });
                         }
                         else if (order.timeSL) {
+                            order.profit -= fee;
                             loss += order.profit;
                             cntLoss++;
                             balanceData.push({ timestamp: order.timeSL, balance: gain + loss });
                         }
                         else if (order.profit) {
-                            if (order.profit > 0) unrealizedGain += order.profit;
-                            else unrealizedLoss += order.profit;
+                            if (order.profit > 0) {
+                                gain -= fee;
+                                unrealizedGain += order.profit;
+                            }
+                            else {
+                                loss -= fee;
+                                unrealizedLoss += order.profit;
+                            }
                         }
                         maxProfit = Math.max(maxProfit, gain + loss);
                         maxDD = Math.max(maxDD, maxProfit - (gain + loss));
