@@ -29,20 +29,12 @@ interface Order {
     lastTimeUpdated: number
 };
 
-const hostSocketServer = process.env.HOST_SOCKET_SERVER || 'http://localhost';
-const ports: { [key: string]: number } = {
-    'binance': 81,
-    'bybit': 82,
-    'okx': 83,
-    'bybit_future': 84,
-    'binance_future': 85
-};
-
 async function handleOrder(order: Order) {
     try {
         const { broker, symbol, lastTimeUpdated } = order;
 
-        const url = `${hostSocketServer}:${ports[broker]}/api/getOHLCV`;
+        const BASE_URL = util.getSocketURL(broker);
+        const url = `${BASE_URL}/api/getOHLCV`;
         const params = {
             symbol,
             timeframe: '1m',

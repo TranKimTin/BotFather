@@ -7,6 +7,10 @@ import _ from 'lodash';
 import axios from 'axios';
 import { RateData } from './Interface';
 import pm2 from 'pm2';
+import dotenv from 'dotenv';
+
+dotenv.config({ path: `${__dirname}/../../.env` });
+
 
 let binance = new ccxt.binance({ 'timeout': 30000 });
 let binanceFuture = new ccxt.binanceusdm({ 'timeout': 30000 });
@@ -926,4 +930,17 @@ export function iDoji(candle: RateData): boolean {
         low: [candle.low]
     };
     return indicator.doji(singleInput);
+}
+
+export function getSocketURL(broker: string) {
+    const hostSocketServer = process.env.HOST_SOCKET_SERVER || 'http://localhost';
+    const ports: { [key: string]: number } = {
+        'binance': 81,
+        'bybit': 82,
+        'okx': 83,
+        'bybit_future': 84,
+        'binance_future': 85
+    };
+    const url = `${hostSocketServer}:${ports[broker]}`;
+    return url;
 }

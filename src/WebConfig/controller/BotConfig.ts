@@ -99,6 +99,19 @@ export async function checkNode(req: any, res: any) {
     }
 }
 
+export async function getUnrealizedProfit(req: any, res: any) {
+    try {
+        const data = req.body;
+        const response = await BotConfig.getUnrealizedProfit(data);
+
+        res.json({ code: 200, message: "ok", data: response });
+    }
+    catch (err: any) {
+        console.error(err);
+        res.json({ code: 400, message: err, data: [] });
+    }
+}
+
 export async function deleteBot(req: any, res: any) {
     try {
         const botName: string = req.query.botName;

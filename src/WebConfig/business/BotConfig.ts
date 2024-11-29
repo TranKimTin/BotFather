@@ -150,15 +150,8 @@ export async function getHistoryOrder(botName: string, filterBroker: Array<strin
 }
 
 export async function calculator(broker: string, symbol: string, timeframe: string, expr: string) {
-    const hostSocketServer = process.env.HOST_SOCKET_SERVER || 'http://localhost';
-    const ports: { [key: string]: number } = {
-        'binance': 81,
-        'bybit': 82,
-        'okx': 83,
-        'bybit_future': 84,
-        'binance_future': 85
-    };
-    const url = `${hostSocketServer}:${ports[broker]}/api/getData`;
+    const BASE_URL = util.getSocketURL(broker);
+    const url = `${BASE_URL}/api/getData`;
     const params = { symbol, timeframe };
 
     let data: Array<RateData> = await axios.get(url, { params })
@@ -252,6 +245,57 @@ export async function checkNode(data: NodeData) {
     if (!data.id || !isValidCondition(data)) {
         throw `Điều kiện không hợp lệ ${data.value}`;
     }
+}
+
+export async function getUnrealizedProfit(data: Array<{ timestamp: string, orderList: Array<{ symbol: string, broker: string, orderType: NODE_TYPE, entry: number, volume: number }> }>) {
+    const res: Array<number> = [];
+
+    for (const { timestamp, orderList } of data) {
+        const symbolList = [...new Set(orderList.map(item => `${item.broker}:${item.symbol}`))];
+        const timeInt = new Date(timestamp).getTime();
+
+        const queryResponse = await mysql.query(
+            `SELECT symbol, close FROM Rates WHERE timestamp = ? AND symbol IN (?)`,
+            [timeInt, symbolList]
+        );
+
+        const prices: { [key: string]: number } = {};
+        for (let { symbol, close } of queryResponse) {
+            prices[symbol] = close;
+        }
+
+        let profit = 0;
+
+        for (let order of orderList) {
+            const s = `${order.broker}:${order.symbol}`;
+            let p = prices[s];
+            if (p === undefined) {
+                const BASE_URL = util.getSocketURL(order.broker);
+                const url = `${BASE_URL}/api/getOHLCV`;
+                const params = {
+                    symbol: order.symbol,
+                    timeframe: '1m',
+                    since: timeInt,
+                    limit: 1
+                };
+                const rate: RateData = await axios.get(url, { params }).then(res => res.data[0]);
+                let x = await mysql.query(
+                    `INSERT INTO Rates(symbol,timestamp,open,high,low,close) VALUES(?,?,?,?,?,?)`,
+                    [s, timeInt, rate.open, rate.high, rate.low, rate.close]
+                );
+                console.log(x);
+                p = rate.close;
+            }
+            if ([NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_STOP_LIMIT, NODE_TYPE.BUY_STOP_MARKET].includes(order.orderType)) {
+                profit += order.volume * (p - order.entry);
+            }
+            else if ([NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_STOP_LIMIT, NODE_TYPE.SELL_STOP_MARKET].includes(order.orderType)) {
+                profit += order.volume * (order.entry - p);
+            }
+        }
+        res.push(profit);
+    }
+    return res;
 }
 
 export async function deleteBot(botName: string) {

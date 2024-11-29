@@ -19,6 +19,7 @@ routes.get('/calculator', BotConfig.calculator);
 
 routes.post("/save", BotConfig.saveBot);
 routes.post("/check", BotConfig.checkNode);
+routes.post("/getUnrealizedProfit", BotConfig.getUnrealizedProfit);
 
 
 routes.delete('/delete', BotConfig.deleteBot);

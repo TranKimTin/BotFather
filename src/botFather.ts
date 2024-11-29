@@ -16,7 +16,6 @@ export class BotFather {
     private botChildren: Array<BotInfo>;
     private telegram: Telegram;
     private botIDs: { [key: string]: number };
-    private hostSocketServer: string;
     private hostWebServer: string;
 
     constructor() {
@@ -25,22 +24,22 @@ export class BotFather {
         this.botChildren = [];
         this.telegram = new Telegram(undefined, undefined, true);
         this.botIDs = {};
-        this.hostSocketServer = process.env.HOST_SOCKET_SERVER || 'http://localhost';
         this.hostWebServer = process.env.HOST_WEB_SERVER || 'http://localhost';
 
-        this.connectTradeDataServer('binance', 81);
-        this.connectTradeDataServer('bybit', 82);
-        this.connectTradeDataServer('okx', 83);
-        this.connectTradeDataServer('bybit_future', 84);
-        this.connectTradeDataServer('binance_future', 85);
+        this.connectTradeDataServer('binance');
+        this.connectTradeDataServer('bybit');
+        this.connectTradeDataServer('okx');
+        this.connectTradeDataServer('bybit_future');
+        this.connectTradeDataServer('binance_future');
 
         this.connectToWebConfig(8080);
 
         this.initBotChildren();
     }
 
-    private connectTradeDataServer(name: string, port: number) {
-        const client = io(`${this.hostSocketServer}:${port}`, {
+    private connectTradeDataServer(name: string) {
+        const BASE_URL = util.getSocketURL(name);
+        const client = io(BASE_URL, {
             reconnection: true,              // Bật tính năng tự động kết nối lại (mặc định là true)
             reconnectionAttempts: Infinity,  // Số lần thử kết nối lại tối đa (mặc định là vô hạn)
             reconnectionDelay: 1000,         // Thời gian chờ ban đầu trước khi thử kết nối lại (ms)
@@ -49,7 +48,7 @@ export class BotFather {
         });
 
         client.on('connect', () => {
-            console.log(`Connected to server ${name}:${port}`);
+            console.log(`Connected to server ${BASE_URL}`);
         });
 
         client.on('onCloseCandle', (msg: { broker: string, symbol: string, timeframe: string, data: Array<RateData> }) => {
@@ -64,11 +63,11 @@ export class BotFather {
         });
 
         client.on('disconnect', (reason: string) => {
-            console.log(`onDisconnect - Disconnected from server ${name}:${port}. reason: ${reason}`);
+            console.log(`onDisconnect - Disconnected from server ${BASE_URL}. reason: ${reason}`);
         });
 
         client.on("connect_error", (error: { message: any; }) => {
-            console.log(`connect_error - Attempting to reconnect ${name}:${port}`);
+            console.log(`connect_error - Attempting to reconnect ${BASE_URL}`);
             if (client.active) {
                 // temporary failure, the socket will automatically try to reconnect
             } else {
@@ -79,7 +78,7 @@ export class BotFather {
             }
         });
 
-        this.socketList.push({ name, port, client })
+        this.socketList.push({ name, client })
     }
 
     private connectToWebConfig(port: number) {
@@ -147,9 +146,9 @@ export class BotFather {
             return { symbol, broker, timeframe };
         });
 
-        for (const { client, name, port } of this.socketList) {
+        for (const { client, name } of this.socketList) {
             client.emit('update_symbol_listener', symbolListener);
-            console.log('update_symbol_listener', { name, port });
+            console.log('update_symbol_listener', { name });
         }
     }
 
@@ -188,7 +187,7 @@ export class BotFather {
         }
     }
 
-    private adjustParam(data: NodeData, args: ExprArgs) {
+    private adjustParam(data: NodeData, args: ExprArgs): boolean {
         //stop
         if ([NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT].includes(data.type)) {
             if (!data.stop) return false;
@@ -196,6 +195,7 @@ export class BotFather {
             expr = calculateSubExpr(expr, args);
             if (data.unitStop === UNIT.PERCENT) expr = `close() * (100 + abs(${expr})) / 100`;
             data.stop = calculate(expr, args);
+            if (data.stop === null) return false;
         }
         else if ([NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
             if (!data.stop) return false;
@@ -203,6 +203,7 @@ export class BotFather {
             expr = calculateSubExpr(expr, args);
             if (data.unitStop === UNIT.PERCENT) expr = `close() * (100 - abs(${expr})) / 100`;
             data.stop = calculate(expr, args);
+            if (data.stop === null) return false;
         }
         else {
             data.stop = undefined;
@@ -215,6 +216,7 @@ export class BotFather {
             expr = calculateSubExpr(expr, args);
             if (data.unitEntry === UNIT.PERCENT) expr = `close() * (100 - abs(${expr})) / 100`;
             data.entry = calculate(expr, args);
+            if (data.entry === null) return false;
         }
         else if ([NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
             if (!data.entry) return false;
@@ -222,6 +224,7 @@ export class BotFather {
             expr = calculateSubExpr(expr, args);
             if (data.unitEntry === UNIT.PERCENT) expr = `close() * (100 + abs(${expr})) / 100`;
             data.entry = calculate(expr, args);
+            if (data.entry === null) return false;
         }
         else if ([NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.SELL_STOP_MARKET].includes(data.type)) {
             data.entry = data.stop;
@@ -255,6 +258,7 @@ export class BotFather {
             expr = calculateSubExpr(expr, args);
             if (data.unitSL === UNIT.PERCENT) expr = `(${data.entry}) * (100 - abs(${expr})) / 100`;
             data.sl = calculate(expr, args);
+            if (data.sl === null) return false;
         }
         else if ([NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
             if (!data.sl) return false;
@@ -262,6 +266,7 @@ export class BotFather {
             expr = calculateSubExpr(expr, args);
             if (data.unitSL === UNIT.PERCENT) expr = `(${data.entry}) * (100 + abs(${expr})) / 100`;
             data.sl = calculate(expr, args);
+            if (data.sl === null) return false;
         }
         else {
             data.sl = undefined;
@@ -275,6 +280,7 @@ export class BotFather {
             if (data.unitTP === UNIT.PERCENT) expr = `(${data.entry}) * (100 + abs(${expr})) / 100`;
             else if (data.unitTP === UNIT.RR) expr = `( ${data.entry} + abs(${data.entry} - ${data.sl}) * abs(${expr}))`;
             data.tp = calculate(expr, args);
+            if (data.tp === null) return false;
         }
         else if ([NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
             if (!data.tp) return false;
@@ -283,6 +289,7 @@ export class BotFather {
             if (data.unitTP === UNIT.PERCENT) expr = `(${data.entry}) * (100 - abs(${expr})) / 100`;
             else if (data.unitTP === UNIT.RR) expr = `( ${data.entry} - abs(${data.entry} - ${data.sl}) * abs(${expr}))`;
             data.tp = calculate(expr, args);
+            if (data.tp === null) return false;
         }
         else {
             data.tp = undefined;
@@ -295,6 +302,7 @@ export class BotFather {
             expr = calculateSubExpr(expr, args);
             if (data.unitVolume === UNIT.USD) expr = `(${expr}) / ${data.entry}`;
             data.volume = calculate(expr, args);
+            if (data.volume === null) return false;
         }
         else {
             data.volume = undefined;
@@ -312,6 +320,7 @@ export class BotFather {
                 expr = `((${expr}) * 60000 * ${util.timeframeToNumberMinutes(args.timeframe)}) + ${util.nextTime(args.data[0].startTime, args.timeframe)}`;
             }
             data.expiredTime = calculate(expr, args);
+            if (data.expiredTime === null) return false;
         }
         else {
             data.expiredTime = undefined;

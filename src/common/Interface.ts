@@ -65,7 +65,6 @@ export type TelegramIdType = string | number;
 
 export interface SocketInfo {
     name: string;
-    port: number;
     client: Socket<DefaultEventsMap, DefaultEventsMap>,
 }
 
