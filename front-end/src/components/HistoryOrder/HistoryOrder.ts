@@ -61,6 +61,7 @@ export default defineComponent({
         const r_unrealizedLoss = ref<number>(0);
         const r_cntGain = ref<number>(0);
         const r_cntLoss = ref<number>(0);
+        const r_cntOpening = ref<number>(0);
         const r_maxDD = ref<number>(0);
         const r_isLoading = ref<boolean>(true);
         const timeframes: Array<string> = ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'];
@@ -97,6 +98,7 @@ export default defineComponent({
                     let unrealizedLoss = 0;
                     let cntGain = 0;
                     let cntLoss = 0;
+                    let cntOpening = 0;
                     let maxProfit = 0;
                     let maxDD = 0;
                     let balanceData: Array<PropData> = [];
@@ -178,6 +180,7 @@ export default defineComponent({
                             }
                         }
                         else if (order.profit) {
+                            cntOpening++;
                             if (order.profit > 0) {
                                 unrealizedGain += order.profit;
                                 feeGain += fee;
@@ -200,6 +203,7 @@ export default defineComponent({
                     r_maxDD.value = parseFloat(maxDD.toFixed(2));
                     r_cntGain.value = cntGain;
                     r_cntLoss.value = cntLoss;
+                    r_cntOpening.value = cntOpening;
                     r_isLoading.value = false;
                     r_balanceData.value = balanceData;
 
@@ -264,6 +268,7 @@ export default defineComponent({
             r_unrealizedLoss,
             r_cntGain,
             r_cntLoss,
+            r_cntOpening,
             r_maxDD,
             r_isLoading,
             r_timeframesSelected,

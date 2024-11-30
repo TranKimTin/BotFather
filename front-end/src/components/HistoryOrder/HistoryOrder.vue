@@ -2,7 +2,8 @@
     <h1>{{ botName }} <button class="btn btn-outline-danger mr-1" @click="clearHistory">Xóa lịch sử</button> </h1>
     <div class="grid grid-cols-4 gap-2 p-2">
         <div class="flex-auto">
-            Đã chốt: <span style="color: green;">{{ r_gain }}</span>-<span style="color: red;">{{ -r_loss }}</span>
+            Đã chốt ({{ r_cntGain + r_cntLoss }}): <span style="color: green;">{{ r_gain }}</span>-<span
+                style="color: red;">{{ -r_loss }}</span>
             =
             <strong :style="{ color: (r_gain + r_loss) >= 0 ? 'green' : 'red' }">{{
                 +(r_gain + r_loss).toFixed(2) }} $</strong>
@@ -12,9 +13,10 @@
         <div class="flex-auto">Win rate: {{ +((r_cntGain / (r_cntGain + r_cntLoss)) * 100).toFixed(2) }} % </div>
 
         <div class="flex-auto">
-            Chưa chốt: <span style="color: green;">{{ r_unrealizedGain }}</span>-<span style="color: red;">{{
-                -r_unrealizedLoss
-            }}</span> =
+            Chưa chốt ({{ r_cntOpening }}): <span style="color: green;">{{ r_unrealizedGain }}</span>-<span
+                style="color: red;">{{
+                    -r_unrealizedLoss
+                }}</span> =
             <strong :style="{ color: (r_unrealizedGain + r_unrealizedLoss) >= 0 ? 'green' : 'red' }">{{
                 +(r_unrealizedGain + r_unrealizedLoss).toFixed(2) }} $</strong>
         </div>
