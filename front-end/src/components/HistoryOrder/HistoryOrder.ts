@@ -223,6 +223,7 @@ export default defineComponent({
                     r_balanceData.value = balanceData;
 
                     axios.post('/getUnrealizedProfit', argsEquity).then(data => {
+                        console.log({ argsEquity, data })
                         const newData = [...r_balanceData.value];
                         if (data.length === newData.length) {
                             for (let i = 0; i < data.length; i++) {

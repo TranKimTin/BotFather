@@ -268,7 +268,7 @@ export async function getUnrealizedProfit(data: Array<{ timestamp: string, order
 
         let promiseList = [];
         for (let order of orderList) {
-            promiseList.push(async function () {
+            promiseList.push((async function () {
                 const s = `${order.broker}:${order.symbol}`;
                 let p = prices[s];
                 if (p === undefined) {
@@ -293,14 +293,13 @@ export async function getUnrealizedProfit(data: Array<{ timestamp: string, order
                 else if ([NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_STOP_LIMIT, NODE_TYPE.SELL_STOP_MARKET].includes(order.orderType)) {
                     profit += order.volume * (order.entry - p);
                 }
-            });
+            })());
 
             if (promiseList.length > 50) {
                 await Promise.all(promiseList);
                 promiseList = [];
             }
         }
-        await Promise.all(promiseList);
         res.push(profit);
     }
     return res;
