@@ -278,7 +278,7 @@ export class BotFather {
             let expr: string = data.tp;
             expr = calculateSubExpr(expr, args);
             if (data.unitTP === UNIT.PERCENT) expr = `(${data.entry}) * (100 + abs(${expr})) / 100`;
-            else if (data.unitTP === UNIT.RR) expr = `( ${data.entry} + abs(${data.entry} - ${data.sl}) * abs(${expr}))`;
+            else if (data.unitTP === UNIT.RR) expr = `(${data.entry} + abs(${data.entry} - ${data.sl}) * abs(${expr}))`;
             data.tp = calculate(expr, args);
             if (data.tp === null) return false;
         }
@@ -287,7 +287,7 @@ export class BotFather {
             let expr: string = data.tp;
             expr = calculateSubExpr(expr, args);
             if (data.unitTP === UNIT.PERCENT) expr = `(${data.entry}) * (100 - abs(${expr})) / 100`;
-            else if (data.unitTP === UNIT.RR) expr = `( ${data.entry} - abs(${data.entry} - ${data.sl}) * abs(${expr}))`;
+            else if (data.unitTP === UNIT.RR) expr = `(${data.entry} - abs(${data.entry} - ${data.sl}) * abs(${expr}))`;
             data.tp = calculate(expr, args);
             if (data.tp === null) return false;
         }
@@ -326,17 +326,14 @@ export class BotFather {
             data.expiredTime = undefined;
         }
 
-        const tp: number = parseFloat(data.tp);
-        const sl: number = parseFloat(data.sl);
-
         // match TP, SL immediately
-        if (data.entry === closePrice && [NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT].includes(data.type)) {
-            if (closePrice <= sl) data.sl = closePrice;
-            else if (closePrice >= tp) data.tp = closePrice;
+        if ([NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT].includes(data.type)) {
+            if (data.entry <= data.sl) data.sl = data.entry;
+            if (data.entry >= data.tp) data.tp = data.entry;
         }
-        else if (data.entry === closePrice && [NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
-            if (closePrice >= sl) data.sl = closePrice;
-            else if (closePrice <= tp) data.tp = closePrice;
+        else if ([NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(data.type)) {
+            if (data.entry >= data.sl) data.sl = data.entry;
+            if (data.entry <= data.tp) data.tp = data.entry;
         }
 
         return true;
