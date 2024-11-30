@@ -197,14 +197,10 @@ export default defineComponent({
                         //equity 
                         const timeCurrent = new Date(lastTimeUpdated).getTime();
                         argsEquity.push({ timestamp: lastTimeUpdated, orderList: [] });
-                        for (let j = 0; j < sortedData.length; j++) {
-                            const o = sortedData[j];
-
+                        for (const o of sortedData) {
                             const timeEntry = new Date(o.timeEntry).getTime();
-                            const timeTP = new Date(o.timeTP).getTime();
-                            const timeSL = new Date(o.timeSL).getTime();
 
-                            if (o.timeEntry && timeEntry <= timeCurrent && ((!o.timeTP && !o.timeSL) || (o.timeTP && timeTP > timeCurrent) || (o.timeSL && timeSL > timeCurrent))) {
+                            if (o.timeEntry && timeEntry <= timeCurrent && ((!o.timeTP && !o.timeSL))) {
                                 const { symbol, broker, orderType, entry, volume } = o;
                                 argsEquity[argsEquity.length - 1].orderList.push({ symbol, broker, orderType, entry, volume });
                             }
