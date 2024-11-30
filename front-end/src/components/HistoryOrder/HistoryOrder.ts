@@ -192,21 +192,6 @@ export default defineComponent({
                         if (order.profit) order.profit -= fee;
                     }
 
-                    if (lastTimeUpdated !== '') {
-                        balanceData.push({ timestamp: lastTimeUpdated, balance: gain + loss - totalFee, balanceNoFee: gain + loss, equity: 0 });
-                        //equity 
-                        const timeCurrent = new Date(lastTimeUpdated).getTime();
-                        argsEquity.push({ timestamp: lastTimeUpdated, orderList: [] });
-                        for (const o of sortedData) {
-                            const timeEntry = new Date(o.timeEntry).getTime();
-
-                            if (o.timeEntry && timeEntry <= timeCurrent && ((!o.timeTP && !o.timeSL))) {
-                                const { symbol, broker, orderType, entry, volume } = o;
-                                argsEquity[argsEquity.length - 1].orderList.push({ symbol, broker, orderType, entry, volume });
-                            }
-                        }
-                    }
-
                     r_orderList.value = result;
                     r_gain.value = parseFloat((gain - feeGain).toFixed(2));
                     r_loss.value = parseFloat((loss - feeLoss).toFixed(2));
@@ -224,6 +209,9 @@ export default defineComponent({
                         if (data.length === newData.length) {
                             for (let i = 0; i < data.length; i++) {
                                 newData[i].equity = data[i] + newData[i].balance;
+                            }
+                            if (lastTimeUpdated !== '') {
+                                newData.push({ timestamp: lastTimeUpdated, balance: gain + loss - totalFee, balanceNoFee: gain + loss, equity: gain + loss - totalFee + unrealizedGain + unrealizedLoss });
                             }
                             r_balanceData.value = newData;
                         }
