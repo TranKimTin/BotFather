@@ -179,7 +179,7 @@ export default defineComponent({
                                 }
                             }
                         }
-                        else if (order.profit) {
+                        else if (order.timeEntry && order.profit) {
                             cntOpening++;
                             if (order.profit > 0) {
                                 unrealizedGain += order.profit;
