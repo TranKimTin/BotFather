@@ -42,7 +42,7 @@
                 class="w-full md:w-80 form-control" id="timeframe" />
         </div>
     </div>
-    <BalanceChart :data="r_BalanceData" />
+    <BalanceChart :data="r_balanceData" />
     <div>
         <h3 v-if="r_isLoading">Đang load, đợi tí...</h3>
         <DataTable :value="r_orderList" tableStyle="min-width: 50rem" scrollable scrollHeight="90vh"

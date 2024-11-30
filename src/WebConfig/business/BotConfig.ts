@@ -266,33 +266,41 @@ export async function getUnrealizedProfit(data: Array<{ timestamp: string, order
 
         let profit = 0;
 
+        let promiseList = [];
         for (let order of orderList) {
-            const s = `${order.broker}:${order.symbol}`;
-            let p = prices[s];
-            if (p === undefined) {
-                const BASE_URL = util.getSocketURL(order.broker);
-                const url = `${BASE_URL}/api/getOHLCV`;
-                const params = {
-                    symbol: order.symbol,
-                    timeframe: '1m',
-                    since: timeInt,
-                    limit: 1
-                };
-                const rate: RateData = await axios.get(url, { params }).then(res => res.data[0]);
-                let x = await mysql.query(
-                    `INSERT INTO Rates(symbol,timestamp,open,high,low,close) VALUES(?,?,?,?,?,?)`,
-                    [s, timeInt, rate.open, rate.high, rate.low, rate.close]
-                );
-                console.log(x);
-                p = rate.close;
-            }
-            if ([NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_STOP_LIMIT, NODE_TYPE.BUY_STOP_MARKET].includes(order.orderType)) {
-                profit += order.volume * (p - order.entry);
-            }
-            else if ([NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_STOP_LIMIT, NODE_TYPE.SELL_STOP_MARKET].includes(order.orderType)) {
-                profit += order.volume * (order.entry - p);
+            promiseList.push(async function () {
+                const s = `${order.broker}:${order.symbol}`;
+                let p = prices[s];
+                if (p === undefined) {
+                    const BASE_URL = util.getSocketURL(order.broker);
+                    const url = `${BASE_URL}/api/getOHLCV`;
+                    const params = {
+                        symbol: order.symbol,
+                        timeframe: '1m',
+                        since: timeInt,
+                        limit: 1
+                    };
+                    const rate: RateData = await axios.get(url, { params }).then(res => res.data[0]);
+                    await mysql.query(
+                        `INSERT INTO Rates(symbol,timestamp,open,high,low,close) VALUES(?,?,?,?,?,?)`,
+                        [s, timeInt, rate.open, rate.high, rate.low, rate.close]
+                    );
+                    p = rate.close;
+                }
+                if ([NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_STOP_LIMIT, NODE_TYPE.BUY_STOP_MARKET].includes(order.orderType)) {
+                    profit += order.volume * (p - order.entry);
+                }
+                else if ([NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_STOP_LIMIT, NODE_TYPE.SELL_STOP_MARKET].includes(order.orderType)) {
+                    profit += order.volume * (order.entry - p);
+                }
+            });
+
+            if (promiseList.length > 50) {
+                await Promise.all(promiseList);
+                promiseList = [];
             }
         }
+        await Promise.all(promiseList);
         res.push(profit);
     }
     return res;

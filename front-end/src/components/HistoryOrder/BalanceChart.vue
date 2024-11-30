@@ -67,6 +67,17 @@ export default {
                         pointHoverRadius: 5,
                         pointBackgroundColor: '#ffffff',
                         pointBorderColor: '#6699FF'
+                    },
+                    {
+                        label: 'Equity',
+                        backgroundColor: '#33FF00',
+                        borderColor: '#33FF00',
+                        data: data.map(item => item.equity),
+                        fill: false,
+                        pointRadius: 1,
+                        pointHoverRadius: 5,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: '#33FF00'
                     }
                 ]
             }

@@ -42,7 +42,8 @@ export enum ORDER_STATUS {
 export interface PropData {
     timestamp: string,
     balance: number,
-    balanceNoFee: number
+    balanceNoFee: number,
+    equity: number
 }
 
 export default defineComponent({
@@ -66,7 +67,7 @@ export default defineComponent({
         const r_timeframesSelected = ref<Array<string>>([...timeframes]);
         const brokers: Array<string> = ['binance', 'bybit', 'okx', 'binance_future', 'bybit_future'];
         const r_brokerSelected = ref<Array<string>>([...brokers]);
-        const r_BalanceData = ref<Array<PropData>>([]);
+        const r_balanceData = ref<Array<PropData>>([]);
 
         watch(r_timeframesSelected, (newValue) => {
             newValue.sort((a, b) => timeframes.indexOf(a) - timeframes.indexOf(b));
@@ -84,7 +85,7 @@ export default defineComponent({
             clearTimeout(timeout);
             timeout = setTimeout(() => {
                 r_isLoading.value = true;
-                r_BalanceData.value = [];
+                r_balanceData.value = [];
                 const params = {
                     filterBroker: r_brokerSelected.value.join(','),
                     filterTimeframe: r_timeframesSelected.value.join(',')
@@ -103,6 +104,8 @@ export default defineComponent({
                     let feeGain = 0;
                     let feeLoss = 0;
                     let totalFee = 0;
+                    const argsEquity: Array<{ timestamp: string, orderList: Array<{ symbol: string, broker: string, orderType: string, entry: number, volume: number }> }> = [];
+                    let lastTimeUpdated: string = '';
 
                     let sortedData = [...result];
                     sortedData.sort((a, b) => {
@@ -118,7 +121,11 @@ export default defineComponent({
                         return timeA - timeB;
                     });
 
-                    for (let order of sortedData) {
+                    for (let i = 0; i < sortedData.length; i++) {
+                        const order = sortedData[i];
+
+                        if (order.lastTimeUpdated && !order.timeTP && !order.timeSL) lastTimeUpdated = order.lastTimeUpdated;
+
                         let fee = 0;
                         if (order.status === ORDER_STATUS.MATCH_ENTRY) fee = feeRate * order.volume * order.entry;
                         else if (order.status === ORDER_STATUS.MATCH_TP) fee = feeRate * order.volume * (order.entry + order.tp);
@@ -130,13 +137,45 @@ export default defineComponent({
                             gain += order.profit;
                             feeGain += fee;
                             cntGain++;
-                            balanceData.push({ timestamp: order.timeTP, balance: gain + loss - totalFee, balanceNoFee: gain + loss });
+                            balanceData.push({ timestamp: order.timeTP, balance: gain + loss - totalFee, balanceNoFee: gain + loss, equity: 0 });
+
+                            //equity 
+                            const timeCurrent = new Date(order.timeTP).getTime();
+                            argsEquity.push({ timestamp: order.timeTP, orderList: [] });
+                            for (let j = 0; j < i; j++) {
+                                const o = sortedData[j];
+
+                                const timeEntry = new Date(o.timeEntry).getTime();
+                                const timeTP = new Date(o.timeTP).getTime();
+                                const timeSL = new Date(o.timeSL).getTime();
+
+                                if (o.timeEntry && timeEntry <= timeCurrent && ((!o.timeTP && !o.timeSL) || (o.timeTP && timeTP > timeCurrent) || (o.timeSL && timeSL > timeCurrent))) {
+                                    const { symbol, broker, orderType, entry, volume } = o;
+                                    argsEquity[argsEquity.length - 1].orderList.push({ symbol, broker, orderType, entry, volume });
+                                }
+                            }
                         }
                         else if (order.timeSL) {
                             loss += order.profit;
                             feeLoss += fee;
                             cntLoss++;
-                            balanceData.push({ timestamp: order.timeSL, balance: gain + loss - totalFee, balanceNoFee: gain + loss });
+                            balanceData.push({ timestamp: order.timeSL, balance: gain + loss - totalFee, balanceNoFee: gain + loss, equity: 0 });
+
+                            //equity 
+                            const timeCurrent = new Date(order.timeSL).getTime();
+                            argsEquity.push({ timestamp: order.timeSL, orderList: [] });
+                            for (let j = 0; j < i; j++) {
+                                const o = sortedData[j];
+
+                                const timeEntry = new Date(o.timeEntry).getTime();
+                                const timeTP = new Date(o.timeTP).getTime();
+                                const timeSL = new Date(o.timeSL).getTime();
+
+                                if (o.timeEntry && timeEntry <= timeCurrent && ((!o.timeTP && !o.timeSL) || (o.timeTP && timeTP > timeCurrent) || (o.timeSL && timeSL > timeCurrent))) {
+                                    const { symbol, broker, orderType, entry, volume } = o;
+                                    argsEquity[argsEquity.length - 1].orderList.push({ symbol, broker, orderType, entry, volume });
+                                }
+                            }
                         }
                         else if (order.profit) {
                             if (order.profit > 0) {
@@ -153,6 +192,25 @@ export default defineComponent({
                         if (order.profit) order.profit -= fee;
                     }
 
+                    if (lastTimeUpdated !== '') {
+                        balanceData.push({ timestamp: lastTimeUpdated, balance: gain + loss - totalFee, balanceNoFee: gain + loss, equity: 0 });
+                        //equity 
+                        const timeCurrent = new Date(lastTimeUpdated).getTime();
+                        argsEquity.push({ timestamp: lastTimeUpdated, orderList: [] });
+                        for (let j = 0; j < sortedData.length; j++) {
+                            const o = sortedData[j];
+
+                            const timeEntry = new Date(o.timeEntry).getTime();
+                            const timeTP = new Date(o.timeTP).getTime();
+                            const timeSL = new Date(o.timeSL).getTime();
+
+                            if (o.timeEntry && timeEntry <= timeCurrent && ((!o.timeTP && !o.timeSL) || (o.timeTP && timeTP > timeCurrent) || (o.timeSL && timeSL > timeCurrent))) {
+                                const { symbol, broker, orderType, entry, volume } = o;
+                                argsEquity[argsEquity.length - 1].orderList.push({ symbol, broker, orderType, entry, volume });
+                            }
+                        }
+                    }
+
                     r_orderList.value = result;
                     r_gain.value = parseFloat((gain - feeGain).toFixed(2));
                     r_loss.value = parseFloat((loss - feeLoss).toFixed(2));
@@ -162,7 +220,17 @@ export default defineComponent({
                     r_cntGain.value = cntGain;
                     r_cntLoss.value = cntLoss;
                     r_isLoading.value = false;
-                    r_BalanceData.value = balanceData;
+                    r_balanceData.value = balanceData;
+
+                    axios.post('/getUnrealizedProfit', argsEquity).then(data => {
+                        const newData = [...r_balanceData.value];
+                        if (data.length === newData.length) {
+                            for (let i = 0; i < data.length; i++) {
+                                newData[i].equity = data[i] + newData[i].balance;
+                            }
+                            r_balanceData.value = newData;
+                        }
+                    });
                 });
             }, delay ? 1000 : 0);
         }
@@ -215,7 +283,7 @@ export default defineComponent({
             r_isLoading,
             r_timeframesSelected,
             r_brokerSelected,
-            r_BalanceData,
+            r_balanceData,
             timeframes,
             brokers,
             clearHistory
