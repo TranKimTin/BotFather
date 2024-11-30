@@ -254,6 +254,11 @@ export async function getUnrealizedProfit(data: Array<{ timestamp: string, order
         const symbolList = [...new Set(orderList.map(item => `${item.broker}:${item.symbol}`))];
         const timeInt = new Date(timestamp).getTime();
 
+        if (symbolList.length === 0) {
+            res.push(0);
+            continue;
+        }
+
         const queryResponse = await mysql.query(
             `SELECT symbol, close FROM Rates WHERE timestamp = ? AND symbol IN (?)`,
             [timeInt, symbolList]
