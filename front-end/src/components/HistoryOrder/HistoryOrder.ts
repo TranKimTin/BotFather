@@ -126,7 +126,8 @@ export default defineComponent({
                     for (let i = 0; i < sortedData.length; i++) {
                         const order = sortedData[i];
 
-                        if (order.lastTimeUpdated && !order.timeTP && !order.timeSL) lastTimeUpdated = order.lastTimeUpdated;
+                        if (order.lastTimeUpdated && !order.timeTP && !order.timeSL && new Date(lastTimeUpdated).getTime() < new Date(order.lastTimeUpdated).getTime())
+                            lastTimeUpdated = order.lastTimeUpdated;
 
                         let fee = 0;
                         if (order.status === ORDER_STATUS.MATCH_ENTRY) fee = feeRate * order.volume * order.entry;
