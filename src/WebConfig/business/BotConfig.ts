@@ -276,7 +276,10 @@ export async function getUnrealizedProfit(data: Array<{ timestamp: string, order
             promiseList.push((async function () {
                 const s = `${order.broker}:${order.symbol}`;
                 let p = prices[s];
-                if (p === undefined) {
+                if (p === undefined || p === -1) {
+                    const isUpdateDB: boolean = (p === undefined) ? true : false;
+                    prices[s] = -1;
+
                     const BASE_URL = util.getSocketURL(order.broker);
                     const url = `${BASE_URL}/api/getOHLCV`;
                     const params = {
@@ -286,11 +289,14 @@ export async function getUnrealizedProfit(data: Array<{ timestamp: string, order
                         limit: 1
                     };
                     const rate: RateData = await axios.get(url, { params }).then(res => res.data[0]);
-                    await mysql.query(
-                        `INSERT INTO Rates(symbol,timestamp,open,high,low,close) VALUES(?,?,?,?,?,?)`,
-                        [s, timeInt, rate.open, rate.high, rate.low, rate.close]
-                    );
+                    if (isUpdateDB) {
+                        await mysql.query(
+                            `INSERT INTO Rates(symbol,timestamp,open,high,low,close) VALUES(?,?,?,?,?,?)`,
+                            [s, timeInt, rate.open, rate.high, rate.low, rate.close]
+                        );
+                    }
                     p = rate.close;
+                    prices[s] = p;
                 }
                 if ([NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_STOP_LIMIT, NODE_TYPE.BUY_STOP_MARKET].includes(order.orderType)) {
                     profit += order.volume * (p - order.entry);
