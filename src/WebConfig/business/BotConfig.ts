@@ -311,6 +311,7 @@ export async function getUnrealizedProfit(data: Array<{ timestamp: string, order
                 promiseList = [];
             }
         }
+        await Promise.all(promiseList);
         res.push(profit);
     }
     return res;

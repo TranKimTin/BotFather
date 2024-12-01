@@ -215,7 +215,12 @@ export default defineComponent({
                                 newData[i].equity = data[i] + newData[i].balance;
                             }
                             if (lastTimeUpdated !== '' && newData.length > 0 && new Date(lastTimeUpdated).getTime() > new Date(newData[newData.length - 1].timestamp).getTime()) {
-                                newData.push({ timestamp: lastTimeUpdated, balance: gain + loss - totalFee, balanceNoFee: gain + loss, equity: gain + loss - totalFee + unrealizedGain + unrealizedLoss });
+                                newData.push({
+                                    timestamp: lastTimeUpdated,
+                                    balance: gain + loss - totalFee,
+                                    balanceNoFee: gain + loss,
+                                    equity: gain + loss - totalFee + unrealizedGain + unrealizedLoss
+                                });
                             }
                             r_balanceData.value = newData;
                         }
