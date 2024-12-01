@@ -126,7 +126,7 @@ export default defineComponent({
                     for (let i = 0; i < sortedData.length; i++) {
                         const order = sortedData[i];
 
-                        if (order.lastTimeUpdated && !order.timeTP && !order.timeSL && new Date(lastTimeUpdated).getTime() < new Date(order.lastTimeUpdated).getTime())
+                        if (order.lastTimeUpdated && order.timeEntry && new Date(lastTimeUpdated).getTime() < new Date(order.lastTimeUpdated).getTime())
                             lastTimeUpdated = order.lastTimeUpdated;
 
                         let fee = 0;
