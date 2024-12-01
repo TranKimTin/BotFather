@@ -337,10 +337,20 @@ export default defineComponent({
             Toast.showSuccess(`Đã lọc coin trùng nhau (${newSymbolListSelected.length} / ${r_symbolList.value.length})`);
         }
 
+        function removeVietnameseTones(str: string) {
+            return str
+                .normalize('NFD') // Chuẩn hóa chuỗi
+                .replace(/[\u0300-\u036f]/g, '') // Xóa các dấu thanh
+                .replace(/đ/g, 'd') // Thay thế chữ "đ"
+                .replace(/Đ/g, 'D') // Thay thế chữ "Đ"
+                .toLocaleLowerCase()
+                .trim();
+        }
+
         function searchBot(event: any) {
             const inputValue = event.query;
             r_botNameList.value = allBotList.filter(suggestion =>
-                suggestion.toLowerCase().includes(inputValue.toLowerCase())
+                removeVietnameseTones(suggestion).includes(removeVietnameseTones(inputValue))
             );
         }
 
