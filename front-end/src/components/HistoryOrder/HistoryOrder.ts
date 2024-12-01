@@ -82,7 +82,7 @@ export default defineComponent({
         const confirmation = useConfirm();
 
         let timeout = 0;
-        function loadData(delay: boolean) {
+        function loadData(isDelay: boolean) {
             clearTimeout(timeout);
             timeout = setTimeout(() => {
                 r_isLoading.value = true;
@@ -91,7 +91,7 @@ export default defineComponent({
                     filterBroker: r_brokerSelected.value.join(','),
                     filterTimeframe: r_timeframesSelected.value.join(',')
                 };
-                axios.get(`/getHistoryOrder/${botName}`, params).then((result: Array<Order>) => {
+                axios.get(`/getHistoryOrder/${botName}`, params).then(async (result: Array<Order>) => {
                     let gain = 0;
                     let loss = 0;
                     let unrealizedGain = 0;
@@ -207,26 +207,38 @@ export default defineComponent({
                     r_isLoading.value = false;
                     r_balanceData.value = balanceData;
 
-                    axios.post('/getUnrealizedProfit', argsEquity).then(data => {
-                        console.log({ argsEquity, data })
+                    const step = Math.max(10, argsEquity.length / 30);
+                    for (let idx = 0; idx < argsEquity.length; idx += step) {
                         const newData = [...r_balanceData.value];
-                        if (data.length === newData.length) {
+
+                        const args = argsEquity.slice(idx, idx + step);
+                        const data = await axios.post('/getUnrealizedProfit', args);
+                        console.log({ idx, args, data })
+
+                        if (data.length === args.length) {
                             for (let i = 0; i < data.length; i++) {
-                                newData[i].equity = data[i] + newData[i].balance;
-                            }
-                            if (lastTimeUpdated !== '' && newData.length > 0 && new Date(lastTimeUpdated).getTime() > new Date(newData[newData.length - 1].timestamp).getTime()) {
-                                newData.push({
-                                    timestamp: lastTimeUpdated,
-                                    balance: gain + loss - totalFee,
-                                    balanceNoFee: gain + loss,
-                                    equity: gain + loss - totalFee + unrealizedGain + unrealizedLoss
-                                });
+                                newData[idx + i].equity = data[i] + newData[idx + i].balance;
                             }
                             r_balanceData.value = newData;
                         }
-                    });
+                        else {
+                            Toast.showError(`Update equity error ${idx}`);
+                        }
+                    }
+
+                    const newData = [...r_balanceData.value];
+                    if (lastTimeUpdated !== '' && newData.length > 0 && new Date(lastTimeUpdated).getTime() > new Date(newData[newData.length - 1].timestamp).getTime()) {
+                        newData.push({
+                            timestamp: lastTimeUpdated,
+                            balance: gain + loss - totalFee,
+                            balanceNoFee: gain + loss,
+                            equity: gain + loss - totalFee + unrealizedGain + unrealizedLoss
+                        });
+                        r_balanceData.value = newData;
+                    }
+                    
                 });
-            }, delay ? 1000 : 0);
+            }, isDelay ? 3000 : 0);
         }
 
         function clearHistory() {
