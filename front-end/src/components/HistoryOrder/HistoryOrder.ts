@@ -126,7 +126,7 @@ export default defineComponent({
                     for (let i = 0; i < sortedData.length; i++) {
                         const order = sortedData[i];
 
-                        if (order.lastTimeUpdated && order.timeEntry && new Date(lastTimeUpdated).getTime() < new Date(order.lastTimeUpdated).getTime())
+                        if (lastTimeUpdated === '' || (order.lastTimeUpdated && order.timeEntry && new Date(lastTimeUpdated).getTime() < new Date(order.lastTimeUpdated).getTime()))
                             lastTimeUpdated = order.lastTimeUpdated;
 
                         let fee = 0;
@@ -228,7 +228,9 @@ export default defineComponent({
                     }
 
                     const newData = [...r_balanceData.value];
+
                     if (lastTimeUpdated !== '' && newData.length > 0 && new Date(lastTimeUpdated).getTime() > new Date(newData[newData.length - 1].timestamp).getTime()) {
+                        console.log({ lastTimeUpdated });
                         newData.push({
                             timestamp: lastTimeUpdated,
                             balance: gain + loss - feeGain - feeLoss,
