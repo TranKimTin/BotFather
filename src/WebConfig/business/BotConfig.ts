@@ -289,7 +289,7 @@ export async function getUnrealizedProfit(data: Array<{ timestamp: string, order
                         limit: 1
                     };
                     const rate: RateData = await axios.get(url, { params }).then(res => res.data[0]);
-                    if (isUpdateDB) {
+                    if (isUpdateDB && rate.isFinal) {
                         await mysql.query(
                             `INSERT INTO Rates(symbol,timestamp,open,high,low,close) VALUES(?,?,?,?,?,?)`,
                             [s, timeInt, rate.open, rate.high, rate.low, rate.close]
