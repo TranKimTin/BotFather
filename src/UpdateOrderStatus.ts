@@ -221,6 +221,7 @@ async function updateRate() {
         }
     }
     await Promise.all(promiseList);
+    console.log(`update Rate ${data.length}`);
 }
 
 async function main() {
@@ -229,8 +230,6 @@ async function main() {
             `SELECT * FROM Orders WHERE status NOT IN (?, ?, ?)`,
             [ORDER_STATUS.MATCH_TP, ORDER_STATUS.MATCH_SL, ORDER_STATUS.CANCELED]
         );
-        console.log(`update ${orders.length} order`);
-
         let promiseList = [];
 
         for (const order of orders) {
@@ -241,6 +240,7 @@ async function main() {
             }
         }
         await Promise.all(promiseList);
+        console.log(`update ${orders.length} order`);
         await updateRate();
     }
     catch (err) {
