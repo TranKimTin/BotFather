@@ -188,31 +188,39 @@ async function updateRate() {
                         AND CONCAT(o1.broker, ':', o1.symbol, ':', temp.closeTime) NOT IN (SELECT CONCAT(symbol, ':', timestamp) FROM Rates);`
 
     const data = await mysql.query(sql);
+    let promiseList = [];
     for (const { broker, symbol, closeTime } of data) {
-        try {
-            const s = `${broker}:${symbol}`;
-            const [{ count }] = await mysql.query(`SELECT count(1) AS count FROM Rates WHERE symbol = ? AND timestamp = ?`, [s, closeTime]);
-            if (count > 0) continue;
+        promiseList.push((async function () {
+            try {
+                const s = `${broker}:${symbol}`;
+                const [{ count }] = await mysql.query(`SELECT count(1) AS count FROM Rates WHERE symbol = ? AND timestamp = ?`, [s, closeTime]);
+                if (count > 0) return;
 
-            const BASE_URL = util.getSocketURL(broker);
-            const url = `${BASE_URL}/api/getOHLCV`;
-            const params = {
-                symbol: symbol,
-                timeframe: '1m',
-                since: closeTime,
-                limit: 1
-            };
-            const rate: RateData = await axios.get(url, { params }).then(res => res.data[0]);
-            await mysql.query(
-                `INSERT INTO Rates(symbol,timestamp,open,high,low,close) VALUES(?,?,?,?,?,?)`,
-                [s, closeTime, rate.open, rate.high, rate.low, rate.close]
-            );
-            console.log({ s, timestamp: new Date(closeTime) });
-        }
-        catch (err) {
-            // console.error(err);
+                const BASE_URL = util.getSocketURL(broker);
+                const url = `${BASE_URL}/api/getOHLCV`;
+                const params = {
+                    symbol: symbol,
+                    timeframe: '1m',
+                    since: closeTime,
+                    limit: 1
+                };
+                const rate: RateData = await axios.get(url, { params }).then(res => res.data[0]);
+                await mysql.query(
+                    `INSERT INTO Rates(symbol,timestamp,open,high,low,close) VALUES(?,?,?,?,?,?)`,
+                    [s, closeTime, rate.open, rate.high, rate.low, rate.close]
+                );
+                console.log({ s, timestamp: new Date(closeTime) });
+            }
+            catch (err) {
+                // console.error(err);
+            }
+        })());
+        if (promiseList.length > 50) {
+            await Promise.all(promiseList);
+            promiseList = [];
         }
     }
+    await Promise.all(promiseList);
 }
 
 async function main() {
