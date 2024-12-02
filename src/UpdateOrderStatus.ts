@@ -170,6 +170,46 @@ async function handleOrder(order: Order) {
     }
 }
 
+async function updateRate() {
+    const sql = `   SELECT distinct o1.broker, o1.symbol, temp.closeTime
+                    FROM Orders o1
+                    JOIN (
+                        SELECT distinct o2.botID, COALESCE(o2.timeTP, o2.timeSL) AS closeTime 
+                        FROM Orders o2
+                        WHERE (o2.timeTP IS NOT NULL OR o2.timeSL IS NOT NULL)
+                            AND COALESCE(o2.timeTP, o2.timeSL) NOT IN (SELECT timestamp FROM Rates)
+                    ) temp ON o1.botID = temp.botID
+                    WHERE o1.timeEntry IS NOT NULL
+                        AND o1.timeEntry < temp.closeTime
+                        AND ((o1.timeSL IS NULL AND o1.timeTP IS NULL) 
+                                OR (o1.timeSL IS NOT NULL AND o1.timeSL > temp.closeTime) 
+                                OR (o1.timeTP IS NOT NULL AND o1.timeTP > temp.closeTime)
+                            )
+                        AND CONCAT(o1.broker, ':', o1.symbol, ':', temp.closeTime) NOT IN (SELECT CONCAT(symbol, ':', timestamp) FROM Rates);`
+
+    const data = await mysql.query(sql);
+    for (const { broker, symbol, closeTime } of data) {
+        const s = `${broker}:${symbol}`;
+        const [{ count }] = await mysql.query(`SELECT count(1) AS count FROM Rates WHERE symbol = ? AND timestamp = ?`, [s, closeTime]);
+        if (count > 0) continue;
+
+        const BASE_URL = util.getSocketURL(broker);
+        const url = `${BASE_URL}/api/getOHLCV`;
+        const params = {
+            symbol: symbol,
+            timeframe: '1m',
+            since: closeTime,
+            limit: 1
+        };
+        const rate: RateData = await axios.get(url, { params }).then(res => res.data[0]);
+        await mysql.query(
+            `INSERT INTO Rates(symbol,timestamp,open,high,low,close) VALUES(?,?,?,?,?,?)`,
+            [s, closeTime, rate.open, rate.high, rate.low, rate.close]
+        );
+        console.log({ s, closeTime });
+    }
+}
+
 async function main() {
     try {
         const orders: Array<Order> = await mysql.query(
@@ -188,6 +228,7 @@ async function main() {
             }
         }
         await Promise.all(promiseList);
+        await updateRate();
     }
     catch (err) {
         console.error(err);
