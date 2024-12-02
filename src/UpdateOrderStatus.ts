@@ -207,10 +207,10 @@ async function updateRate() {
                 `INSERT INTO Rates(symbol,timestamp,open,high,low,close) VALUES(?,?,?,?,?,?)`,
                 [s, closeTime, rate.open, rate.high, rate.low, rate.close]
             );
-            console.log({ s, closeTime });
+            console.log({ s, timestamp: new Date(closeTime) });
         }
         catch (err) {
-            console.error(err);
+            // console.error(err);
         }
     }
 }
