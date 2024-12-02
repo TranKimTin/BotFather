@@ -1,7 +1,7 @@
 import * as antlr from "antlr4ng";
 import { BaseErrorListener, CharStream, CommonTokenStream, RecognitionException, Recognizer, Token } from 'antlr4ng';
 import { ExprLexer } from './generated/ExprLexer';
-import { ABSContext, AddSubContext, AmplContext, AmplPContext, Avg_amplContext, Avg_amplPContext, Avg_closeContext, Avg_highContext, Avg_lowContext, Avg_openContext, Bb_lowerContext, Bb_middleContext, Bb_upperContext, Bearish_engulfingContext, Bearish_hammerContext, BearishContext, BrokerContext, Bull_bear_listContext, Bullish_engulfingContext, Bullish_hammerContext, BullishContext, ChangeContext, ChangePContext, CloseContext, ComparisonContext, DojiContext, EmaContext, ExprParser, FloatContext, HighContext, HourContext, IAvgOpenContext, IntContext, IRSIContext, LowContext, Lower_shadowContext, Lower_shadowPContext, Macd_histogramContext, Macd_n_dinhContext, Macd_signalContext, Macd_slopeContext, Macd_valueContext, MaContext, MarsiContext, Max_closeContext, Max_highContext, Max_lowContext, Max_openContext, MAXContext, Min_closeContext, Min_highContext, Min_lowContext, Min_openContext, MINContext, MinuteContext, MulDivContext, NegativeContext, NumberContext, OpenContext, ParensContext, PositiveContext, Rsi_phan_kiContext, Rsi_slopeContext, RsiContext, StringContext, SymbolContext, TimeframeContext, Upper_shadowContext, Upper_shadowPContext, Volume24h_in_usdContext, VolumeContext } from './generated/ExprParser';
+import { ABSContext, AddSubContext, AmplContext, AmplPContext, Avg_amplContext, Avg_amplPContext, Avg_closeContext, Avg_highContext, Avg_lowContext, Avg_openContext, Bb_lowerContext, Bb_middleContext, Bb_upperContext, Bearish_engulfingContext, Bearish_hammerContext, BearishContext, BrokerContext, Bull_bear_listContext, Bullish_engulfingContext, Bullish_hammerContext, BullishContext, ChangeContext, ChangePContext, CloseContext, ComparisonContext, DojiContext, EmaContext, ExprParser, FloatContext, HighContext, HourContext, IAvgOpenContext, IntContext, IRSIContext, LowContext, Lower_shadowContext, Lower_shadowPContext, Macd_histogramContext, Macd_n_dinhContext, Macd_signalContext, Macd_slopeContext, Macd_valueContext, MaContext, MarsiContext, Max_closeContext, Max_highContext, Max_lowContext, Max_openContext, Max_rsiContext, MAXContext, Min_closeContext, Min_highContext, Min_lowContext, Min_openContext, Min_rsiContext, MINContext, MinuteContext, MulDivContext, NegativeContext, NumberContext, OpenContext, ParensContext, PositiveContext, Rsi_phan_kiContext, Rsi_slopeContext, RsiContext, StringContext, SymbolContext, TimeframeContext, Upper_shadowContext, Upper_shadowPContext, Volume24h_in_usdContext, VolumeContext } from './generated/ExprParser';
 import { ExprVisitor } from './generated/ExprVisitor';
 import * as util from '../common/util';
 import moment from "moment";
@@ -881,6 +881,38 @@ export class Expr extends ExprVisitor<any> {
             min = Math.min(min, this.data[shift + i].close);
         }
         return min;
+    };
+
+    visitMin_rsi = (ctx: Min_rsiContext) => {
+        const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
+        const depth = parseInt(ctx.INT(1)?.getText() || "0", 10);
+        const shift = parseInt(ctx.INT(2)?.getText() || "0", 10);
+
+        const RSIs = util.iRSI(this.data, period);
+
+        if (shift + depth >= RSIs.length) throw `min_crsi out of range. length = ${this.data.length}`;
+
+        let min = RSIs[shift];
+        for (let i = 1; i < depth; i++) {
+            min = Math.min(min, RSIs[shift + i]);
+        }
+        return min;
+    };
+
+    visitMax_rsi = (ctx: Max_rsiContext) => {
+        const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
+        const depth = parseInt(ctx.INT(1)?.getText() || "0", 10);
+        const shift = parseInt(ctx.INT(2)?.getText() || "0", 10);
+
+        const RSIs = util.iRSI(this.data, period);
+
+        if (shift + depth >= RSIs.length) throw `min_crsi out of range. length = ${this.data.length}`;
+
+        let max = RSIs[shift];
+        for (let i = 1; i < depth; i++) {
+            max = Math.max(max, RSIs[shift + i]);
+        }
+        return max;
     };
 }
 

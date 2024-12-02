@@ -67,7 +67,9 @@ expr
     | min_open                  # iMinOpen
     | min_high                  # iMinHigh
     | min_low                   # iMinLow
-    | min_close                 # iMinClose    
+    | min_close                 # iMinClose
+    | min_rsi                   # iMinRSI
+    | max_rsi                   # iMaxRSI  
     ;
 
 broker: 'broker' '(' ')';
@@ -125,6 +127,8 @@ min_open: 'min_open' '(' INT (',' INT)? ')';
 min_high: 'min_high' '(' INT (',' INT)? ')';
 min_low: 'min_low' '(' INT (',' INT)? ')';
 min_close: 'min_close' '(' INT (',' INT)? ')';
+min_rsi: 'min_rsi' '(' INT ',' INT (',' INT)? ')';
+max_rsi: 'max_rsi' '(' INT ',' INT (',' INT)? ')';
 
 comparisonOp
     : '>'
