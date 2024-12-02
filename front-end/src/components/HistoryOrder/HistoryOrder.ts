@@ -208,7 +208,7 @@ export default defineComponent({
                     r_isLoading.value = false;
                     r_balanceData.value = balanceData;
 
-                    const step = Math.max(10, argsEquity.length / 30);
+                    const step = Math.max(10, Math.ceil(argsEquity.length / 30));
                     for (let idx = 0; idx < argsEquity.length; idx += step) {
                         const newData = [...r_balanceData.value];
 
