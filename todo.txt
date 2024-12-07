@@ -9,4 +9,5 @@
 - is leader -> https://api.cryptorank.io/v0/coins/tensor/investors-list
 - vẽ chart, chỉ báo ->  https://www.npmjs.com/package/trading-vue-js   https://codesandbox.io/p/sandbox/vue-ocpqe?file=%2Fsrc%2FApp.vue%3A6%2C6-6%2C17
 - fix bug telegram message dài quá
-- chart equity
+- interval
+- custom code
