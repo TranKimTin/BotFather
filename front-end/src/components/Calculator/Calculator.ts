@@ -4,9 +4,10 @@ import * as Toast from '../../toast/toast';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Select from 'primevue/select';
+import CodeMirror from '../CodeMirror/CodeMirror.vue';
 
 export default defineComponent({
-    components: { InputText, Select, Button },
+    components: { InputText, Select, Button, CodeMirror },
     setup() {
         Toast.showInfo("Xin chào");
 
