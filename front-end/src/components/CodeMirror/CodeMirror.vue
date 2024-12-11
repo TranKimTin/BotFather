@@ -6,7 +6,7 @@
 
 <script lang="ts" src="./CodeMirror.ts"></script>
 
-<style>
+<style scoped>
 .input-codemirror {
     display: inline-block;
     padding: 0.5rem;
@@ -17,7 +17,12 @@
     line-height: 1.5;
     color: #333;
     width: 100%;
+    max-width: 100%;
     box-sizing: border-box;
+}
+
+.input-codemirror:hover {
+    cursor: text;
 }
 
 .input-codemirror:focus {
@@ -25,9 +30,5 @@
     border-color: #007bff;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
     cursor: text;
-}
-
-.cm-focused {
-    outline: none !important;
 }
 </style>
