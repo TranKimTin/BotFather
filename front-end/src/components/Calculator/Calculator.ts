@@ -2,12 +2,11 @@ import { defineComponent, ref } from 'vue';
 import * as axios from '../../axios/axios';
 import * as Toast from '../../toast/toast';
 import Button from 'primevue/button';
-import InputText from 'primevue/inputtext';
 import Select from 'primevue/select';
-import CodeMirror from '../CodeMirror/CodeMirror.vue';
+import CodeMirror from '../CodeMirror/ExprInput.vue';
 
 export default defineComponent({
-    components: { InputText, Select, Button, CodeMirror },
+    components: { Select, Button, CodeMirror },
     setup() {
         Toast.showInfo("Xin chào");
 

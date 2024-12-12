@@ -4,7 +4,7 @@
     </span>
 </template>
 
-<script lang="ts" src="./CodeMirror.ts"></script>
+<script lang="ts" src="./ExprInput.ts"></script>
 
 <style scoped>
 .input-codemirror {
