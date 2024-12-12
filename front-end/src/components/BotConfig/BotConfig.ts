@@ -11,6 +11,7 @@ import { useConfirm } from "primevue/useconfirm";
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import Select from 'primevue/select';
+import ExprInput from '../ExprInput/ExprInput.vue';
 
 cytoscape.use(edgehandles);
 
@@ -33,7 +34,7 @@ interface NodeData {
 }
 
 export default defineComponent({
-    components: { MultiSelect, AutoComplete, Button, Dialog, InputText, Select },
+    components: { MultiSelect, AutoComplete, Button, Dialog, InputText, Select, ExprInput },
     setup() {
         Toast.showInfo("Xin chào");
         const r_botName = ref<string>('');

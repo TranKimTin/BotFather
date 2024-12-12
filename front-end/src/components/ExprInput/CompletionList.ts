@@ -346,14 +346,14 @@ export default [
     {
         type: 'function',
         label: 'macd_value',
-        detail: '(fastPeriod, slowPeriod, signalPeriod, i)',
+        detail: '(fast, slow, signal, i)',
         apply: 'macd_value(12, 26, 9, 0)',
         boost: 0,
         info: ` - Đường trung bình động hội tụ phân kỳ MACD tại nến thứ i (Moving Average Convergence Divergence)
                 - Trả về giá trị MACD
-                - fastPeriod: Số nến đường nhanh để tính giá trị MACD
-                - slowPeriod: Số nến đường chậm để tính giá trị MACD
-                - signalPeriod: Số nến tính đường Signal MACD
+                - fast: Số nến đường nhanh để tính giá trị MACD
+                - slow: Số nến đường chậm để tính giá trị MACD
+                - signal: Số nến tính đường Signal MACD
                 Ví dụ:
                 + macd_value(14, 0) : MACD tại nến 0
                 + macd_value(14, 1) : MACD tại nến 1
@@ -362,14 +362,14 @@ export default [
     {
         type: 'function',
         label: 'macd_signal',
-        detail: '(fastPeriod, slowPeriod, signalPeriod, i)',
+        detail: '(fast, slow, signal, i)',
         apply: 'macd_signal(12, 26, 9, 0)',
         boost: 0,
         info: ` - Đường trung bình động hội tụ phân kỳ MACD tại nến thứ i (Moving Average Convergence Divergence)
                 - Trả về giá trị Signal
-                - fastPeriod: Số nến đường nhanh để tính giá trị MACD
-                - slowPeriod: Số nến đường chậm để tính giá trị MACD
-                - signalPeriod: Số nến tính đường Signal MACD
+                - fast: Số nến đường nhanh để tính giá trị MACD
+                - slow: Số nến đường chậm để tính giá trị MACD
+                - signal: Số nến tính đường Signal MACD
                 Ví dụ:
                 + macd_signal(14, 0) : Signal tại nến 0
                 + macd_signal(14, 1) : Signal tại nến 1
@@ -378,14 +378,14 @@ export default [
     {
         type: 'function',
         label: 'macd_histogram',
-        detail: '(fastPeriod, slowPeriod, signalPeriod, i)',
+        detail: '(fast, slow, signal, i)',
         apply: 'macd_histogram(12, 26, 9, 0)',
         boost: 0,
         info: ` - Đường trung bình động hội tụ phân kỳ MACD tại nến thứ i (Moving Average Convergence Divergence)
                 - Trả về giá trị Histogram
-                - fastPeriod: Số nến đường nhanh để tính giá trị MACD
-                - slowPeriod: Số nến đường chậm để tính giá trị MACD
-                - signalPeriod: Số nến tính đường Signal MACD
+                - fast: Số nến đường nhanh để tính giá trị MACD
+                - slow: Số nến đường chậm để tính giá trị MACD
+                - signal: Số nến tính đường Signal MACD
                 Ví dụ:
                 + macd_histogram(14, 0) : Histogram tại nến 0
                 + macd_histogram(14, 1) : Histogram tại nến 1
@@ -439,7 +439,7 @@ export default [
     {
         type: 'function',
         label: 'rsi_phan_ki',
-        detail: '(period, deviation, depth, numberOfPeaks, minhDiff, maxRSI, i)',
+        detail: '(period,...)',
         apply: 'rsi_phan_ki(0, 0, 0, 0 0, 0, 0)',
         boost: 0,
         info: ` - Chỉ báo tự bịa ra, thỏa mãn các điều kiện sau:
@@ -453,7 +453,7 @@ export default [
     {
         type: 'function',
         label: 'macd_n_dinh',
-        detail: '(fastPeriod, slowPeriod, signalPeriod, redDepth, depth, enableDivergence, diffCandle0, i, diffPercents...)',
+        detail: '(fast, slow, signal,...)',
         apply: 'macd_n_dinh(12, 26, 9, 15, 15, 0, 0.5, 0, 0)',
         boost: 0,
         info: ` - Chỉ báo tự bịa ra, quên mất nó như nào rồi
@@ -462,13 +462,13 @@ export default [
     {
         type: 'function',
         label: 'macd_slope',
-        detail: '(fastPeriod, slowPeriod, signalPeriod, i)',
+        detail: '(fast, slow, signal, i)',
         apply: 'macd_slope(12, 26, 9, 0)',
         boost: 0,
-        info: ` - Góc giữa đường MACD Value và đường trung bình MACD Value (slowPeriod nến) tại nến thứ i
-                - fastPeriod: Số nến đường nhanh để tính giá trị MACD
-                - slowPeriod: Số nến đường chậm để tính giá trị MACD
-                - signalPeriod: Số nến tính đường Signal MACD
+        info: ` - Góc giữa đường MACD Value và đường trung bình MACD Value (slow nến) tại nến thứ i
+                - fast: Số nến đường nhanh để tính giá trị MACD
+                - slow: Số nến đường chậm để tính giá trị MACD
+                - signal: Số nến tính đường Signal MACD
                 - Giá trị từ -90 đến 90 độ
                 Ví dụ:
                 + macd_slope(12, 26, 9, 0): Góc đường MACD Value tại nến 0

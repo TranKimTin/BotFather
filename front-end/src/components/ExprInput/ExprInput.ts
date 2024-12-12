@@ -14,11 +14,17 @@ export default {
         modelValue: {
             type: String,
             default: ''
+        },
+        isVisible: {
+            type: Boolean,
+            default: true
         }
     },
     emits: ['update:modelValue'],
     setup(props: any, context: { emit: (event: 'update:modelValue', value: string) => void }) {
-        const code = ref("");
+        console.log({ props })
+        const code = ref<string>(props.modelValue);
+        const isVisible = ref<boolean>(props.isVisible);
 
         completionList.sort((a, b) => a.label.localeCompare(b.label));
         for (let i = 0; i < completionList.length; i++) {
@@ -75,9 +81,10 @@ export default {
 
         watch(props, (newValue) => {
             code.value = newValue.modelValue;
+            isVisible.value = newValue.isVisible;
         });
 
 
-        return { code, extensions, editorOptions };
+        return { code, isVisible, extensions, editorOptions };
     },
 };
