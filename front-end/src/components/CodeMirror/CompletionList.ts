@@ -391,4 +391,411 @@ export default [
                 + macd_histogram(14, 1) : Histogram tại nến 1
                 `
     },
+    {
+        type: 'function',
+        label: 'bb_upper',
+        detail: '(period, multiplier, i)',
+        apply: 'bb_upper(20, 2, 0)',
+        boost: 0,
+        info: ` - Đường Bollinger Band (BB) tại nến thứ i
+                - Trả về giá trị đường BB phía trên
+                - period: Số nến để tính giá trị BB
+                - multiplier: Bội số BB
+                Ví dụ:
+                + bb_upper(20, 2, 0) : BB trên tại nến 0
+                + bb_upper(20, 2, 1) : BB trên tại nến 1
+                `
+    },
+    {
+        type: 'function',
+        label: 'bb_middle',
+        detail: '(period, multiplier, i)',
+        apply: 'bb_middle(20, 2, 0)',
+        boost: 0,
+        info: ` - Đường Bollinger Band (BB) tại nến thứ i
+                - Trả về giá trị đường BB ở giữa
+                - period: Số nến để tính giá trị BB
+                - multiplier: Bội số BB
+                Ví dụ:
+                + bb_middle(20, 2, 0) : BB giữa tại nến 0
+                + bb_middle(20, 2, 1) : BB giữa tại nến 1
+                `
+    },
+    {
+        type: 'function',
+        label: 'bb_lower',
+        detail: '(period, multiplier, i)',
+        apply: 'bb_lower(20, 2, 0)',
+        boost: 0,
+        info: ` - Đường Bollinger Band (BB) tại nến thứ i
+                - Trả về giá trị đường BB phía dưới
+                - period: Số nến để tính giá trị BB
+                - multiplier: Bội số BB
+                Ví dụ:
+                + bb_lower(20, 2, 0) : BB dưới tại nến 0
+                + bb_lower(20, 2, 1) : BB dưới tại nến 1
+                `
+    },
+    {
+        type: 'function',
+        label: 'rsi_phan_ki',
+        detail: '(period, deviation, depth, numberOfPeaks, minhDiff, maxRSI, i)',
+        apply: 'rsi_phan_ki(0, 0, 0, 0 0, 0, 0)',
+        boost: 0,
+        info: ` - Chỉ báo tự bịa ra, thỏa mãn các điều kiện sau:
+                - downtrend
+                - rsi đáy sau cao hơn đáy trước
+                - giá sau thấp hơn giá trước
+                - tạo đủ numberOfPeaks đáy thỏa mãn
+                - rsi <= 30
+                `
+    },
+    {
+        type: 'function',
+        label: 'macd_n_dinh',
+        detail: '(fastPeriod, slowPeriod, signalPeriod, redDepth, depth, enableDivergence, diffCandle0, i, diffPercents...)',
+        apply: 'macd_n_dinh(12, 26, 9, 15, 15, 0, 0.5, 0, 0)',
+        boost: 0,
+        info: ` - Chỉ báo tự bịa ra, quên mất nó như nào rồi
+                `
+    },
+    {
+        type: 'function',
+        label: 'macd_slope',
+        detail: '(fastPeriod, slowPeriod, signalPeriod, i)',
+        apply: 'macd_slope(12, 26, 9, 0)',
+        boost: 0,
+        info: ` - Góc giữa đường MACD Value và đường trung bình MACD Value (slowPeriod nến) tại nến thứ i
+                - fastPeriod: Số nến đường nhanh để tính giá trị MACD
+                - slowPeriod: Số nến đường chậm để tính giá trị MACD
+                - signalPeriod: Số nến tính đường Signal MACD
+                - Giá trị từ -90 đến 90 độ
+                Ví dụ:
+                + macd_slope(12, 26, 9, 0): Góc đường MACD Value tại nến 0
+                + macd_slope(12, 26, 9, 1): Góc đường MACD Value tại nến 1
+                `
+    },
+    {
+        type: 'function',
+        label: 'bullish_engulfing',
+        detail: '(i)',
+        apply: 'bullish_engulfing(0)',
+        boost: 0,
+        info: ` - Có xuất hiện mô hình nến bullish_engulfing tại nến thứ i không?
+                - Xuất hiện: trả về 1
+                - Không xuất hiện: trả về 0
+                Ví dụ:
+                + bullish_engulfing(0): Tại nến 0 có xuất hiện mô hình nến bullish_engulfing không
+                + bullish_engulfing(1): Tại nến 1 có xuất hiện mô hình nến bullish_engulfing không
+                `
+    },
+    {
+        type: 'function',
+        label: 'bearish_engulfing',
+        detail: '(i)',
+        apply: 'bearish_engulfing(0)',
+        boost: 0,
+        info: ` - Có xuất hiện mô hình nến bearish_engulfing tại nến thứ i không?
+                - Xuất hiện: trả về 1
+                - Không xuất hiện: trả về 0
+                Ví dụ:
+                + bearish_engulfing(0): Tại nến 0 có xuất hiện mô hình nến bearish_engulfing không
+                + bearish_engulfing(1): Tại nến 1 có xuất hiện mô hình nến bearish_engulfing không
+                `
+    },
+    {
+        type: 'function',
+        label: 'bullish_hammer',
+        detail: '(i)',
+        apply: 'bullish_hammer(0)',
+        boost: 0,
+        info: ` - Có xuất hiện mô hình nến bullish_hammer tại nến thứ i không? (Nến búa tăng)
+                - Xuất hiện: trả về 1
+                - Không xuất hiện: trả về 0
+                Ví dụ:
+                + bullish_hammer(0) = 1: xuất hiện bullish_hammer tại nến 0
+                + bullish_hammer(1) = 0: không xuất hiện bullish_hammer tại nến 1
+                `
+    },
+    {
+        type: 'function',
+        label: 'bearish_hammer',
+        detail: '(i)',
+        apply: 'bearish_hammer(0)',
+        boost: 0,
+        info: ` - Có xuất hiện mô hình nến bearish_hammer tại nến thứ i không? (Nến búa giảm)
+                - Xuất hiện: trả về 1
+                - Không xuất hiện: trả về 0
+                Ví dụ:
+                + bearish_hammer(0) = 1: xuất hiện bearish_hammer tại nến 0
+                + bearish_hammer(1) = 0: không xuất hiện bearish_hammer tại nến 1
+                `
+    },
+    {
+        type: 'function',
+        label: 'bullish',
+        detail: '(i)',
+        apply: 'bullish(0)',
+        boost: 0,
+        info: ` - Có xuất hiện một trong các mô hình nến bullish tại nến thứ i không?
+                - Xuất hiện: trả về 1
+                - Không xuất hiện: trả về 0
+                - Các mô hình nến bullish: BullishEngulfingPattern, DownsideTasukiGap, BullishHarami, BullishHaramiCross, MorningDojiStar, MorningStar, BullishMarubozu, PiercingLine, ThreeWhiteSoldiers, BullishHammerStick, BullishInvertedHammerStick, HammerPattern, HammerPatternUnconfirmed, TweezerBottom
+                Ví dụ:
+                + bullish(0) = 1: xuất hiện một trong các mô hình nến bullish tại nến 0
+                + bullish(1) = 0: không xuất hiện một trong các mô hình nến bullish tại nến 1
+                `
+    },
+    {
+        type: 'function',
+        label: 'bearish',
+        detail: '(i)',
+        apply: 'bearish(0)',
+        boost: 0,
+        info: ` - Có xuất hiện một trong các mô hình nến bearish tại nến thứ i không?
+                - Xuất hiện: trả về 1
+                - Không xuất hiện: trả về 0
+                - Các mô hình nến bearish: BearishEngulfingPattern, BearishHarami, BearishHaramiCross, EveningDojiStar, EveningStar, BearishMarubozu, ThreeBlackCrows, BearishHammerStick, BearishInvertedHammerStick, HangingMan, HangingManUnconfirmed, ShootingStar, ShootingStarUnconfirmed, TweezerTop
+                Ví dụ:
+                + bearish(0) = 1: xuất hiện một trong các mô hình nến bearish tại nến 0
+                + bearish(1) = 0: không xuất hiện một trong các mô hình nến bearish tại nến 1
+                `
+    },
+    {
+        type: 'function',
+        label: 'marsi',
+        detail: '(period, i)',
+        apply: 'marsi(14, 0)',
+        boost: 0,
+        info: ` - Rsi trung bình trong <period> nến gần nhất
+                - Giá trị từ 0 - 100
+                Ví dụ:
+                + marsi(14, 0): trung bình rsi 14 nến gần nhất tính từ nến 0 (0->13)
+                + marsi(14, 1): trung bình rsi 14 nến gần nhất tính từ nến 1 (1->14)
+                `
+    },
+    {
+        type: 'function',
+        label: 'bull_bear_list',
+        detail: '(i)',
+        apply: 'bull_bear_list(0)',
+        boost: 0,
+        info: ` - Danh sách các mô hình nến bullish, bearish xuất hiện tại nến thứ i
+                - Dùng khi muốn gửi danh sách về telegram để theo dõi, không có tác dụng đặt điều kiện
+                - Các mô hình nến bullish: BullishEngulfingPattern, DownsideTasukiGap, BullishHarami, BullishHaramiCross, MorningDojiStar, MorningStar, BullishMarubozu, PiercingLine, ThreeWhiteSoldiers, BullishHammerStick, BullishInvertedHammerStick, HammerPattern, HammerPatternUnconfirmed, TweezerBottom
+                - Các mô hình nến bearish: BearishEngulfingPattern, BearishHarami, BearishHaramiCross, EveningDojiStar, EveningStar, BearishMarubozu, ThreeBlackCrows, BearishHammerStick, BearishInvertedHammerStick, HangingMan, HangingManUnconfirmed, ShootingStar, ShootingStarUnconfirmed, TweezerTop
+                Ví dụ:
+                + telegram: các mô hình nến bullish, bearish xuất hiện tại nến 0: {bull_bear_list(0)}
+                `
+    },
+    {
+        type: 'function',
+        label: 'doji',
+        detail: '(i)',
+        apply: 'doji(0)',
+        boost: 0,
+        info: ` - Có xuất hiện mô hình nến doji tại nến thứ i không?
+                - Xuất hiện: trả về 1
+                - Không xuất hiện: trả về 0
+                Ví dụ:
+                + doji(0) = 1: xuất hiện doji tại nến 0
+                + doji(1) = 0: không xuất hiện doji tại nến 1
+                `
+    },
+    {
+        type: 'function',
+        label: 'avg_open',
+        detail: '(n, i)',
+        apply: 'avg_open(10, 0)',
+        boost: 0,
+        info: ` - Giá mở trung bình trong n nến gần nhất tính từ nến thứ i
+                Ví dụ:
+                + avg_open(10, 0): Giá mở trung bình 10 nến gần nhất tính từ nến 0 (0->9)
+                + avg_open(10, 1): Giá mở trung bình 10 nến gần nhất tính từ nến 1 (1->10)
+                `
+    },
+    {
+        type: 'function',
+        label: 'avg_high',
+        detail: '(n, i)',
+        apply: 'avg_high(10, 0)',
+        boost: 0,
+        info: ` - Giá đỉnh trung bình trong n nến gần nhất tính từ nến thứ i
+                Ví dụ:
+                + avg_high(10, 0): Giá đỉnh trung bình 10 nến gần nhất tính từ nến 0 (0->9)
+                + avg_high(10, 1): Giá đỉnh trung bình 10 nến gần nhất tính từ nến 1 (1->10)
+                `
+    },
+    {
+        type: 'function',
+        label: 'avg_low',
+        detail: '(n, i)',
+        apply: 'avg_low(10, 0)',
+        boost: 0,
+        info: ` - Giá đáy trung bình trong n nến gần nhất tính từ nến thứ i
+                Ví dụ:
+                + avg_low(10, 0): Giá đáy trung bình 10 nến gần nhất tính từ nến 0 (0->9)
+                + avg_low(10, 1): Giá đáy trung bình 10 nến gần nhất tính từ nến 1 (1->10)
+                `
+    },
+    {
+        type: 'function',
+        label: 'avg_close',
+        detail: '(n, i)',
+        apply: 'avg_close(10, 0)',
+        boost: 0,
+        info: ` - Giá đóng trung bình trong n nến gần nhất tính từ nến thứ i
+                Ví dụ:
+                + avg_close(10, 0): Giá đóng trung bình 10 nến gần nhất tính từ nến 0 (0->9)
+                + avg_close(10, 1): Giá đóng trung bình 10 nến gần nhất tính từ nến 1 (1->10)
+                `
+    },
+    {
+        type: 'function',
+        label: 'avg_ampl',
+        detail: '(n, i)',
+        apply: 'avg_ampl(10, 0)',
+        boost: 0,
+        info: ` - Biên độ trung bình trong n nến gần nhất tính từ nến thứ i
+                - Đơn vị: USDT
+                Ví dụ:
+                + avg_ampl(10, 0): Biên độ trung bình 10 nến gần nhất tính từ nến 0 (0->9)
+                + avg_ampl(10, 1): Biên độ trung bình 10 nến gần nhất tính từ nến 1 (1->10)
+                `
+    },
+    {
+        type: 'function',
+        label: 'avg_ampl%',
+        detail: '(n, i)',
+        apply: 'avg_ampl%(10, 0)',
+        boost: 0,
+        info: ` - Biên độ trung bình trong n nến gần nhất tính từ nến thứ i
+                - Đơn vị: %
+                Ví dụ:
+                + avg_ampl%(10, 0): Biên độ trung bình 10 nến gần nhất tính từ nến 0 (0->9)
+                + avg_ampl%(10, 1): Biên độ trung bình 10 nến gần nhất tính từ nến 1 (1->10)
+                `
+    },
+    {
+        type: 'function',
+        label: 'max_open',
+        detail: '(n, i)',
+        apply: 'max_open(10, 0)',
+        boost: 0,
+        info: ` - Giá mở cao nhất trong n nến gần nhất tính từ nến thứ i
+                Ví dụ:
+                + max_open(10, 0): Giá mở cao nhất 10 nến gần nhất tính từ nến 0 (0->9)
+                + max_open(10, 1): Giá mở cao nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                `
+    },
+    {
+        type: 'function',
+        label: 'max_high',
+        detail: '(n, i)',
+        apply: 'max_high(10, 0)',
+        boost: 0,
+        info: ` - Giá đỉnh cao nhất trong n nến gần nhất tính từ nến thứ i
+                Ví dụ:
+                + max_high(10, 0): Giá đỉnh cao nhất 10 nến gần nhất tính từ nến 0 (0->9)
+                + max_high(10, 1): Giá đỉnh cao nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                `
+    },
+    {
+        type: 'function',
+        label: 'max_low',
+        detail: '(n, i)',
+        apply: 'max_low(10, 0)',
+        boost: 0,
+        info: ` - Giá đáy cao nhất trong n nến gần nhất tính từ nến thứ i
+                Ví dụ:
+                + max_low(10, 0): Giá đáy cao nhất 10 nến gần nhất tính từ nến 0 (0->9)
+                + max_low(10, 1): Giá đáy cao nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                `
+    },
+    {
+        type: 'function',
+        label: 'max_close',
+        detail: '(n, i)',
+        apply: 'max_close(10, 0)',
+        boost: 0,
+        info: ` - Giá đóng cao nhất trong n nến gần nhất tính từ nến thứ i
+                Ví dụ:
+                + max_close(10, 0): Giá đóng cao nhất 10 nến gần nhất tính từ nến 0 (0->9)
+                + max_close(10, 1): Giá đóng cao nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                `
+    },
+    {
+        type: 'function',
+        label: 'min_open',
+        detail: '(n, i)',
+        apply: 'min_open(10, 0)',
+        boost: 0,
+        info: ` - Giá mở thấp nhất trong n nến gần nhất tính từ nến thứ i
+                Ví dụ:
+                + min_open(10, 0): Giá mở thấp nhất 10 nến gần nhất tính từ nến 0 (0->9)
+                + min_open(10, 1): Giá mở thấp nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                `
+    },
+    {
+        type: 'function',
+        label: 'min_high',
+        detail: '(n, i)',
+        apply: 'min_high(10, 0)',
+        boost: 0,
+        info: ` - Giá đỉnh thấp nhất trong n nến gần nhất tính từ nến thứ i
+                Ví dụ:
+                + min_high(10, 0): Giá đỉnh thấp nhất 10 nến gần nhất tính từ nến 0 (0->9)
+                + min_high(10, 1): Giá đỉnh thấp nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                `
+    },
+    {
+        type: 'function',
+        label: 'min_low',
+        detail: '(n, i)',
+        apply: 'min_low(10, 0)',
+        boost: 0,
+        info: ` - Giá đáy thấp nhất trong n nến gần nhất tính từ nến thứ i
+                Ví dụ:
+                + min_low(10, 0): Giá đáy thấp nhất 10 nến gần nhất tính từ nến 0 (0->9)
+                + min_low(10, 1): Giá đáy thấp nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                `
+    },
+    {
+        type: 'function',
+        label: 'min_close',
+        detail: '(n, i)',
+        apply: 'min_close(10, 0)',
+        boost: 0,
+        info: ` - Giá đóng thấp nhất trong n nến gần nhất tính từ nến thứ i
+                Ví dụ:
+                + min_close(10, 0): Giá đóng thấp nhất 10 nến gần nhất tính từ nến 0 (0->9)
+                + min_close(10, 1): Giá đóng thấp nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                `
+    },
+    {
+        type: 'function',
+        label: 'min_rsi',
+        detail: '(period, n, i)',
+        apply: 'min_rsi(14, 10, 0)',
+        boost: 0,
+        info: ` - rsi thấp nhất trong n nến gần nhất tính từ nến thứ i
+                - period: số nến để tính chỉ báo rsi
+                Ví dụ:
+                + min_rsi(10, 0): rsi thấp nhất 10 nến gần nhất tính từ nến 0 (0->9)
+                + min_rsi(10, 1): rsi thấp nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                `
+    },
+    {
+        type: 'function',
+        label: 'max_rsi',
+        detail: '(period, n, i)',
+        apply: 'max_rsi(14, 10, 0)',
+        boost: 0,
+        info: ` - rsi cao nhất trong n nến gần nhất tính từ nến thứ i
+                - period: số nến để tính chỉ báo rsi
+                Ví dụ:
+                + max_rsi(10, 0): rsi cao nhất 10 nến gần nhất tính từ nến 0 (0->9)
+                + max_rsi(10, 1): rsi cao nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                `
+    },
 ];
