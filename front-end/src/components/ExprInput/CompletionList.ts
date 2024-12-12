@@ -798,4 +798,108 @@ export default [
                 + max_rsi(10, 1): rsi cao nhất 10 nến gần nhất tính từ nến 1 (1->10)
                 `
     },
+    {
+        type: 'function',
+        label: 'min_change',
+        detail: '(n, i)',
+        apply: 'min_change(10, 0)',
+        boost: 0,
+        info: ` - Thay đổi giá thấp nhất trong n nến gần nhất tính từ nến thứ i
+                - Đơn vị: USDT
+                Ví dụ:
+                + min_change(10, 0): Thay đổi giá thấp nhất 10 nến gần nhất tính từ nến 0 (0->9)
+                + min_change(10, 1): Thay đổi giá thấp nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                `
+    },
+    {
+        type: 'function',
+        label: 'max_change',
+        detail: '(n, i)',
+        apply: 'max_change(10, 0)',
+        boost: 0,
+        info: ` - Thay đổi giá cao nhất trong n nến gần nhất tính từ nến thứ i
+                - Đơn vị: USDT
+                Ví dụ:
+                + max_change(10, 0): Thay đổi giá cao nhất 10 nến gần nhất tính từ nến 0 (0->9)
+                + max_change(10, 1): Thay đổi giá cao nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                `
+    },
+    {
+        type: 'function',
+        label: 'min_change%',
+        detail: '(n, i)',
+        apply: 'min_change%(10, 0)',
+        boost: 0,
+        info: ` - Thay đổi giá thấp nhất trong n nến gần nhất tính từ nến thứ i
+                - Đơn vị: %
+                Ví dụ:
+                + min_change(10, 0): Thay đổi giá thấp nhất 10 nến gần nhất tính từ nến 0 (0->9)
+                + min_change(10, 1): Thay đổi giá thấp nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                `
+    },
+    {
+        type: 'function',
+        label: 'max_change%',
+        detail: '(n, i)',
+        apply: 'max_change%(10, 0)',
+        boost: 0,
+        info: ` - Thay đổi giá cao nhất trong n nến gần nhất tính từ nến thứ i
+                - Đơn vị: %
+                Ví dụ:
+                + max_change%(10, 0): Thay đổi giá cao nhất 10 nến gần nhất tính từ nến 0 (0->9)
+                + max_change%(10, 1): Thay đổi giá cao nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                `
+    },
+    {
+        type: 'function',
+        label: 'min_ampl',
+        detail: '(n, i)',
+        apply: 'min_ampl(10, 0)',
+        boost: 0,
+        info: ` - Biên độ giá thấp nhất trong n nến gần nhất tính từ nến thứ i
+                - Đơn vị: USDT
+                Ví dụ:
+                + min_ampl(10, 0): Biên độ giá thấp nhất 10 nến gần nhất tính từ nến 0 (0->9)
+                + min_ampl(10, 1): Biên độ giá thấp nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                `
+    },
+    {
+        type: 'function',
+        label: 'max_ampl',
+        detail: '(n, i)',
+        apply: 'max_ampl(10, 0)',
+        boost: 0,
+        info: ` - Biên độ giá cap nhất trong n nến gần nhất tính từ nến thứ i
+                - Đơn vị: USDT
+                Ví dụ:
+                + max_ampl(10, 0): Biên độ giá cao nhất 10 nến gần nhất tính từ nến 0 (0->9)
+                + max_ampl(10, 1): Biên độ giá cao nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                `
+    },
+    {
+        type: 'function',
+        label: 'min_ampl%',
+        detail: '(n, i)',
+        apply: 'min_ampl%(10, 0)',
+        boost: 0,
+        info: ` - Biên độ giá thấp nhất trong n nến gần nhất tính từ nến thứ i
+                - Đơn vị: %
+                Ví dụ:
+                + min_ampl%(10, 0): Biên độ giá thấp nhất 10 nến gần nhất tính từ nến 0 (0->9)
+                + min_ampl%(10, 1): Biên độ giá thấp nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                `
+    },
+    {
+        type: 'function',
+        label: 'max_ampl%',
+        detail: '(n, i)',
+        apply: 'max_ampl%(10, 0)',
+        boost: 0,
+        info: ` - Biên độ giá cap nhất trong n nến gần nhất tính từ nến thứ i
+                - Đơn vị: %
+                Ví dụ:
+                + max_ampl%(10, 0): Biên độ giá cao nhất 10 nến gần nhất tính từ nến 0 (0->9)
+                + max_ampl%(10, 1): Biên độ giá cao nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                `
+    },
 ];
