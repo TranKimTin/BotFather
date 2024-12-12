@@ -70,6 +70,14 @@ expr
     | min_close                 # iMinClose
     | min_rsi                   # iMinRSI
     | max_rsi                   # iMaxRSI  
+    | min_change                # iMinChange
+    | max_change                # iMaxChange
+    | min_changeP               # iMinChangeP
+    | max_changeP               # iMaxChangeP
+    | min_ampl                  # iMinAmpl
+    | max_ampl                  # iMaxAmpl
+    | min_amplP                 # iMinAmplP
+    | max_amplP                 # iMaxAmplP
     ;
 
 broker: 'broker' '(' ')';
@@ -129,6 +137,14 @@ min_low: 'min_low' '(' INT (',' INT)? ')';
 min_close: 'min_close' '(' INT (',' INT)? ')';
 min_rsi: 'min_rsi' '(' INT ',' INT (',' INT)? ')';
 max_rsi: 'max_rsi' '(' INT ',' INT (',' INT)? ')';
+min_change: 'min_change' '(' INT (',' INT)? ')';
+max_change: 'max_change' '(' INT (',' INT)? ')';
+min_changeP: 'min_change%' '(' INT (',' INT)? ')';
+max_changeP: 'max_change%' '(' INT (',' INT)? ')';
+min_ampl: 'min_ampl' '(' INT (',' INT)? ')';
+max_ampl: 'max_ampl' '(' INT (',' INT)? ')';
+min_amplP: 'min_ampl%' '(' INT (',' INT)? ')';
+max_amplP: 'max_ampl%' '(' INT (',' INT)? ')';
 
 comparisonOp
     : '>'

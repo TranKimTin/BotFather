@@ -1,7 +1,7 @@
 import * as antlr from "antlr4ng";
 import { BaseErrorListener, CharStream, CommonTokenStream, RecognitionException, Recognizer, Token } from 'antlr4ng';
 import { ExprLexer } from './generated/ExprLexer';
-import { ABSContext, AddSubContext, AmplContext, AmplPContext, Avg_amplContext, Avg_amplPContext, Avg_closeContext, Avg_highContext, Avg_lowContext, Avg_openContext, Bb_lowerContext, Bb_middleContext, Bb_upperContext, Bearish_engulfingContext, Bearish_hammerContext, BearishContext, BrokerContext, Bull_bear_listContext, Bullish_engulfingContext, Bullish_hammerContext, BullishContext, ChangeContext, ChangePContext, CloseContext, ComparisonContext, DojiContext, EmaContext, ExprParser, FloatContext, HighContext, HourContext, IAvgOpenContext, IntContext, IRSIContext, LowContext, Lower_shadowContext, Lower_shadowPContext, Macd_histogramContext, Macd_n_dinhContext, Macd_signalContext, Macd_slopeContext, Macd_valueContext, MaContext, MarsiContext, Max_closeContext, Max_highContext, Max_lowContext, Max_openContext, Max_rsiContext, MAXContext, Min_closeContext, Min_highContext, Min_lowContext, Min_openContext, Min_rsiContext, MINContext, MinuteContext, MulDivContext, NegativeContext, NumberContext, OpenContext, ParensContext, PositiveContext, Rsi_phan_kiContext, Rsi_slopeContext, RsiContext, StringContext, SymbolContext, TimeframeContext, Upper_shadowContext, Upper_shadowPContext, Volume24h_in_usdContext, VolumeContext } from './generated/ExprParser';
+import { ABSContext, AddSubContext, AmplContext, AmplPContext, Avg_amplContext, Avg_amplPContext, Avg_closeContext, Avg_highContext, Avg_lowContext, Avg_openContext, Bb_lowerContext, Bb_middleContext, Bb_upperContext, Bearish_engulfingContext, Bearish_hammerContext, BearishContext, BrokerContext, Bull_bear_listContext, Bullish_engulfingContext, Bullish_hammerContext, BullishContext, ChangeContext, ChangePContext, CloseContext, ComparisonContext, DojiContext, EmaContext, ExprParser, FloatContext, HighContext, HourContext, IAvgOpenContext, IntContext, IRSIContext, LowContext, Lower_shadowContext, Lower_shadowPContext, Macd_histogramContext, Macd_n_dinhContext, Macd_signalContext, Macd_slopeContext, Macd_valueContext, MaContext, MarsiContext, Max_amplContext, Max_amplPContext, Max_changeContext, Max_changePContext, Max_closeContext, Max_highContext, Max_lowContext, Max_openContext, Max_rsiContext, MAXContext, Min_amplContext, Min_amplPContext, Min_changeContext, Min_changePContext, Min_closeContext, Min_highContext, Min_lowContext, Min_openContext, Min_rsiContext, MINContext, MinuteContext, MulDivContext, NegativeContext, NumberContext, OpenContext, ParensContext, PositiveContext, Rsi_phan_kiContext, Rsi_slopeContext, RsiContext, StringContext, SymbolContext, TimeframeContext, Upper_shadowContext, Upper_shadowPContext, Volume24h_in_usdContext, VolumeContext } from './generated/ExprParser';
 import { ExprVisitor } from './generated/ExprVisitor';
 import * as util from '../common/util';
 import moment from "moment";
@@ -911,6 +911,109 @@ export class Expr extends ExprVisitor<any> {
         let max = RSIs[shift];
         for (let i = 1; i < depth; i++) {
             max = Math.max(max, RSIs[shift + i]);
+        }
+        return max;
+    };
+
+    visitMin_change = (ctx: Min_changeContext) => {
+        const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
+        const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
+        if (shift + period >= this.data.length) throw `min_change out of range. length = ${this.data.length}`;
+
+        let min = this.data[shift].close - this.data[shift].open;
+        for (let i = 1; i < period; i++) {
+            const change = this.data[shift + i].close - this.data[shift + i].open;
+            min = Math.min(min, change);
+        }
+        return min;
+    };
+    visitMax_change = (ctx: Max_changeContext) => {
+        const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
+        const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
+        if (shift + period >= this.data.length) throw `max_change out of range. length = ${this.data.length}`;
+
+        let max = this.data[shift].close - this.data[shift].open;
+        for (let i = 1; i < period; i++) {
+            const change = this.data[shift + i].close - this.data[shift + i].open;
+            max = Math.max(max, change);
+        }
+        return max;
+    };
+
+    visitMin_changeP = (ctx: Min_changePContext) => {
+        const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
+        const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
+        if (shift + period >= this.data.length) throw `min_changeP out of range. length = ${this.data.length}`;
+
+        let min = (this.data[shift].close - this.data[shift].open) / this.data[shift].open * 100;
+        for (let i = 1; i < period; i++) {
+            const change = (this.data[shift + i].close - this.data[shift + i].open) / this.data[shift + i].open * 100;
+            min = Math.min(min, change);
+        }
+        return min;
+    };
+
+    visitMax_changeP = (ctx: Max_changePContext) => {
+        const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
+        const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
+        if (shift + period >= this.data.length) throw `max_changeP out of range. length = ${this.data.length}`;
+
+        let max = (this.data[shift].close - this.data[shift].open) / this.data[shift].open * 100;
+        for (let i = 1; i < period; i++) {
+            const change = (this.data[shift + i].close - this.data[shift + i].open) / this.data[shift + i].open * 100;
+            max = Math.max(max, change);
+        }
+        return max;
+    };
+
+    visitMin_ampl = (ctx: Min_amplContext) => {
+        const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
+        const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
+        if (shift + period >= this.data.length) throw `min_ampl out of range. length = ${this.data.length}`;
+
+        let min = this.data[shift].high - this.data[shift].low;
+        for (let i = 1; i < period; i++) {
+            const ampl = this.data[shift + i].high - this.data[shift + i].low;
+            min = Math.min(min, ampl);
+        }
+        return min;
+    };
+
+    visitMax_ampl = (ctx: Max_amplContext) => {
+        const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
+        const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
+        if (shift + period >= this.data.length) throw `max_ampl out of range. length = ${this.data.length}`;
+
+        let max = this.data[shift].high - this.data[shift].low;
+        for (let i = 1; i < period; i++) {
+            const ampl = this.data[shift + i].high - this.data[shift + i].low;
+            max = Math.max(max, ampl);
+        }
+        return max;
+    };
+
+    visitMin_amplP = (ctx: Min_amplPContext) => {
+        const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
+        const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
+        if (shift + period >= this.data.length) throw `min_amplP out of range. length = ${this.data.length}`;
+
+        let min = (this.data[shift].high - this.data[shift].low) / this.data[shift].open * 100;
+        for (let i = 1; i < period; i++) {
+            const ampl = (this.data[shift + i].high - this.data[shift + i].low) / this.data[shift + i].open * 100;
+            min = Math.min(min, ampl);
+        }
+        return min;
+    };
+
+    visitMax_amplP = (ctx: Max_amplPContext) => {
+        const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
+        const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
+        if (shift + period >= this.data.length) throw `max_amplP out of range. length = ${this.data.length}`;
+
+        let max = (this.data[shift].high - this.data[shift].low) / this.data[shift].open * 100;
+        for (let i = 1; i < period; i++) {
+            const ampl = (this.data[shift + i].high - this.data[shift + i].low) / this.data[shift + i].open * 100;
+            max = Math.max(max, ampl);
         }
         return max;
     };
