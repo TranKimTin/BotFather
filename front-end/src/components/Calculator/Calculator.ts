@@ -3,10 +3,10 @@ import * as axios from '../../axios/axios';
 import * as Toast from '../../toast/toast';
 import Button from 'primevue/button';
 import Select from 'primevue/select';
-import CodeMirror from '../ExprInput/ExprInput.vue';
+import ExprInput from '../ExprInput/ExprInput.vue';
 
 export default defineComponent({
-    components: { Select, Button, CodeMirror },
+    components: { Select, Button, ExprInput },
     setup() {
         Toast.showInfo("Xin chào");
 

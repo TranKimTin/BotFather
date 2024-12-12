@@ -11,7 +11,7 @@
 
         <label for="expr" class="font-semibold">Biểu thức</label>
         <!-- <InputText type="text" v-model="r_expr" id="expr" placeholder="Nhập biểu thức" /> -->
-        <CodeMirror v-model="r_expr" id="expr"/>
+        <ExprInput v-model="r_expr" id="expr"/>
 
 
         <Button type="button" label="Tính giá trị" severity="secondary" @click="calculate"></Button>
