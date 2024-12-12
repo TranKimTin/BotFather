@@ -140,7 +140,8 @@ export async function getBinanceSymbolList() {
     return data.symbols
         .filter((item: { status: string }) => item.status == 'TRADING')
         .map((item: { symbol: any; }) => item.symbol)
-        .filter(item => item.endsWith('USDT'));
+        .filter(item => item.endsWith('USDT'))
+        .filter(item => !['USDCUSDT', 'TUSDUSDT', 'DAIUSDT'].includes(item));
 }
 
 export async function getBinanceFutureSymbolList() {
@@ -151,7 +152,8 @@ export async function getBinanceFutureSymbolList() {
     return data.symbols
         .filter((item: { status: string }) => item.status == 'TRADING')
         .map((item: { symbol: any; }) => item.symbol)
-        .filter(item => item.endsWith('USDT'));
+        .filter(item => item.endsWith('USDT'))
+        .filter(item => !['USDCUSDT', 'TUSDUSDT', 'DAIUSDT'].includes(item));
 }
 
 export async function getBybitSymbolList() {
@@ -168,7 +170,8 @@ export async function getBybitSymbolList() {
     return data.result.list
         .filter(item => +item.volume24h > 0)
         .map((item: { symbol: string; }) => item.symbol)
-        .filter(item => item.endsWith('USDT'));
+        .filter(item => item.endsWith('USDT'))
+        .filter(item => !['USDCUSDT', 'TUSDUSDT', 'DAIUSDT'].includes(item));
 }
 
 export async function getBybitFutureSymbolList() {
@@ -189,7 +192,8 @@ export async function getBybitFutureSymbolList() {
     return data.result.list
         .filter(item => +item.volume24h > 0)
         .map((item: { symbol: string; }) => item.symbol)
-        .filter(item => item.endsWith('USDT'));
+        .filter(item => item.endsWith('USDT'))
+        .filter(item => !['USDCUSDT', 'TUSDUSDT', 'DAIUSDT'].includes(item));
 }
 
 export async function getOkxSymbolList() {
@@ -199,6 +203,7 @@ export async function getOkxSymbolList() {
     const data = await res.data as { data: Array<{ baseCcy: string, quoteCcy: string, instId: string }> };
     return data.data
         .filter(item => item.quoteCcy === 'USDT')
+        .filter(item => !['USDC', 'TUSD', 'BUSD', 'DAI'].includes(item.baseCcy))
         .map((item) => item.instId);
 }
 
