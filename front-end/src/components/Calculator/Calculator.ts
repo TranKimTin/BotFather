@@ -4,9 +4,10 @@ import * as Toast from '../../toast/toast';
 import Button from 'primevue/button';
 import Select from 'primevue/select';
 import ExprInput from '../ExprInput/ExprInput.vue';
+import InputText from 'primevue/inputtext';
 
 export default defineComponent({
-    components: { Select, Button, ExprInput },
+    components: { Select, Button, InputText, ExprInput },
     setup() {
         Toast.showInfo("Xin chào");
 
