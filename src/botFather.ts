@@ -147,8 +147,8 @@ export class BotFather {
         });
 
         for (const { client, name } of this.socketList) {
+            console.log('update_symbol_listener', { name, symbolListener });
             client.emit('update_symbol_listener', symbolListener);
-            console.log('update_symbol_listener', { name });
         }
     }
 
