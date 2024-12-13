@@ -144,11 +144,11 @@ export class BotFather {
         const symbolListener: Array<SymbolListener> = [...new Set(list)].map(item => {
             const [symbol, broker, timeframe] = item.split(':');
             return { symbol, broker, timeframe };
-        }).slice(0,10);
+        });
 
         for (const { client, name } of this.socketList) {
-            console.log('update_symbol_listener', { name, symbolListener });
             client.emit('update_symbol_listener', symbolListener);
+            console.log('update_symbol_listener', { name });
         }
     }
 

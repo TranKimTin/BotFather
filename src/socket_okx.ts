@@ -233,7 +233,8 @@ app.get('/api/getData', (req: any, res) => {
 
 const io = new Server(server, {
     pingInterval: 25000,
-    pingTimeout: 60000
+    pingTimeout: 60000,
+    maxHttpBufferSize: 200 * 1024 * 1024 //100MB
 });
 const port = 83;
 let symbolListener: { [key: string]: boolean } = {};
