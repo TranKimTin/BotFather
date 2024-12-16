@@ -70,14 +70,7 @@ export default defineComponent({
         const r_brokerSelected = ref<Array<string>>([...brokers]);
         const r_balanceData = ref<Array<PropData>>([]);
 
-        watch(r_timeframesSelected, (newValue) => {
-            newValue.sort((a, b) => timeframes.indexOf(a) - timeframes.indexOf(b));
-            loadData(true);
-        });
-        watch(r_brokerSelected, (newValue) => {
-            newValue.sort((a, b) => brokers.indexOf(a) - brokers.indexOf(b));
-            loadData(true);
-        });
+        let firstLoad = true;
 
         const confirmation = useConfirm();
 
@@ -207,6 +200,25 @@ export default defineComponent({
                     r_cntOpening.value = cntOpening;
                     r_isLoading.value = false;
                     r_balanceData.value = balanceData;
+                    if (firstLoad) {
+                        firstLoad = false;
+                        const timeframeSelected = [...new Set(sortedData.map(order => order.timeframe))];
+                        timeframeSelected.sort((a, b) => brokers.indexOf(a) - brokers.indexOf(b));
+                        r_timeframesSelected.value = timeframeSelected;
+
+                        const brokerSelected = [...new Set(sortedData.map(order => order.broker))];
+                        brokerSelected.sort((a, b) => brokers.indexOf(a) - brokers.indexOf(b));
+                        r_brokerSelected.value = brokerSelected;
+
+                        watch(r_timeframesSelected, (newValue) => {
+                            newValue.sort((a, b) => timeframes.indexOf(a) - timeframes.indexOf(b));
+                            loadData(true);
+                        });
+                        watch(r_brokerSelected, (newValue) => {
+                            newValue.sort((a, b) => brokers.indexOf(a) - brokers.indexOf(b));
+                            loadData(true);
+                        });
+                    }
 
                     const step = Math.max(10, Math.ceil(argsEquity.length / 30));
                     for (let idx = 0; idx < argsEquity.length; idx += step) {
