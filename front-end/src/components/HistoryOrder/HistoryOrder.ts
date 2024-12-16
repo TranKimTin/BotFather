@@ -203,7 +203,7 @@ export default defineComponent({
                     if (firstLoad) {
                         firstLoad = false;
                         const timeframeSelected = [...new Set(sortedData.map(order => order.timeframe))];
-                        timeframeSelected.sort((a, b) => brokers.indexOf(a) - brokers.indexOf(b));
+                        timeframeSelected.sort((a, b) => timeframes.indexOf(a) - timeframes.indexOf(b));
                         r_timeframesSelected.value = timeframeSelected;
 
                         const brokerSelected = [...new Set(sortedData.map(order => order.broker))];
