@@ -10,3 +10,4 @@
 - fix bug telegram message dài quá
 - interval
 - custom code
+- đánh lệnh thật
