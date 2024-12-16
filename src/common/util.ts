@@ -5,7 +5,7 @@ import * as ccxt from 'ccxt'
 import * as indicator from 'technicalindicators';
 import _ from 'lodash';
 import axios from 'axios';
-import { RateData } from './Interface';
+import { FundingRate, RateData } from './Interface';
 import pm2 from 'pm2';
 import dotenv from 'dotenv';
 
@@ -948,4 +948,22 @@ export function getSocketURL(broker: string) {
     };
     const url = `${hostSocketServer}:${ports[broker]}`;
     return url;
+}
+
+export async function getBinanceFundingRate(symbol: string, limit: number, page: number = 1): Promise<Array<FundingRate>> {
+    const url = `https://www.binance.com/bapi/futures/v1/public/future/common/get-funding-rate-history`;
+    const body = {
+        symbol,
+        page,
+        rows: limit
+    }
+    const res = await axios.post(url, body);
+    const data: Array<FundingRate> = res.data.data;
+
+    for (let item of data) {
+        item.lastFundingRate = +item.lastFundingRate;
+        item.markPrice = +item.markPrice;
+    }
+
+    return data;
 }

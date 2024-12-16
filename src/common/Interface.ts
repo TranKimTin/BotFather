@@ -173,3 +173,11 @@ export enum NODE_TYPE {
     CLOSE_ALL_ORDER = 'closeAllOrder',
     CLOSE_ALL_POSITION = 'closeAllPosition'
 }
+
+export interface FundingRate{
+    calcTime: number,
+    symbol: string,
+    fundingIntervalHours: number,
+    lastFundingRate: number,
+    markPrice: number
+}
