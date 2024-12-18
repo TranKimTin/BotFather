@@ -104,7 +104,7 @@ export default defineComponent({
             {
                 label: 'Lưu cấu hình bot',
                 icon: 'pi pi-save',
-                shortcut: 'Ctrl + s',
+                shortcut: 'Ctrl + S',
                 command: saveBot
             },
             {
