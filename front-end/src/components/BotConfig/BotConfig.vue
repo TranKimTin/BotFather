@@ -1,6 +1,6 @@
 <template>
     <div class="alwaysOnTop">
-        <Dialog v-model:visible="r_visible" modal :header="r_type" :style="{ width: '70%' }"  :closeOnEscape="false" >
+        <Dialog v-model:visible="r_visible" modal :header="r_type" :style="{ width: '70%' }" :closeOnEscape="false">
             <div class="grid grid-cols-[1fr_5fr] gap-2 p-2">
                 <label for="type" class="font-semibold">Loại</label>
                 <Select v-model="r_currentNode.type" filter :options="nodeTypes" optionLabel="name" optionValue="value"
@@ -145,24 +145,29 @@
                     class="w-full md:w-80 form-control" :virtualScrollerOptions="{ itemSize: 30 }" />
             </div>
         </div>
-
-        <div class="flex justify-center">
-            <button class="btn btn-outline-danger mr-1" @click="removeBot">Xóa bot</button>
-            <button class="btn btn-outline-primary mr-1" @click="newNode">Thêm nút mới</button>
-            <button class="btn btn-outline-primary mr-1" @click="drawModeOn">Chế độ vẽ cạnh</button>
-            <button class="btn btn-outline-primary mr-1" @click="drawModeOff">Chế độ sắp xếp nút</button>
-            <button class="btn btn-outline-primary mr-1" @click="updateNode">Sửa nút đã chọn</button>
-            <button class="btn btn-outline-danger mr-1" @click="removeNode">Xóa nút đã chọn</button>
-            <button class="btn btn-outline-success mr-1" @click="saveBot">Lưu cấu hình bot</button>
-            <a :href="`/history/${r_botName}`" target="_blank">
-                <button class="btn btn-outline-success mr-1">Xem lịch sử lệnh</button>
-            </a>
-            <router-link :to="{ path: `/calculator` }">
-                <button class="btn btn-outline-success mr-1">Máy tính</button>
-            </router-link>
-        </div>
     </div>
-    <div id="cy"></div>
+    <div id="cy" @contextmenu="openContextMenu"></div>
+    <ContextMenu ref="menu" :model="items">
+        <template #item="{ item, props }">
+
+            <router-link v-if="item.route" v-slot="{ href, navigate }" :to="item.route()" custom>
+                <a v-ripple :href="href" v-bind="props.action" @click="navigate" :target="item.target">
+                    <span :class="item.icon" />
+                    <span class="ml-2">{{ item.label }}</span>
+                    <span v-if="item.shortcut"
+                        class="ml-auto border border-surface rounded bg-emphasis text-muted-color text-xs p-1">{{
+                            item.shortcut }}</span>
+                </a>
+            </router-link>
+            <a v-else v-ripple class="flex items-center" v-bind="props.action">
+                <span :class="item.icon" />
+                <span class="ml-2">{{ item.label }}</span>
+                <span v-if="item.shortcut"
+                    class="ml-auto border border-surface rounded bg-emphasis text-muted-color text-xs p-1">{{
+                        item.shortcut }}</span>
+            </a>
+        </template>
+    </ContextMenu>
 </template>
 
 <script lang="ts" src="./BotConfig.ts"></script>

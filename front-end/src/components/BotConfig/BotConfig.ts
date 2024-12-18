@@ -12,6 +12,8 @@ import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import Select from 'primevue/select';
 import ExprInput from '../ExprInput/ExprInput.vue';
+import ContextMenu from 'primevue/contextmenu';
+import { useRouter } from 'vue-router';
 
 cytoscape.use(edgehandles);
 
@@ -40,7 +42,7 @@ interface NodeCopy {
 }
 
 export default defineComponent({
-    components: { MultiSelect, AutoComplete, Button, Dialog, InputText, Select, ExprInput },
+    components: { MultiSelect, AutoComplete, Button, Dialog, InputText, Select, ExprInput, ContextMenu },
     setup() {
         Toast.showInfo("Xin chào");
         const r_botName = ref<string>('');
@@ -53,6 +55,79 @@ export default defineComponent({
         const r_visible = ref<boolean>(false);
         const r_currentNode = ref<NodeData>({ id: '', type: '' });
         const r_type = ref<string>('');
+        const menu = ref();
+        const items = ref([
+            {
+                label: 'Thêm nút mới',
+                icon: 'pi pi-plus',
+                shortcut: 'Ctrl + N',
+                command: newNode
+            },
+            {
+                label: 'Xóa nút',
+                icon: 'pi pi-trash',
+                shortcut: 'Delete',
+                command: () => {
+                    console.log('paste')
+                }
+            },
+            {
+                label: 'sửa nút',
+                icon: 'pi pi-pen-to-square',
+                shortcut: 'Ctr + U',
+                command: updateNode
+            },
+            {
+                label: 'Vẽ cạnh',
+                icon: 'pi pi-pencil',
+                shortcut: 'Ctrl + E',
+                command: drawModeOn
+            },
+            {
+                label: 'Sắp xếp nút',
+                icon: 'pi pi-wrench',
+                shortcut: 'Ctrl + R',
+                command: drawModeOff
+            },
+            {
+                label: 'Copy nút',
+                icon: 'pi pi-copy',
+                shortcut: 'Ctrl + C',
+                command: copyNode
+            },
+            {
+                label: 'Paste nút',
+                icon: 'pi pi-clipboard',
+                shortcut: 'Ctrl + V',
+                command: pasteNode
+            },
+            {
+                label: 'Lưu cấu hình bot',
+                icon: 'pi pi-save',
+                shortcut: 'Ctrl + s',
+                command: saveBot
+            },
+            {
+                label: 'Xem lịch sử lệnh',
+                icon: 'pi pi-history',
+                shortcut: 'Ctrl + H',
+                route: () => `/history/a${r_botName.value}`,
+                target: '_blank'
+            },
+            {
+                label: 'Máy tính',
+                icon: 'pi pi-calculator',
+                shortcut: 'Ctrl + M',
+                route: () => `/calculator`,
+                target: '_self'
+            },
+            {
+                label: 'Xóa bot',
+                icon: 'pi pi-trash',
+                shortcut: 'Ctrl + Delete',
+                command: removeBot
+            },
+        ]);
 
         const brokerList = ['binance', 'okx', 'bybit', 'binance_future', 'bybit_future'];
         const nodeTypes = [
@@ -77,6 +152,8 @@ export default defineComponent({
         let allBotList: Array<string> = [];
         let cy: Core;
         let eh: edgehandles.EdgeHandlesInstance;
+
+        const router = useRouter();
 
         const defaultTree = {
             style: [
@@ -383,80 +460,118 @@ export default defineComponent({
             highlightedElements.remove();
         }
 
+        function copyNode() {
+            const nodeSelected = cy.elements('.selected').filter(item => item.is('node'));
+            if (nodeSelected.length == 0) {
+                Toast.showWarning('Chưa chọn nút nào');
+                return;
+            };
+
+            let offsetY = Infinity;
+
+            function getNodeData(id: string): NodeCopy {
+                const node = cy.getElementById(id);
+
+                const nodeCopy: NodeCopy = { data: { ...node.data() }, position: { ...node.position() }, next: [] };
+                offsetY = Math.min(offsetY, nodeCopy.position.y);
+                const connectedEdge = node.connectedEdges();
+                for (const edge of connectedEdge) {
+                    const { source, target } = edge.data();
+                    if (source === id) {
+                        nodeCopy.next.push(getNodeData(target));
+                    }
+                }
+                return nodeCopy;
+            };
+
+            const node = nodeSelected[0];
+            const id = node.data('id');
+
+            const nodeCopy: NodeCopy = getNodeData(id);
+            if (offsetY === Infinity) offsetY = 0;
+
+            Cookies.set("NodeCopy", JSON.stringify(nodeCopy));
+            Cookies.set("offsetY", offsetY.toString());
+
+            console.log(nodeCopy)
+        }
+
+        function pasteNode() {
+            const stringObject = Cookies.get("NodeCopy");
+            const offsetY = parseInt(Cookies.get("offsetY") || '0');
+            console.log(stringObject)
+            if (!stringObject) {
+                Toast.showError('Chưa copy');
+                return;
+            }
+
+            const nodeCopy: NodeCopy = JSON.parse(stringObject);
+            const offset = findFreePosition();
+            offset.y += offsetY;
+
+            let newID = new Date().getTime();
+
+            function addNode(node: NodeCopy, parrentID?: string) {
+                node.data.id = (newID++).toString();
+                cy.add({
+                    group: 'nodes',
+                    data: node.data,
+                    position: { x: node.position.x, y: node.position.y + offset.y }
+                });
+                if (parrentID) {
+                    cy.add({
+                        group: 'edges',
+                        data: { source: parrentID, target: node.data.id },
+                    });
+                }
+                for (const nodeNext of node.next) {
+                    addNode(nodeNext, node.data.id);
+                }
+            }
+
+            addNode(nodeCopy);
+            Toast.showSuccess('Paste');
+        }
+
         document.addEventListener('keydown', (event) => {
-            if (!r_visible.value && event.key === 'Delete') {
+            if (r_visible.value) return;
+            if (!event.ctrlKey && event.key === 'Delete') {
                 removeNode();
             }
             else if (event.ctrlKey && event.key.toLowerCase() === 'c') {
-                const nodeSelected = cy.elements('.selected').filter(item => item.is('node'));
-                if (nodeSelected.length == 0) {
-                    Toast.showWarning('Chưa chọn nút nào');
-                    return;
-                };
-
-                let offsetY = Infinity;
-
-                function getNodeData(id: string): NodeCopy {
-                    const node = cy.getElementById(id);
-
-                    const nodeCopy: NodeCopy = { data: { ...node.data() }, position: { ...node.position() }, next: [] };
-                    offsetY = Math.min(offsetY, nodeCopy.position.y);
-                    const connectedEdge = node.connectedEdges();
-                    for (const edge of connectedEdge) {
-                        const { source, target } = edge.data();
-                        if (source === id) {
-                            nodeCopy.next.push(getNodeData(target));
-                        }
-                    }
-                    return nodeCopy;
-                };
-
-                const node = nodeSelected[0];
-                const id = node.data('id');
-
-                const nodeCopy: NodeCopy = getNodeData(id);
-                if (offsetY === Infinity) offsetY = 0;
-
-                Cookies.set("NodeCopy", JSON.stringify(nodeCopy));
-                Cookies.set("offsetY", offsetY.toString());
-
-                console.log(nodeCopy)
+                copyNode();
             }
             else if (event.ctrlKey && event.key.toLowerCase() === 'v') {
-                const stringObject = Cookies.get("NodeCopy");
-                const offsetY = parseInt(Cookies.get("offsetY") || '0');
-                console.log(stringObject)
-                if (!stringObject) {
-                    Toast.showError('Chưa copy');
-                    return;
-                }
-
-                const nodeCopy: NodeCopy = JSON.parse(stringObject);
-                const offset = findFreePosition();
-                offset.y += offsetY;
-
-                let newID = new Date().getTime();
-
-                function addNode(node: NodeCopy, parrentID?: string) {
-                    node.data.id = (newID++).toString();
-                    cy.add({
-                        group: 'nodes',
-                        data: node.data,
-                        position: { x: node.position.x, y: node.position.y + offset.y }
-                    });
-                    if (parrentID) {
-                        cy.add({
-                            group: 'edges',
-                            data: { source: parrentID, target: node.data.id },
-                        });
-                    }
-                    for (const nodeNext of node.next) {
-                        addNode(nodeNext, node.data.id);
-                    }
-                }
-
-                addNode(nodeCopy);
-                Toast.showSuccess('Paste');
+                pasteNode();
+            }
+            else if (event.ctrlKey && event.key.toLowerCase() === 'a') {
+                event.preventDefault();
+                newNode();
+            }
+            else if (event.ctrlKey && event.key.toLowerCase() === 'e') {
+                event.preventDefault();
+                drawModeOn();
+            }
+            else if (event.ctrlKey && event.key.toLowerCase() === 'r') {
+                event.preventDefault();
+                drawModeOff();
+            }
+            else if (event.ctrlKey && event.key.toLowerCase() === 'u') {
+                event.preventDefault();
+                updateNode();
+            }
+            else if (event.ctrlKey && event.key.toLowerCase() === 's') {
+                event.preventDefault();
+                saveBot();
+            }
+            else if (event.ctrlKey && event.key.toLowerCase() === 'h') {
+                window.open(`/history/${r_botName.value}`);
+            }
+            else if (event.ctrlKey && event.key.toLowerCase() === 'm') {
+                router.push('/calculator');
+            }
+            else if (event.ctrlKey && event.key.toLowerCase() === 'delete') {
+                removeBot();
             }
         });
 
@@ -597,7 +712,31 @@ export default defineComponent({
             catch (err: any) {
                 Toast.showError(err.message);
             }
+        }
 
+        function isTextSelected() {
+            const selection = window.getSelection();
+            if (!selection) return true;
+            if (selection.type === 'Range' && selection.toString().length > 0) {
+                return true;
+            }
+            return false;
+        }
+
+        function clearTextSelection() {
+            const selection = window.getSelection();
+            if (selection) {
+                selection.removeAllRanges();
+            }
+        }
+
+        function openContextMenu(event: any) {
+            if (r_visible.value) return;
+            if (isTextSelected()) {
+                clearTextSelection();
+                return;
+            }
+            menu.value.show(event);
         }
 
         onMounted(async () => {
@@ -665,6 +804,8 @@ export default defineComponent({
             unitTP,
             unitsVulume,
             unitExpiredTime,
+            menu,
+            items,
             getBotInfo,
             toogleAllSymbol,
             filterDuplicate,
@@ -676,7 +817,8 @@ export default defineComponent({
             removeBot,
             newNode,
             updateNode,
-            applyNode
+            applyNode,
+            openContextMenu
         };
     }
 });
