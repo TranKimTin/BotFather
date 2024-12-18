@@ -111,7 +111,7 @@ export default defineComponent({
                 label: 'Xem lịch sử lệnh',
                 icon: 'pi pi-history',
                 shortcut: 'Ctrl + H',
-                route: () => `/history/a${r_botName.value}`,
+                route: () => `/history/${r_botName.value}`,
                 target: '_blank'
             },
             {
