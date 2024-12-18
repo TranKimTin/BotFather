@@ -60,7 +60,7 @@ export default defineComponent({
             {
                 label: 'Thêm nút mới',
                 icon: 'pi pi-plus',
-                shortcut: 'Ctrl + N',
+                shortcut: 'Ctrl + A',
                 command: newNode
             },
             {
