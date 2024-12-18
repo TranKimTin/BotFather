@@ -383,44 +383,48 @@ export default defineComponent({
             highlightedElements.remove();
         }
 
-
-        function getNodeData(id: string): NodeCopy {
-            const node = cy.getElementById(id);
-
-            const nodeCopy: NodeCopy = { data: { ...node.data() }, position: { ...node.position() }, next: [] };
-
-            const connectedEdge = node.connectedEdges();
-            for (const edge of connectedEdge) {
-                const { source, target } = edge.data();
-                if (source === id) {
-                    nodeCopy.next.push(getNodeData(target));
-                }
-            }
-            return nodeCopy;
-        };
-
         document.addEventListener('keydown', (event) => {
             if (!r_visible.value && event.key === 'Delete') {
                 removeNode();
             }
-            if (event.ctrlKey && event.key.toLowerCase() === 'c') {
+            else if (event.ctrlKey && event.key.toLowerCase() === 'c') {
                 const nodeSelected = cy.elements('.selected').filter(item => item.is('node'));
                 if (nodeSelected.length == 0) {
                     Toast.showWarning('Chưa chọn nút nào');
                     return;
                 };
 
+                let offsetY = Infinity;
+
+                function getNodeData(id: string): NodeCopy {
+                    const node = cy.getElementById(id);
+
+                    const nodeCopy: NodeCopy = { data: { ...node.data() }, position: { ...node.position() }, next: [] };
+                    offsetY = Math.min(offsetY, nodeCopy.position.y);
+                    const connectedEdge = node.connectedEdges();
+                    for (const edge of connectedEdge) {
+                        const { source, target } = edge.data();
+                        if (source === id) {
+                            nodeCopy.next.push(getNodeData(target));
+                        }
+                    }
+                    return nodeCopy;
+                };
+
                 const node = nodeSelected[0];
                 const id = node.data('id');
 
                 const nodeCopy: NodeCopy = getNodeData(id);
-
-                console.log(nodeCopy)
+                if (offsetY === Infinity) offsetY = 0;
 
                 Cookies.set("NodeCopy", JSON.stringify(nodeCopy));
+                Cookies.set("offsetY", offsetY.toString());
+
+                console.log(nodeCopy)
             }
-            if (event.ctrlKey && event.key.toLowerCase() === 'v') {
+            else if (event.ctrlKey && event.key.toLowerCase() === 'v') {
                 const stringObject = Cookies.get("NodeCopy");
+                const offsetY = parseInt(Cookies.get("offsetY") || '0');
                 console.log(stringObject)
                 if (!stringObject) {
                     Toast.showError('Chưa copy');
@@ -428,13 +432,31 @@ export default defineComponent({
                 }
 
                 const nodeCopy: NodeCopy = JSON.parse(stringObject);
-                let newID = new Date().getTime();
-                const rootPosition = findFreePosition();
-                
-                function addNode() {
+                const offset = findFreePosition();
+                offset.y += offsetY;
 
+                let newID = new Date().getTime();
+
+                function addNode(node: NodeCopy, parrentID?: string) {
+                    node.data.id = (newID++).toString();
+                    cy.add({
+                        group: 'nodes',
+                        data: node.data,
+                        position: { x: node.position.x, y: node.position.y + offset.y }
+                    });
+                    if (parrentID) {
+                        cy.add({
+                            group: 'edges',
+                            data: { source: parrentID, target: node.data.id },
+                        });
+                    }
+                    for (const nodeNext of node.next) {
+                        addNode(nodeNext, node.data.id);
+                    }
                 }
 
+                addNode(nodeCopy);
+                Toast.showSuccess('Paste');
             }
         });
 
