@@ -1,5 +1,3 @@
-- thêm nút copy node
-- ấn crl để vẽ node
 - tại tài khoản
 - đăng nhập
 - phân quyền, chỉ xem được bot mình tạo
