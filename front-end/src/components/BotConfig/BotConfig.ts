@@ -60,7 +60,7 @@ export default defineComponent({
             {
                 label: 'Thêm nút mới',
                 icon: 'pi pi-plus',
-                shortcut: 'Ctrl + A',
+                shortcut: 'Ctrl + B',
                 command: newNode
             },
             {
@@ -544,7 +544,7 @@ export default defineComponent({
             else if (event.ctrlKey && event.key.toLowerCase() === 'v') {
                 pasteNode();
             }
-            else if (event.ctrlKey && event.key.toLowerCase() === 'a') {
+            else if (event.ctrlKey && event.key.toLowerCase() === 'b') {
                 event.preventDefault();
                 newNode();
             }
