@@ -535,6 +535,7 @@ export default defineComponent({
 
         document.addEventListener('keydown', (event) => {
             if (r_visible.value) return;
+            if (isTextSelected()) return;
             if (!event.ctrlKey && event.key === 'Delete') {
                 removeNode();
             }
@@ -714,13 +715,20 @@ export default defineComponent({
             }
         }
 
+        function isInputFocused() {
+            const activeElement = document.activeElement;
+            if (activeElement === null) return false;
+            return activeElement.tagName === 'INPUT' ||
+                activeElement.tagName === 'TEXTAREA';
+        }
+
         function isTextSelected() {
             const selection = window.getSelection();
             if (!selection) return true;
             if (selection.type === 'Range' && selection.toString().length > 0) {
                 return true;
             }
-            return false;
+            return isInputFocused();
         }
 
         function clearTextSelection() {
