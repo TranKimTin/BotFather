@@ -33,6 +33,12 @@ interface NodeData {
     unitExpiredTime?: string
 }
 
+interface NodeCopy {
+    data: NodeData;
+    position: { x: number, y: number };
+    next: Array<NodeCopy>
+}
+
 export default defineComponent({
     components: { MultiSelect, AutoComplete, Button, Dialog, InputText, Select, ExprInput },
     setup() {
@@ -205,25 +211,11 @@ export default defineComponent({
         }
 
         function updateDisplay(node: NodeSingular) {
-            const id = node.data('id');
-            const value = node.data('value');
-            const type = node.data('type');
-            const volume = node.data('volume');
-            const stop = node.data('stop');
-            const entry = node.data('entry');
-            const tp = node.data('tp');
-            const sl = node.data('sl');
-            const expiredTime = node.data('expiredTime');
+            const data: NodeData = node.data();
 
-            const unitVolume = node.data('unitVolume');
-            const unitStop = node.data('unitStop');
-            const unitEntry = node.data('unitEntry');
-            const unitTP = node.data('unitTP');
-            const unitSL = node.data('unitSL');
-            const unitexpiredTime = node.data('unitexpiredTime');
+            const { type, volume, stop, entry, tp, sl, unitVolume, unitStop, unitEntry, unitTP, unitSL } = data;
 
-
-            const getUnit = (unit: string) => {
+            const getUnit = (unit?: string) => {
                 if (unit === 'price') return 'USD';
                 if (unit === 'percent') return '%';
                 if (unit === 'usd') return 'USD';
@@ -355,24 +347,20 @@ export default defineComponent({
             );
         }
 
-        function findFreePosition(x: number = 400, y: number = 300) {
-            const step = 50;
-            while (true) {
-                let isFree = true;
-                cy.nodes().forEach(node => {
-                    const pos = node.position();
-                    if (Math.abs(pos.x - x) < step && Math.abs(pos.y - y) < step) {
-                        isFree = false;
-                    }
-                });
+        function findFreePosition() {
+            let minX = Infinity;
+            let maxY = -Infinity;
 
-                if (isFree) {
-                    return { x, y };
-                }
+            cy.nodes().forEach(node => {
+                const pos = node.position();
+                minX = Math.min(minX, pos.x);
+                maxY = Math.max(maxY, pos.y);
+            });
 
-                x += step;
-                // y += step;
-            }
+            if (minX === Infinity) minX = 400;
+            if (maxY === -Infinity) maxY = 300;
+
+            return { x: minX, y: maxY + 100 };
         }
 
         function drawModeOn() {
@@ -395,10 +383,58 @@ export default defineComponent({
             highlightedElements.remove();
         }
 
+
+        function getNodeData(id: string): NodeCopy {
+            const node = cy.getElementById(id);
+
+            const nodeCopy: NodeCopy = { data: { ...node.data() }, position: { ...node.position() }, next: [] };
+
+            const connectedEdge = node.connectedEdges();
+            for (const edge of connectedEdge) {
+                const { source, target } = edge.data();
+                if (source === id) {
+                    nodeCopy.next.push(getNodeData(target));
+                }
+            }
+            return nodeCopy;
+        };
+
         document.addEventListener('keydown', (event) => {
-            if (r_visible.value) return;
-            if (event.key === 'Delete') {
+            if (!r_visible.value && event.key === 'Delete') {
                 removeNode();
+            }
+            if (event.ctrlKey && event.key.toLowerCase() === 'c') {
+                const nodeSelected = cy.elements('.selected').filter(item => item.is('node'));
+                if (nodeSelected.length == 0) {
+                    Toast.showWarning('Chưa chọn nút nào');
+                    return;
+                };
+
+                const node = nodeSelected[0];
+                const id = node.data('id');
+
+                const nodeCopy: NodeCopy = getNodeData(id);
+
+                console.log(nodeCopy)
+
+                Cookies.set("NodeCopy", JSON.stringify(nodeCopy));
+            }
+            if (event.ctrlKey && event.key.toLowerCase() === 'v') {
+                const stringObject = Cookies.get("NodeCopy");
+                console.log(stringObject)
+                if (!stringObject) {
+                    Toast.showError('Chưa copy');
+                    return;
+                }
+
+                const nodeCopy: NodeCopy = JSON.parse(stringObject);
+                let newID = new Date().getTime();
+                const rootPosition = findFreePosition();
+                
+                function addNode() {
+
+                }
+
             }
         });
 
@@ -496,23 +532,7 @@ export default defineComponent({
             r_visible.value = true;
 
             const node = nodeSelected[0];
-            const id = node.data('id');
-            const value = node.data('value');
-            const type = node.data('type');
-            const volume = node.data('volume');
-            const stop = node.data('stop');
-            const entry = node.data('entry');
-            const tp = node.data('tp');
-            const sl = node.data('sl');
-            const expiredTime = node.data('expiredTime')
-            const unitVolume = node.data('unitVolume');
-            const unitStop = node.data('unitStop');
-            const unitEntry = node.data('unitEntry');
-            const unitTP = node.data('unitTP');
-            const unitSL = node.data('unitSL');
-            const unitExpiredTime = node.data('unitExpiredTime');
-
-            r_currentNode.value = { id, value, type, volume, stop, entry, tp, sl, expiredTime, unitVolume, unitStop, unitTP, unitEntry, unitSL, unitExpiredTime };
+            r_currentNode.value = { ...node.data() };
         }
 
         async function applyNode() {
@@ -535,20 +555,8 @@ export default defineComponent({
                 }
                 else if (r_type.value == 'Cập nhật nút') {
                     const node = cy.getElementById(data.id);
-                    node.data('type', data.type);
-                    node.data('value', data.value);
-                    node.data('volume', data.volume);
-                    node.data('stop', data.stop);
-                    node.data('entry', data.entry);
-                    node.data('tp', data.tp);
-                    node.data('sl', data.sl);
-                    node.data('expiredTime', data.expiredTime);
-                    node.data('unitVolume', data.unitVolume);
-                    node.data('unitStop', data.unitStop);
-                    node.data('unitEntry', data.unitEntry);
-                    node.data('unitTP', data.unitTP);
-                    node.data('unitSL', data.unitSL);
-                    node.data('unitExpiredTime', data.unitExpiredTime);
+                    node.data({ ...data });
+
                     updateDisplay(node);
                 }
 
