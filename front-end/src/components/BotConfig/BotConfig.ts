@@ -485,6 +485,8 @@ export default defineComponent({
             Cookies.set("NodeCopy", JSON.stringify(nodeCopy));
             Cookies.set("offsetY", offsetY.toString());
 
+            Toast.showSuccess('Copy');
+
             console.log(nodeCopy)
         }
 
