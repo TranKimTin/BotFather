@@ -13,7 +13,6 @@ import InputText from 'primevue/inputtext';
 import Select from 'primevue/select';
 import ExprInput from '../ExprInput/ExprInput.vue';
 import ContextMenu from 'primevue/contextmenu';
-import { useRouter } from 'vue-router';
 
 cytoscape.use(edgehandles);
 
@@ -145,8 +144,6 @@ export default defineComponent({
         let cy: Core;
         let eh: edgehandles.EdgeHandlesInstance;
 
-        const router = useRouter();
-
         const defaultTree = {
             style: [
                 {
@@ -270,6 +267,9 @@ export default defineComponent({
         const confirmation = useConfirm();
         watch(r_timeframesSelected, (newValue) => {
             newValue.sort((a, b) => timeframes.indexOf(a) - timeframes.indexOf(b));
+        });
+        watch(r_botName, (newValue) => {
+            Cookies.set("botName", newValue);
         });
 
 

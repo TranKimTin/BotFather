@@ -225,7 +225,6 @@ export default defineComponent({
 
                         const args = argsEquity.slice(idx, idx + step);
                         const data = await axios.post('/getUnrealizedProfit', args);
-                        console.log({ idx, args, data })
 
                         if (data.length === args.length) {
                             for (let i = 0; i < data.length; i++) {
@@ -241,7 +240,6 @@ export default defineComponent({
                     const newData = [...r_balanceData.value];
 
                     if (lastTimeUpdated !== '' && newData.length > 0 && new Date(lastTimeUpdated).getTime() > new Date(newData[newData.length - 1].timestamp).getTime()) {
-                        console.log({ lastTimeUpdated });
                         newData.push({
                             timestamp: lastTimeUpdated,
                             balance: gain + loss - feeGain - feeLoss,

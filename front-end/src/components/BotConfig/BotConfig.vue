@@ -160,7 +160,7 @@
                 </a>
             </router-link>
             <a v-else v-ripple class="flex items-center" v-bind="props.action">
-                <span :class="item.icon" />
+                <span :class="item.icon" /> 
                 <span class="ml-2">{{ item.label }}</span>
                 <span v-if="item.shortcut"
                     class="ml-auto border border-surface rounded bg-emphasis text-muted-color text-xs p-1">{{
