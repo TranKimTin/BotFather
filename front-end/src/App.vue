@@ -55,7 +55,7 @@
 }
 
 .sidebar-collapsed {
-  width: 80px;
+  width: auto;
 }
 
 .sidebar-header {
