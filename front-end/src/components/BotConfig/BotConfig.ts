@@ -469,14 +469,12 @@ export default defineComponent({
             };
 
             let minY = Infinity;
-            let maxY = -Infinity;
 
             function getNodeData(id: string): NodeCopy {
                 const node = cy.getElementById(id);
 
                 const nodeCopy: NodeCopy = { data: { ...node.data() }, position: { ...node.position() }, next: [] };
                 minY = Math.min(minY, nodeCopy.position.y);
-                maxY = Math.max(maxY, nodeCopy.position.y);
 
                 const connectedEdge = node.connectedEdges();
                 for (const edge of connectedEdge) {
@@ -494,13 +492,10 @@ export default defineComponent({
             const nodeCopy: NodeCopy = getNodeData(id);
 
             if (minY === Infinity) minY = 0;
-            if (maxY === -Infinity) maxY = 0;
-            const offsetY = maxY - minY;
+            const offsetY = - minY;
 
             localStorage.setItem("NodeCopy", JSON.stringify(nodeCopy));
             localStorage.setItem("offsetY", offsetY.toString());
-            localStorage.setItem("minY", minY.toString());
-
 
             Toast.showSuccess('Copy');
 
@@ -509,8 +504,7 @@ export default defineComponent({
 
         function pasteNode() {
             const stringObject = localStorage.getItem("NodeCopy");
-            const offsetY = parseInt(localStorage.getItem("offsetY") || '0');
-            const minY = parseInt(localStorage.getItem("minY") || '0');
+            const offsetY = parseInt(localStorage.getItem("offsetY") || '0') + findFreePosition().y;
 
             console.log(stringObject)
             if (!stringObject) {
@@ -519,8 +513,6 @@ export default defineComponent({
             }
 
             const nodeCopy: NodeCopy = JSON.parse(stringObject);
-            const offset = findFreePosition();
-            offset.y += offsetY - minY - minY;
 
             let newID = new Date().getTime();
 
@@ -529,7 +521,7 @@ export default defineComponent({
                 cy.add({
                     group: 'nodes',
                     data: node.data,
-                    position: { x: node.position.x, y: offset.y + node.position.y }
+                    position: { x: node.position.x, y: node.position.y + offsetY }
                 });
                 if (parrentID) {
                     cy.add({
