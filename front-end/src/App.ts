@@ -1,9 +1,9 @@
-import { ref } from 'vue';
+import { defineComponent, ref } from 'vue';
 import Toast from 'primevue/toast';
 import ConfirmDialog from 'primevue/confirmdialog';
 import * as mToast from './toast/toast';
 
-export default {
+export default defineComponent({
   components: { Toast, ConfirmDialog },
   setup() {
     mToast.showInfo("Xin chào");
@@ -29,4 +29,4 @@ export default {
 
     return { sidebarVisible, menuItems, activeItem, toggleSidebar, setActive };
   },
-};
+});
