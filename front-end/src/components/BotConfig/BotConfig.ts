@@ -342,7 +342,7 @@ export default defineComponent({
                 ...botData.treeData,
                 ...defaultTree
             };
-            if (treeData.elements.nodes.filter((item: { id: string; }) => item.id != 'start').length == 0) {
+            if (treeData.elements.nodes.filter((item: { type: string; }) => item.type != 'start').length == 0) {
                 treeData.elements.nodes.push({ data: { id: 'start', value: 'Start', type: 'start' }, position: { x: 400, y: 300 } });
             }
 
@@ -429,6 +429,7 @@ export default defineComponent({
             if (minX === Infinity) minX = 400;
             if (maxY === -Infinity) maxY = 300;
 
+
             return { x: minX, y: maxY + 100 };
         }
 
@@ -448,7 +449,15 @@ export default defineComponent({
 
 
         function removeNode() {
-            const highlightedElements = cy.elements('.selected').filter(item => !item.is('node') || item.id() != 'start');
+            const highlightedElements = cy.elements('.selected');
+
+            const startSelectedCount = highlightedElements.map(item => item.data('type') === 'start').length;
+            const startConnt = cy.nodes().filter(item => item.data('type') === 'start').length;
+            if (startSelectedCount === startConnt) {
+                Toast.showError('Phải có 1 nút start');
+                return;
+            }
+
             highlightedElements.remove();
         }
 
@@ -459,13 +468,16 @@ export default defineComponent({
                 return;
             };
 
-            let offsetY = Infinity;
+            let minY = Infinity;
+            let maxY = -Infinity;
 
             function getNodeData(id: string): NodeCopy {
                 const node = cy.getElementById(id);
 
                 const nodeCopy: NodeCopy = { data: { ...node.data() }, position: { ...node.position() }, next: [] };
-                offsetY = Math.min(offsetY, nodeCopy.position.y);
+                minY = Math.min(minY, nodeCopy.position.y);
+                maxY = Math.max(maxY, nodeCopy.position.y);
+
                 const connectedEdge = node.connectedEdges();
                 for (const edge of connectedEdge) {
                     const { source, target } = edge.data();
@@ -480,10 +492,15 @@ export default defineComponent({
             const id = node.data('id');
 
             const nodeCopy: NodeCopy = getNodeData(id);
-            if (offsetY === Infinity) offsetY = 0;
 
-            Cookies.set("NodeCopy", JSON.stringify(nodeCopy));
-            Cookies.set("offsetY", offsetY.toString());
+            if (minY === Infinity) minY = 0;
+            if (maxY === -Infinity) maxY = 0;
+            const offsetY = maxY - minY;
+
+            localStorage.setItem("NodeCopy", JSON.stringify(nodeCopy));
+            localStorage.setItem("offsetY", offsetY.toString());
+            localStorage.setItem("minY", minY.toString());
+
 
             Toast.showSuccess('Copy');
 
@@ -491,8 +508,10 @@ export default defineComponent({
         }
 
         function pasteNode() {
-            const stringObject = Cookies.get("NodeCopy");
-            const offsetY = parseInt(Cookies.get("offsetY") || '0');
+            const stringObject = localStorage.getItem("NodeCopy");
+            const offsetY = parseInt(localStorage.getItem("offsetY") || '0');
+            const minY = parseInt(localStorage.getItem("minY") || '0');
+
             console.log(stringObject)
             if (!stringObject) {
                 Toast.showError('Chưa copy');
@@ -501,7 +520,7 @@ export default defineComponent({
 
             const nodeCopy: NodeCopy = JSON.parse(stringObject);
             const offset = findFreePosition();
-            offset.y += offsetY;
+            offset.y += offsetY - minY - minY;
 
             let newID = new Date().getTime();
 
@@ -510,7 +529,7 @@ export default defineComponent({
                 cy.add({
                     group: 'nodes',
                     data: node.data,
-                    position: { x: node.position.x, y: node.position.y + offset.y }
+                    position: { x: node.position.x, y: offset.y + node.position.y }
                 });
                 if (parrentID) {
                     cy.add({
@@ -574,6 +593,11 @@ export default defineComponent({
                     Toast.showError("Tên bot không hợp lệ");
                     return;
                 }
+                if (cy.nodes().filter(item => item.data('type') === 'start').length !== 0) {
+                    Toast.showError("Chỉ được có 1 nút start");
+                    return;
+                }
+
                 let data = {
                     treeData: cy.json(),
                     idTelegram: r_idTelegram.value,
@@ -651,7 +675,7 @@ export default defineComponent({
         }
 
         function updateNode() {
-            const nodeSelected = cy.elements('.selected').filter(item => item.is('node') && item.id() != 'start');
+            const nodeSelected = cy.elements('.selected').filter(item => item.is('node') && item.data('type') != 'start');
             if (nodeSelected.length == 0) {
                 Toast.showWarning('Chưa chọn nút nào');
                 return;
@@ -752,7 +776,7 @@ export default defineComponent({
             loadData();
 
             const treeData: { [key: string]: any } = { elements: { nodes: [], edges: [] } };
-            if (treeData.elements.nodes.filter((item: { id: string; }) => item.id != 'start').length == 0) {
+            if (treeData.elements.nodes.filter((item: { type: string; }) => item.type != 'start').length == 0) {
                 treeData.elements.nodes.push({ data: { id: 'start', value: 'Start', type: 'start' }, position: { x: 400, y: 300 } });
             }
 
