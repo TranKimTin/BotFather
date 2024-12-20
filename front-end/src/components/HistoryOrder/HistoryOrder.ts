@@ -49,8 +49,6 @@ export interface PropData {
 export default defineComponent({
     components: { DataTable, Column, MultiSelect, BalanceChart },
     setup() {
-        Toast.showInfo("Xin chào");
-
         const route = useRoute();
         const botName = route.params.botName;
 

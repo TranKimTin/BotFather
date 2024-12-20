@@ -4,19 +4,6 @@
 @tailwind components;
 @tailwind utilities;
 
-#background {
-  background-image: url('/background.jpg');
-  background-size: contain;
-  background-position: center;
-  width: 100%;
-  height: 100vh;
-  position: fixed;
-  z-index: -9999;
-  margin: 0;
-  padding: 0;
-  opacity: 0.035;
-}
-
 #app {
   width: 100%;
   margin: 0;

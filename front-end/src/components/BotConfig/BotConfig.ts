@@ -44,7 +44,6 @@ interface NodeCopy {
 export default defineComponent({
     components: { MultiSelect, AutoComplete, Button, Dialog, InputText, Select, ExprInput, ContextMenu },
     setup() {
-        Toast.showInfo("Xin chào");
         const r_botName = ref<string>('');
         const r_idTelegram = ref<string>('');
         const timeframes: Array<string> = ['5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'];
@@ -113,13 +112,6 @@ export default defineComponent({
                 shortcut: 'Ctrl + H',
                 route: () => `/history/${r_botName.value}`,
                 target: '_blank'
-            },
-            {
-                label: 'Máy tính',
-                icon: 'pi pi-calculator',
-                shortcut: 'Ctrl + M',
-                route: () => `/calculator`,
-                target: '_self'
             },
             {
                 label: 'Xóa bot',
@@ -567,9 +559,6 @@ export default defineComponent({
             }
             else if (event.ctrlKey && event.key.toLowerCase() === 'h') {
                 window.open(`/history/${r_botName.value}`);
-            }
-            else if (event.ctrlKey && event.key.toLowerCase() === 'm') {
-                router.push('/calculator');
             }
             else if (event.ctrlKey && event.key.toLowerCase() === 'delete') {
                 removeBot();

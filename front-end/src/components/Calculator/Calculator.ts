@@ -9,8 +9,6 @@ import InputText from 'primevue/inputtext';
 export default defineComponent({
     components: { Select, Button, InputText, ExprInput },
     setup() {
-        Toast.showInfo("Xin chào");
-
         const r_broker = ref<string>('binance');
         const r_symbol = ref<string>('BTCUSDT');
         const r_timeframe = ref<string>('1h');

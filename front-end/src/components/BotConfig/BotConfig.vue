@@ -1,5 +1,5 @@
 <template>
-    <div class="alwaysOnTop">
+    <div>
         <Dialog v-model:visible="r_visible" modal :header="r_type" :style="{ width: '70%' }" :closeOnEscape="false">
             <div class="grid grid-cols-[1fr_5fr] gap-2 p-2">
                 <label for="type" class="font-semibold">Loại</label>
@@ -176,17 +176,11 @@
 #cy {
     width: 100%;
     height: 100vh;
+    max-height: 100vh;
     left: 0;
     top: 0;
     right: 0;
     bottom: 0;
     margin: auto;
-    position: fixed;
-}
-
-.alwaysOnTop {
-    position: absolute;
-    z-index: 1000;
-    width: 100%;
 }
 </style>
