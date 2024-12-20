@@ -13,7 +13,7 @@ const routes = express.Router({});
 routes.get("/getBotInfo", BotConfig.getBotInfo);
 routes.get('/getSymbolList', BotConfig.getSymbolList);
 routes.get('/getBotList', BotConfig.getBotList);
-routes.get('/getHistoryOrder/:botName', BotConfig.getHistoryOrder);
+routes.get('/getHistoryOrder', BotConfig.getHistoryOrder);
 routes.get('/calculator', BotConfig.calculator);
 
 

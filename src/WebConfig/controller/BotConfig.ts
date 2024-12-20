@@ -38,7 +38,7 @@ export async function getBotList(req: any, res: any) {
 
 export async function getHistoryOrder(req: any, res: any) {
     try {
-        const botName: string = req.params.botName;
+        const botName: string = req.query.botName;
         const filterBroker = req.query.filterBroker.split(',');
         const filterTimeframe = req.query.filterTimeframe.split(',');
         const data = await BotConfig.getHistoryOrder(botName, filterBroker, filterTimeframe);

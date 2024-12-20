@@ -79,10 +79,11 @@ export default defineComponent({
                 r_isLoading.value = true;
                 r_balanceData.value = [];
                 const params = {
+                    botName,
                     filterBroker: r_brokerSelected.value.join(','),
                     filterTimeframe: r_timeframesSelected.value.join(',')
                 };
-                axios.get(`/getHistoryOrder/${botName}`, params).then(async (result: Array<Order>) => {
+                axios.get(`/getHistoryOrder`, params).then(async (result: Array<Order>) => {
                     let gain = 0;
                     let loss = 0;
                     let unrealizedGain = 0;
