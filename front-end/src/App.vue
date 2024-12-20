@@ -50,6 +50,7 @@ export default {
 
     const menuItems = [
       { label: 'Trang chủ', route: '/', icon: 'pi pi-home' },
+      { label: 'Lịch sử lệnh', route: '/history', icon: 'pi pi-book' },
       { label: 'Máy tính', route: '/calculator', icon: 'pi pi-calculator' },
       { label: 'Thanh toán', route: '/contact', icon: 'pi pi-credit-card' },
       { label: 'Cài đặt', route: '/team', icon: 'pi pi-cog' },
