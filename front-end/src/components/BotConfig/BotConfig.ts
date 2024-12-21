@@ -451,7 +451,7 @@ export default defineComponent({
         function removeNode() {
             const highlightedElements = cy.elements('.selected');
 
-            const startSelectedCount = highlightedElements.map(item => item.data('type') === 'start').length;
+            const startSelectedCount = highlightedElements.filter(item => item.data('type') === 'start').length;
             const startConnt = cy.nodes().filter(item => item.data('type') === 'start').length;
             if (startSelectedCount === startConnt) {
                 Toast.showError('Phải có 1 nút start');
