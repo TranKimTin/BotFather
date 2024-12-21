@@ -1,5 +1,11 @@
 <template>
-    <h1>{{ botName }} <button class="btn btn-outline-danger mr-1" @click="clearHistory">Xóa lịch sử</button> </h1>
+    <div class="grid grid-cols-[1fr_3fr]">
+        <Select v-model="r_botName" filter :options="r_botNameList" placeholder="Tên bot" class="flex-auto" />
+    </div>
+    <div>
+        <button class="btn btn-outline-danger mr-1" @click="clearHistory">Xóa lịch sử</button>
+    </div>
+
     <div class="grid grid-cols-4 gap-2 p-2">
         <div class="flex-auto">
             Đã chốt ({{ r_cntGain + r_cntLoss }}): <span style="color: green;">{{ r_gain }}</span>-<span

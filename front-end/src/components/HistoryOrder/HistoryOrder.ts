@@ -1,12 +1,14 @@
 import { defineComponent, onMounted, ref, watch } from 'vue';
 import * as axios from '../../axios/axios';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import MultiSelect from 'primevue/multiselect';
 import BalanceChart from "./BalanceChart.vue";
 import { useConfirm } from "primevue/useconfirm";
 import * as Toast from '../../toast/toast';
+import router from '@/router/router';
+import Select from 'primevue/select';
 
 interface Order {
     id: number,
@@ -47,10 +49,11 @@ export interface PropData {
 }
 
 export default defineComponent({
-    components: { DataTable, Column, MultiSelect, BalanceChart },
+    components: { DataTable, Column, MultiSelect, BalanceChart, Select },
     setup() {
         const route = useRoute();
-        const botName = route.params.botName;
+        const router = useRouter();
+        const botName: string = route.params.botName as string;
 
         const r_orderList = ref<Array<Order>>([]);
         const r_gain = ref<number>(0);
@@ -68,6 +71,9 @@ export default defineComponent({
         const r_brokerSelected = ref<Array<string>>([...brokers]);
         const r_balanceData = ref<Array<PropData>>([]);
 
+        const r_botNameList = ref<Array<string>>([]);
+        const r_botName = ref<string>(botName);
+
         let firstLoad = true;
 
         const confirmation = useConfirm();
@@ -79,7 +85,7 @@ export default defineComponent({
                 r_isLoading.value = true;
                 r_balanceData.value = [];
                 const params = {
-                    botName,
+                    botName: route.params.botName,
                     filterBroker: r_brokerSelected.value.join(','),
                     filterTimeframe: r_timeframesSelected.value.join(',')
                 };
@@ -217,6 +223,12 @@ export default defineComponent({
                             newValue.sort((a, b) => brokers.indexOf(a) - brokers.indexOf(b));
                             loadData(true);
                         });
+                        watch(r_botName, (newValue) => {
+                            router.push(`/history/${r_botName.value}`);
+                        });
+                        watch(() => route.params.botName, (newValue) => {
+                            loadData(false);
+                        });
                     }
 
                     const step = Math.max(10, Math.ceil(argsEquity.length / 30));
@@ -286,6 +298,9 @@ export default defineComponent({
         }
         onMounted(() => {
             loadData(false);
+            axios.get('/getBotList').then(result => {
+                r_botNameList.value = result;
+            });
         });
 
         return {
@@ -303,6 +318,8 @@ export default defineComponent({
             r_timeframesSelected,
             r_brokerSelected,
             r_balanceData,
+            r_botNameList,
+            r_botName,
             timeframes,
             brokers,
             clearHistory
