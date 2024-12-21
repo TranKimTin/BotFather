@@ -11,11 +11,10 @@
             </div>
             <ul class="menu">
                 <li v-for="item in menuItems" :key="item.label" :class="{ active: activeItem === item.label }">
-                    <span class="menu-link"
-                        @click.native="setActive(item)">
+                    <span class="menu-link" @click.native="setActive(item)">
                         <i :class="item.icon"></i>
                         <span v-if="sidebarVisible">{{ item.label }}</span>
-                </span>
+                    </span>
                 </li>
             </ul>
             <div class="sidebar-footer">
@@ -33,8 +32,11 @@
 
 <script lang="ts" src="./App.ts"></script>
 
-<style scoped>
-/* Layout */
+<style>
+* {
+    box-sizing: border-box;
+}
+
 .layout {
     display: flex;
     height: 100vh;

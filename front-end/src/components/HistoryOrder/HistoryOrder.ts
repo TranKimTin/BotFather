@@ -7,7 +7,6 @@ import MultiSelect from 'primevue/multiselect';
 import BalanceChart from "./BalanceChart.vue";
 import { useConfirm } from "primevue/useconfirm";
 import * as Toast from '../../toast/toast';
-import router from '@/router/router';
 import Select from 'primevue/select';
 
 interface Order {
