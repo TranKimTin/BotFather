@@ -585,7 +585,7 @@ export default defineComponent({
                     Toast.showError("Tên bot không hợp lệ");
                     return;
                 }
-                if (cy.nodes().filter(item => item.data('type') === 'start').length !== 0) {
+                if (cy.nodes().filter(item => item.data('type') === 'start').length !== 1) {
                     Toast.showError("Chỉ được có 1 nút start");
                     return;
                 }
