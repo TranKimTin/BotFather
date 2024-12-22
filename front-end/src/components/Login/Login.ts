@@ -1,21 +1,21 @@
 import { ref, defineComponent, onMounted } from "vue";
 import * as Toast from '../../toast/toast';
+import axios from "axios";
 
 export default defineComponent({
     components: {},
     setup() {
-        const r_email = ref<string>('');
-        const r_password = ref<string>('');
-
-        function validateEmail(email: string) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return emailRegex.test(email);
-        };
+        const r_email = ref<string>('example@gmail.com');
+        const r_password = ref<string>('123456');
 
         function login() {
             const email = r_email.value;
             const password = r_password.value;
-            Toast.showInfo(email + password)
+
+
+            axios.post(`/api/login`, { email, password }).then(response => {
+                console.log(response);
+            });
         }
 
         onMounted(() => {
