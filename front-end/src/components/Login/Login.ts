@@ -8,8 +8,8 @@ import { useRouter } from "vue-router";
 export default defineComponent({
     components: {},
     setup() {
-        const r_email = ref<string>('example@gmail.com');
-        const r_password = ref<string>('123456');
+        const r_email = ref<string>('');
+        const r_password = ref<string>('');
 
         const router = useRouter();
 
