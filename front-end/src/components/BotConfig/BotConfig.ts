@@ -13,6 +13,7 @@ import InputText from 'primevue/inputtext';
 import Select from 'primevue/select';
 import ExprInput from '../ExprInput/ExprInput.vue';
 import ContextMenu from 'primevue/contextmenu';
+import { useEventListener } from '@/Composables/Composables';
 
 cytoscape.use(edgehandles);
 
@@ -538,7 +539,7 @@ export default defineComponent({
             Toast.showSuccess('Paste');
         }
 
-        const onKeydownEventListener = (event: KeyboardEvent) => {
+        useEventListener(document, 'keydown', (event: KeyboardEvent) => {
             if (r_visible.value) return;
             if (isTextSelected()) return;
             if (!event.ctrlKey && event.key === 'Delete') {
@@ -576,7 +577,7 @@ export default defineComponent({
             else if (event.ctrlKey && event.key.toLowerCase() === 'delete') {
                 removeBot();
             }
-        }
+        });
 
         async function saveBot() {
             try {
@@ -755,7 +756,6 @@ export default defineComponent({
         }
 
         onMounted(async () => {
-            document.addEventListener('keydown', onKeydownEventListener);
             r_botName.value = Cookies.get("botName") || '';
 
             axios.get('/getSymbolList').then(result => {
@@ -800,11 +800,6 @@ export default defineComponent({
 
             });
         });
-
-        onUnmounted(() => {
-            document.removeEventListener('keydown', onKeydownEventListener);
-        });
-
 
         return {
             r_botName,
