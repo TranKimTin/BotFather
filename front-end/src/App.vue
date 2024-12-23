@@ -101,19 +101,19 @@
 
 .menu-link i {
     font-size: 1.2rem;
-    margin-right: 1rem;
 }
 
 .sidebar-footer {
     display: flex;
     align-items: center;
-    padding: 1rem;
     border-top: 1px solid #34495e;
     margin-top: auto;
 }
 
-.sidebar-footer span {
-    padding: 1rem;
+.sidebar-footer span,
+.menu span {
+    padding-left: 1rem;
+    padding-right: 1rem;
 }
 
 /* Main Content */
