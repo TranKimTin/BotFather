@@ -11,3 +11,5 @@
 - đánh lệnh thật
 - dashboard
 - lịch sử lệnh theo symbol
+
+- refactor event  useEventListener https://vuejs.org/guide/reusability/composables.html
