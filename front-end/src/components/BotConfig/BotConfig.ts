@@ -1,4 +1,4 @@
-import { defineComponent, onMounted, ref, watch } from 'vue';
+import { defineComponent, onMounted, onUnmounted, ref, watch } from 'vue';
 import cytoscape, { type NodeSingular, type Core } from 'cytoscape';
 import edgehandles from 'cytoscape-edgehandles';
 import * as axios from '../../axios/axios';
@@ -538,7 +538,7 @@ export default defineComponent({
             Toast.showSuccess('Paste');
         }
 
-        document.addEventListener('keydown', (event) => {
+        const onKeydownEventListener = (event: KeyboardEvent) => {
             if (r_visible.value) return;
             if (isTextSelected()) return;
             if (!event.ctrlKey && event.key === 'Delete') {
@@ -576,7 +576,7 @@ export default defineComponent({
             else if (event.ctrlKey && event.key.toLowerCase() === 'delete') {
                 removeBot();
             }
-        });
+        }
 
         async function saveBot() {
             try {
@@ -755,6 +755,7 @@ export default defineComponent({
         }
 
         onMounted(async () => {
+            document.addEventListener('keydown', onKeydownEventListener);
             r_botName.value = Cookies.get("botName") || '';
 
             axios.get('/getSymbolList').then(result => {
@@ -800,6 +801,9 @@ export default defineComponent({
             });
         });
 
+        onUnmounted(() => {
+            document.removeEventListener('keydown', onKeydownEventListener);
+        });
 
 
         return {
