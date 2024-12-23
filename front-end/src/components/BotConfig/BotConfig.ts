@@ -463,6 +463,9 @@ export default defineComponent({
         }
 
         function copyNode() {
+            localStorage.removeItem("NodeCopy");
+            localStorage.removeItem("offsetY");
+
             const nodeSelected = cy.elements('.selected').filter(item => item.is('node'));
             if (nodeSelected.length == 0) {
                 Toast.showWarning('Chưa chọn nút nào');
