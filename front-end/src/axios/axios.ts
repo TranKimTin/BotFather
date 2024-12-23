@@ -1,5 +1,6 @@
 import axios from "axios";
 import * as Toast from "../toast/toast";
+import Cookies from 'js-cookie';
 
 interface Params {
     [key: string]: any
@@ -14,8 +15,46 @@ interface Response {
 // const URL = 'http://103.82.25.144:8080/api';
 const URL = '/api';
 
+const headers = {
+    'content-type': 'application/json',
+    'x-access-token': ''
+};
+
+const instance = axios.create({});
+
+instance.interceptors.request.use(
+    async config => {
+        return config;
+    },
+    error => Promise.reject(error),
+);
+
+instance.interceptors.response.use(
+    response => {
+        if (response.data.code === 401) { //token sai, hết hạn => về tramg login
+            Toast.showError(response.data.message);
+            setTimeout(() => {
+                Cookies.remove("token");
+                Cookies.remove("user");
+                window.location.href = '/login';
+            }, 1000);
+            return Promise.reject(response.data);
+        }
+        else if (response.data.code === 402 || response.data.code === 403) { //đăng nhập sai || không có quyền
+            Toast.showError(response.data.message);
+            return Promise.reject(response.data);
+        } else {
+            return response;
+        }
+    },
+    async error => {
+        return Promise.reject(error);
+    }
+);
+
 export async function get(url: string, params: Params = {}): Promise<any> {
-    const response = await axios.get(`${URL}${url}`, { params });
+    headers['x-access-token'] = Cookies.get('token') || '';
+    const response = await instance.get(`${URL}${url}`, { headers, params });
     const data: Response = response.data as Response;
     if (data.code === 200) {
         return data.data;
@@ -28,7 +67,8 @@ export async function get(url: string, params: Params = {}): Promise<any> {
 }
 
 export async function post(url: string, body: Params = {}): Promise<any> {
-    const response = await axios.post(`${URL}${url}`, body);
+    headers['x-access-token'] = Cookies.get('token') || '';
+    const response = await instance.post(`${URL}${url}`, body, { headers });
     const data: Response = response.data as Response;
     if (data.code === 200) {
         return data.data;
@@ -40,8 +80,9 @@ export async function post(url: string, body: Params = {}): Promise<any> {
     }
 }
 
-export async function put(url: string, params: Params = {}): Promise<any> {
-    const response = await axios.put(`${URL}${url}`, undefined, { params });
+export async function put(url: string, body: Params = {}): Promise<any> {
+    headers['x-access-token'] = Cookies.get('token') || '';
+    const response = await instance.put(`${URL}${url}`, body, { headers });
     const data: Response = response.data as Response;
     if (data.code === 200) {
         return data.data;
@@ -54,7 +95,8 @@ export async function put(url: string, params: Params = {}): Promise<any> {
 }
 
 export async function delete_(url: string, params: Params = {}): Promise<any> {
-    const response = await axios.delete(`${URL}${url}`, { params });
+    headers['x-access-token'] = Cookies.get('token') || '';
+    const response = await instance.delete(`${URL}${url}`, { headers, params });
     const data: Response = response.data as Response;
     if (data.code === 200) {
         return data.data;

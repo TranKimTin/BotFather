@@ -4,22 +4,24 @@
 
     <div class="layout">
         <!-- Sidebar -->
-        <aside class="sidebar" :class="{ 'sidebar-collapsed': !sidebarVisible }">
+        <aside class="sidebar" :class="{ 'sidebar-collapsed': !r_sidebarVisible }">
             <div class="sidebar-header">
-                <span v-if="sidebarVisible">Bot father</span>
+                <span v-if="r_sidebarVisible">{{ r_email }}</span>
                 <i class="pi pi-bars toggle-button" @click="toggleSidebar"></i>
             </div>
             <ul class="menu">
-                <li v-for="item in menuItems" :key="item.label" :class="{ active: activeItem === item.label }">
+                <li v-for="item in r_menuItems" :key="item.label" :class="{ active: r_activeItem === item.label }">
                     <span class="menu-link" @click.native="setActive(item)">
                         <i :class="item.icon"></i>
-                        <span v-if="sidebarVisible">{{ item.label }}</span>
+                        <span v-if="r_sidebarVisible">{{ item.label }}</span>
                     </span>
                 </li>
             </ul>
             <div class="sidebar-footer">
-                <i class="pi pi-sign-in"></i>
-                <span v-if="sidebarVisible">Đăng xuất</span>
+                <span class="menu-link" @click.native="logout">
+                    <i class="pi pi-sign-in"></i>
+                    <span v-if="r_sidebarVisible">Đăng xuất</span>
+                </span>
             </div>
         </aside>
 
