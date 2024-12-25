@@ -339,7 +339,7 @@ export async function clearHistory(botName: string) {
 export async function requireOwnBot(botName: string, userData: UserTokenInfo) {
     if (userData.role === ROLE.ADMIN) return true;
 
-    const bot = await mysql.query(`SELECT userID FROM BOT WHERE botName = ?`, [botName]);
+    const bot = await mysql.query(`SELECT userID FROM Bot WHERE botName = ?`, [botName]);
     if (bot.length === 0 || bot[0].userID === userData.id) return true;
     return false;
 }
