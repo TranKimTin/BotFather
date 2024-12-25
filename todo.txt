@@ -1,6 +1,3 @@
-- tại tài khoản
-- đăng nhập
-- phân quyền, chỉ xem được bot mình tạo
 - bắn tín hiệu cho bot khác	
 - market cap -> https://api.cryptorank.io/v0/coins/    https://www.binance.com/bapi/apex/v1/friendly/apex/marketing/simplifiedSymbolListWeb
 - is leader -> https://api.cryptorank.io/v0/coins/tensor/investors-list
