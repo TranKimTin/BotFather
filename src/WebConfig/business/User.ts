@@ -12,8 +12,10 @@ export async function login(email: string, password: string) {
     let userID = 0;
 
     if (user.length === 0) {
-        const u = await mysql.query(`INSERT INTO User(email, password) VALUES(?,?)`,
-            [email, md5(`${email.toLowerCase()}_${password}`)]
+        const [{ roleID }] = await mysql.query(`SELECT id AS roleID FROM Role WHERE roleName = 'Customer'`);
+
+        const u = await mysql.query(`INSERT INTO User(email, password, roleID) VALUES(?,?,?)`,
+            [email, md5(`${email.toLowerCase()}_${password}`), roleID]
         );
         userID = u.insertId;
     }
