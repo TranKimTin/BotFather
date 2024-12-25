@@ -75,7 +75,9 @@ export async function calculator(req: any, res: any) {
 export async function saveBot(req: any, res: any) {
     try {
         const data: BotInfo = req.body;
-        await BotConfig.saveBot(data);
+        const userID: number = req.user.id;
+        
+        await BotConfig.saveBot(data, userID);
         (req as unknown as CustomRequest).onChangeConfig(data.botName);
 
         res.json({ code: 200, message: "Lưu thành công" });

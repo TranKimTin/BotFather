@@ -176,7 +176,7 @@ export async function calculator(broker: string, symbol: string, timeframe: stri
     return `${value}    (${data[0].timestring})`;
 }
 
-export async function saveBot(data: BotInfo) {
+export async function saveBot(data: BotInfo, userID: number) {
     const botName = data.botName;
     if (!validatekBotName(botName)) {
         throw `Tên bot không hợp lệ ${botName}`;
@@ -206,7 +206,7 @@ export async function saveBot(data: BotInfo) {
 
     if (count === 0) {
         console.log('Insert new bot', JSON.stringify(data));
-        const sql = `INSERT INTO Bot(botName, idTelegram, route, symbolList, timeframes, treeData) VALUES(?,?,?,?,?,?)`;
+        const sql = `INSERT INTO Bot(botName, idTelegram, route, symbolList, timeframes, treeData, userID) VALUES(?,?,?,?,?,?,?)`;
         await mysql.query(sql,
             [
                 data.botName,
@@ -214,7 +214,8 @@ export async function saveBot(data: BotInfo) {
                 JSON.stringify(data.route),
                 JSON.stringify(data.symbolList),
                 JSON.stringify(data.timeframes),
-                JSON.stringify(data.treeData)
+                JSON.stringify(data.treeData),
+                userID
             ]);
     }
     else {
