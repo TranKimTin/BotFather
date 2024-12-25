@@ -181,3 +181,14 @@ export interface FundingRate{
     lastFundingRate: number,
     markPrice: number
 }
+
+export enum ROLE {
+    ADMIN = 'admin',
+    CUSTOMER = 'customer'
+}
+
+export interface UserTokenInfo {
+    id: number,
+    email: string,
+    role: ROLE
+}

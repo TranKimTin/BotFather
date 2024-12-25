@@ -1,4 +1,4 @@
-import { BotInfo, CustomRequest, NODE_TYPE, Node, NodeData, RateData } from '../../common/Interface';
+import { BotInfo, CustomRequest, NODE_TYPE, Node, NodeData, ROLE, RateData, UserTokenInfo } from '../../common/Interface';
 import { calculate, calculateSubExpr, isValidCondition } from '../../common/Expr';
 import * as util from '../../common/util'
 import * as mysql from '../lib/mysql';
@@ -122,8 +122,11 @@ export async function getSymbolList() {
     return symbolList;
 }
 
-export async function getBotList() {
-    const botList = await mysql.query(`SELECT botName FROM Bot`);
+export async function getBotList(userData: UserTokenInfo) {
+    const botList = await mysql.query(`SELECT botName 
+                                        FROM Bot 
+                                        WHERE userID = ? OR ? = ?
+                                        ORDER BY botName ASC`, [userData.id, userData.role, ROLE.ADMIN]);
     const data = botList.map((item: { botName: any; }) => item.botName);
     return data;
 }
@@ -176,7 +179,7 @@ export async function calculator(broker: string, symbol: string, timeframe: stri
     return `${value}    (${data[0].timestring})`;
 }
 
-export async function saveBot(data: BotInfo, userID: number) {
+export async function saveBot(data: BotInfo, userData: UserTokenInfo) {
     const botName = data.botName;
     if (!validatekBotName(botName)) {
         throw `Tên bot không hợp lệ ${botName}`;
@@ -215,7 +218,7 @@ export async function saveBot(data: BotInfo, userID: number) {
                 JSON.stringify(data.symbolList),
                 JSON.stringify(data.timeframes),
                 JSON.stringify(data.treeData),
-                userID
+                userData.id
             ]);
     }
     else {
@@ -331,4 +334,12 @@ export async function clearHistory(botName: string) {
     const [{ id }] = await mysql.query(`Select id FROM Bot WHERE botName = ?`, [botName]);
     await mysql.query(`DELETE FROM Orders WHERE botID = ?`, [id]);
     return [];
+}
+
+export async function requireOwnBot(botName: string, userData: UserTokenInfo) {
+    if (userData.role === ROLE.ADMIN) return true;
+
+    const bot = await mysql.query(`SELECT userID FROM BOT WHERE botName = ?`, [botName]);
+    if (bot.length === 0 || bot[0].userID === userData.id) return true;
+    return false;
 }

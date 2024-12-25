@@ -1,3 +1,4 @@
+import { UserTokenInfo } from '../../common/Interface';
 import * as User from '../business/User';
 
 export async function Login(req: any, res: any) {
