@@ -564,14 +564,15 @@ export default [
     {
         type: 'function',
         label: 'marsi',
-        detail: '(period, i)',
-        apply: 'marsi(14, 0)',
+        detail: '(period, n, i)',
+        apply: 'marsi(14, 20, 0)',
         boost: 0,
-        info: ` - Rsi trung bình trong <period> nến gần nhất
+        info: ` - Rsi trung bình trong n nến gần nhất
+                - period: số nến để tính rsi
                 - Giá trị từ 0 - 100
                 Ví dụ:
-                + marsi(14, 0): trung bình rsi 14 nến gần nhất tính từ nến 0 (0->13)
-                + marsi(14, 1): trung bình rsi 14 nến gần nhất tính từ nến 1 (1->14)
+                + marsi(14, 20, 0): trung bình rsi(14) trong 20 nến gần nhất tính từ nến 0 (0->19)
+                + marsi(14, 20, 1): trung bình rsi(14) trong 20 nến gần nhất tính từ nến 1 (1->20)
                 `
     },
     {
