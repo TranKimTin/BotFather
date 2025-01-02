@@ -19,9 +19,12 @@ function buildRoute(botInfo: BotInfo): boolean {
     const edges = elements.edges?.map(item => item.data) || [];
 
     const nodeList: { [key: string]: Node } = {};
+    let startID: string | undefined = undefined;
+
     for (let node of nodes) {
-        const { id } = node;
+        const { id, type } = node;
         nodeList[id] = { data: node, id, next: [] };
+        if (type === 'start') startID = id;
     }
 
     for (let edge of edges) {
@@ -29,7 +32,7 @@ function buildRoute(botInfo: BotInfo): boolean {
         nodeList[source].next.push(nodeList[target]);
     }
 
-    if (!nodeList['start']) return false;
+    if (startID === undefined) return false;
 
     const visited: { [key: string]: boolean } = {};
     let ret = true;
@@ -44,10 +47,10 @@ function buildRoute(botInfo: BotInfo): boolean {
         }
         visited[node.id] = false;
     }
-    dfs(nodeList['start']);
+    dfs(nodeList[startID]);
     if (!ret) return false;
 
-    botInfo.route = nodeList['start'];
+    botInfo.route = nodeList[startID];
 
     return true;
 }
