@@ -105,7 +105,9 @@ export default {
                     }
                 }
             },
-            animation: false
+            animation: {
+                duration: 0
+            }
         };
 
         watch(props, (newValue) => {
