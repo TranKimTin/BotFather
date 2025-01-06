@@ -120,8 +120,13 @@ export default defineComponent({
                         return timeA - timeB;
                     });
 
+                    let orderOpening: Array<Order | undefined> = [];
+
                     for (let i = 0; i < sortedData.length; i++) {
                         const order = sortedData[i];
+                        if (order.status !== ORDER_STATUS.CANCELED) {
+                            orderOpening.push(order);
+                        }
 
                         if (lastTimeUpdated === '' || (order.lastTimeUpdated && order.timeEntry && new Date(lastTimeUpdated).getTime() < new Date(order.lastTimeUpdated).getTime()))
                             lastTimeUpdated = order.lastTimeUpdated;
@@ -142,8 +147,9 @@ export default defineComponent({
                             //equity 
                             const timeCurrent = new Date(order.timeTP).getTime();
                             argsEquity.push({ timestamp: order.timeTP, orderList: [] });
-                            for (let j = 0; j < i; j++) {
-                                const o = sortedData[j];
+                            for (let j = 0; j < orderOpening.length; j++) {
+                                const o = orderOpening[j];
+                                if (o === undefined) continue;
 
                                 const timeEntry = new Date(o.timeEntry).getTime();
                                 const timeTP = new Date(o.timeTP).getTime();
@@ -153,7 +159,11 @@ export default defineComponent({
                                     const { symbol, broker, orderType, entry, volume } = o;
                                     argsEquity[argsEquity.length - 1].orderList.push({ symbol, broker, orderType, entry, volume });
                                 }
+                                else {
+                                    orderOpening[j] = undefined;
+                                }
                             }
+                            orderOpening = orderOpening.filter(item => item !== undefined);
                         }
                         else if (order.timeSL) {
                             loss += order.profit;
@@ -164,8 +174,9 @@ export default defineComponent({
                             //equity 
                             const timeCurrent = new Date(order.timeSL).getTime();
                             argsEquity.push({ timestamp: order.timeSL, orderList: [] });
-                            for (let j = 0; j < i; j++) {
-                                const o = sortedData[j];
+                            for (let j = 0; j < orderOpening.length; j++) {
+                                const o = orderOpening[j];
+                                if (o === undefined) continue;
 
                                 const timeEntry = new Date(o.timeEntry).getTime();
                                 const timeTP = new Date(o.timeTP).getTime();
@@ -176,6 +187,7 @@ export default defineComponent({
                                     argsEquity[argsEquity.length - 1].orderList.push({ symbol, broker, orderType, entry, volume });
                                 }
                             }
+                            orderOpening = orderOpening.filter(item => item !== undefined);
                         }
                         else if (order.timeEntry && order.profit) {
                             cntOpening++;

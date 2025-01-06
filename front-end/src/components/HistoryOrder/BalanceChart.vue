@@ -104,7 +104,8 @@ export default {
                         maxTicksLimit: 10 // Giới hạn số lượng nhãn trên trục x
                     }
                 }
-            }
+            },
+            animation: false
         };
 
         watch(props, (newValue) => {
