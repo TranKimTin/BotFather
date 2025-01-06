@@ -8,3 +8,4 @@
 - đánh lệnh thật
 - dashboard
 - lịch sử lệnh theo symbol
+- apply template UI: https://github.com/wobsoriano/v-dashboard
