@@ -54,8 +54,7 @@ export class BotFather {
         client.on('onCloseCandle', (msg: { broker: string, symbol: string, timeframe: string, data: Array<RateData> }) => {
             try {
                 const { broker, symbol, timeframe, data } = msg;
-                console.log(new Date(), broker, symbol, timeframe);
-                return;
+                
                 if (!broker || !symbol || !timeframe || !data) return;
                 this.onCloseCandle(broker, symbol, timeframe, data);
             }
