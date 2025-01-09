@@ -55,7 +55,7 @@ export class BotFather {
             try {
                 const { broker, symbol, timeframe, data } = msg;
                 console.log(new Date(), broker, symbol, timeframe);
-
+                return;
                 if (!broker || !symbol || !timeframe || !data) return;
                 this.onCloseCandle(broker, symbol, timeframe, data);
             }
