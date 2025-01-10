@@ -21,9 +21,7 @@
             <div class="relative">
                 <button class="relative z-10 block w-8 h-8 overflow-hidden rounded-full shadow focus:outline-none"
                     @click="dropdownOpen = !dropdownOpen">
-                    <img class="object-cover w-full h-full"
-                        src="/user.png"
-                        alt="Your avatar">
+                    <img class="object-cover w-full h-full" src="/user.png" alt="Your avatar">
                 </button>
 
                 <div v-show="dropdownOpen" class="fixed inset-0 z-10 w-full h-full" @click="dropdownOpen = false" />
@@ -41,10 +39,10 @@
                         <a href="#"
                             class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-600 hover:text-white">Thanh
                             toán</a>
-                        <router-link to="/login"
-                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-600 hover:text-white">
-                            Đăng xuất
-                        </router-link>
+                        <span @click.native="logout"
+                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-600 hover:text-white cursor-pointer">
+                            <u>Đăng xuất</u>
+                        </span>
                     </div>
                 </transition>
             </div>

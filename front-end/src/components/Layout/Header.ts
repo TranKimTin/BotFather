@@ -17,7 +17,9 @@ export default defineComponent({
                 Cookies.remove('token');
                 Cookies.remove('user');
                 mToast.showInfo('Đăng xuất thành công');
-                router.push('/login');
+                setTimeout(() => {
+                    router.push('/login');
+                }, 500);
             });
         };
 
