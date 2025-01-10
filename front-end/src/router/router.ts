@@ -8,7 +8,7 @@ const routes = [
     { path: '/', component: BotConfig },
     { path: '/history/:botName', component: HistoryOrder },
     { path: '/calculator', component: Calculator },
-    { path: '/login', component: Login },
+    { path: '/login', component: Login, meta: { layout: 'empty' } },
 ];
 
 const router = createRouter({

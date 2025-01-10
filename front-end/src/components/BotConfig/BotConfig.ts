@@ -13,7 +13,7 @@ import InputText from 'primevue/inputtext';
 import Select from 'primevue/select';
 import ExprInput from '../ExprInput/ExprInput.vue';
 import ContextMenu from 'primevue/contextmenu';
-import { useEventListener } from '@/Composables/Composables';
+import { useEventListener } from '@/Composables/useEvent';
 
 cytoscape.use(edgehandles);
 

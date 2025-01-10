@@ -14,8 +14,15 @@ import VueCodemirror from 'vue-codemirror';
 import { closeBrackets } from '@codemirror/autocomplete';
 import { history, historyKeymap } from '@codemirror/commands';
 import { keymap } from '@codemirror/view';
+import DashboardLayout from './components/Layout/DashboardLayout.vue';
+import EmptyLayout from './components/Layout/EmptyLayout.vue';
 
 const app = createApp(App);
+
+app.component('DefaultLayout', DashboardLayout)
+app.component('EmptyLayout', EmptyLayout)
+
+
 app.use(PrimeVue, {
     theme: {
         preset: Aura
