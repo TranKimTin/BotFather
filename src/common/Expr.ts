@@ -1074,16 +1074,24 @@ function isValidExpr(expr: string): boolean {
 }
 
 function replaceSubExprs(expr: string) {
-    const subExprs = [...new Set([...expr.matchAll(/\{(.*?)\}/g)].map(match => match[1]))];
-
-    for (const subExpr of subExprs) {
-        if (!isValidExpr(subExpr)) {
-            return '';
+    const stack: Array<string> = [];
+    let s = '';
+    for (const i of expr) {
+        if (i === '{') {
+            stack.push(s);
+            s = '';
         }
-        expr = expr.replaceAll(`{${subExpr}}`, '1');
+        else if (i === '}') {
+            if (stack.length == 0 || s === '') return '';
+            const lastS = stack.pop();
+            s = lastS + ' ' + 1;
+        }
+        else {
+            s += i;
+        }
     }
-
-    return expr;
+    if (stack.length > 1) return '';
+    return (stack[0] || '') + s;
 }
 
 export function isValidCondition(data: NodeData) {
