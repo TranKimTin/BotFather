@@ -106,12 +106,8 @@ function update(): void {
     }
 }
 
-let cntAll = 0;
-let cntCache = 0;
 export function get(key: string) {
     update();
-    cntAll++;
-    if (data[key]?.value) cntCache++;
     return data[key]?.value || null;
 }
 
