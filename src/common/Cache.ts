@@ -112,7 +112,7 @@ export function get(key: string) {
     update();
     cntAll++;
     if (data[key]?.value) cntCache++;
-    console.log(`cache ${cntCache} / ${cntAll} (${cntCache / cntAll * 100} %)`);
+    console.log(`cache size: ${heap.size()} - ${cntCache} / ${cntAll} (${cntCache / cntAll * 100} %)`);
     return data[key]?.value || null;
 }
 
