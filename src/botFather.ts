@@ -54,10 +54,13 @@ export class BotFather {
         client.on('onCloseCandle', (msg: { broker: string, symbol: string, timeframe: string, data: Array<RateData> }) => {
             try {
                 const { broker, symbol, timeframe, data } = msg;
-                console.log('onCloseCandle', broker, symbol, timeframe)
-
                 if (!broker || !symbol || !timeframe || !data) return;
+
+                const startTime = new Date().getTime();
                 this.onCloseCandle(broker, symbol, timeframe, data);
+                const endTime = new Date().getTime();
+                console.log('onCloseCandle', broker, symbol, timeframe, 'runtime=', endTime - startTime);
+
             }
             catch (err) {
                 console.error(err);
@@ -176,15 +179,15 @@ export class BotFather {
         }
     }
 
-    private async dfs_handleLogic(node: Node, broker: string, symbol: string, timeframe: string, data: RateData[], idTelegram: TelegramIdType, visited: { [key: string]: boolean }, botID: number) {
+    private dfs_handleLogic(node: Node, broker: string, symbol: string, timeframe: string, data: RateData[], idTelegram: TelegramIdType, visited: { [key: string]: boolean }, botID: number) {
         const { id, next } = node;
         const nodeData = node.data;
 
         if (visited[id] === true) return;
         visited[id] = true;
-        if (await this.handleLogic(nodeData, broker, symbol, timeframe, data, idTelegram, botID)) {
+        if (this.handleLogic(nodeData, broker, symbol, timeframe, data, idTelegram, botID)) {
             for (const child of next) {
-                await this.dfs_handleLogic(child, broker, symbol, timeframe, data, idTelegram, visited, botID);
+                this.dfs_handleLogic(child, broker, symbol, timeframe, data, idTelegram, visited, botID);
             }
         }
     }
@@ -341,7 +344,7 @@ export class BotFather {
         return true;
     }
 
-    private async handleLogic(nodeData: NodeData, broker: string, symbol: string, timeframe: string, data: RateData[], idTelegram: TelegramIdType, botID: number): Promise<boolean> {
+    private handleLogic(nodeData: NodeData, broker: string, symbol: string, timeframe: string, data: RateData[], idTelegram: TelegramIdType, botID: number): boolean {
         if (nodeData.type === NODE_TYPE.START) return true;
 
         const exprArgs: ExprArgs = {
@@ -419,7 +422,7 @@ export class BotFather {
             ];
             console.log(`new order`, args);
 
-            await mysql.query(sql, args);
+            mysql.query(sql, args);
             return true;
         }
 
