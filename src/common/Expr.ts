@@ -35,8 +35,9 @@ export class Expr extends ExprVisitor<any> {
 
     visit(tree: antlr.ParseTree) {
         const timestamp = this.data[0]?.startTime;
-        if (timestamp && tree.getChildCount() === 1) {
-            const key = `${this.broker}:${this.symbol}:${this.timeframe}:${timestamp / 1000}_${tree.getText()}`;
+        const treeText = tree.getText();
+        if (timestamp && tree.getChildCount() === 1 && isNaN(Number(treeText))) {
+            const key = `${this.broker}:${this.symbol}:${this.timeframe}:${timestamp / 1000}_${treeText}`;
             const cacheValue = Cache.get(key);
             if (cacheValue) {
                 return cacheValue;
@@ -1237,7 +1238,7 @@ async function test() {
         data: data
     };
 
-    let condition = "{rsi(14,0) + rsi(14,0) < rsi(14,1)}";
+    let condition = "{1+2+3+rsi(14)}";
 
     condition = calculateSubExpr(condition, args);
 
@@ -1245,4 +1246,4 @@ async function test() {
 
 }
 
-// test();
+test();
