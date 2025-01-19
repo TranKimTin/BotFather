@@ -326,7 +326,7 @@ export class Expr extends ExprVisitor<any> {
         return MAs[shift];
     };
 
-    visitEMa = (ctx: EmaContext) => {
+    visitEma = (ctx: EmaContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const EMAs = util.iEMA(this.data, period);
@@ -1220,7 +1220,7 @@ export function calculateSubExpr(expr: string, args: ExprArgs) {
 }
 
 async function test() {
-    let broker = 'binance';
+    let broker = 'binance_future';
     const symbol = 'BTCUSDT';
     const timeframe = '1h';
     const data = (broker == 'binance_future')
@@ -1237,7 +1237,7 @@ async function test() {
         data: data
     };
 
-    let condition = "{1+2+3+rsi(14)}";
+    let condition = "{rsi(24)} {rsi(12)}";
 
     condition = calculateSubExpr(condition, args);
 

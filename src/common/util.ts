@@ -80,7 +80,7 @@ export function iCCI(data: Array<RateData>, period: number) {
 }
 
 export function iRSI(data: Array<RateData>, period: number) {
-    const prices = data.map(item => item.close).reverse();
+    const prices = data.map(item => item.close);
     const gains = [];
     const losses = [];
     let avgGain = 0;
@@ -89,7 +89,7 @@ export function iRSI(data: Array<RateData>, period: number) {
     const RSI: Array<number> = [];
 
     for (let i = 1; i < prices.length; i++) {
-        const delta = prices[i] - prices[i - 1];
+        const delta = prices[prices.length - i - 1] - prices[prices.length - i];
 
         if (delta > 0) {
             gains.push(delta);
@@ -110,11 +110,11 @@ export function iRSI(data: Array<RateData>, period: number) {
 
             rs = (avgGain / avgLoss) || 0;
             const rsi = 100 - (100 / (1 + rs));
-            RSI[i] = rsi;
+            RSI[prices.length - i - 1] = +rsi.toFixed(2);
         }
     }
 
-    return RSI.reverse().map(item => +item.toFixed(2));
+    return RSI;
 }
 
 export async function getDigitsFuture() {
@@ -668,34 +668,37 @@ export async function getData_m1(symbol: string, date: string): Promise<Array<Ra
 }
 
 export function iMA(data: Array<RateData>, period: number) {
-    const values = data.map(item => item.close).reverse();
+    const values = data.map(item => item.close);
     const MAs = indicator.SMA.calculate({
         period,
-        values
+        values,
+        reversedInput: true
     });
-    return MAs.reverse();
+    return MAs;
 }
 
 export function iEMA(data: Array<RateData>, period: number) {
-    const values = data.map(item => item.close).reverse();
+    const values = data.map(item => item.close);
     const EMAs = indicator.EMA.calculate({
         period,
-        values
+        values,
+        reversedInput: true
     });
-    return EMAs.reverse();
+    return EMAs;
 }
 
 export function iMACD(data: Array<RateData>, fastPeriod: number, slowPeriod: number, signalPeriod: number) {
-    const values = data.map(item => item.close).reverse();
+    const values = data.map(item => item.close);
     const EMAs = indicator.MACD.calculate({
         values,
         fastPeriod,
         slowPeriod,
         signalPeriod,
         SimpleMAOscillator: false,
-        SimpleMASignal: false
+        SimpleMASignal: false,
+        reversedInput: true
     });
-    return EMAs.reverse().map(item => ({
+    return EMAs.map(item => ({
         MACD: item.MACD || 0,
         signal: item.signal || 0,
         histogram: item.histogram || 0
@@ -703,13 +706,14 @@ export function iMACD(data: Array<RateData>, fastPeriod: number, slowPeriod: num
 }
 
 export function iBB(data: Array<RateData>, period: number, multiplier: number) {
-    const values = data.map(item => item.close).reverse();
+    const values = data.map(item => item.close);
     const EMAs = indicator.BollingerBands.calculate({
         period,
         values,
-        stdDev: multiplier
+        stdDev: multiplier,
+        reversedInput: true
     });
-    return EMAs.reverse();
+    return EMAs;
 }
 
 export function iZigZag(data: Array<RateData>, deviation: number, depth: number, byPercent: boolean) {
@@ -805,14 +809,15 @@ export function iZigZag(data: Array<RateData>, deviation: number, depth: number,
 }
 
 export function iATR(data: Array<RateData>, period: number) {
-    const values = data.reverse();
+    const values = data;
     const ATRs = indicator.ATR.calculate({
         high: values.map(item => item.high),
         low: values.map(item => item.low),
         close: values.map(item => item.close),
-        period
+        period,
+        reversedInput: true
     });
-    return ATRs.reverse();
+    return ATRs;
 }
 
 export function isBearishEngulfing(candle1: RateData, candle2: RateData): boolean {
