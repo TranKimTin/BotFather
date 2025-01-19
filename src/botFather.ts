@@ -164,17 +164,13 @@ export class BotFather {
     private onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
         for (const botInfo of this.botChildren) {
             try {
-                const t1 = new Date().getTime();
                 const { botName, idTelegram, symbolList, timeframes, treeData, route } = botInfo;
-                const t2 = new Date().getTime();
                 if (!timeframes.includes(timeframe) || !symbolList.includes(`${broker}:${symbol}`)) continue;
 
                 // console.log("onCloseCandle", { symbol, timeframe });
 
                 const visited: { [key: string]: boolean } = {};
                 this.dfs_handleLogic(route, broker, symbol, timeframe, data, idTelegram, visited, this.botIDs[this, botName]);
-                const t3 = new Date().getTime();
-                console.log(botName, symbol, timeframe, t2 - t1, t3 - t1);
             }
             catch (err) {
                 console.error({ symbol, timeframe }, err);

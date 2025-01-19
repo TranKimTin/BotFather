@@ -1040,6 +1040,7 @@ export class Expr extends ExprVisitor<any> {
 
 export function calculate(condition: string, args: ExprArgs): any {
     try {
+        const t1 = new Date().getTime();
         // const inputStream = CharStream.fromString(condition.toLowerCase().replace(/\s+/g, ''));
         const inputStream = CharStream.fromString(condition.toLowerCase());
         const lexer = new ExprLexer(inputStream);
@@ -1055,10 +1056,13 @@ export function calculate(condition: string, args: ExprArgs): any {
         const tree = parser.expr();
 
         const evalVisitor = new Expr(args);
+        const t2 = new Date().getTime();
         const result = evalVisitor.visit(tree);
-
+        const t3 = new Date().getTime();
+        console.log(condition, t2 - t1, t3 - t1);
         // console.log({ tree: tree.toStringTree(parser) });
         // console.log({ result });
+
 
         return result;
     }
