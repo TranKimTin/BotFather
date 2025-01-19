@@ -6,6 +6,7 @@ import { ExprVisitor } from './generated/ExprVisitor';
 import * as util from '../common/util';
 import moment from "moment";
 import { ExprArgs, NodeData, NODE_TYPE, RateData } from "../common/Interface";
+import * as Cache from './Cache';
 
 export class CustomErrorListener extends BaseErrorListener {
     syntaxError<S extends Token, T extends antlr.ATNSimulator>(recognizer: Recognizer<T>, offendingSymbol: S | null, line: number, column: number, msg: string, e: RecognitionException | null): void {
@@ -30,6 +31,22 @@ export class Expr extends ExprVisitor<any> {
         this.symbol = args.symbol;
         this.timeframe = args.timeframe;
         this.data = args.data;
+    }
+
+    visit(tree: antlr.ParseTree) {
+        const timestamp = this.data[0]?.startTime;
+        if (timestamp && tree.getChildCount() === 1) {
+            const key = `${this.broker}:${this.symbol}:${this.timeframe}:${timestamp / 1000}_${tree.getText()}`;
+            const cacheValue = Cache.get(key);
+            if (cacheValue) {
+                return cacheValue;
+            }
+            //else
+            const value = super.visit(tree);
+            Cache.set(key, value, 180000);
+            return value;
+        }
+        return super.visit(tree);
     }
 
     visitAddSub = (ctx: AddSubContext) => {
@@ -1220,7 +1237,7 @@ async function test() {
         data: data
     };
 
-    let condition = "{min_close(14)} {max_close(14)}";
+    let condition = "{rsi(14,0) + rsi(14,0) < rsi(14,1)}";
 
     condition = calculateSubExpr(condition, args);
 
