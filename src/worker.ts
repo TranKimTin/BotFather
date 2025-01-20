@@ -10,7 +10,6 @@ let botChildren: Array<BotInfo> = [];
 const telegram = new Telegram(undefined, undefined, false);
 const botIDs: { [key: string]: number } = {};
 function onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
-    console.log('worker onCloseCandle');
     for (const botInfo of botChildren) {
         try {
             const { botName, idTelegram, symbolList, timeframes, treeData, route } = botInfo;
