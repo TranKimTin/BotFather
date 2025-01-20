@@ -6,5 +6,5 @@
 - interval
 - custom code
 - đánh lệnh thật
-- dashbo- lịch sử lệnh theo symbol
-ard
+- dashboard- lịch sử lệnh theo symbol
+- tạo worker thread với node-worker-threads-pool
