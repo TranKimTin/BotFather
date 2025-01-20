@@ -64,10 +64,10 @@ export class BotFather {
                 const { broker, symbol, timeframe, data } = msg;
                 if (!broker || !symbol || !timeframe || !data) return;
 
-                // const startTime = new Date().getTime();
+                const startTime = new Date().getTime();
                 this.onCloseCandle(broker, symbol, timeframe, data);
-                // const endTime = new Date().getTime();
-                // console.log('onCloseCandle', broker, symbol, timeframe, 'runtime=', endTime - startTime);
+                const endTime = new Date().getTime();
+                console.log('onCloseCandle', broker, symbol, timeframe, 'runtime=', endTime - startTime);
 
             }
             catch (err) {
