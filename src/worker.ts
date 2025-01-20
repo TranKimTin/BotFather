@@ -298,8 +298,9 @@ async function initBotChildren() {
     console.log('initBotChildren', botChildren.length);
 }
 
-let lastTimeUpdatedBotList = '-';
 const tempFile = 'temp.txt';
+let lastTimeUpdatedBotList = fs.existsSync(tempFile) ? fs.readFileSync(tempFile).toString() : '';
+
 if (parentPort) {
     console.log('worker loaded');
     initBotChildren();
