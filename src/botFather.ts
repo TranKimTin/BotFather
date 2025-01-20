@@ -61,8 +61,9 @@ export class BotFather {
 
         client.on('onCloseCandle', async (msg: { broker: string, symbol: string, timeframe: string, data: Array<RateData> }) => {
             try {
-                console.log('onCloseCandle', msg);
                 const { broker, symbol, timeframe, data } = msg;
+                console.log('onCloseCandle:', broker, symbol, timeframe, data.length);
+
                 if (!broker || !symbol || !timeframe || !data) return;
 
                 const startTime = new Date().getTime();
