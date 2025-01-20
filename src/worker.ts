@@ -302,6 +302,7 @@ let lastTimeUpdatedBotList = '-';
 const tempFile = 'temp.txt';
 if (parentPort) {
     console.log('worker loaded');
+    initBotChildren();
     parentPort.on('message', async (broker: string, symbol: string, timeframe: string, data: Array<RateData>) => {
         if (!broker || !symbol || !timeframe || !data) return;
         let lastTime = fs.existsSync(tempFile) ? fs.readFileSync(tempFile).toString() : '';
