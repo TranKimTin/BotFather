@@ -306,7 +306,6 @@ if (parentPort) {
     initBotChildren();
     parentPort.on('message', async (msg: { broker: string, symbol: string, timeframe: string, data: Array<RateData> }) => {
         const { broker, symbol, timeframe, data } = msg;
-        console.log('worker message', broker, symbol, timeframe);
         if (!broker || !symbol || !timeframe || !data) throw 'worker data error';
         const t1 = new Date().getTime();
         let lastTime = fs.existsSync(tempFile) ? fs.readFileSync(tempFile).toString() : '';
@@ -316,7 +315,6 @@ if (parentPort) {
         }
         onCloseCandle(broker, symbol, timeframe, data);
         const t2 = new Date().getTime();
-        console.log('worker runtime', t2 - t1);
         parentPort?.postMessage(t2 - t1);
     });
 }
