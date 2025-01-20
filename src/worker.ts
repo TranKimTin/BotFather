@@ -303,7 +303,8 @@ const tempFile = 'temp.txt';
 if (parentPort) {
     console.log('worker loaded');
     initBotChildren();
-    parentPort.on('message', async (broker: string, symbol: string, timeframe: string, data: Array<RateData>) => {
+    parentPort.on('message', async (msg: { broker: string, symbol: string, timeframe: string, data: Array<RateData> }) => {
+        const { broker, symbol, timeframe, data } = msg;
         console.log('worker message', broker, symbol, timeframe);
         if (!broker || !symbol || !timeframe || !data) throw 'worker data error';
         const t1 = new Date().getTime();

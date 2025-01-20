@@ -61,12 +61,8 @@ export class BotFather {
 
         client.on('onCloseCandle', async (msg: { broker: string, symbol: string, timeframe: string, data: Array<RateData> }) => {
             try {
-                const { broker, symbol, timeframe, data } = msg;
-
-                if (!broker || !symbol || !timeframe || !data) return;
-
-                const runtime = await this.onCloseCandle(broker, symbol, timeframe, data);
-                console.log('onCloseCandle', broker, symbol, timeframe, 'runtime=', runtime);
+                const runtime = await this.worker.exec(msg);
+                console.log('onCloseCandle', msg.broker, msg.symbol, msg.timeframe, 'runtime=', runtime);
 
             }
             catch (err) {
@@ -168,10 +164,6 @@ export class BotFather {
 
     public async init() {
         console.log('BotFather init');
-    }
-
-    private async onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
-        await this.worker.exec(broker, symbol, timeframe, data);
     }
 
 };
