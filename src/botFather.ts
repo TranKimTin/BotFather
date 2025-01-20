@@ -59,13 +59,15 @@ export class BotFather {
             console.log(`Connected to server ${BASE_URL}`);
         });
 
-        client.on('onCloseCandle', (msg: { broker: string, symbol: string, timeframe: string, data: Array<RateData> }) => {
+        client.on('onCloseCandle', async (msg: { broker: string, symbol: string, timeframe: string, data: Array<RateData> }) => {
             try {
                 const { broker, symbol, timeframe, data } = msg;
                 if (!broker || !symbol || !timeframe || !data) return;
 
                 const startTime = new Date().getTime();
-                this.onCloseCandle(broker, symbol, timeframe, data);
+
+                await this.worker.exec(broker, symbol, timeframe, data);
+
                 const endTime = new Date().getTime();
                 console.log('onCloseCandle', broker, symbol, timeframe, 'runtime=', endTime - startTime);
 
@@ -170,11 +172,6 @@ export class BotFather {
     public async init() {
         console.log('BotFather init');
     }
-
-    private onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
-        this.worker.exec(broker, symbol, timeframe, data);
-    }
-
 };
 
 const botFather = new BotFather();
