@@ -295,6 +295,7 @@ async function initBotChildren() {
         botChildren.push(botInfo);
         botIDs[bot.botName] = bot.id;
     }
+    console.log('initBotChildren', botChildren.length);
 }
 
 let lastTimeUpdatedBotList = '-';
