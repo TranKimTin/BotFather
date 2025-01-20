@@ -304,13 +304,16 @@ if (parentPort) {
     console.log('worker loaded');
     initBotChildren();
     parentPort.on('message', async (broker: string, symbol: string, timeframe: string, data: Array<RateData>) => {
-        if (!broker || !symbol || !timeframe || !data) return;
+        if (!broker || !symbol || !timeframe || !data) throw 'worker data error';
+        const t1 = new Date().getTime();
         let lastTime = fs.existsSync(tempFile) ? fs.readFileSync(tempFile).toString() : '';
         if (lastTime !== lastTimeUpdatedBotList) {
             lastTimeUpdatedBotList = lastTime;
             await initBotChildren();
         }
         onCloseCandle(broker, symbol, timeframe, data);
+        const t2 = new Date().getTime();
+        parentPort?.postMessage(t2 - t1);
     });
 }
 else {
