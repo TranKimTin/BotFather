@@ -88,7 +88,7 @@ function handleLogic(nodeData: NodeData, broker: string, symbol: string, timefra
 
         if (content === '<--->') mess = '--------------------';
 
-        const ids = idTelegram.toString().split(',').map(item => item.trim());
+        const ids = idTelegram.toString().split(',').map(item => item.trim()).filter(item => item !== '');
         for (const id of ids) {
             telegram.sendMessage(mess, id);
         }
