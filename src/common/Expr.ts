@@ -1062,7 +1062,7 @@ export function calculate(condition: string, args: ExprArgs): any {
         return result;
     }
     catch (err) {
-        console.error({ symbol: args.symbol, broker: args.broker, timeframe: args.timeframe, condition }, err);
+        // console.error({ symbol: args.symbol, broker: args.broker, timeframe: args.timeframe, condition }, err);
         return null;
     }
 }
