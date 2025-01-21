@@ -11,3 +11,4 @@
 - khuyến mại
 - nạp tiền qua ví binance
 - chênh giá future, spot
+- đăng nhập bằng telegram
