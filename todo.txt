@@ -7,4 +7,7 @@
 - custom code
 - đánh lệnh thật
 - dashboard- lịch sử lệnh theo symbol
-- tạo worker thread với node-worker-threads-pool
+- nạp tiền -> coin
+- khuyến mại
+- nạp tiền qua ví binance
+- chênh giá future, spot
