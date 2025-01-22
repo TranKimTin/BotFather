@@ -19,6 +19,7 @@ export default defineComponent({
         const r_activeItem = ref<string>('Trang chủ');
         const r_menuItems = ref<Array<MenuItem>>([
             { label: 'Trang chủ', route: () => '/', icon: 'pi pi-home' },
+            { label: 'Cấu hình bot', route: () => '/bot', icon: 'pi pi-cog' },
             { label: 'Lịch sử lệnh', route: () => `/history/${Cookies.get('botName')}`, icon: 'pi pi-history' },
             { label: 'Máy tính', route: () => '/calculator', icon: 'pi pi-calculator' },
         ]);

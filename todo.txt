@@ -3,8 +3,6 @@
 - is leader -> https://api.cryptorank.io/v0/coins/tensor/investors-list
 - vẽ chart, chỉ báo ->  https://www.npmjs.com/package/trading-vue-js   https://codesandbox.io/p/sandbox/vue-ocpqe?file=%2Fsrc%2FApp.vue%3A6%2C6-6%2C17
 - fix bug telegram message dài quá
-- interval
-- custom code
 - đánh lệnh thật
 - dashboard- lịch sử lệnh theo symbol
 - nạp tiền -> coin
@@ -12,3 +10,4 @@
 - nạp tiền qua ví binance
 - chênh giá future, spot
 - đăng nhập bằng telegram
+- người dùng gửi signal đến tele khác?
