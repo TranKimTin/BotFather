@@ -104,6 +104,10 @@
                             <tr>
                                 <th
                                     class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
+
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
                                     Tên bot
                                 </th>
                                 <th
@@ -126,12 +130,13 @@
                         <tbody class="bg-white">
                             <tr v-for="(u, index) in botList" :key="index">
                                 <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <div class="ml-4">
-                                            <div class="text-sm font-medium leading-5 text-gray-900">
-                                                {{ u.name }}
-                                            </div>
-                                        </div>
+                                    <div class="text-sm leading-5 text-gray-900">
+                                        {{ index + 1 }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
+                                    <div class="text-sm leading-5 text-gray-900">
+                                        {{ u.name }}
                                     </div>
                                 </td>
 
@@ -142,8 +147,8 @@
                                 </td>
 
                                 <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
-                                    <span
-                                        class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full" :class="u.profit >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'">{{
+                                    <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
+                                        :class="u.profit >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'">{{
                                             u.profit }}</span>
                                 </td>
 
@@ -154,7 +159,8 @@
 
                                 <td
                                     class="px-6 py-4 text-sm font-medium leading-5 border-b border-gray-200 whitespace-nowrap">
-                                    <a href="#" class="text-indigo-600 hover:text-indigo-900"><i class="pi pi-cog"></i></a>
+                                    <a href="#" class="text-indigo-600 hover:text-indigo-900"><i
+                                            class="pi pi-cog"></i></a>
                                 </td>
                             </tr>
                         </tbody>
