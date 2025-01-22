@@ -1,9 +1,5 @@
 <template>
     <div>
-        <h3 class="text-3xl font-medium text-gray-700">
-            Dashboard
-        </h3>
-
         <div class="mt-4">
             <div class="flex flex-wrap -mx-6">
                 <div class="w-full px-6 sm:w-1/2 xl:w-1/3">
