@@ -11,3 +11,5 @@
 - chênh giá future, spot
 - đăng nhập bằng telegram
 - người dùng gửi signal đến tele khác?
+- subcribe socket
+- tự cập nhật new list, dell list coin
