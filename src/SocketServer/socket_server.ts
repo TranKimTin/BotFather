@@ -1,6 +1,6 @@
 import http from 'http';
 import { Server } from "socket.io";
-import { RateData, SymbolListener } from './common/Interface';
+import { RateData, SymbolListener } from '../common/Interface';
 import express from "express";
 import cors from "cors";
 import body_parser from "body-parser";

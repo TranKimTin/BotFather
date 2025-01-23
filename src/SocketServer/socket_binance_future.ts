@@ -1,27 +1,14 @@
-import * as util from './common/util';
+import { Candle } from 'binance-api-node';
+import * as util from '../common/util';
 import moment from 'moment';
 import delay from 'delay';
 import WebSocket from 'ws';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import { SocketServer } from './socket_server';
-import { RateData } from './common/Interface';
+import { RateData } from '../common/Interface';
 
-interface BybitCandle {
-    start: number,
-    end: number,
-    interval: string,
-    open: string,
-    close: string,
-    high: string,
-    low: string,
-    volume: string,
-    turnover: string,
-    confirm: boolean,
-    timestamp: number
-};
-
-export class BybitSocketFuture {
-    public static readonly broker = 'bybit_future'
+export class BinanceSocketFuture {
+    public static readonly broker = 'binance_future';
 
     private gData: { [key: string]: { [key: string]: Array<RateData> } };
     private gLastPrice: { [key: string]: number };
@@ -34,11 +21,11 @@ export class BybitSocketFuture {
     }
 
     public async init(numbler_candle_load: number, onCloseCandle: (broker: string, symbol: string, timeframe: string, data: Array<RateData>) => void) {
-        const symbolList = await util.getBybitFutureSymbolList();
+        const symbolList = await util.getBinanceFutureSymbolList();
         // console.log(symbolList.join(' '));
-        console.log(`${BybitSocketFuture.broker}: Total ${symbolList.length} symbols`);
+        console.log(`${BinanceSocketFuture.broker}: Total ${symbolList.length} symbols`);
 
-        const timeframes = ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '12h', '1d'];
+        const timeframes = ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d',];
         // timeframes = ['1m', '15m', '4h', '1d'];
         for (const symbol of symbolList) {
             this.gData[symbol] = {};
@@ -48,21 +35,6 @@ export class BybitSocketFuture {
             }
         }
 
-        const rws = new ReconnectingWebSocket('wss://stream.bybit.com/v5/public/linear', [], { WebSocket: WebSocket });
-
-        rws.addEventListener('open', () => {
-            console.log(`${BybitSocketFuture.broker}: WebSocket connection opened`);
-
-            for (let i = 0; i < symbolList.length; i += 10) {
-                rws.send(JSON.stringify({
-                    op: 'subscribe',
-                    args: symbolList.slice(i, i + 10).map(item => `kline.1.${item}`)
-                }));
-                // await delay(50);
-            }
-
-        });
-
         const mergeData = (data: RateData, isFinalMinute: boolean) => {
             this.gLastPrice[data.symbol] = data.close;
 
@@ -70,7 +42,7 @@ export class BybitSocketFuture {
             if (dataList.length === 0) {
                 dataList.push(data);
                 return;
-            };
+            }
 
             if (dataList[0].startTime == data.startTime) {
                 // dataList[0] = data;
@@ -81,7 +53,7 @@ export class BybitSocketFuture {
 
                 if (data.isFinal && !dataList[0].isFinal) {
                     dataList[0].isFinal = data.isFinal;
-                    onCloseCandle(BybitSocketFuture.broker, data.symbol, data.interval, [...dataList]);
+                    onCloseCandle(BinanceSocketFuture.broker, data.symbol, data.interval, [...dataList]);
                 }
             }
             else if (dataList[0].startTime < data.startTime) {
@@ -92,57 +64,84 @@ export class BybitSocketFuture {
                 if (dataList[1] && !dataList[1].isFinal) {
                     dataList[1].isFinal = true;
                     console.log('forces final', dataList[1]);
-                    onCloseCandle(BybitSocketFuture.broker, data.symbol, data.interval, dataList.slice(1));
+                    onCloseCandle(BinanceSocketFuture.broker, data.symbol, data.interval, dataList.slice(1));
                 }
             }
             else {
                 console.log('merge error');
             }
         };
-        const fetchCandles = (symbol: string, candle: BybitCandle) => {
-            this.gLastUpdated[symbol] = new Date().getTime();
+
+        console.log(`${BinanceSocketFuture.broker}: init timeframe`, timeframes);
+        const fetchCandles = (candle: Candle) => {
+            this.gLastUpdated[candle.symbol] = new Date().getTime();
             for (const tf of timeframes) {
                 const data: RateData = {
-                    symbol: symbol,
-                    startTime: util.getStartTime(tf, candle.start),
-                    timestring: moment(util.getStartTime(tf, candle.start)).format('YYYY-MM-DD HH:mm:SS'),
+                    symbol: candle.symbol,
+                    startTime: util.getStartTime(tf, candle.startTime),
+                    timestring: moment(util.getStartTime(tf, candle.startTime)).format('YYYY-MM-DD HH:mm:SS'),
                     open: +candle.open,
                     high: +candle.high,
                     low: +candle.low,
                     close: +candle.close,
                     volume: +candle.volume,
                     interval: tf,
-                    isFinal: candle.confirm && util.checkFinal(tf, candle.start)
+                    isFinal: candle.isFinal && util.checkFinal(tf, candle.startTime)
                 };
-                mergeData(data, candle.confirm);
+                mergeData(data, candle.isFinal);
             }
         }
 
-        // ws.on('message', function incoming(mess) {
-        rws.addEventListener('message', (event) => {
-            const mess = event.data;
-            const data: { type: string, topic: string, data: Array<BybitCandle> } = JSON.parse(mess.toString());
-            if (!data || data.type !== 'snapshot') return;
-            const symbol = data.topic.split('.')[2];
+        const streams = symbolList.map(symbol => `${symbol.toLowerCase()}@kline_1m`).join("/");
+        const url = `wss://fstream.binance.com/stream?streams=${streams}`;
 
-            for (const candle of data.data) {
-                fetchCandles(symbol, candle);
-            }
+        const rws = new ReconnectingWebSocket(url, [], { WebSocket: WebSocket });
+
+        rws.addEventListener('open', () => {
+            console.log(`binance: Socket connected`);
         });
 
-        rws.addEventListener('close', (event) => {
-            console.error(`${BybitSocketFuture.broker}: WebSocket connection closed ${event.code} ${event.reason}`);
-            // util.restartApp();
+        rws.addEventListener('message', (event) => {
+            const mess = event.data;
+            const { stream, data } = JSON.parse(mess.toString());
+            const kline = data.k;
+            const candle: Candle = {
+                eventType: data.e,
+                eventTime: data.E,
+                symbol: data.s,
+                startTime: kline.t,
+                closeTime: kline.T,
+                firstTradeId: kline.f,
+                lastTradeId: kline.L,
+                open: kline.o,
+                high: kline.h,
+                low: kline.l,
+                close: kline.c,
+                volume: kline.v,
+                trades: kline.n,
+                interval: kline.i,
+                isFinal: kline.x,
+                quoteVolume: kline.q,
+                buyVolume: kline.V,
+                quoteBuyVolume: kline.Q
+            };
+
+            fetchCandles(candle);
         });
 
         rws.addEventListener('error', (err) => {
-            console.error(`${BybitSocketFuture.broker}: WebSocket error: `, err);
+            console.error(`binance: WebSocket error`, err);
+            // util.restartApp();
+        });
+
+        rws.addEventListener('close', (event) => {
+            console.error(`${BinanceSocketFuture.broker}: WebSocket connection closed, ${event.code} ${event.reason}`);
             // util.restartApp();
         });
 
 
         const initCandle = async (symbol: string, tf: string) => {
-            const rates = await util.getBybitFutureOHLCV(symbol, tf, numbler_candle_load);
+            const rates = await util.getBinanceFutureOHLCV(symbol, tf, numbler_candle_load);
             const lastData = this.gData[symbol][tf].reverse();
             this.gData[symbol][tf] = rates;
             this.gLastPrice[symbol] = this.gData[symbol][tf][0]?.close || 0;
@@ -156,7 +155,7 @@ export class BybitSocketFuture {
         }
 
         for (const tf of timeframes) {
-            console.log(`${BybitSocketFuture.broker}: init candle ${tf}...`);
+            console.log(`${BinanceSocketFuture.broker}: init candle ${tf}...`);
             let promiseList = [];
             for (const symbol of symbolList) {
                 promiseList.push(initCandle(symbol, tf));
@@ -177,9 +176,9 @@ export class BybitSocketFuture {
             for (const symbol in this.gLastUpdated) {
                 const lastTimeUpdated = this.gLastUpdated[symbol];
                 if (now - lastTimeUpdated > timeInterval) {
-                    console.error(`${BybitSocketFuture.broker}: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`);
+                    console.error(`${BinanceSocketFuture.broker}: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`);
                     util.restartApp();
-                    // throw `${BybitSocketFuture.broker}: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`;
+                    // throw `${BinanceSocketFuture.broker}: ${symbol} not uppdated. [${new Date(lastTimeUpdated)}, ${new Date(now)}]`;
                 }
             }
         }, timeInterval);
@@ -191,14 +190,14 @@ export class BybitSocketFuture {
     }
 };
 
-const port = 84;
+const port = 85;
 
-const bybitSocketFuture = new BybitSocketFuture();
+const binanceSocketFuture = new BinanceSocketFuture();
 const socketServer = new SocketServer(
-    BybitSocketFuture.broker,
+    BinanceSocketFuture.broker,
     port,
-    bybitSocketFuture.getData.bind(bybitSocketFuture),
+    binanceSocketFuture.getData.bind(binanceSocketFuture),
     util.getBinanceFutureOHLCV
 );
 
-bybitSocketFuture.init(300, socketServer.onCloseCandle.bind(socketServer));
+binanceSocketFuture.init(300, socketServer.onCloseCandle.bind(socketServer));
