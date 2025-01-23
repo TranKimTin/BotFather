@@ -1,9 +1,11 @@
-import IBinance, { Binance, Candle } from 'binance-api-node';
+import { Candle } from 'binance-api-node';
 import * as util from './common/util';
 import moment from 'moment';
 import delay from 'delay';
 import WebSocket from 'ws';
 import ReconnectingWebSocket from 'reconnecting-websocket';
+import { SocketServer } from './socket_server';
+import { RateData } from './common/Interface';
 
 export class BinanceSocketFuture {
     public static readonly broker = 'binance_future';
@@ -188,93 +190,14 @@ export class BinanceSocketFuture {
     }
 };
 
-
-
-import http from 'http';
-import { Server } from "socket.io";
-import { RateData, SymbolListener } from './common/Interface';
-import express from "express";
-import cors from "cors";
-import body_parser from "body-parser";
-
-const app = express();
-const server = http.createServer(app);
-app.disable("x-powered-by");
-app.set("trust proxy", true);
-app.use(cors());
-app.use(body_parser.json({ limit: "50mb" }));
-app.use(body_parser.urlencoded({ extended: false, limit: "50mb" }));
-app.get('/api/getOHLCV', async (req: any, res) => {
-    try {
-        const { symbol, timeframe } = req.query;
-        const since = parseInt(req.query.since);
-        const limit = parseInt(req.query.limit || 299);
-
-        let data: Array<RateData> = binanceSocketFuture.getData(symbol, timeframe);
-
-        while (data.length > 0 && data[data.length - 1].startTime < since) data.pop();
-
-        if (data.length === 0 || data[data.length - 1].startTime > since) {
-            data = await util.getBinanceFutureOHLCV(symbol, timeframe, limit + 1, since);
-        }
-        while (data.length > 0 && data[data.length - 1].startTime < since) data.pop();
-        if (data.length > limit) data = data.slice(data.length - limit);
-
-        res.json(data);
-    }
-    catch (err) {
-        console.error(err);
-        res.json([]);
-    }
-});
-
-app.get('/api/getData', (req: any, res) => {
-    try {
-        const { symbol, timeframe } = req.query;
-        let data: Array<RateData> = binanceSocketFuture.getData(symbol, timeframe);
-        res.json(data);
-    }
-    catch (err) {
-        console.error(err);
-        res.json([]);
-    }
-});
-
-const io = new Server(server, {
-    pingInterval: 25000,
-    pingTimeout: 60000,
-    maxHttpBufferSize: 200 * 1024 * 1024 //100MB
-});
 const port = 85;
-let symbolListener: { [key: string]: boolean } = {};
-
-io.on('connection', client => {
-    console.log(`${BinanceSocketFuture.broker}: client connected. total: ${io.sockets.sockets.size} connection`);
-
-    client.on('disconnect', () => {
-        console.log(`${BinanceSocketFuture.broker}: onDisconnect - Client disconnected. total: ${io.sockets.sockets.size} connection`);
-    });
-
-    client.on('update_symbol_listener', (data: Array<SymbolListener>) => {
-        symbolListener = {};
-        for (const { symbol, timeframe, broker } of data) {
-            if (broker !== BinanceSocketFuture.broker) continue;
-            let key = `${symbol}:${timeframe}`;
-            symbolListener[key] = true;
-        }
-        console.log(`${BinanceSocketFuture.broker} on update_symbol_listener. length = ${Object.keys(symbolListener).length}`);
-    });
-});
-
-server.listen(port);
-
-function onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
-    let key = `${symbol}:${timeframe}`;
-    if (!symbolListener[key]) return;
-    if (data.length <= 15) return;
-
-    io.emit('onCloseCandle', { broker, symbol, timeframe, data });
-}
 
 const binanceSocketFuture = new BinanceSocketFuture();
-binanceSocketFuture.init(300, onCloseCandle);
+const socketServer = new SocketServer(
+    BinanceSocketFuture.broker,
+    port,
+    binanceSocketFuture.getData,
+    util.getBinanceFutureOHLCV
+);
+
+binanceSocketFuture.init(300, socketServer.onCloseCandle);
