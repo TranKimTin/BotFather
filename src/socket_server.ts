@@ -4,7 +4,6 @@ import { RateData, SymbolListener } from './common/Interface';
 import express from "express";
 import cors from "cors";
 import body_parser from "body-parser";
-
 export class SocketServer {
     private broker;
     private port: number;
@@ -13,7 +12,7 @@ export class SocketServer {
     private app;
     private server;
     private io;
-    private symbolListener: { [key: string]: boolean };
+    private symbolListener: { [key: string]: { [key: string]: boolean } };
 
     constructor(broker: string, port: number, getData: (symbol: string, timeframe: string) => Array<RateData>, getOHLCV: (symbol: string, timeframe: string, limit: number, since?: number) => Promise<Array<RateData>>) {
         this.broker = broker;
@@ -65,7 +64,7 @@ export class SocketServer {
         this.app.get('/api/getData', (req: any, res) => {
             try {
                 const { symbol, timeframe } = req.query;
-                let data: Array<RateData> = this.getData(symbol, timeframe);
+                const data: Array<RateData> = this.getData(symbol, timeframe);
                 res.json(data);
             }
             catch (err) {
@@ -77,18 +76,34 @@ export class SocketServer {
         this.io.on('connection', client => {
             console.log(`${this.broker}: client connected. total: ${this.io.sockets.sockets.size} connection`);
 
-            client.on('disconnect', () => {
-                console.log(`${this.broker}: onDisconnect - Client disconnected. total: ${this.io.sockets.sockets.size} connection`);
-            });
+            this.symbolListener[client.id] = {};
 
-            client.on('update_symbol_listener', (data: Array<SymbolListener>) => {
-                this.symbolListener = {};
+            client.on('subscribe', (data: Array<SymbolListener>) => {
+                const clientID = client.id;
+                this.symbolListener[clientID] = {};
                 for (const { symbol, timeframe, broker } of data) {
                     if (broker !== this.broker) continue;
-                    let key = `${symbol}:${timeframe}`;
-                    this.symbolListener[key] = true;
+                    const key = `${symbol}:${timeframe}`;
+                    this.symbolListener[clientID][key] = true;
                 }
-                console.log(`${this.broker} on update_symbol_listener. length = ${Object.keys(this.symbolListener).length}`);
+                console.log(`${this.broker} on subscribe. clientID = ${clientID}, length = ${Object.keys(this.symbolListener[clientID]).length}`);
+            });
+
+            client.on('unsubscribe', (data: Array<SymbolListener>) => {
+                const clientID = client.id;
+
+                for (const { symbol, timeframe, broker } of data) {
+                    if (broker !== this.broker) continue;
+                    const key = `${symbol}:${timeframe}`;
+                    delete this.symbolListener[clientID][key];
+                }
+                console.log(`${this.broker} on unsubscribe. clientID = ${clientID}, length = ${Object.keys(this.symbolListener[clientID]).length}`);
+            });
+
+            client.on('disconnect', () => {
+                const clientID = client.id;
+                delete this.symbolListener[clientID];
+                console.log(`${this.broker}: onDisconnect - Client ${clientID} disconnected. total: ${this.io.sockets.sockets.size} connection`);
             });
         });
 
@@ -96,10 +111,14 @@ export class SocketServer {
     }
 
     public onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
-        let key = `${symbol}:${timeframe}`;
         if (data.length <= 15) return;
-        if (!this.symbolListener[key]) return;
 
-        this.io.emit('onCloseCandle', { broker, symbol, timeframe, data });
+        for (const client of this.io.sockets.sockets.values()) {
+            const clientID = client.id;
+            const key = `${symbol}:${timeframe}`;
+            if (this.symbolListener[clientID][key]) {
+                client.emit('onCloseCandle', { broker, symbol, timeframe, data });
+            }
+        }
     }
 }

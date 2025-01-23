@@ -154,7 +154,7 @@ export class BotFather {
         });
 
         for (const { client, name } of this.socketList) {
-            client.emit('update_symbol_listener', symbolListener);
+            client.emit('subscribe', symbolListener);
         }
 
         fs.writeFileSync('temp.txt', new Date().getTime().toString());
