@@ -189,8 +189,8 @@ const okxSocket = new OkxSocket();
 const socketServer = new SocketServer(
     OkxSocket.broker,
     port,
-    okxSocket.getData,
+    okxSocket.getData.bind(okxSocket),
     util.getBinanceFutureOHLCV
 );
 
-okxSocket.init(300, socketServer.onCloseCandle);
+okxSocket.init(300, socketServer.onCloseCandle.bind(socketServer));

@@ -196,8 +196,8 @@ const binanceSocketFuture = new BinanceSocketFuture();
 const socketServer = new SocketServer(
     BinanceSocketFuture.broker,
     port,
-    binanceSocketFuture.getData,
+    binanceSocketFuture.getData.bind(binanceSocketFuture),
     util.getBinanceFutureOHLCV
 );
 
-binanceSocketFuture.init(300, socketServer.onCloseCandle);
+binanceSocketFuture.init(300, socketServer.onCloseCandle.bind(socketServer));

@@ -197,8 +197,8 @@ const bybitSocketFuture = new BybitSocketFuture();
 const socketServer = new SocketServer(
     BybitSocketFuture.broker,
     port,
-    bybitSocketFuture.getData,
+    bybitSocketFuture.getData.bind(bybitSocketFuture),
     util.getBinanceFutureOHLCV
 );
 
-bybitSocketFuture.init(300, socketServer.onCloseCandle);
+bybitSocketFuture.init(300, socketServer.onCloseCandle.bind(socketServer));

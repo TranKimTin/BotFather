@@ -203,8 +203,8 @@ const binanceSocket = new BinanceSocket();
 const socketServer = new SocketServer(
     BinanceSocket.broker,
     port,
-    binanceSocket.getData,
+    binanceSocket.getData.bind(binanceSocket),
     util.getBinanceOHLCV
 );
 
-binanceSocket.init(300, socketServer.onCloseCandle);
+binanceSocket.init(300, socketServer.onCloseCandle.bind(socketServer));
