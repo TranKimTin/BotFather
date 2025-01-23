@@ -1,6 +1,7 @@
 import express from 'express';
 import * as BotConfig from './controller/BotConfig';
 import * as User from './controller/User';
+import * as Dashboard from './controller/Dashboard';
 
 const { requireToken } = User;
 
@@ -12,6 +13,7 @@ routes.get('/getSymbolList', requireToken, BotConfig.getSymbolList);
 routes.get('/getBotList', requireToken, BotConfig.getBotList);
 routes.get('/getHistoryOrder', requireToken, BotConfig.getHistoryOrder);
 routes.get('/calculator', requireToken, BotConfig.calculator);
+routes.get('/dashboard/statistic', requireToken, Dashboard.statistic)
 
 
 routes.post("/save", requireToken, BotConfig.saveBot);
