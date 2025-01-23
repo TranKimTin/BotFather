@@ -200,10 +200,11 @@ export async function getOkxSymbolList() {
     const url = `https://www.okx.com/api/v5/public/instruments?instType=SPOT`;
     const res = await axios.get(url);
 
-    const data = await res.data as { data: Array<{ baseCcy: string, quoteCcy: string, instId: string }> };
+    const data = await res.data as { data: Array<{ baseCcy: string, quoteCcy: string, instId: string, listTime: string }> };
     return data.data
         .filter(item => item.quoteCcy === 'USDT')
         .filter(item => !['USDC', 'TUSD', 'BUSD', 'DAI'].includes(item.baseCcy))
+        .filter(item => new Date().getTime() > new Date(parseInt(item.listTime)).getTime())
         .map((item) => item.instId);
 }
 
