@@ -6,7 +6,8 @@ interface BotInfo {
     name: string
     tradeCount: number
     profit: number
-    cost: number
+    cost: number,
+    winrate: number
 }
 
 export default defineComponent({
@@ -18,7 +19,8 @@ export default defineComponent({
                 name: 'bot ' + i,
                 tradeCount: Math.round(Math.random() * 100) + 1,
                 profit: Math.round(Math.random() * 10000) - 5000,
-                cost: Math.round(Math.random() * 20) * 100
+                cost: Math.round(Math.random() * 20) * 100,
+                winrate: Math.round(Math.random() * 1000) / 10
             };
             botList.value.push(bot);
         }
