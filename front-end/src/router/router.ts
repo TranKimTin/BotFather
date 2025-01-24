@@ -4,6 +4,8 @@ import BotConfig from '../components/BotConfig/BotConfig.vue';
 import HistoryOrder from '../components/HistoryOrder/HistoryOrder.vue';
 import Calculator from '../components/Calculator/Calculator.vue';
 import Login from '../components/Login/Login.vue';
+import Admin from '../components/Admin/Admin.vue';
+import Guide from '../components/Guide/Guide.vue';
 
 const routes = [
     { path: '/', component: Dashboard },
@@ -11,6 +13,8 @@ const routes = [
     { path: '/history/:botName', component: HistoryOrder },
     { path: '/calculator', component: Calculator },
     { path: '/login', component: Login, meta: { layout: 'empty' } },
+    { path: '/admin', component: Admin },
+    { path: '/guide', component: Guide },
 ];
 
 const router = createRouter({

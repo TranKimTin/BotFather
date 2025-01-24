@@ -11,7 +11,7 @@
             </div>
             <ul class="menu">
                 <li v-for="item in r_menuItems" :key="item.label" :class="{ active: r_activeItem === item.label }">
-                    <span class="menu-link" @click.native="setActive(item)">
+                    <span v-if="!item.hide" class="menu-link" @click.native="setActive(item)">
                         <i :class="item.icon"></i>
                         <span v-if="r_sidebarVisible">
                             {{ item.label }}

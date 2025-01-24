@@ -9,7 +9,8 @@ import * as axios from '../../axios/axios';
 interface MenuItem {
     label: string,
     route: () => string,
-    icon: string
+    icon: string,
+    hide?: boolean
 }
 
 export default defineComponent({
@@ -17,11 +18,15 @@ export default defineComponent({
     setup() {
         const r_sidebarVisible = ref<boolean>(Cookies.get('sidebarVisible') !== 'false');
         const r_activeItem = ref<string>('Trang chủ');
+        const user = JSON.parse(Cookies.get('user') || '{}');
+
         const r_menuItems = ref<Array<MenuItem>>([
             { label: 'Trang chủ', route: () => '/', icon: 'pi pi-home' },
             { label: 'Cấu hình bot', route: () => '/bot', icon: 'pi pi-cog' },
             { label: 'Lịch sử lệnh', route: () => `/history/${Cookies.get('botName')}`, icon: 'pi pi-history' },
             { label: 'Máy tính', route: () => '/calculator', icon: 'pi pi-calculator' },
+            { label: 'Hướng dẫn', route: () => '/guide', icon: 'pi pi-calculator' },
+            { label: 'Admin', route: () => '/admin', icon: 'pi pi-calculator', hide: user.role !== 'admin' }
         ]);
         const r_email = ref<string>('Bot Father');
 
