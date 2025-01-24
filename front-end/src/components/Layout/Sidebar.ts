@@ -25,8 +25,8 @@ export default defineComponent({
             { label: 'Cấu hình bot', route: () => '/bot', icon: 'pi pi-cog' },
             { label: 'Lịch sử lệnh', route: () => `/history/${Cookies.get('botName')}`, icon: 'pi pi-history' },
             { label: 'Máy tính', route: () => '/calculator', icon: 'pi pi-calculator' },
-            { label: 'Hướng dẫn', route: () => '/guide', icon: 'pi pi-calculator' },
-            { label: 'Admin', route: () => '/admin', icon: 'pi pi-calculator', hide: user.role !== 'admin' }
+            { label: 'Hướng dẫn', route: () => '/guide', icon: 'pi pi-question-circle' },
+            { label: 'Admin', route: () => '/admin', icon: 'pi pi-user', hide: user.role !== 'admin' }
         ]);
         const r_email = ref<string>('Bot Father');
 
