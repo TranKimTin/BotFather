@@ -1,4 +1,4 @@
-import { ROLE, UserTokenInfo } from '../../common/Interface';
+import { ORDER_STATUS, ROLE, UserTokenInfo } from '../../common/Interface';
 import * as mysql from '../lib/mysql';
 import dotenv from 'dotenv';
 
@@ -16,9 +16,9 @@ export async function getBotInfo(userData: UserTokenInfo) {
                 FROM Bot b
                 JOIN User u ON u.id = b.userID
                 JOIN Orders o ON o.botID = b.id
-                WHERE (u.id = ? OR ? = ?) AND o.status <> 'Đã hủy'
+                WHERE (u.id = ? OR ? = ?) AND o.status in (?,?,?)
                 GROUP BY b.id
                 ORDER BY b.botName ASC;`;
-    const data = await mysql.query(sql, [userData.id, userData.role, ROLE.ADMIN]);
+    const data = await mysql.query(sql, [userData.id, userData.role, ROLE.ADMIN, ORDER_STATUS.MATCH_ENTRY, ORDER_STATUS.MATCH_TP, ORDER_STATUS.MATCH_SL]);
     return data;
 }
