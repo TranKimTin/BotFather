@@ -42,7 +42,7 @@ export async function getBalance(req: any, res: any) {
     try {
         const userData: UserTokenInfo = req.user;
         const data = await User.getBalance(userData);
-        return data;
+        res.json({ code: 200, message: "ok", data });
     } catch (error: any) {
         console.error(error);
         res.json({ code: 401, message: error, data: [] });
