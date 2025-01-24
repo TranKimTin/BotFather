@@ -1,8 +1,7 @@
 import fs from 'fs';
 import Telegram from './common/telegram';
 import io from 'socket.io-client';
-import { calculate, calculateSubExpr } from './common/Expr';
-import { BotInfo, ExprArgs, NODE_TYPE, Node, NodeData, ORDER_STATUS, RateData, SocketInfo, SymbolListener, TelegramIdType, UNIT } from './common/Interface';
+import { BotInfo, RateData, SocketInfo, SymbolListener } from './common/Interface';
 import * as mysql from './WebConfig/lib/mysql';
 import * as util from './common/util';
 import { StaticPool } from 'node-worker-threads-pool';
@@ -62,7 +61,7 @@ export class BotFather {
         client.on('onCloseCandle', async (msg: { broker: string, symbol: string, timeframe: string, data: Array<RateData> }) => {
             try {
                 const runtime = await this.worker.exec(msg);
-                // console.log('onCloseCandle', msg.broker, msg.symbol, msg.timeframe, 'runtime=', runtime);
+                console.log('onCloseCandle', msg.broker, msg.symbol, msg.timeframe, 'runtime=', runtime);
             }
             catch (err) {
                 console.error(err);
