@@ -26,6 +26,8 @@ export default defineComponent({
 
             for (let bot of botList.value) {
                 bot.cost = 0;
+                bot.profit -= (feeRate * bot.volumeClosed * 2);
+                bot.unrealizedProfit -= (feeRate * bot.volumeOpening)
                 totalProfit.value += bot.profit;
                 totalCost.value += bot.cost;
                 bot.profit = parseFloat(bot.profit.toFixed(2));
