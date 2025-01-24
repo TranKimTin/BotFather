@@ -28,6 +28,8 @@ export default defineComponent({
                 bot.cost = 0;
                 totalProfit.value += bot.profit;
                 totalCost.value += bot.cost;
+                bot.profit = parseFloat(bot.profit.toFixed(2));
+                bot.unrealizedProfit = parseFloat(bot.unrealizedProfit.toFixed(2));
                 bot.volumeOpening = parseFloat(bot.volumeOpening.toFixed(2));
                 bot.volumeClosed = parseFloat(bot.volumeClosed.toFixed(2));
             }
