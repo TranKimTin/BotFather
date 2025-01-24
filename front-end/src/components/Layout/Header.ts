@@ -25,9 +25,11 @@ export default defineComponent({
         };
 
         onMounted(() => {
-            axios.get('/getBalance').then(data => {
-                r_balance.value = data.balance + data.credit;
-            });
+            if (Cookies.get('token')) {
+                axios.get('/getBalance').then(data => {
+                    r_balance.value = data.balance + data.credit;
+                });
+            }
         });
 
         return { dropdownOpen, r_balance, logout };
