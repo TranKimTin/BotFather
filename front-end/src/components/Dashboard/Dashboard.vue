@@ -138,26 +138,26 @@
 
                                 <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
                                     <div class="text-sm leading-5 text-gray-900">
-                                        {{ u.tradeCountClosed }}
+                                        {{ u.tradeCountClosed.toLocaleString() }}
                                     </div>
                                 </td>
 
                                 <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
                                     <div class="text-sm leading-5 text-gray-900">
-                                        {{ u.tradeCountOpening }}
+                                        {{ u.tradeCountOpening.toLocaleString() }}
                                     </div>
                                 </td>
 
                                 <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
                                     <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
                                         :class="u.profit >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'">{{
-                                            u.profit.toLocaleString() }} </span> / {{ u.volumeClosed }} $
+                                            u.profit.toLocaleString() }} </span> / {{ u.volumeClosed.toLocaleString() }} $
                                 </td>
 
                                 <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
                                     <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
                                         :class="u.unrealizedProfit >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'">{{
-                                            u.unrealizedProfit.toLocaleString() }} </span> / {{ u.volumeOpening }} $
+                                            u.unrealizedProfit.toLocaleString() }} </span> / {{ u.volumeOpening.toLocaleString() }} $
                                 </td>
 
                                 <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
