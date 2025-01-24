@@ -69,3 +69,11 @@ export async function requireToken(token: string) {
         throw 'Phiên đăng nhập hết hạn, vui lòng đăng nhập lại';
     }
 }
+
+export async function getBalance(userData: UserTokenInfo) {
+    const userID = userData.id;
+    const sql = `SELECT balance, credit FROM User WHERE id = ?`;
+    const [{ balance, credit }] = await mysql.query(sql, [userID]);
+    return { balance, credit };
+}
+

@@ -37,3 +37,14 @@ export async function requireToken(req: any, res: any, next: any) {
         res.json({ code: 401, message: error, data: [] });
     }
 }
+
+export async function getBalance(req: any, res: any) {
+    try {
+        const userData: UserTokenInfo = req.user;
+        const data = await User.getBalance(userData);
+        return data;
+    } catch (error: any) {
+        console.error(error);
+        res.json({ code: 401, message: error, data: [] });
+    }
+}

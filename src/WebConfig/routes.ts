@@ -13,7 +13,9 @@ routes.get('/getSymbolList', requireToken, BotConfig.getSymbolList);
 routes.get('/getBotList', requireToken, BotConfig.getBotList);
 routes.get('/getHistoryOrder', requireToken, BotConfig.getHistoryOrder);
 routes.get('/calculator', requireToken, BotConfig.calculator);
-routes.get('/dashboard/statistic', requireToken, Dashboard.statistic)
+routes.get('/dashboard/statistic', requireToken, Dashboard.statistic);
+routes.get('/getBalance', requireToken, User.getBalance);
+
 
 
 routes.post("/save", requireToken, BotConfig.saveBot);
