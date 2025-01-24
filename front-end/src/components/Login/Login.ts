@@ -16,14 +16,13 @@ export default defineComponent({
             const email = r_email.value;
             const password = r_password.value;
 
-
-            // axios.post(`/login`, { email, password }).then(response => {
-            //     let token = response.token;
-            //     Cookies.set("token", token);
-            //     let user = jwtDecode(token);
-            //     Cookies.set('user', JSON.stringify(user));
-            //     router.push('/');
-            // });
+            axios.post(`/login`, { email, password }).then(response => {
+                let token = response.token;
+                Cookies.set("token", token);
+                let user = jwtDecode(token);
+                Cookies.set('user', JSON.stringify(user));
+                router.push('/');
+            });
         }
 
         onMounted(() => {

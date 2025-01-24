@@ -1,4 +1,4 @@
-import { defineComponent, ref, onMounted, watch } from 'vue';
+import { defineComponent, ref, onMounted } from 'vue';
 import Toast from 'primevue/toast';
 import ConfirmDialog from 'primevue/confirmdialog';
 import * as mToast from '../../toast/toast';
@@ -13,10 +13,6 @@ export default defineComponent({
         const dropdownOpen = ref(false);
         const r_balance = ref<number>(0);
 
-        axios.get('/getBalance').then(data => {
-            r_balance.value = data.balance + data.credit;
-        });
-
         const logout = () => {
             axios.post('/logout').then(response => {
                 Cookies.remove('token');
@@ -27,6 +23,12 @@ export default defineComponent({
                 }, 500);
             });
         };
+
+        onMounted(() => {
+            axios.get('/getBalance').then(data => {
+                r_balance.value = data.balance + data.credit;
+            });
+        });
 
         return { dropdownOpen, r_balance, logout };
     },
