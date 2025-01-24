@@ -45,7 +45,7 @@
                         <div class="mx-5">
                             <h4 class="text-2xl font-semibold"
                                 :class="totalProfit >= 0 ? 'text-green-900' : 'text-red-900'">
-                                {{ totalProfit.toLocaleString() }}
+                                {{ totalProfit.toLocaleString() }} $
                             </h4>
                             <div class="text-gray-500">
                                 Tổng lợi nhuận
@@ -96,11 +96,19 @@
                                 </th>
                                 <th
                                     class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                                    Số lệnh
+                                    Số lệnh (đã đóng)
                                 </th>
                                 <th
                                     class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                                    Lợi nhuận
+                                    Số lệnh (đang mở)
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
+                                    Lãi / volume (đã đóng)
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
+                                    Lãi / volume (chưa đóng)
                                 </th>
                                 <th
                                     class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
@@ -124,21 +132,34 @@
                                 </td>
                                 <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
                                     <div class="text-sm leading-5 text-gray-900">
-                                        {{ u.name }}
+                                        {{ u.botName }}
                                     </div>
                                 </td>
 
                                 <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
                                     <div class="text-sm leading-5 text-gray-900">
-                                        {{ u.tradeCount }}
+                                        {{ u.tradeCountClosed }}
+                                    </div>
+                                </td>
+
+                                <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
+                                    <div class="text-sm leading-5 text-gray-900">
+                                        {{ u.tradeCountOpening }}
                                     </div>
                                 </td>
 
                                 <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
                                     <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
                                         :class="u.profit >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'">{{
-                                            u.profit.toLocaleString() }}</span>
+                                            u.profit.toLocaleString() }} $</span> / {{ u.volumeClosed }}
                                 </td>
+
+                                <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
+                                    <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
+                                        :class="u.unrealizedProfit >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'">{{
+                                            u.unrealizedProfit.toLocaleString() }} $</span> / {{ u.volumeOpening }}
+                                </td>
+
                                 <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
                                     <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full">
                                         {{ u.winrate }} %

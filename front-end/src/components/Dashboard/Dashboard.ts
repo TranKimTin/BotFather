@@ -1,36 +1,42 @@
 import { defineComponent, ref } from 'vue';
 import * as axios from '../../axios/axios';
-import * as Toast from '../../toast/toast';
 
 interface BotInfo {
-    name: string
-    tradeCount: number
-    profit: number
-    cost: number,
+    botName: string,
+    tradeCountClosed: number,
+    tradeCountOpening: number,
+    profit: number,
+    unrealizedProfit: number,
+    volumeClosed: number,
+    volumeOpening: number,
     winrate: number
+    cost: number,
 }
 
 export default defineComponent({
     components: {},
     setup() {
         const botList = ref<BotInfo[]>([]);
-        for (let i = 0; i < 10; i++) {
-            let bot: BotInfo = {
-                name: 'bot ' + i,
-                tradeCount: Math.round(Math.random() * 100) + 1,
-                profit: Math.round(Math.random() * 10000) - 5000,
-                cost: Math.round(Math.random() * 20) * 100,
-                winrate: Math.round(Math.random() * 1000) / 10
-            };
-            botList.value.push(bot);
-        }
+        let totalProfit = ref<number>(0);
+        let totalCost = ref<number>(0);
+        const feeRate = 0.05 / 100;
 
-        let totalProfit = 0;
-        let totalCost = 0;
-        for (let bot of botList.value) {
-            totalProfit += bot.profit;
-            totalCost += bot.cost;
-        }
+        axios.get(`/dashboard/statistic`).then(data => {
+            botList.value = data;
+
+            for (let bot of botList.value) {
+                bot.cost = 0;
+                totalProfit.value += bot.profit;
+                totalCost.value += bot.cost;
+                bot.volumeOpening = parseFloat(bot.volumeOpening.toFixed(2));
+                bot.volumeClosed = parseFloat(bot.volumeClosed.toFixed(2));
+            }
+
+            totalProfit.value = parseFloat(totalProfit.value.toFixed(2));
+            console.log(botList.value)
+        });
+
+
 
         return {
             botList,
