@@ -190,7 +190,7 @@ const socketServer = new SocketServer(
     OkxSocket.broker,
     port,
     okxSocket.getData.bind(okxSocket),
-    util.getBinanceFutureOHLCV
+    util.getOkxOHLCV
 );
 
 okxSocket.init(300, socketServer.onCloseCandle.bind(socketServer));
