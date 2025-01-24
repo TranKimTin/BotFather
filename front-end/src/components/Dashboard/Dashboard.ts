@@ -32,6 +32,7 @@ export default defineComponent({
                 bot.unrealizedProfit = parseFloat(bot.unrealizedProfit.toFixed(2));
                 bot.volumeOpening = parseFloat(bot.volumeOpening.toFixed(2));
                 bot.volumeClosed = parseFloat(bot.volumeClosed.toFixed(2));
+                bot.winrate = parseFloat(bot.winrate.toFixed(2));
             }
 
             totalProfit.value = parseFloat(totalProfit.value.toFixed(2));
