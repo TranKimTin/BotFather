@@ -12,7 +12,7 @@
         <div class="flex items-center">
             <div class="bg-gray-100 text-gray-600 font-semibold text-xs p-2 rounded-full shadow-md px-5">
                 Số dư hiện tại
-                <span class="block text-blue-600 text-base font-bold">37,019đ</span>
+                <span class="block text-blue-600 text-base font-bold">{{ r_balance.toLocaleString() }}đ</span>
             </div>
 
 

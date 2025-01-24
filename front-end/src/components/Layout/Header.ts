@@ -10,7 +10,12 @@ export default defineComponent({
     components: { Toast, ConfirmDialog },
     setup() {
         const router = useRouter();
-        const dropdownOpen = ref(false)
+        const dropdownOpen = ref(false);
+        const r_balance = ref<number>(0);
+
+        axios.get('/getBalance').then(data => {
+            r_balance.value = data.balance + data.credit;
+        });
 
         const logout = () => {
             axios.post('/logout').then(response => {
@@ -23,6 +28,6 @@ export default defineComponent({
             });
         };
 
-        return { dropdownOpen, logout };
+        return { dropdownOpen, r_balance, logout };
     },
 });
