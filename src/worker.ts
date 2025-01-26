@@ -18,6 +18,7 @@ function onCloseCandle(broker: string, symbol: string, timeframe: string, data: 
             // console.log("onCloseCandle", { symbol, timeframe });
 
             const visited: { [key: string]: boolean } = {};
+            return;
             dfs_handleLogic(route, broker, symbol, timeframe, data, idTelegram, visited, botIDs[botName]);
         }
         catch (err) {
