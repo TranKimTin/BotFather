@@ -29,7 +29,7 @@ export class BotFather {
         this.botIDs = {};
         this.hostWebServer = process.env.HOST_WEB_SERVER || 'http://localhost';
         this.worker = new StaticPool({
-            size: os.cpus().length * 2,
+            size: os.cpus().length,
             task: './worker.js'
         });
 
