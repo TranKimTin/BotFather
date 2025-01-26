@@ -15,7 +15,7 @@ export async function getBotInfo(userData: UserTokenInfo) {
                     COUNT(IF(o.profit >= 0 AND ( o.timeSL IS NOT NULL OR o.timeTP IS NOT NULL), 1, NULL)) / COUNT(1) * 100 AS winrate
                 FROM Bot b
                 JOIN User u ON u.id = b.userID
-                JOIN Orders o ON o.botID = b.id
+                LEFT JOIN Orders o ON o.botID = b.id
                 WHERE (u.id = ? OR ? = ?) AND o.status in (?,?,?)
                 GROUP BY b.id
                 ORDER BY b.botName ASC;`;
