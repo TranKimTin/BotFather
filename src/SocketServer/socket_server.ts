@@ -25,7 +25,25 @@ export class SocketServer {
         this.io = new Server(this.server, {
             pingInterval: 25000,
             pingTimeout: 60000,
-            maxHttpBufferSize: 200 * 1024 * 1024 //100MB
+            maxHttpBufferSize: 200 * 1024 * 1024, //100MB
+            perMessageDeflate: {
+                threshold: 2048, // defaults to 1024
+
+                zlibDeflateOptions: {
+                    chunkSize: 8 * 1024, // defaults to 16 * 1024
+                },
+
+                zlibInflateOptions: {
+                    windowBits: 14, // defaults to 15
+                    memLevel: 7, // defaults to 8
+                },
+
+                clientNoContextTakeover: false, // defaults to negotiated value.
+                serverNoContextTakeover: false, // defaults to negotiated value.
+                serverMaxWindowBits: 10, // defaults to negotiated value.
+
+                concurrencyLimit: 20, // defaults to 10
+            }
         });
 
         this.createServer();
@@ -117,7 +135,7 @@ export class SocketServer {
             const clientID = client.id;
             const key = `${symbol}:${timeframe}`;
             if (this.symbolListener[clientID][key]) {
-                client.emit('onCloseCandle', { broker, symbol, timeframe, data:[] });
+                client.emit('onCloseCandle', { broker, symbol, timeframe, data });
             }
         }
     }
