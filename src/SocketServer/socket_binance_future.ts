@@ -53,7 +53,7 @@ export class BinanceSocketFuture {
 
                 if (data.isFinal && !dataList[0].isFinal) {
                     dataList[0].isFinal = data.isFinal;
-                    onCloseCandle(BinanceSocketFuture.broker, data.symbol, data.interval, [...dataList]);
+                    onCloseCandle(BinanceSocketFuture.broker, data.symbol, data.interval, dataList);
                 }
             }
             else if (dataList[0].startTime < data.startTime) {

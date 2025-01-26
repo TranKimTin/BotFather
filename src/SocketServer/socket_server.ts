@@ -117,7 +117,7 @@ export class SocketServer {
             const clientID = client.id;
             const key = `${symbol}:${timeframe}`;
             if (this.symbolListener[clientID][key]) {
-                client.emit('onCloseCandle', { broker, symbol, timeframe, data });
+                client.emit('onCloseCandle', { broker, symbol, timeframe, data:[] });
             }
         }
     }
