@@ -16,7 +16,7 @@ export async function getBotInfo(userData: UserTokenInfo) {
                 FROM Bot b
                 JOIN User u ON u.id = b.userID
                 LEFT JOIN Orders o ON o.botID = b.id
-                WHERE (u.id = ? OR ? = ?) AND o.status in (?,?,?)
+                WHERE (u.id = ? OR ? = ?)
                 GROUP BY b.id
                 ORDER BY b.botName ASC;`;
     const data = await mysql.query(sql, [userData.id, userData.role, ROLE.ADMIN, ORDER_STATUS.MATCH_ENTRY, ORDER_STATUS.MATCH_TP, ORDER_STATUS.MATCH_SL]);
