@@ -25,7 +25,7 @@ export class BotFather {
         this.socketList = [];
 
         this.botChildren = [];
-        this.telegram = new Telegram(undefined, undefined, false);
+        this.telegram = new Telegram(undefined, undefined, true);
         this.botIDs = {};
         this.hostWebServer = process.env.HOST_WEB_SERVER || 'http://localhost';
         this.worker = new StaticPool({
@@ -61,7 +61,7 @@ export class BotFather {
         client.on('onCloseCandle', async (msg: { broker: string, symbol: string, timeframe: string, data: Array<RateData> }) => {
             try {
                 const runtime = await this.worker.exec(msg);
-                console.log('onCloseCandle', msg.broker, msg.symbol, msg.timeframe, 'runtime=', runtime);
+                // console.log('onCloseCandle', msg.broker, msg.symbol, msg.timeframe, 'runtime=', runtime);
             }
             catch (err) {
                 console.error(err);
