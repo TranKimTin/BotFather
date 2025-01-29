@@ -1,6 +1,6 @@
 import http from 'http';
 import { Server } from "socket.io";
-import { RateData, SymbolListener } from '../common/Interface';
+import { RateData, SocketData, SymbolListener } from '../common/Interface';
 import express from "express";
 import cors from "cors";
 import body_parser from "body-parser";
@@ -13,10 +13,13 @@ export class SocketServer {
     private server;
     private io;
     private symbolListener: { [key: string]: { [key: string]: boolean } };
+    private pool: Array<SocketData>;
+
 
     constructor(broker: string, port: number, getData: (symbol: string, timeframe: string) => Array<RateData>, getOHLCV: (symbol: string, timeframe: string, limit: number, since?: number) => Promise<Array<RateData>>) {
         this.broker = broker;
         this.port = port;
+        this.pool = [];
         this.getData = getData;
         this.getOHLCV = getOHLCV;
         this.symbolListener = {};
@@ -26,6 +29,7 @@ export class SocketServer {
             pingInterval: 25000,
             pingTimeout: 60000,
             maxHttpBufferSize: 200 * 1024 * 1024, //100MB
+            transports: ["websocket"],
             // perMessageDeflate: {
             //     threshold: 2048, // defaults to 1024
 
@@ -47,6 +51,7 @@ export class SocketServer {
         });
 
         this.createServer();
+        setInterval(this.intervalHandlePool.bind(this), 10);
     }
 
     private createServer() {
@@ -128,27 +133,32 @@ export class SocketServer {
         this.server.listen(this.port);
     }
 
-    public onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
-        if (data.length <= 15) return;
+    private intervalHandlePool() {
+        if (this.pool.length === 0) return;
+        let pool = this.pool;
+        this.pool = [];
 
         for (const client of this.io.sockets.sockets.values()) {
-            const clientID = client.id;
-            const key = `${symbol}:${timeframe}`;
-            if (this.symbolListener[clientID][key]) {
-                let s = JSON.stringify(data);
-                let parse = JSON.parse(s);
-                let sum = 0;
+            let data: Array<SocketData> = [];
 
-                for (let i = 0; i < 1000; i++) {
-                    for (let item of parse) {
-                        sum += item.close;
-                    }
+            for (let item of pool) {
+                const clientID = client.id;
+                const key = `${item.symbol}:${item.timeframe}`;
+                if (this.symbolListener[clientID][key]) {
+                    data.push(item);
                 }
+            }
 
-                console.log('onCloseCandle', broker, symbol, timeframe, sum);
-
-                // client.emit('onCloseCandle', { broker, symbol, timeframe, data });
+            if (data.length > 0) {
+                client.emit('onCloseCandle', data);
             }
         }
     }
+
+    public onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
+        if (data.length <= 15) return;
+
+        this.pool.push({ broker, symbol, timeframe, data });
+    }
+
 }

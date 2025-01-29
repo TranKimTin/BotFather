@@ -1,7 +1,7 @@
 import fs from 'fs';
 import Telegram from './common/telegram';
 import io from 'socket.io-client';
-import { BotInfo, RateData, SocketInfo, SymbolListener } from './common/Interface';
+import { BotInfo, RateData, SocketData, SocketInfo, SymbolListener } from './common/Interface';
 import * as mysql from './WebConfig/lib/mysql';
 import * as util from './common/util';
 import { StaticPool } from 'node-worker-threads-pool';
@@ -58,15 +58,17 @@ export class BotFather {
             console.log(`Connected to server ${BASE_URL}`);
         });
 
-        client.on('onCloseCandle', async (msg: { broker: string, symbol: string, timeframe: string, data: Array<RateData> }) => {
-            try {
-                // console.log('onCloseCandle', msg.broker, msg.symbol, msg.timeframe, 'runtime=', -1);
+        client.on('onCloseCandle', async (data: Array<SocketData>) => {
+            for (let item of data) {
+                try {
+                    console.log('onCloseCandle', item.broker, item.symbol, item.timeframe, 'runtime=', -1);
 
-                const runtime = await this.worker.exec(msg);
-                // console.log('onCloseCandle', msg.broker, msg.symbol, msg.timeframe, 'runtime=', runtime);
-            }
-            catch (err) {
-                console.error(err);
+                    // const runtime = await this.worker.exec(item);
+                    // console.log('onCloseCandle', item.broker, item.symbol, item.timeframe, 'runtime=', runtime);
+                }
+                catch (err) {
+                    console.error(err);
+                }
             }
         });
 

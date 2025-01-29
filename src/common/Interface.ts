@@ -174,7 +174,7 @@ export enum NODE_TYPE {
     CLOSE_ALL_POSITION = 'closeAllPosition'
 }
 
-export interface FundingRate{
+export interface FundingRate {
     calcTime: number,
     symbol: string,
     fundingIntervalHours: number,
@@ -191,4 +191,11 @@ export interface UserTokenInfo {
     id: number,
     email: string,
     role: ROLE
+}
+
+export interface SocketData {
+    broker: string,
+    symbol: string,
+    timeframe: string,
+    data: Array<RateData>
 }
