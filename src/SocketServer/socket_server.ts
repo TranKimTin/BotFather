@@ -29,7 +29,7 @@ export class SocketServer {
             pingInterval: 25000,
             pingTimeout: 60000,
             maxHttpBufferSize: 200 * 1024 * 1024, //100MB
-            transports: ["websocket"],
+            transports: ['websocket', 'polling'],
             // perMessageDeflate: {
             //     threshold: 2048, // defaults to 1024
 
