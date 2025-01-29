@@ -51,7 +51,7 @@ export class SocketServer {
         });
 
         this.createServer();
-        setInterval(this.intervalHandlePool.bind(this), 1000);
+        setInterval(this.intervalHandlePool.bind(this), 100);
 
         console.log(`Created socket server ${broker}:${port}`);
     }
@@ -146,13 +146,13 @@ export class SocketServer {
             for (let item of pool) {
                 const clientID = client.id;
                 const key = `${item.symbol}:${item.timeframe}`;
-                if (this.symbolListener[clientID][key]) {
+                // if (this.symbolListener[clientID][key]) {
                     data.push(item);
-                }
+                // }
             }
 
             if (data.length > 0) {
-                client.emit('onCloseCandle', data, );
+                client.emit('onCloseCandle', data);
             }
         }
     }
@@ -160,7 +160,7 @@ export class SocketServer {
     public onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
         if (data.length <= 15) return;
 
-        this.pool.push({ broker, symbol, timeframe, data });
+        this.pool.push({ broker, symbol, timeframe, data: [] });
     }
 
 }
