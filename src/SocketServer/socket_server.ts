@@ -28,7 +28,7 @@ export class SocketServer {
         this.io = new Server(this.server, {
             pingInterval: 25000,
             pingTimeout: 60000,
-            maxHttpBufferSize: 10 * 1024 * 1024 * 1024, //10 GB
+            maxHttpBufferSize: 1 * 1024 * 1024 * 1024, //1 GB
             transports: ['websocket', 'polling'],
             // perMessageDeflate: {
             //     threshold: 2048, // defaults to 1024
@@ -158,7 +158,7 @@ export class SocketServer {
             while (data.length > 0) {
                 if (data.length > 100) {
                     client.emit('onCloseCandle', data.slice(0, 100));
-                    data = data.slice(100);
+                    for(let i=0; i<100; i++) data.shift();
                 }
                 else {
                     client.emit('onCloseCandle', data);
