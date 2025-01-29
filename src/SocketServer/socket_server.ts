@@ -148,6 +148,10 @@ export class SocketServer {
                 const key = `${item.symbol}:${item.timeframe}`;
                 // if (this.symbolListener[clientID][key]) {
                     data.push(item);
+                    data.push(item);
+                    data.push(item);
+                    data.push(item);
+                    data.push(item);
                 // }
             }
 
