@@ -33,10 +33,10 @@ export class BotFather {
             task: './worker.js'
         });
 
-        this.connectTradeDataServer('binance');
-        this.connectTradeDataServer('bybit');
-        this.connectTradeDataServer('okx');
-        this.connectTradeDataServer('bybit_future');
+        // this.connectTradeDataServer('binance');
+        // this.connectTradeDataServer('bybit');
+        // this.connectTradeDataServer('okx');
+        // this.connectTradeDataServer('bybit_future');
         this.connectTradeDataServer('binance_future');
 
         this.connectToWebConfig(8080);
