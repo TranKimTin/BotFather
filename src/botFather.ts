@@ -82,13 +82,13 @@ export class BotFather {
         });
 
         client.on("connect_error", (error: { message: any; }) => {
-            console.log(`connect_error - Attempting to reconnect ${BASE_URL}`);
+            console.error(`connect_error - Attempting to reconnect ${BASE_URL}`, error);
             if (client.active) {
                 // temporary failure, the socket will automatically try to reconnect
             } else {
                 // the connection was denied by the server
                 // in that case, `socket.connect()` must be manually called in order to reconnect
-                console.log(error.message);
+                console.error(error.message);
                 client.connect();
             }
         });
