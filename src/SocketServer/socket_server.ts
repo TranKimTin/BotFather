@@ -52,6 +52,8 @@ export class SocketServer {
 
         this.createServer();
         setInterval(this.intervalHandlePool.bind(this), 10);
+
+        console.log(`Created socket server ${broker}:${port}`);
     }
 
     private createServer() {
