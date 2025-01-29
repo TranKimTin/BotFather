@@ -160,7 +160,7 @@ export class SocketServer {
     public onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
         if (data.length <= 15) return;
 
-        this.pool.push({ broker, symbol, timeframe, data: [] });
+        this.pool.push({ broker, symbol, timeframe, data });
     }
 
 }
