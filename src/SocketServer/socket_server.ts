@@ -28,7 +28,7 @@ export class SocketServer {
         this.io = new Server(this.server, {
             pingInterval: 25000,
             pingTimeout: 60000,
-            maxHttpBufferSize: 200 * 1024 * 1024, //100MB
+            maxHttpBufferSize: 10 * 1024 * 1024 * 1024, //10 GB
             transports: ['websocket', 'polling'],
             // perMessageDeflate: {
             //     threshold: 2048, // defaults to 1024
