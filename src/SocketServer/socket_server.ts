@@ -156,9 +156,9 @@ export class SocketServer {
             }
 
             while (data.length > 0) {
-                if (data.length > 1000) {
-                    client.emit('onCloseCandle', data.slice(0, 1000));
-                    data = data.slice(1000);
+                if (data.length > 100) {
+                    client.emit('onCloseCandle', data.slice(0, 100));
+                    data = data.slice(100);
                 }
                 else {
                     client.emit('onCloseCandle', data);
