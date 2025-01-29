@@ -147,16 +147,22 @@ export class SocketServer {
                 const clientID = client.id;
                 const key = `${item.symbol}:${item.timeframe}`;
                 // if (this.symbolListener[clientID][key]) {
-                    data.push(item);
-                    data.push(item);
-                    data.push(item);
-                    data.push(item);
-                    data.push(item);
+                data.push(item);
+                data.push(item);
+                data.push(item);
+                data.push(item);
+                data.push(item);
                 // }
             }
 
-            if (data.length > 0) {
-                client.emit('onCloseCandle', data);
+            while (data.length > 0) {
+                if (data.length > 1000) {
+                    client.emit('onCloseCandle', data.slice(0, 1000));
+                    data = data.slice(1000);
+                }
+                else {
+                    client.emit('onCloseCandle', data);
+                }
             }
         }
     }
