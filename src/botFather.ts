@@ -59,21 +59,17 @@ export class BotFather {
         });
 
         client.on('onCloseCandle', async (data: Array<SocketData>) => {
-            try {
-                for (let item of data) {
-                    try {
-                        console.log('onCloseCandle', item.broker, item.symbol, item.timeframe, 'runtime=', -1);
+            console.log('onCloseCandle', data.length);
+            for (let item of data) {
+                try {
+                    console.log('onCloseCandle', item.broker, item.symbol, item.timeframe, 'runtime=', -1);
 
-                        // const runtime = await this.worker.exec(item);
-                        // console.log('onCloseCandle', item.broker, item.symbol, item.timeframe, 'runtime=', runtime);
-                    }
-                    catch (err) {
-                        console.error(err);
-                    }
+                    // const runtime = await this.worker.exec(item);
+                    // console.log('onCloseCandle', item.broker, item.symbol, item.timeframe, 'runtime=', runtime);
                 }
-            }
-            catch (err) {
-                console.error(err);
+                catch (err) {
+                    console.error(err);
+                }
             }
         });
 
