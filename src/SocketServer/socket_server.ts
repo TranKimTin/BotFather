@@ -155,15 +155,7 @@ export class SocketServer {
                 // }
             }
 
-            while (data.length > 0) {
-                if (data.length > 100) {
-                    client.emit('onCloseCandle', data.slice(0, 100));
-                    for(let i=0; i<100; i++) data.shift();
-                }
-                else {
-                    client.emit('onCloseCandle', data);
-                }
-            }
+            client.emit('onCloseCandle', data);
         }
     }
 
