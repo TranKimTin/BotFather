@@ -25,7 +25,7 @@ export class BinanceSocketFuture {
         // console.log(symbolList.join(' '));
         console.log(`${BinanceSocketFuture.broker}: Total ${symbolList.length} symbols`);
 
-        const timeframes = ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d',];
+        const timeframes = [/*'1m', '3m', */'5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d',];
         // timeframes = ['1m', '15m', '4h', '1d'];
         for (const symbol of symbolList) {
             this.gData[symbol] = {};

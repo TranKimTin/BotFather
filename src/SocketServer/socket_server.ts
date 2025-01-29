@@ -30,24 +30,24 @@ export class SocketServer {
             pingTimeout: 60000,
             maxHttpBufferSize: 200 * 1024 * 1024, //100MB
             transports: ['websocket', 'polling'],
-            perMessageDeflate: {
-                threshold: 2048, // defaults to 1024
+            // perMessageDeflate: {
+            //     threshold: 2048, // defaults to 1024
 
-                zlibDeflateOptions: {
-                    chunkSize: 8 * 1024, // defaults to 16 * 1024
-                },
+            //     zlibDeflateOptions: {
+            //         chunkSize: 8 * 1024, // defaults to 16 * 1024
+            //     },
 
-                zlibInflateOptions: {
-                    windowBits: 14, // defaults to 15
-                    memLevel: 7, // defaults to 8
-                },
+            //     zlibInflateOptions: {
+            //         windowBits: 14, // defaults to 15
+            //         memLevel: 7, // defaults to 8
+            //     },
 
-                clientNoContextTakeover: false, // defaults to negotiated value.
-                serverNoContextTakeover: false, // defaults to negotiated value.
-                serverMaxWindowBits: 10, // defaults to negotiated value.
+            //     clientNoContextTakeover: false, // defaults to negotiated value.
+            //     serverNoContextTakeover: false, // defaults to negotiated value.
+            //     serverMaxWindowBits: 10, // defaults to negotiated value.
 
-                concurrencyLimit: 20, // defaults to 10
-            }
+            //     concurrencyLimit: 20, // defaults to 10
+            // }
         });
 
         this.createServer();
