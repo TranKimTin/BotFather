@@ -91,7 +91,7 @@ export class BotFather {
                 console.log(error.message);
                 client.connect();
             }
-        }); 
+        });
 
         this.socketList.push({ name, client })
     }
@@ -121,10 +121,10 @@ export class BotFather {
         });
 
         client.on("connect_error", (error: { message: any; }) => {
-            console.log(`connect_error - Attempting to reconnect web config :${port}`, error);
+            console.error(`connect_error - Attempting to reconnect web config :${port}`, error);
             if (client.active) {
             } else {
-                console.log(error.message);
+                console.error(error.message);
                 client.connect();
             }
         });
