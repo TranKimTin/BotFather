@@ -135,15 +135,17 @@ export class SocketServer {
             const clientID = client.id;
             const key = `${symbol}:${timeframe}`;
             if (this.symbolListener[clientID][key]) {
-                let s = 0;
-                for (let i = 0; i < 100; i++) {
-                    for (let j = 0; j < 100; j++) {
-                        for (let item of data) {
-                            s += item.close;
-                        }
+                let s = JSON.stringify(data);
+                let parse = JSON.parse(s);
+                let sum = 0;
+
+                for (let i = 0; i < 1000; i++) {
+                    for (let item of parse) {
+                        sum += item.close;
                     }
                 }
-                console.log('onCloseCandle', broker, symbol, timeframe, s);
+
+                console.log('onCloseCandle', broker, symbol, timeframe, sum);
 
                 // client.emit('onCloseCandle', { broker, symbol, timeframe, data });
             }
