@@ -146,13 +146,9 @@ export class SocketServer {
             for (let item of pool) {
                 const clientID = client.id;
                 const key = `${item.symbol}:${item.timeframe}`;
-                // if (this.symbolListener[clientID][key]) {
-                data.push(item);
-                data.push(item);
-                data.push(item);
-                data.push(item);
-                data.push(item);
-                // }
+                if (this.symbolListener[clientID][key]) {
+                    data.push(item);
+                }
             }
 
             client.emit('onCloseCandle', data);
