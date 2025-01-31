@@ -62,9 +62,9 @@ export class BotFather {
             console.log('onCloseCandle', data.length);
             for (let item of data) {
                 try {
-                    console.log('onCloseCandle', item.broker, item.symbol, item.timeframe, 'runtime=', -1);
+                    // console.log('onCloseCandle', item.broker, item.symbol, item.timeframe, 'runtime=', -1);
 
-                    // const runtime = await this.worker.exec(item);
+                    const runtime = await this.worker.exec(item);
                     // console.log('onCloseCandle', item.broker, item.symbol, item.timeframe, 'runtime=', runtime);
                 }
                 catch (err) {
