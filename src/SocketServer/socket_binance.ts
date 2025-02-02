@@ -41,14 +41,14 @@ export class BinanceSocket extends SocketData {
             const kline = data.k;
             const candle: RateData = {
                 symbol: data.s,
-                startTime: kline.t,
-                open: kline.o,
-                high: kline.h,
-                low: kline.l,
-                close: kline.c,
-                volume: kline.v,
+                startTime: +kline.t,
+                open: +kline.o,
+                high: +kline.h,
+                low: +kline.l,
+                close: +kline.c,
+                volume: +kline.v,
                 interval: kline.i,
-                isFinal: kline.x,
+                isFinal: !!kline.x,
                 timestring: ''
             };
 
