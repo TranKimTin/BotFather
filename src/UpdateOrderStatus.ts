@@ -196,7 +196,7 @@ async function updateRate() {
                 const [{ count }] = await mysql.query(`SELECT count(1) AS count FROM Rates WHERE symbol = ? AND timestamp = ?`, [s, closeTime]);
                 if (count > 0) return;
 
-                const BASE_URL = util.getSocketURL(broker).replace('ws://', 'http://');
+                const BASE_URL = util.getSocketURL(broker);
                 const url = `${BASE_URL}/api/getOHLCV`;
                 const params = {
                     symbol: symbol,
