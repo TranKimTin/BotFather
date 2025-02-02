@@ -151,7 +151,7 @@ export async function getBinanceFutureSymbolList() {
     const data = res.data as { symbols: Array<{ symbol: string; status: string }> };
     return data.symbols
         .filter((item: { status: string }) => item.status == 'TRADING')
-        .map((item: { symbol: any; }) => item.symbol)
+        .map((item: { symbol: string; }) => item.symbol)
         .filter(item => item.endsWith('USDT'))
         .filter(item => !['USDCUSDT', 'TUSDUSDT', 'DAIUSDT'].includes(item));
 }
