@@ -944,7 +944,7 @@ export function iDoji(candle: RateData): boolean {
 }
 
 export function getSocketURL(broker: string) {
-    const hostSocketServer = process.env.HOST_SOCKET_SERVER || 'ws://localhost';
+    const hostSocketServer = process.env.HOST_SOCKET_SERVER || 'http://localhost';
     const ports: { [key: string]: number } = {
         'binance': 81,
         'bybit': 82,
