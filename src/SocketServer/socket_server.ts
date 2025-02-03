@@ -81,7 +81,7 @@ export class SocketServer {
                 res.json(data);
             }
             catch (err) {
-                console.error(err);
+                console.error(err, req.query);
                 res.json([]);
             }
         });
