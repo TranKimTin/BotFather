@@ -247,7 +247,7 @@ async function main() {
         console.error(err);
     }
     finally {
-        setTimeout(main, 1 * 60 * 1000);
+        setTimeout(main, 33 * 60 * 1000);
     }
 }
 
