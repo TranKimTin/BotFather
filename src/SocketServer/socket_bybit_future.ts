@@ -94,7 +94,7 @@ const socketServer = new SocketServer(
     BybitSocketFuture.broker,
     port,
     bybitSocketFuture.getData.bind(bybitSocketFuture),
-    util.getBybitOHLCV
+    util.getBybitFutureOHLCV
 );
 
 bybitSocketFuture.SetOnCloseCandle(socketServer.onCloseCandle.bind(socketServer));
