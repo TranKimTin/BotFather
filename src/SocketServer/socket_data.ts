@@ -254,13 +254,13 @@ export class SocketData {
                     const res = await Promise.all(promiseList);
                     promiseList = [];
                     const delayTime = 5000 / this.symbolLoadConcurrent * res.filter(item => item === true).length;
-                    console.log({delayTime});
+                    console.log({ tf, delayTime });
                     await delay(delayTime);
                 }
             }
             const res = await Promise.all(promiseList);
             const delayTime = 5000 / this.symbolLoadConcurrent * res.filter(item => item === true).length;
-            console.log({delayTime});
+            console.log({ tf, delayTime });
 
             await delay(delayTime);
         }
