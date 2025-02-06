@@ -230,6 +230,8 @@ export class SocketData {
         if (!this.getSymbolList) throw 'Missing fundtion getSymbolList';
         if (!this.init) throw 'Missing fundtion init';
 
+        console.log(`socket ${this.broker} restart`);
+
         this.symbolList = await this.getSymbolList();
         console.log(`${this.broker}: Total ${this.symbolList.length} symbols`);
         console.log(`${this.broker}: init timeframe`, this.timeframes);
