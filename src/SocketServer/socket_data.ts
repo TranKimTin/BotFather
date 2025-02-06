@@ -92,10 +92,11 @@ export class SocketData {
         }
     }
 
-    protected async initCandle(symbol: string, timeframe: string) {
+    protected async initCandle(symbol: string, timeframe: string): Promise<boolean> {
         if (!this.getOHLCV) throw 'Missing fundtion getOHLCV';
 
-        const rates: Array<RateData> = await this.getRates(symbol, timeframe);
+        const res = { fromCache: false };
+        const rates: Array<RateData> = await this.getRates(symbol, timeframe, res);
         this.cacheData(rates);
         const lastData = this.gData[symbol][timeframe].reverse();
         this.gData[symbol][timeframe] = rates;
@@ -112,6 +113,7 @@ export class SocketData {
                 }
             }
         }
+        return res.fromCache;
     }
 
     private mergeRates(ratesLower: Array<RateData>, ratesHigher: Array<RateData>, timeframe: string) {
@@ -162,7 +164,8 @@ export class SocketData {
         return true;
     }
 
-    private async getRates(symbol: string, timeframe: string): Promise<Array<RateData>> {
+    private async getRates(symbol: string, timeframe: string, res: { fromCache: boolean }): Promise<Array<RateData>> {
+        res.fromCache = false;
         if (timeframe === '1m') return this.getOHLCV!(symbol, timeframe);
         const sql = `SELECT id, symbol, \`interval\`, startTime, open, high, low, close, volume
                         FROM CacheRates
@@ -185,6 +188,7 @@ export class SocketData {
         }
         if (!this.isValidRates(rates)) return this.getOHLCV!(symbol, timeframe);
         // console.log('get from cache', this.broker, symbol, timeframe);
+        res.fromCache = true;
         return rates;
     }
 
@@ -208,7 +212,7 @@ export class SocketData {
                     args.push(item.volume);
                 }
                 await mysql.query(sql, args);
-                console.log(`cached ${this.broker} ${rates[0].symbol}  ${rates[0].interval} - ${rates.length}`);
+                // console.log(`cached ${this.broker} ${rates[0].symbol}  ${rates[0].interval} - ${rates.length}`);
             }
             catch (err) {
                 console.error(err);
@@ -247,14 +251,15 @@ export class SocketData {
             for (const symbol of this.symbolList) {
                 promiseList.push(this.initCandle(symbol, tf));
                 if (promiseList.length >= this.symbolLoadConcurrent) {
-                    await Promise.all(promiseList);
+                    const res = await Promise.all(promiseList);
                     promiseList = [];
-                    await delay(5000);
+                    const delayTime = 5000 / this.symbolLoadConcurrent * res.filter(item => item === true).length;
+                    await delay(delayTime);
                 }
             }
-            await Promise.all(promiseList);
-
-            await delay(1000);
+            const res = await Promise.all(promiseList);
+            const delayTime = 5000 / this.symbolLoadConcurrent * res.filter(item => item === true).length;
+            await delay(delayTime);
         }
 
         const timeInterval = 10 * 60 * 1000;
