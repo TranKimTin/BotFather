@@ -115,6 +115,7 @@ export class SocketData {
     }
 
     private mergeRates(ratesLower: Array<RateData>, ratesHigher: Array<RateData>, timeframe: string) {
+        console.log('merge rate');
         if (ratesLower.length === 0) return;
         const rates: Array<RateData> = [];
         for (const rate of ratesLower) { //time DESC
@@ -177,20 +178,16 @@ export class SocketData {
         if (rates.length === 0) {
             return this.getOHLCV!(symbol, timeframe);
         }
-        if (timeframe !== '1m') {
-            let idx = this.timeframes.indexOf(timeframe) - 1;
-            while (idx >= 0) {
-                this.mergeRates(this.gData[symbol][this.timeframes[idx]], this.gData[symbol][timeframe], timeframe);
-                idx--;
-            }
-            if (!this.isValidRates(rates)) return this.getOHLCV!(symbol, timeframe);
-            console.log('get from cache', this.broker, symbol, timeframe);
-            return rates;
+
+        let idx = this.timeframes.indexOf(timeframe) - 1;
+        while (idx >= 0) {
+            this.mergeRates(this.gData[symbol][this.timeframes[idx]], this.gData[symbol][timeframe], timeframe);
+            console.log('merge rate ok');
+            idx--;
         }
         if (!this.isValidRates(rates)) return this.getOHLCV!(symbol, timeframe);
-
-        const since = rates[0].startTime + util.timeframeToNumberMiliseconds(timeframe);
-        return [...await this.getOHLCV!(symbol, timeframe, since), ...rates];
+        console.log('get from cache', this.broker, symbol, timeframe);
+        return rates;
     }
 
     private cacheData(rates: Array<RateData>) {
