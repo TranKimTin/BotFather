@@ -184,7 +184,7 @@ export class SocketData {
             idx--;
         }
         if (!this.isValidRates(rates)) return this.getOHLCV!(symbol, timeframe);
-        console.log('get from cache', this.broker, symbol, timeframe);
+        // console.log('get from cache', this.broker, symbol, timeframe);
         return rates;
     }
 
