@@ -253,13 +253,13 @@ export class SocketData {
                 if (promiseList.length >= this.symbolLoadConcurrent) {
                     const res = await Promise.all(promiseList);
                     promiseList = [];
-                    const delayTime = 5000 / this.symbolLoadConcurrent * res.filter(item => item === true).length;
+                    const delayTime = 5000 / this.symbolLoadConcurrent * res.filter(item => item === false).length;
                     console.log({ tf, delayTime });
                     await delay(delayTime);
                 }
             }
             const res = await Promise.all(promiseList);
-            const delayTime = 5000 / this.symbolLoadConcurrent * res.filter(item => item === true).length;
+            const delayTime = 5000 / this.symbolLoadConcurrent * res.filter(item => item === false).length;
             console.log({ tf, delayTime });
 
             await delay(delayTime);
