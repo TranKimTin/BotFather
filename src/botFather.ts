@@ -59,7 +59,7 @@ export class BotFather {
         try {
             const workerData: WorkerData = { broker, symbol, timeframe, data };
             const runtime = await this.worker.exec(workerData);
-            // console.log('onCloseCandle', broker, symbol, timeframe, 'runtime=', runtime);
+            console.log('onCloseCandle', broker, symbol, timeframe, 'runtime=', runtime);
         }
         catch (err) {
             console.error(err);
