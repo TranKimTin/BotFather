@@ -199,9 +199,10 @@ export class SocketData {
             try {
                 rates = rates.filter(item => item.isFinal && !item.id);
                 if (rates.length === 0) return;
-                const sql = `INSERT INTO CacheRates(symbol, \`interval\`, startTime, open, high, low, close, volume) VALUES ${Array(rates.length).fill('(?,?,?,?,?,?,?,?)').join(',')}`;
+                const sql = `INSERT INTO CacheRates(broker, symbol, \`interval\`, startTime, open, high, low, close, volume) VALUES ${Array(rates.length).fill('(?,?,?,?,?,?,?,?,?)').join(',')}`;
                 const args: Array<string | number> = [];
                 for (let item of rates) {
+                    args.push(this.broker);
                     args.push(item.symbol);
                     args.push(item.interval);
                     args.push(item.startTime);
