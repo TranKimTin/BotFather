@@ -58,7 +58,7 @@ export class SocketData {
         }
         else if (dataList[0].startTime < data.startTime) {
             dataList.unshift(data);
-            if (dataList.length > 300) {
+            while (dataList.length > 300) {
                 dataList.pop();
             }
             // if (dataList[1] && !dataList[1].isFinal) {
