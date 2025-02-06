@@ -63,12 +63,6 @@ export interface BotInfo {
 
 export type TelegramIdType = string | number;
 
-export interface SymbolListener {
-    symbol: string,
-    broker: string
-    timeframe: string,
-}
-
 export interface RateData {
     symbol: string,
     startTime: number,

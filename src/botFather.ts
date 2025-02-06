@@ -1,7 +1,7 @@
 import fs from 'fs';
 import Telegram from './common/telegram';
 import io from 'socket.io-client';
-import { BotInfo, RateData, WorkerData, SymbolListener } from './common/Interface';
+import { BotInfo, RateData, WorkerData } from './common/Interface';
 import * as mysql from './WebConfig/lib/mysql';
 import * as util from './common/util';
 import { StaticPool } from 'node-worker-threads-pool';
@@ -24,12 +24,14 @@ export class BotFather {
     private botIDs: { [key: string]: number };
     private hostWebServer: string;
     private worker;
+    private symbolListener: { [key: string]: boolean };
 
 
     constructor() {
         this.botChildren = [];
         this.telegram = new Telegram(undefined, undefined, true);
         this.botIDs = {};
+        this.symbolListener = {};
         this.socketList = [
             new BinanceSocket(this.onCloseCandle.bind(this)),
             new BinanceFutureSocket(this.onCloseCandle.bind(this)),
@@ -57,6 +59,9 @@ export class BotFather {
 
     private async onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
         try {
+            const key = `${broker}:${symbol}:${timeframe}`;
+            if (!this.symbolListener[key]) return;
+
             const workerData: WorkerData = { broker, symbol, timeframe, data };
             const runtime = await this.worker.exec(workerData);
             console.log('onCloseCandle', broker, symbol, timeframe, 'runtime=', runtime);
@@ -116,20 +121,17 @@ export class BotFather {
             this.botIDs[bot.botName] = bot.id;
         }
 
-        const list: Array<string> = [];
+        this.symbolListener = {};
+
         for (const bot of this.botChildren) {
             for (const timeframe of bot.timeframes) {
                 for (const s of bot.symbolList) {
                     const [broker, symbol] = s.split(':');
-                    const key = `${symbol}:${broker}:${timeframe}`;
-                    list.push(key);
+                    const key = `${broker}:${symbol}:${timeframe}`;
+                    this.symbolListener[key] = true;
                 }
             }
         }
-        const symbolListener: Array<SymbolListener> = [...new Set(list)].map(item => {
-            const [symbol, broker, timeframe] = item.split(':');
-            return { symbol, broker, timeframe };
-        });
 
         fs.writeFileSync('temp.txt', new Date().getTime().toString());
         console.log('init bot list', this.botChildren.length);
