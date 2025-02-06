@@ -1,25 +1,23 @@
-import { Candle } from 'binance-api-node';
 import * as util from '../common/util';
 import WebSocket from 'ws';
 import ReconnectingWebSocket from 'reconnecting-websocket';
-import { SocketServer } from './socket_server';
 import { SocketData } from './socket_data';
 import { RateData } from '../common/Interface';
 
 export class BinanceSocket extends SocketData {
     public static readonly broker = 'binance';
 
-    constructor() {
+    constructor(onCloseCandle: (broker: string, symbol: string, timeframe: string, data: Array<RateData>) => void) {
         const timeframes = [/*'1m', '3m', */'5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'];
-        super(timeframes, BinanceSocket.broker, 100);
+        super(timeframes, BinanceSocket.broker, 100, onCloseCandle);
     }
 
     protected getSymbolList = () => {
         return util.getBinanceSymbolList();
     }
 
-    protected getOHLCV = (symbol: string, timeframe: string) => {
-        return util.getBinanceOHLCV(symbol, timeframe, 300);
+    protected getOHLCV = (symbol: string, timeframe: string, since?: number) => {
+        return util.getBinanceOHLCV(symbol, timeframe, 300, since);
     };
 
     protected init = () => {
@@ -48,7 +46,7 @@ export class BinanceSocket extends SocketData {
                 close: +kline.c,
                 volume: +kline.v,
                 interval: kline.i,
-                isFinal: !!kline.x,
+                isFinal: !!+kline.x,
                 timestring: ''
             };
 
@@ -68,17 +66,3 @@ export class BinanceSocket extends SocketData {
         });
     }
 };
-
-const port = 81;
-
-const binanceSocket = new BinanceSocket();
-
-const socketServer = new SocketServer(
-    BinanceSocket.broker,
-    port,
-    binanceSocket.getData.bind(binanceSocket),
-    util.getBinanceOHLCV
-);
-
-binanceSocket.SetOnCloseCandle(socketServer.onCloseCandle.bind(socketServer));
-binanceSocket.initData();

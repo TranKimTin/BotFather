@@ -1,19 +1,24 @@
 import fs from 'fs';
 import Telegram from './common/telegram';
 import io from 'socket.io-client';
-import { BotInfo, RateData, SocketData, SocketInfo, SymbolListener } from './common/Interface';
+import { BotInfo, RateData, WorkerData, SymbolListener } from './common/Interface';
 import * as mysql from './WebConfig/lib/mysql';
 import * as util from './common/util';
 import { StaticPool } from 'node-worker-threads-pool';
+import { BinanceSocket } from './SocketServer/socket_binance';
+import { BinanceFutureSocket } from './SocketServer/socket_binance_future';
+import { BybitSocket } from './SocketServer/socket_bybit';
+import { BybitFutureSocket } from './SocketServer/socket_bybit_future';
+import { OkxSocket } from './SocketServer/socket_okx';
 import os from 'os';
 import dotenv from 'dotenv';
+import { SocketData } from './SocketServer/socket_data';
 
 dotenv.config({ path: `${__dirname}/../.env` });
 
 
 export class BotFather {
-    private socketList: Array<SocketInfo>;
-
+    private socketList: Array<SocketData>;
     private botChildren: Array<BotInfo>;
     private telegram: Telegram;
     private botIDs: { [key: string]: number };
@@ -22,72 +27,43 @@ export class BotFather {
 
 
     constructor() {
-        this.socketList = [];
-
         this.botChildren = [];
         this.telegram = new Telegram(undefined, undefined, true);
         this.botIDs = {};
+        this.socketList = [
+            new BinanceSocket(this.onCloseCandle.bind(this)),
+            new BinanceFutureSocket(this.onCloseCandle.bind(this)),
+            new BybitSocket(this.onCloseCandle.bind(this)),
+            new BybitFutureSocket(this.onCloseCandle.bind(this)),
+            new OkxSocket(this.onCloseCandle.bind(this))
+        ];
+        this.connectSocketServer();
         this.hostWebServer = process.env.HOST_WEB_SERVER || 'http://localhost';
         this.worker = new StaticPool({
             size: os.cpus().length,
             task: './worker.js'
         });
 
-        this.connectTradeDataServer('binance');
-        this.connectTradeDataServer('bybit');
-        this.connectTradeDataServer('okx');
-        this.connectTradeDataServer('bybit_future');
-        this.connectTradeDataServer('binance_future');
-
         this.connectToWebConfig(8080);
 
         this.initBotChildren();
     }
 
-    private connectTradeDataServer(name: string) {
-        const BASE_URL = util.getSocketURL(name);
-        const client = io(BASE_URL, {
-            reconnection: true,              // Bật tính năng tự động kết nối lại (mặc định là true)
-            reconnectionAttempts: Infinity,  // Số lần thử kết nối lại tối đa (mặc định là vô hạn)
-            reconnectionDelay: 1000,         // Thời gian chờ ban đầu trước khi thử kết nối lại (ms)
-            reconnectionDelayMax: 5000,      // Thời gian chờ tối đa giữa các lần thử kết nối lại (ms)
-            randomizationFactor: 0.5         // Yếu tố ngẫu nhiên trong thời gian chờ kết nối lại
-        });
+    private connectSocketServer() {
+        for (let item of this.socketList) {
+            item.initData();
+        }
+    }
 
-        client.on('connect', () => {
-            console.log(`Connected to server ${BASE_URL}`);
-        });
-
-        client.on('onCloseCandle', async (data: Array<SocketData>) => {
-            for (let item of data) {
-                try {
-                    // console.log('onCloseCandle', item.broker, item.symbol, item.timeframe, 'runtime=', -1);
-
-                    const runtime = await this.worker.exec(item);
-                    // console.log('onCloseCandle', item.broker, item.symbol, item.timeframe, 'runtime=', runtime);
-                }
-                catch (err) {
-                    console.error(err);
-                }
-            }
-        });
-
-        client.on('disconnect', (reason: string) => {
-            console.log(`onDisconnect - Disconnected from server ${BASE_URL}. reason: ${reason}`);
-        });
-
-        client.on("connect_error", (error: { message: any; }) => {
-            console.error(`connect_error - Attempting to reconnect ${BASE_URL}`, error.message);
-            if (client.active) {
-                // temporary failure, the socket will automatically try to reconnect
-            } else {
-                // the connection was denied by the server
-                // in that case, `socket.connect()` must be manually called in order to reconnect
-                client.connect();
-            }
-        });
-
-        this.socketList.push({ name, client })
+    private async onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
+        try {
+            const workerData: WorkerData = { broker, symbol, timeframe, data };
+            const runtime = await this.worker.exec(workerData);
+            // console.log('onCloseCandle', broker, symbol, timeframe, 'runtime=', runtime);
+        }
+        catch (err) {
+            console.error(err);
+        }
     }
 
     private connectToWebConfig(port: number) {
@@ -154,10 +130,6 @@ export class BotFather {
             const [symbol, broker, timeframe] = item.split(':');
             return { symbol, broker, timeframe };
         });
-
-        for (const { client, name } of this.socketList) {
-            client.emit('subscribe', symbolListener);
-        }
 
         fs.writeFileSync('temp.txt', new Date().getTime().toString());
         console.log('init bot list', this.botChildren.length);

@@ -1,6 +1,6 @@
 import http from 'http';
 import { Server } from "socket.io";
-import { RateData, SocketData, SymbolListener } from '../common/Interface';
+import { RateData, WorkerData, SymbolListener } from '../common/Interface';
 import express from "express";
 import cors from "cors";
 import body_parser from "body-parser";
@@ -13,7 +13,7 @@ export class SocketServer {
     private server;
     private io;
     private symbolListener: { [key: string]: { [key: string]: boolean } };
-    private pool: Array<SocketData>;
+    private pool: Array<WorkerData>;
 
 
     constructor(broker: string, port: number, getData: (symbol: string, timeframe: string) => Array<RateData>, getOHLCV: (symbol: string, timeframe: string, limit: number, since?: number) => Promise<Array<RateData>>) {
@@ -141,7 +141,7 @@ export class SocketServer {
         this.pool = [];
 
         for (const client of this.io.sockets.sockets.values()) {
-            let data: Array<SocketData> = [];
+            let data: Array<WorkerData> = [];
 
             for (let item of pool) {
                 const clientID = client.id;

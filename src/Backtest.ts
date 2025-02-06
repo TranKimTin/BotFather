@@ -124,7 +124,8 @@ export default class Backtest {
             const today = startDate.format('YYYY-MM-DD');
             const todayData: Array<RateData> = [];
             for (const symbol of this.symbolList) {
-                todayData.push(...await util.getData_m1(symbol, today));
+                //removed
+                // todayData.push(...await util.getData_m1(symbol, today));
             }
             todayData.sort((a, b) => a.startTime - b.startTime);
             for (const rate of todayData) {

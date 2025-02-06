@@ -33,15 +33,11 @@ async function handleOrder(order: Order) {
     try {
         const { broker, symbol, lastTimeUpdated } = order;
 
-        const BASE_URL = util.getSocketURL(broker);
-        const url = `${BASE_URL}/api/getOHLCV`;
-        const params = {
-            symbol,
-            timeframe: '1m',
-            since: lastTimeUpdated ? (lastTimeUpdated + 60000) : order.createdTime
-        };
-        const data: Array<RateData> = await axios.get(url, { params })
-            .then(res => res.data.reverse()); //time tang dan
+        const timeframe = '1m';
+        const since = lastTimeUpdated ? (lastTimeUpdated + 60000) : order.createdTime;
+        const limit = 300;
+        const data: Array<RateData> = await util.getOHLCV(broker, symbol, timeframe, limit, since)
+            .then(data => data.reverse()); //time tang dan
 
         let isUpdated: boolean = false;
         for (const rate of data) {
@@ -196,15 +192,11 @@ async function updateRate() {
                 const [{ count }] = await mysql.query(`SELECT count(1) AS count FROM Rates WHERE symbol = ? AND timestamp = ?`, [s, closeTime]);
                 if (count > 0) return;
 
-                const BASE_URL = util.getSocketURL(broker);
-                const url = `${BASE_URL}/api/getOHLCV`;
-                const params = {
-                    symbol: symbol,
-                    timeframe: '1m',
-                    since: closeTime,
-                    limit: 1
-                };
-                const rate: RateData = await axios.get(url, { params }).then(res => res.data[0]);
+                const timeframe = '1m';
+                const since = closeTime;
+                const limit = 1;
+                const rate: RateData = await util.getOHLCV(broker, symbol, timeframe, limit, since).then(data => data[0]);;
+   
                 await mysql.query(
                     `INSERT INTO Rates(symbol,timestamp,open,high,low,close) VALUES(?,?,?,?,?,?)`,
                     [s, closeTime, rate.open, rate.high, rate.low, rate.close]

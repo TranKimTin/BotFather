@@ -263,8 +263,13 @@ export function timeframeToNumberMinutes(tf: string) {
     }
 }
 
-export function nextTime(startTime: number, timeframe: string) {
-    const offsetTime = timeframeToNumberMinutes(timeframe) * 60 * 1000;
+export function timeframeToNumberMiliseconds(tf: string) {
+    return timeframeToNumberMinutes(tf) * 60000;
+}
+
+export function nextTime(timestamp: number, timeframe: string) {
+    const startTime = getStartTime(timeframe, timestamp);
+    const offsetTime = timeframeToNumberMiliseconds(timeframe);
     return startTime + offsetTime;
 }
 
@@ -497,14 +502,14 @@ export async function getOkxOHLCV(symbol: string, timeframe: string, limit: numb
         const close = +item[4] || 0;
         const volume = +item[5] || 0;
         const interval = timeframe;
-        const isFinal = true;
+        const isFinal = !!+item[8];
         const change = (close - open) / open;
         const ampl = (high - low) / open;
         const timestring = moment(startTime).format('YYYY-MM-DD HH:mm:SS');
         return { symbol, startTime, timestring, open, high, low, close, volume, interval, isFinal, change, ampl };
     });
     result.sort((a, b) => b.startTime - a.startTime);
-    if (result.length) result[0].isFinal = false;
+    // if (result.length) result[0].isFinal = false;
 
     return result;
 }
@@ -536,7 +541,7 @@ export async function getOkxOHLCVHistory(symbol: string, timeframe: string, limi
             break;
     }
 
-    const url = `https://www.okx.com/api/v5/market/history-candles?instId=${symbol}&bar=${tf}&limit=${limit}&after=${since + limit * timeframeToNumberMinutes(tf) * 60000}`;
+    const url = `https://www.okx.com/api/v5/market/history-candles?instId=${symbol}&bar=${tf}&limit=${limit}&after=${since + limit * timeframeToNumberMiliseconds(timeframe)}`;
     const res = await axios.get(url);
 
     const data = res.data as { data: Array<string> };
@@ -548,124 +553,17 @@ export async function getOkxOHLCVHistory(symbol: string, timeframe: string, limi
         const close = +item[4] || 0;
         const volume = +item[5] || 0;
         const interval = timeframe;
-        const isFinal = true;
+        const isFinal = !!+item[8];
         const change = (close - open) / open;
         const ampl = (high - low) / open;
         const timestring = moment(startTime).format('YYYY-MM-DD HH:mm:SS');
         return { symbol, startTime, timestring, open, high, low, close, volume, interval, isFinal, change, ampl };
     });
     result.sort((a, b) => b.startTime - a.startTime);
-    if (result.length) result[0].isFinal = false;
+    // if (result.length) result[0].isFinal = false;
+    while (result.length > 0 && result[result.length - 1].startTime < since) result.pop();
 
     return result;
-}
-
-export async function getOHLCVFromCache(symbol: string, timeframe: string, limit: number): Promise<Array<RateData>> {
-    const date = moment.utc();
-    const dataM1: Array<RateData> = [];
-    while (dataM1.length < limit * timeframeToNumberMinutes(timeframe)) {
-        const data = await getData_m1(symbol, date.format('YYYY-MM-DD'));
-        if (data.length == 0) break;
-        dataM1.unshift(...data);
-        date.subtract(1, 'day');
-    }
-
-    dataM1.sort((a, b) => a.startTime - b.startTime);
-
-    let data: Array<RateData> = [];
-    for (const candle of dataM1) {
-        candle.timestring = moment(getStartTime(timeframe, candle.startTime)).format('YYYY-MM-DD HH:mm:SS');
-        candle.startTime = getStartTime(timeframe, candle.startTime);
-
-        candle.interval = timeframe;
-        candle.isFinal = true;
-
-        if (data.length == 0 || data[0].startTime != candle.startTime) {
-            data.unshift(candle);
-        }
-        else {
-            data[0].high = Math.max(data[0].high, candle.high);
-            data[0].low = Math.min(data[0].low, candle.low);
-            data[0].close = candle.close;
-            data[0].volume += candle.isFinal ? candle.volume : 0;
-        }
-    }
-    data = data.slice(0, limit);
-    if (data.length) data[0].isFinal = false;
-
-    return data;
-}
-
-async function getOHLCV_m1(symbol: string, limit: number, since: number): Promise<Array<OHLCV>> {
-    const result = [];
-    const maxCall = 1000;
-    const check: { [key: number]: boolean } = {};
-    while (limit > 0) {
-        // if (limit > maxCall) console.log(`getOHLCV pending ${symbol} ${timeframe} ${limit}`);
-        const ohlcv = await binance.fetchOHLCV(symbol, '1m', since, Math.min(limit, maxCall));
-        const data = ohlcv.filter(item => item[0] !== undefined && item[1] !== undefined && item[2] !== undefined && item[3] !== undefined && item[4] !== undefined && item[5] !== undefined).map(item => {
-            const startTime = item[0] || 0;
-            const open = item[1] || 0;
-            const high = item[2] || 0;
-            const low = item[3] || 0;
-            const close = item[4] || 0;
-            const volume = item[5] || 0;
-            return { symbol, startTime, open, high, low, close, volume };
-        }).filter(item => !check[item.startTime]);
-        if (data.length == 0) break;
-        data.sort((a, b) => a.startTime - b.startTime);
-        result.push(...data);
-        for (const item of data) {
-            check[item.startTime] = true;
-        }
-        limit -= Math.min(limit, maxCall);
-        since = moment(data[data.length - 1].startTime).add(1, 'minute').valueOf();
-    }
-    result.sort((a, b) => a.startTime - b.startTime);
-    return result;
-}
-
-export async function getData_m1(symbol: string, date: string): Promise<Array<RateData>> {
-    const startDate = moment.utc(date);
-    let data: Array<OHLCV> = [];
-
-    const filename = `../data/${symbol}_${startDate.format('YYYY-MM-DD')}.data`;
-    if (!fs.existsSync(filename)) {
-        data = await getOHLCV_m1(symbol, 1440, startDate.valueOf());
-        if (data.length == 1440 && data[0].startTime == startDate.valueOf() && data[data.length - 1].startTime + 60000 == startDate.valueOf() + 86400000) {
-            const compressData = await compress(JSON.stringify(data));
-            fs.writeFileSync(filename, compressData);
-            console.log(`update data ${symbol} ${startDate.format('YYYY-MM-DD')}`);
-        }
-        if (data[0].startTime == startDate.valueOf()) {
-            if (startDate.format('YYYY-MM-DD') != moment.utc().format('YYYY-MM-DD')) {
-                // console.log('error', { symbol, startDate: startDate.format('YYYY-MM-DD'), length: data.length });
-                // console.log(data[0], data[data.length - 1])
-            }
-        }
-        else {
-            data = [];
-        }
-    }
-    else {
-        const dataDecompress = await decompress(fs.readFileSync(filename));
-        data = JSON.parse(dataDecompress.toString());
-    }
-
-    return data.map(item => ({
-        symbol: item.symbol,
-        startTime: item.startTime,
-        timestring: moment(item.startTime).format('YYYY-MM-DD HH:mm:ss'),
-        open: item.open,
-        high: item.high,
-        low: item.low,
-        close: item.close,
-        volume: item.volume,
-        interval: '1m',
-        isFinal: true,
-        change: (item.close - item.open) / item.open,
-        ampl: (item.high - item.low) / item.open
-    }));
 }
 
 export function iMA(data: Array<RateData>, period: number) {
@@ -943,17 +841,21 @@ export function iDoji(candle: RateData): boolean {
     return indicator.doji(singleInput);
 }
 
-export function getSocketURL(broker: string) {
-    const hostSocketServer = process.env.HOST_SOCKET_SERVER || 'http://localhost';
-    const ports: { [key: string]: number } = {
-        'binance': 81,
-        'bybit': 82,
-        'okx': 83,
-        'bybit_future': 84,
-        'binance_future': 85
-    };
-    const url = `${hostSocketServer}:${ports[broker]}`;
-    return url;
+export async function getOHLCV(broker: string, symbol: string, timeframe: string, limit: number, since?: number): Promise<Array<RateData>> {
+    //tinh tu thoi diem since, lay toi da limit candle
+    // if (since)
+    // console.log(since + timeframeToNumberMiliseconds(timeframe) < new Date().getTime())
+    if (since && !checkFinal(timeframe, since - 60000)) since = nextTime(since, timeframe);
+    if (broker === 'binance') return getBinanceOHLCV(symbol, timeframe, limit, since);
+    if (broker === 'binance_future') return getBinanceFutureOHLCV(symbol, timeframe, limit, since);
+    if (broker === 'bybit') return getBybitOHLCV(symbol, timeframe, limit, since);
+    if (broker === 'bybitFuture') return getBybitFutureOHLCV(symbol, timeframe, limit, since);
+    if (broker === 'okx' && !since) return getOkxOHLCV(symbol, timeframe, limit);
+    if (broker === 'okx' && since) return (since + timeframeToNumberMiliseconds(timeframe) * (limit) < new Date().getTime())
+        ? getOkxOHLCVHistory(symbol, timeframe, limit, since)
+        : getOkxOHLCV(symbol, timeframe, Math.ceil((new Date().getTime() - since) / timeframeToNumberMiliseconds(timeframe)));
+
+    return [];
 }
 
 export async function getBinanceFundingRate(symbol: string, limit: number, page: number = 1): Promise<Array<FundingRate>> {
