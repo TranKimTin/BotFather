@@ -120,7 +120,7 @@ export function iRSI(data: Array<RateData>, period: number) {
 export async function getDigitsFuture() {
     // const url = useFuture ? 'https://fapi.binance.com/fapi/v1/exchangeInfo' : 'https://api.binance.com/api/v1/exchangeInfo'
     const url = 'https://fapi.binance.com/fapi/v1/exchangeInfo';
-    const res = await axios.get(url);
+    const res = await axios.get(url, { timeout: 60000 });
     const data: any = res.data;
     const digits: { [key: string]: { price: number, volume: number } } = {};
     for (const item of data.symbols) {
@@ -134,7 +134,7 @@ export async function getDigitsFuture() {
 
 export async function getBinanceSymbolList() {
     const url = 'https://api.binance.com/api/v1/exchangeInfo';
-    const res = await axios.get(url);
+    const res = await axios.get(url, { timeout: 60000 });
 
     const data = res.data as { symbols: Array<{ symbol: string; status: string }> };
     return data.symbols
@@ -146,7 +146,7 @@ export async function getBinanceSymbolList() {
 
 export async function getBinanceFutureSymbolList() {
     const url = 'https://fapi.binance.com/fapi/v1/exchangeInfo';
-    const res = await axios.get(url);
+    const res = await axios.get(url, { timeout: 60000 });
 
     const data = res.data as { symbols: Array<{ symbol: string; status: string }> };
     return data.symbols
@@ -159,7 +159,7 @@ export async function getBinanceFutureSymbolList() {
 export async function getBybitSymbolList() {
     const url = `https://api.bybit.com/v5/market/tickers?category=spot`;
     // const url = `https://api.bybit.com/spot/v3/public/symbols`;
-    const res = await axios.get(url);
+    const res = await axios.get(url,{ timeout: 60000 });
 
     // const data = await res.data as { result: { list: Array<{ name: string, quoteCoin: string }> } };
     // return data.result.list
@@ -176,7 +176,7 @@ export async function getBybitSymbolList() {
 
 export async function getBybitFutureSymbolList() {
     // const url = `https://api.bybit.com/v2/public/symbols`;
-    // const res = await axios.get(url);
+    // const res = await axios.get(url, { timeout: 60000 });
 
     // const data = res.data as { result: Array<{ name: string, quote_currency: string, status: string }> };
     // return data.result
@@ -185,7 +185,7 @@ export async function getBybitFutureSymbolList() {
     //     .map((item) => item.name);
 
     const url = `https://api.bybit.com/v5/market/tickers?category=linear`;
-    const res = await axios.get(url);
+    const res = await axios.get(url, { timeout: 60000 });
 
 
     const data = res.data as { result: { list: Array<{ symbol: string, volume24h: string }> } };
@@ -198,7 +198,7 @@ export async function getBybitFutureSymbolList() {
 
 export async function getOkxSymbolList() {
     const url = `https://www.okx.com/api/v5/public/instruments?instType=SPOT`;
-    const res = await axios.get(url);
+    const res = await axios.get(url, { timeout: 60000 });
 
     const data = await res.data as { data: Array<{ baseCcy: string, quoteCcy: string, instId: string, listTime: string }> };
     return data.data
@@ -390,7 +390,7 @@ export async function getBybitOHLCV(symbol: string, timeframe: string, limit: nu
 
     let url = `https://api.bybit.com/v5/market/kline?category=spot&symbol=${symbol}&interval=${tf}&limit=${limit}`;
     if (since) url += `&start=${since}`;
-    const res = await axios.get(url);
+    const res = await axios.get(url, { timeout: 60000 });
 
     const data = res.data as { result: { list: Array<string> } };
     const result = data.result.list.map(item => {
@@ -440,7 +440,7 @@ export async function getBybitFutureOHLCV(symbol: string, timeframe: string, lim
 
     let url = `https://api.bybit.com/v5/market/kline?category=linear&symbol=${symbol}&interval=${tf}&limit=${limit}`;
     if (since) url += `&start=${since}`;
-    const res = await axios.get(url);
+    const res = await axios.get(url, { timeout: 60000 });
 
     const data = res.data as { result: { list: Array<string> } };
     const result = data.result.list.map(item => {
@@ -491,7 +491,7 @@ export async function getOkxOHLCV(symbol: string, timeframe: string, limit: numb
     }
 
     const url = `https://www.okx.com/api/v5/market/candles?instId=${symbol}&bar=${tf}&limit=${limit}`;
-    const res = await axios.get(url);
+    const res = await axios.get(url, { timeout: 60000 });
 
     const data = res.data as { data: Array<string> };
     const result = data.data.map(item => {
@@ -542,7 +542,7 @@ export async function getOkxOHLCVHistory(symbol: string, timeframe: string, limi
     }
 
     const url = `https://www.okx.com/api/v5/market/history-candles?instId=${symbol}&bar=${tf}&limit=${limit}&after=${since + limit * timeframeToNumberMiliseconds(timeframe)}`;
-    const res = await axios.get(url);
+    const res = await axios.get(url, { timeout: 60000 });
 
     const data = res.data as { data: Array<string> };
     const result = data.data.map(item => {
