@@ -115,7 +115,6 @@ export class SocketData {
     }
 
     private mergeRates(ratesLower: Array<RateData>, ratesHigher: Array<RateData>, timeframe: string) {
-        console.log('merge rate');
         if (ratesLower.length === 0) return;
         const rates: Array<RateData> = [];
         for (const rate of ratesLower) { //time DESC
@@ -128,7 +127,7 @@ export class SocketData {
         }
         for (let rate of rates) {  //time ASC
             if (ratesHigher.length === 0 || rate.startTime > ratesHigher[0].startTime) {
-                rates.unshift({
+                ratesHigher.unshift({
                     symbol: rate.symbol,
                     startTime: util.getStartTime(timeframe, rate.startTime),
                     timestring: moment(util.getStartTime(timeframe, rate.startTime)).format('YYYY-MM-DD HH:mm:SS'),
@@ -182,7 +181,6 @@ export class SocketData {
         let idx = this.timeframes.indexOf(timeframe) - 1;
         while (idx >= 0) {
             this.mergeRates(this.gData[symbol][this.timeframes[idx]], this.gData[symbol][timeframe], timeframe);
-            console.log('merge rate ok');
             idx--;
         }
         if (!this.isValidRates(rates)) return this.getOHLCV!(symbol, timeframe);
