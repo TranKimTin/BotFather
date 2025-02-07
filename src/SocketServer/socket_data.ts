@@ -207,6 +207,7 @@ export class SocketData {
                 const sql = `INSERT INTO CacheRates(broker, symbol, \`interval\`, startTime, open, high, low, close, volume) VALUES ${Array(rates.length).fill('(?,?,?,?,?,?,?,?,?)').join(',')}`;
                 const args: Array<string | number> = [];
                 for (let item of rates) {
+                    item.id = 1;
                     args.push(this.broker);
                     args.push(item.symbol);
                     args.push(item.interval);
