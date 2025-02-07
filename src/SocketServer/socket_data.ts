@@ -54,6 +54,7 @@ export class SocketData {
             if (data.isFinal && !dataList[0].isFinal) {
                 dataList[0].isFinal = data.isFinal;
                 this.onCloseCandle(this.broker, data.symbol, data.interval, dataList);
+                this.cacheData(dataList);
             }
         }
         else if (dataList[0].startTime < data.startTime) {
@@ -192,11 +193,16 @@ export class SocketData {
         return rates;
     }
 
-    private cacheData(rates: Array<RateData>) {
-        if (rates.length === 0 || rates[0].interval === '1m') return;
+    private cacheData(data: Array<RateData>) {
+        if (data.length === 0 || data[0].interval === '1m') return;
         setImmediate(async () => {
             try {
-                rates = rates.filter(item => item.isFinal && !item.id);
+                const rates: Array<RateData> = [];
+                for (let i = 0; i < data.length && !data[i].id; i++) {
+                    if (data[i].isFinal) {
+                        rates.push(data[i]);
+                    }
+                }
                 if (rates.length === 0) return;
                 const sql = `INSERT INTO CacheRates(broker, symbol, \`interval\`, startTime, open, high, low, close, volume) VALUES ${Array(rates.length).fill('(?,?,?,?,?,?,?,?,?)').join(',')}`;
                 const args: Array<string | number> = [];
@@ -212,7 +218,7 @@ export class SocketData {
                     args.push(item.volume);
                 }
                 await mysql.query(sql, args);
-                // console.log(`cached ${this.broker} ${rates[0].symbol}  ${rates[0].interval} - ${rates.length}`);
+                console.log(`cached ${this.broker} ${rates[0].symbol}  ${rates[0].interval} - ${rates.length}`);
             }
             catch (err) {
                 console.error(err);
