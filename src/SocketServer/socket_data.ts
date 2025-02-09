@@ -193,8 +193,9 @@ export class SocketData {
         return rates;
     }
 
-    private cacheData(data: Array<RateData>) {
+    private async cacheData(data: Array<RateData>) {
         if (data.length === 0 || data[0].interval === '1m') return;
+        await delay(60 * 1000);
         setImmediate(async () => {
             try {
                 const rates: Array<RateData> = [];
