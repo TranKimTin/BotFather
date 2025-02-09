@@ -187,7 +187,17 @@ export class SocketData {
             this.mergeRates(this.gData[symbol][this.timeframes[idx]], this.gData[symbol][timeframe], timeframe);
             idx--;
         }
-        if (!this.isValidRates(rates)) return this.getOHLCV!(symbol, timeframe);
+        if (!this.isValidRates(rates)) {
+            const ids: { [key: number]: number | undefined } = {};
+            for (const item of rates) {
+                ids[item.startTime] = item.id;
+            }
+            const result = await this.getOHLCV!(symbol, timeframe);
+            for (let item of result) {
+                item.id = ids[item.startTime];
+            }
+            return result;
+        }
         // console.log('get from cache', this.broker, symbol, timeframe);
         res.fromCache = true;
         return rates;
