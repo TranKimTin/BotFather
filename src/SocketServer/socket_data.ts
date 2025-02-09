@@ -205,37 +205,38 @@ export class SocketData {
 
     private async cacheData(data: Array<RateData>) {
         if (data.length === 0 || data[0].interval === '1m') return;
-        await delay(60 * 1000);
-        setImmediate(async () => {
-            try {
-                const rates: Array<RateData> = [];
-                for (let i = 0; i < data.length && !data[i].id; i++) {
-                    if (data[i].isFinal) {
-                        rates.push(data[i]);
+        setTimeout(() => {
+            setImmediate(async () => {
+                try {
+                    const rates: Array<RateData> = [];
+                    for (let i = 0; i < data.length && !data[i].id; i++) {
+                        if (data[i].isFinal) {
+                            rates.push(data[i]);
+                        }
                     }
+                    if (rates.length === 0) return;
+                    const sql = `INSERT INTO CacheRates(broker, symbol, \`interval\`, startTime, open, high, low, close, volume) VALUES ${Array(rates.length).fill('(?,?,?,?,?,?,?,?,?)').join(',')}`;
+                    const args: Array<string | number> = [];
+                    for (let item of rates) {
+                        item.id = 1;
+                        args.push(this.broker);
+                        args.push(item.symbol);
+                        args.push(item.interval);
+                        args.push(item.startTime);
+                        args.push(item.open);
+                        args.push(item.high);
+                        args.push(item.low);
+                        args.push(item.close);
+                        args.push(item.volume);
+                    }
+                    await mysql.query(sql, args);
+                    console.log(`cached ${this.broker} ${rates[0].symbol}  ${rates[0].interval} - ${rates.length}`);
                 }
-                if (rates.length === 0) return;
-                const sql = `INSERT INTO CacheRates(broker, symbol, \`interval\`, startTime, open, high, low, close, volume) VALUES ${Array(rates.length).fill('(?,?,?,?,?,?,?,?,?)').join(',')}`;
-                const args: Array<string | number> = [];
-                for (let item of rates) {
-                    item.id = 1;
-                    args.push(this.broker);
-                    args.push(item.symbol);
-                    args.push(item.interval);
-                    args.push(item.startTime);
-                    args.push(item.open);
-                    args.push(item.high);
-                    args.push(item.low);
-                    args.push(item.close);
-                    args.push(item.volume);
+                catch (err) {
+                    console.error(err);
                 }
-                await mysql.query(sql, args);
-                console.log(`cached ${this.broker} ${rates[0].symbol}  ${rates[0].interval} - ${rates.length}`);
-            }
-            catch (err) {
-                console.error(err);
-            }
-        });
+            });
+        }, 60000);
     }
 
     public getData(symbol: string, timeframe: string) {
