@@ -1,7 +1,7 @@
-import { parentPort, workerData } from 'worker_threads';
+import { parentPort } from 'worker_threads';
 import * as mysql from './WebConfig/lib/mysql';
 import { calculate, calculateSubExpr } from './common/Expr';
-import { BotInfo, ExprArgs, NODE_TYPE, Node, NodeData, ORDER_STATUS, RateData, SocketInfo, SymbolListener, TelegramIdType, UNIT } from './common/Interface';
+import { BotInfo, ExprArgs, NODE_TYPE, Node, NodeData, ORDER_STATUS, RateData, TelegramIdType, UNIT } from './common/Interface';
 import Telegram from './common/telegram';
 import * as util from './common/util';
 import fs from 'fs';

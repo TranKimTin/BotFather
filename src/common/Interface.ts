@@ -63,17 +63,6 @@ export interface BotInfo {
 
 export type TelegramIdType = string | number;
 
-export interface SocketInfo {
-    name: string;
-    client: Socket<DefaultEventsMap, DefaultEventsMap>,
-}
-
-export interface SymbolListener {
-    symbol: string,
-    broker: string
-    timeframe: string,
-}
-
 export interface RateData {
     symbol: string,
     startTime: number,
@@ -85,6 +74,7 @@ export interface RateData {
     volume: number,
     interval: string,
     isFinal: boolean,
+    id?: number
 }
 
 export interface IParamsConstructor {
@@ -193,7 +183,7 @@ export interface UserTokenInfo {
     role: ROLE
 }
 
-export interface SocketData {
+export interface WorkerData {
     broker: string,
     symbol: string,
     timeframe: string,

@@ -1,7 +1,6 @@
 import * as util from '../common/util';
 import WebSocket from 'ws';
 import ReconnectingWebSocket from 'reconnecting-websocket';
-import { SocketServer } from './socket_server';
 import { RateData } from '../common/Interface';
 import { SocketData } from './socket_data';
 
@@ -19,27 +18,27 @@ interface BybitCandle {
     timestamp: number
 };
 
-export class BybitSocketFuture extends SocketData {
+export class BybitFutureSocket extends SocketData {
     public static readonly broker = 'bybit_future'
 
-    constructor() {
+    constructor(onCloseCandle: (broker: string, symbol: string, timeframe: string, data: Array<RateData>) => void) {
         const timeframes = [/*'1m', '3m', */'5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'];
-        super(timeframes, BybitSocketFuture.broker, 100);
+        super(timeframes, BybitFutureSocket.broker, 100, onCloseCandle);
     }
 
     protected getSymbolList = () => {
         return util.getBybitFutureSymbolList();
     }
 
-    protected getOHLCV = (symbol: string, timeframe: string) => {
-        return util.getBybitFutureOHLCV(symbol, timeframe, 300);
+    protected getOHLCV = (symbol: string, timeframe: string, since?: number) => {
+        return util.getBybitFutureOHLCV(symbol, timeframe, 300, since);
     };
 
     protected init = () => {
         const rws = new ReconnectingWebSocket('wss://stream.bybit.com/v5/public/linear', [], { WebSocket: WebSocket });
 
         rws.addEventListener('open', () => {
-            console.log(`${BybitSocketFuture.broker}: WebSocket connection opened`);
+            console.log(`${BybitFutureSocket.broker}: WebSocket connection opened`);
 
             for (let i = 0; i < this.symbolList.length; i += 10) {
                 rws.send(JSON.stringify({
@@ -76,26 +75,13 @@ export class BybitSocketFuture extends SocketData {
         });
 
         rws.addEventListener('close', (event) => {
-            console.error(`${BybitSocketFuture.broker}: WebSocket connection closed ${event.code} ${event.reason}`);
+            console.error(`${BybitFutureSocket.broker}: WebSocket connection closed ${event.code} ${event.reason}`);
             // util.restartApp();
         });
 
         rws.addEventListener('error', (err) => {
-            console.error(`${BybitSocketFuture.broker}: WebSocket error: `, err);
+            console.error(`${BybitFutureSocket.broker}: WebSocket error: `, err);
             // util.restartApp();
         });
     }
 };
-
-const port = 84;
-
-const bybitSocketFuture = new BybitSocketFuture();
-const socketServer = new SocketServer(
-    BybitSocketFuture.broker,
-    port,
-    bybitSocketFuture.getData.bind(bybitSocketFuture),
-    util.getBybitFutureOHLCV
-);
-
-bybitSocketFuture.SetOnCloseCandle(socketServer.onCloseCandle.bind(socketServer));
-bybitSocketFuture.initData();

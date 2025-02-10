@@ -1,26 +1,26 @@
 import * as util from '../common/util';
-import moment from 'moment';
-import delay from 'delay';
 import WebSocket from 'ws';
 import ReconnectingWebSocket from 'reconnecting-websocket';
-import { SocketServer } from './socket_server';
 import { RateData } from '../common/Interface';
 import { SocketData } from './socket_data';
 
 export class OkxSocket extends SocketData {
     public static readonly broker = 'okx'
 
-    constructor() {
+    constructor(onCloseCandle: (broker: string, symbol: string, timeframe: string, data: Array<RateData>) => void) {
         const timeframes = [/*'1m', '3m', */'5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'];
-        super(timeframes, OkxSocket.broker, 20);
+        super(timeframes, OkxSocket.broker, 20, onCloseCandle);
     }
 
     protected getSymbolList = () => {
         return util.getOkxSymbolList();
     }
 
-    protected getOHLCV = (symbol: string, timeframe: string) => {
-        return util.getOkxOHLCV(symbol, timeframe, 300);
+    protected getOHLCV = (symbol: string, timeframe: string, since?: number) => {
+        if (!since) return util.getOkxOHLCV(symbol, timeframe, 300);
+        else return (since + util.timeframeToNumberMiliseconds(timeframe) * (300) < new Date().getTime())
+            ? util.getOkxOHLCVHistory(symbol, timeframe, 300, since)
+            : util.getOkxOHLCV(symbol, timeframe, Math.ceil((new Date().getTime() - since) / util.timeframeToNumberMiliseconds(timeframe)));
     };
 
     protected init = () => {
@@ -81,16 +81,3 @@ export class OkxSocket extends SocketData {
         });
     }
 };
-
-const port = 83;
-
-const okxSocket = new OkxSocket();
-const socketServer = new SocketServer(
-    OkxSocket.broker,
-    port,
-    okxSocket.getData.bind(okxSocket),
-    util.getOkxOHLCV
-);
-
-okxSocket.SetOnCloseCandle(socketServer.onCloseCandle.bind(socketServer));
-okxSocket.initData();

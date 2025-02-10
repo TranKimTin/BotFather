@@ -37,7 +37,7 @@ export class Expr extends ExprVisitor<any> {
         const timestamp = this.data[0]?.startTime;
         const treeText = tree.getText();
         if (timestamp && tree.getChildCount() === 1 && isNaN(Number(treeText))) {
-            const key = `${this.broker}:${this.symbol}:${this.timeframe}:${timestamp / 1000}_${treeText}`;
+            const key = `${treeText}_${this.broker}:${this.symbol}:${this.timeframe}:${timestamp / 1000}`;
             const cacheValue = Cache.get(key);
             if (cacheValue) {
                 return cacheValue;

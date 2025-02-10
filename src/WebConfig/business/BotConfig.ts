@@ -156,12 +156,7 @@ export async function getHistoryOrder(botName: string, filterBroker: Array<strin
 }
 
 export async function calculator(broker: string, symbol: string, timeframe: string, expr: string) {
-    const BASE_URL = util.getSocketURL(broker);
-    const url = `${BASE_URL}/api/getData`;
-    const params = { symbol, timeframe };
-
-    let data: Array<RateData> = await axios.get(url, { params })
-        .then(res => res.data);
+    const data = await util.getOHLCV(broker, symbol, timeframe, 300);
 
     if (data[0] && !data[0].isFinal) {
         data.shift();
@@ -287,15 +282,7 @@ export async function getUnrealizedProfit(data: Array<{ timestamp: string, order
                     const isUpdateDB: boolean = (p === undefined) ? true : false;
                     prices[s] = -1;
 
-                    const BASE_URL = util.getSocketURL(order.broker);
-                    const url = `${BASE_URL}/api/getOHLCV`;
-                    const params = {
-                        symbol: order.symbol,
-                        timeframe: '1m',
-                        since: timeInt,
-                        limit: 1
-                    };
-                    const rate: RateData = await axios.get(url, { params }).then(res => res.data[0]);
+                    const rate = await util.getOHLCV(order.broker, order.symbol, '1m', 1, timeInt).then(data => data[0]);
                     if (isUpdateDB && rate.isFinal) {
                         await mysql.query(
                             `INSERT INTO Rates(symbol,timestamp,open,high,low,close) VALUES(?,?,?,?,?,?)`,

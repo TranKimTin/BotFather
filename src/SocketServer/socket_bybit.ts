@@ -1,9 +1,6 @@
 import * as util from '../common/util';
-import moment from 'moment';
-import delay from 'delay';
 import WebSocket from 'ws';
 import ReconnectingWebSocket from 'reconnecting-websocket';
-import { SocketServer } from './socket_server';
 import { RateData } from '../common/Interface';
 import { SocketData } from './socket_data';
 
@@ -24,17 +21,17 @@ interface BybitCandle {
 export class BybitSocket extends SocketData {
     public static readonly broker = 'bybit'
 
-    constructor() {
+    constructor(onCloseCandle: (broker: string, symbol: string, timeframe: string, data: Array<RateData>) => void) {
         const timeframes = [/*'1m', '3m', */'5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'];
-        super(timeframes, BybitSocket.broker, 100);
+        super(timeframes, BybitSocket.broker, 100, onCloseCandle);
     }
 
     protected getSymbolList = () => {
         return util.getBybitSymbolList();
     }
 
-    protected getOHLCV = (symbol: string, timeframe: string) => {
-        return util.getBybitOHLCV(symbol, timeframe, 300);
+    protected getOHLCV = (symbol: string, timeframe: string, since?: number) => {
+        return util.getBybitOHLCV(symbol, timeframe, 300, since);
     };
 
     protected init = () => {
@@ -91,16 +88,3 @@ export class BybitSocket extends SocketData {
         });
     }
 };
-
-const port = 82;
-
-const bybitSocket = new BybitSocket();
-const socketServer = new SocketServer(
-    BybitSocket.broker,
-    port,
-    bybitSocket.getData.bind(bybitSocket),
-    util.getBybitOHLCV
-);
-
-bybitSocket.SetOnCloseCandle(socketServer.onCloseCandle.bind(socketServer));
-bybitSocket.initData();

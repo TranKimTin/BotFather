@@ -2,6 +2,7 @@ import * as util from '../common/util';
 import moment from 'moment';
 import delay from 'delay';
 import { RateData } from '../common/Interface';
+import * as mysql from '../WebConfig/lib/mysql';
 
 export class SocketData {
     private broker: string;
@@ -14,19 +15,22 @@ export class SocketData {
 
     protected getSymbolList?: () => Promise<Array<string>>;
     protected onCloseCandle?: (broker: string, symbol: string, timeframe: string, data: Array<RateData>) => void;
-    protected getOHLCV?: (symbol: string, timeframe: string) => Promise<Array<RateData>>;
+    protected getOHLCV?: (symbol: string, timeframe: string, since?: number) => Promise<Array<RateData>>;
     protected init?: () => void;
-    
 
-    constructor(timeframes: Array<string>, broker: string, symbolLoadConcurrent: number) {
+
+    constructor(timeframes: Array<string>, broker: string, symbolLoadConcurrent: number, onCloseCandle: (broker: string, symbol: string, timeframe: string, data: Array<RateData>) => void) {
         this.broker = broker;
         this.timeframes = timeframes;
         this.symbolLoadConcurrent = symbolLoadConcurrent;
+        this.onCloseCandle = onCloseCandle;
 
         this.gData = {};
         this.gLastPrice = {};
         this.gLastUpdated = {};
         this.symbolList = [];
+
+        if (this.timeframes[0] !== '1m') this.timeframes.unshift('1m');
     }
 
     protected mergeData(data: RateData, isFinalMinute: boolean) {
@@ -49,22 +53,24 @@ export class SocketData {
 
             if (data.isFinal && !dataList[0].isFinal) {
                 dataList[0].isFinal = data.isFinal;
-                this.onCloseCandle(this.broker, data.symbol, data.interval, dataList);
+                this.onCloseCandle(this.broker, data.symbol, data.interval, [...dataList]);
+                this.cacheData(dataList);
             }
         }
         else if (dataList[0].startTime < data.startTime) {
             dataList.unshift(data);
-            if (dataList.length > 300) {
+            while (dataList.length > 300) {
                 dataList.pop();
             }
-            if (dataList[1] && !dataList[1].isFinal) {
-                dataList[1].isFinal = true;
-                console.log('forces final', dataList[1]);
-                this.onCloseCandle(this.broker, data.symbol, data.interval, dataList.slice(1));
-            }
+            // if (dataList[1] && !dataList[1].isFinal) {
+            //     dataList[1].isFinal = true;
+            //     console.log('forces final', dataList[1]);
+            //     this.onCloseCandle(this.broker, data.symbol, data.interval, dataList.slice(1));
+            // }
         }
         else {
-            console.log('merge error');
+            console.log(`${this.broker}: merge error`);
+            console.log(dataList[0], data);
         }
     }
 
@@ -87,20 +93,150 @@ export class SocketData {
         }
     }
 
-    protected async initCandle(symbol: string, timeframe: string) {
+    protected async initCandle(symbol: string, timeframe: string): Promise<boolean> {
         if (!this.getOHLCV) throw 'Missing fundtion getOHLCV';
 
-        const rates = await this.getOHLCV(symbol, timeframe);;
+        const res = { fromCache: false };
+        const rates: Array<RateData> = await this.getRates(symbol, timeframe, res);
+        this.cacheData(rates);
         const lastData = this.gData[symbol][timeframe].reverse();
         this.gData[symbol][timeframe] = rates;
         this.gLastPrice[symbol] = this.gData[symbol][timeframe][0]?.close || 0;
 
         for (const data of lastData) {
-            const lastRate = this.gData[symbol][timeframe][0];
-            if (data.startTime >= lastRate.startTime) {
-                this.mergeData(data, data.isFinal);
+            if (this.gData[symbol][timeframe].length === 0) {
+                this.gData[symbol][timeframe].push(data);
+            }
+            else {
+                const lastRate = this.gData[symbol][timeframe][0];
+                if (data.startTime >= lastRate.startTime) {
+                    this.mergeData(data, data.isFinal);
+                }
             }
         }
+        return res.fromCache;
+    }
+
+    private mergeRates(ratesLower: Array<RateData>, ratesHigher: Array<RateData>, timeframe: string) {
+        if (ratesLower.length === 0) return;
+        const rates: Array<RateData> = [];
+        for (const rate of ratesLower) { //time DESC
+            if (ratesHigher.length === 0 || ratesHigher[0].startTime <= rate.startTime) {
+                rates.unshift(rate);
+            }
+            else {
+                break;
+            }
+        }
+        for (let rate of rates) {  //time ASC
+            if (ratesHigher.length === 0 || rate.startTime > ratesHigher[0].startTime) {
+                ratesHigher.unshift({
+                    symbol: rate.symbol,
+                    startTime: util.getStartTime(timeframe, rate.startTime),
+                    timestring: moment(util.getStartTime(timeframe, rate.startTime)).format('YYYY-MM-DD HH:mm:SS'),
+                    open: rate.open,
+                    high: rate.high,
+                    low: rate.low,
+                    close: rate.close,
+                    volume: rate.volume,
+                    interval: timeframe,
+                    isFinal: rate.isFinal && ((rate.startTime + util.timeframeToNumberMiliseconds(rate.interval) - util.getStartTime(timeframe, rate.startTime) === util.timeframeToNumberMiliseconds(timeframe)) ? true : false)
+                });
+            }
+            else if (util.getStartTime(timeframe, rate.startTime) === ratesHigher[0].startTime) {
+                ratesHigher[0].high = Math.max(ratesHigher[0].high, rate.high);
+                ratesHigher[0].low = Math.min(ratesHigher[0].low, rate.low);
+                ratesHigher[0].close = rate.close;
+            }
+            else {
+                console.log('merge rate error', rate, ratesHigher[0]);
+            }
+        }
+    }
+
+    private isValidRates(rates: Array<RateData>): boolean {
+        if (rates.length <= 1) return true;
+        const timeIntervalMiliseconds = rates[0].startTime - rates[1].startTime;
+        for (let i = 2; i < rates.length; i++) {
+            if (rates[i - 1].startTime - rates[i].startTime !== timeIntervalMiliseconds) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private async getRates(symbol: string, timeframe: string, res: { fromCache: boolean }): Promise<Array<RateData>> {
+        res.fromCache = false;
+        if (timeframe === '1m') return this.getOHLCV!(symbol, timeframe);
+        const sql = `SELECT id, symbol, \`interval\`, startTime, open, high, low, close, volume
+                        FROM CacheRates
+                        WHERE symbol = ? AND \`interval\` = ? AND broker = ?
+                        ORDER BY startTime DESC
+                        LIMIT 300`;
+        const rates: Array<RateData> = await mysql.query(sql, [symbol, timeframe, this.broker]);
+        for (let item of rates) {
+            item.timestring = moment(item.startTime).format('YYYY-MM-DD HH:mm:SS');
+            item.isFinal = true;
+        }
+        if (rates.length === 0) {
+            return this.getOHLCV!(symbol, timeframe);
+        }
+
+        let idx = this.timeframes.indexOf(timeframe) - 1;
+        while (idx >= 0) {
+            this.mergeRates(this.gData[symbol][this.timeframes[idx]], this.gData[symbol][timeframe], timeframe);
+            idx--;
+        }
+        if (!this.isValidRates(rates)) {
+            const ids: { [key: number]: number | undefined } = {};
+            for (const item of rates) {
+                ids[item.startTime] = item.id;
+            }
+            const result = await this.getOHLCV!(symbol, timeframe);
+            for (let item of result) {
+                item.id = ids[item.startTime];
+            }
+            return result;
+        }
+        // console.log('get from cache', this.broker, symbol, timeframe);
+        res.fromCache = true;
+        return rates;
+    }
+
+    private async cacheData(data: Array<RateData>) {
+        if (data.length === 0 || data[0].interval === '1m') return;
+        setTimeout(() => {
+            setImmediate(async () => {
+                try {
+                    const rates: Array<RateData> = [];
+                    for (let i = 0; i < data.length && !data[i].id; i++) {
+                        if (data[i].isFinal) {
+                            rates.push(data[i]);
+                        }
+                    }
+                    if (rates.length === 0) return;
+                    const sql = `INSERT INTO CacheRates(broker, symbol, \`interval\`, startTime, open, high, low, close, volume) VALUES ${Array(rates.length).fill('(?,?,?,?,?,?,?,?,?)').join(',')}`;
+                    const args: Array<string | number> = [];
+                    for (let item of rates) {
+                        item.id = 1;
+                        args.push(this.broker);
+                        args.push(item.symbol);
+                        args.push(item.interval);
+                        args.push(item.startTime);
+                        args.push(item.open);
+                        args.push(item.high);
+                        args.push(item.low);
+                        args.push(item.close);
+                        args.push(item.volume);
+                    }
+                    await mysql.query(sql, args);
+                    console.log(`cached ${this.broker} ${rates[0].symbol}  ${rates[0].interval} - ${rates.length}`);
+                }
+                catch (err) {
+                    console.error(err);
+                }
+            });
+        }, 60000);
     }
 
     public getData(symbol: string, timeframe: string) {
@@ -108,14 +244,12 @@ export class SocketData {
         return this.gData[symbol][timeframe];
     }
 
-    public SetOnCloseCandle(onCloseCandle: (broker: string, symbol: string, timeframe: string, data: Array<RateData>) => void) {
-        this.onCloseCandle = onCloseCandle;
-    }
-
     public async initData() {
         // timeframes = ['1m', '15m', '4h', '1d'];
         if (!this.getSymbolList) throw 'Missing fundtion getSymbolList';
         if (!this.init) throw 'Missing fundtion init';
+
+        console.log(`socket ${this.broker} restart`);
 
         this.symbolList = await this.getSymbolList();
         console.log(`${this.broker}: Total ${this.symbolList.length} symbols`);
@@ -131,20 +265,25 @@ export class SocketData {
 
         await this.init();
 
+
         for (const tf of this.timeframes) {
             console.log(`${this.broker}: init candle ${tf}...`);
             let promiseList = [];
             for (const symbol of this.symbolList) {
                 promiseList.push(this.initCandle(symbol, tf));
                 if (promiseList.length >= this.symbolLoadConcurrent) {
-                    await Promise.all(promiseList);
+                    const res = await Promise.all(promiseList);
                     promiseList = [];
-                    await delay(5000);
+                    const delayTime = 5000 / this.symbolLoadConcurrent * res.filter(item => item === false).length;
+                    // console.log({ tf, delayTime });
+                    await delay(delayTime);
                 }
             }
-            await Promise.all(promiseList);
+            const res = await Promise.all(promiseList);
+            const delayTime = 5000 / this.symbolLoadConcurrent * res.filter(item => item === false).length;
+            // console.log({ tf, delayTime });
 
-            await delay(1000);
+            await delay(delayTime);
         }
 
         const timeInterval = 10 * 60 * 1000;

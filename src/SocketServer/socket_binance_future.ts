@@ -1,26 +1,23 @@
-import { Candle } from 'binance-api-node';
 import * as util from '../common/util';
 import WebSocket from 'ws';
 import ReconnectingWebSocket from 'reconnecting-websocket';
-import { SocketServer } from './socket_server';
 import { RateData } from '../common/Interface';
 import { SocketData } from './socket_data';
 
-
-export class BinanceSocketFuture extends SocketData {
+export class BinanceFutureSocket extends SocketData {
     public static readonly broker = 'binance_future';
 
-    constructor() {
+    constructor(onCloseCandle: (broker: string, symbol: string, timeframe: string, data: Array<RateData>) => void) {
         const timeframes = [/*'1m', '3m', */'5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'];
-        super(timeframes, BinanceSocketFuture.broker, 100);
+        super(timeframes, BinanceFutureSocket.broker, 100, onCloseCandle);
     }
 
     protected getSymbolList = () => {
         return util.getBinanceFutureSymbolList();
     }
 
-    protected getOHLCV = (symbol: string, timeframe: string) => {
-        return util.getBinanceFutureOHLCV(symbol, timeframe, 300);
+    protected getOHLCV = (symbol: string, timeframe: string, since?: number) => {
+        return util.getBinanceFutureOHLCV(symbol, timeframe, 300, since);
     };
 
     protected init = () => {
@@ -30,7 +27,7 @@ export class BinanceSocketFuture extends SocketData {
         const rws = new ReconnectingWebSocket(url, [], { WebSocket: WebSocket });
 
         rws.addEventListener('open', () => {
-            console.log(`${BinanceSocketFuture.broker}: Socket connected`);
+            console.log(`${BinanceFutureSocket.broker}: Socket connected`);
         });
 
         rws.addEventListener('message', (event) => {
@@ -46,7 +43,7 @@ export class BinanceSocketFuture extends SocketData {
                 close: +kline.c,
                 volume: +kline.v,
                 interval: kline.i,
-                isFinal: !!kline.x,
+                isFinal: !!+kline.x,
                 timestring: ''
             };
 
@@ -59,21 +56,8 @@ export class BinanceSocketFuture extends SocketData {
         });
 
         rws.addEventListener('close', (event) => {
-            console.error(`${BinanceSocketFuture.broker}: WebSocket connection closed, ${event.code} ${event.reason}`);
+            console.error(`${BinanceFutureSocket.broker}: WebSocket connection closed, ${event.code} ${event.reason}`);
             // util.restartApp();
         });
     }
 };
-
-const port = 85;
-
-const binanceSocketFuture = new BinanceSocketFuture();
-const socketServer = new SocketServer(
-    BinanceSocketFuture.broker,
-    port,
-    binanceSocketFuture.getData.bind(binanceSocketFuture),
-    util.getBinanceFutureOHLCV
-);
-
-binanceSocketFuture.SetOnCloseCandle(socketServer.onCloseCandle.bind(socketServer));
-binanceSocketFuture.initData();
