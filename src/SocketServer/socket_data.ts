@@ -53,8 +53,10 @@ export class SocketData {
 
             if (data.isFinal && !dataList[0].isFinal) {
                 dataList[0].isFinal = data.isFinal;
-                this.onCloseCandle(this.broker, data.symbol, data.interval, [...dataList]);
-                this.cacheData(dataList);
+                if (dataList.length > 5) {
+                    this.onCloseCandle(this.broker, data.symbol, data.interval, [...dataList]);
+                    this.cacheData(dataList);
+                }
             }
         }
         else if (dataList[0].startTime < data.startTime) {
