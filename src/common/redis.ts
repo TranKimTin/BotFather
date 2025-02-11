@@ -6,6 +6,8 @@ dotenv.config({ path: `${__dirname}/../../.env` });
 
 let client: ReturnType<typeof createClient>;
 
+initConnection();
+
 async function initConnection() {
     if (!client) {
         const redis_username = process.env.REDUS_USERNAME || '';
@@ -14,13 +16,19 @@ async function initConnection() {
         const redis_port = process.env.REDIS_PORT || 6379;
 
         client = await createClient({
-            url: `redis://${redis_username}:${redis_password}@${redis_host}:${redis_port}`
+            url: `redis://${redis_username}:${redis_password}@${redis_host}:${redis_port}`,
+            socket: {
+                connectTimeout: 10 * 60 * 100,
+                timeout: 10 * 60 * 1000,
+                keepAlive: 10 * 60 * 1000
+            }
         })
-            .on('error', err => console.log('Redis Client Error', err))
+            .on('error', err => console.error('Redis Client Error', err))
             .connect();
         console.log(`connected redis server ${redis_host}:${redis_port}`);
     }
 }
+
 export async function get(key: string) {
     if (!client) await initConnection();
     return client.get(key);

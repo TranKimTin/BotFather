@@ -2,7 +2,7 @@ import * as util from '../common/util';
 import moment from 'moment';
 import delay from 'delay';
 import { RateData } from '../common/Interface';
-import * as mysql from '../WebConfig/lib/mysql';
+import * as redis from '../common/redis';
 
 export class SocketData {
     private broker: string;
@@ -168,15 +168,12 @@ export class SocketData {
     private async getRates(symbol: string, timeframe: string, res: { fromCache: boolean }): Promise<Array<RateData>> {
         res.fromCache = false;
         if (timeframe === '1m') return this.getOHLCV!(symbol, timeframe);
-        const sql = `SELECT id, symbol, \`interval\`, startTime, open, high, low, close, volume
-                        FROM CacheRates
-                        WHERE symbol = ? AND \`interval\` = ? AND broker = ?
-                        ORDER BY startTime DESC
-                        LIMIT 300`;
-        const rates: Array<RateData> = await mysql.query(sql, [symbol, timeframe, this.broker]);
+        const key = `${this.broker}_${symbol}_${timeframe}`;
+
+        const rates: Array<RateData> = (await redis.getArray(key)).map(item => JSON.parse(item));
         for (let item of rates) {
-            item.timestring = moment(item.startTime).format('YYYY-MM-DD HH:mm:SS');
             item.isFinal = true;
+            item.cached = true;
         }
         if (rates.length === 0) {
             return this.getOHLCV!(symbol, timeframe);
@@ -188,17 +185,12 @@ export class SocketData {
             idx--;
         }
         if (!this.isValidRates(rates)) {
-            const ids: { [key: number]: number | undefined } = {};
-            for (const item of rates) {
-                ids[item.startTime] = item.id;
-            }
+            console.error(`rate is invalid`, JSON.stringify(rates));
+            await redis.remove(key);
             const result = await this.getOHLCV!(symbol, timeframe);
-            for (let item of result) {
-                item.id = ids[item.startTime];
-            }
             return result;
         }
-        // console.log('get from cache', this.broker, symbol, timeframe);
+        console.log(`get data from cache ${key}_${rates.length}`);
         res.fromCache = true;
         return rates;
     }
@@ -208,29 +200,26 @@ export class SocketData {
         setTimeout(() => {
             setImmediate(async () => {
                 try {
-                    const rates: Array<RateData> = [];
-                    for (let i = 0; i < data.length && !data[i].id; i++) {
+                    const rates: Array<RateData> = []; //time ASC
+                    for (let i = 0; i < data.length && !data[i].cached; i++) {
                         if (data[i].isFinal) {
-                            rates.push(data[i]);
+                            rates.unshift(data[i]);
                         }
                     }
                     if (rates.length === 0) return;
-                    const sql = `INSERT INTO CacheRates(broker, symbol, \`interval\`, startTime, open, high, low, close, volume) VALUES ${Array(rates.length).fill('(?,?,?,?,?,?,?,?,?)').join(',')}`;
-                    const args: Array<string | number> = [];
-                    for (let item of rates) {
-                        item.id = 1;
-                        args.push(this.broker);
-                        args.push(item.symbol);
-                        args.push(item.interval);
-                        args.push(item.startTime);
-                        args.push(item.open);
-                        args.push(item.high);
-                        args.push(item.low);
-                        args.push(item.close);
-                        args.push(item.volume);
+                    const key = `${this.broker}_${rates[0].symbol}_${rates[0].interval}`;
+                    let cnt = 0;
+                    for (let rate of rates) {
+                        if (!rate.cached) {
+                            rate.cached = true;
+                            cnt++;
+                            await redis.pushFront(key, JSON.stringify(rate));
+                        }
                     }
-                    await mysql.query(sql, args);
-                    console.log(`cached ${this.broker} ${rates[0].symbol}  ${rates[0].interval} - ${rates.length}`);
+                    while ((await redis.length(key) > 300)) {
+                        await redis.popBack(key);
+                    }
+                    console.log(`cached ${key}_${cnt}`);
                 }
                 catch (err) {
                     console.error(err);
@@ -275,7 +264,7 @@ export class SocketData {
                     const res = await Promise.all(promiseList);
                     promiseList = [];
                     const delayTime = 5000 / this.symbolLoadConcurrent * res.filter(item => item === false).length;
-                    // console.log({ tf, delayTime });
+                    // console.log({ broker: this.broker, symbol, tf, delayTime });
                     await delay(delayTime);
                 }
             }

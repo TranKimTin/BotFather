@@ -74,7 +74,7 @@ export interface RateData {
     volume: number,
     interval: string,
     isFinal: boolean,
-    id?: number
+    cached?: boolean
 }
 
 export interface IParamsConstructor {
