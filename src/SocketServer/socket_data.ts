@@ -187,7 +187,7 @@ export class SocketData {
             idx--;
         }
         if (!this.isValidRates(rates)) {
-            console.error(`rate is invalid`, JSON.stringify(rates));
+            console.error(`rate is invalid`, JSON.stringify(rates.map(item => item.timestring)));
             await redis.remove(key);
             const result = await this.getOHLCV!(symbol, timeframe);
             return result;
