@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 
 dotenv.config({ path: `${__dirname}/../../.env` });
 
-let client : any;
+let client: ReturnType<typeof createClient>;
 
 async function initConnection() {
     if (!client) {
@@ -26,7 +26,7 @@ export async function get(key: string) {
     return client.get(key);
 }
 
-export async function getArray(key: string) : Promise<Array<string>> {
+export async function getArray(key: string): Promise<Array<string>> {
     if (!client) await initConnection();
     return await client.lRange(key, 0, -1)
 }
@@ -69,4 +69,14 @@ export async function length(key: string) {
 export async function set(key: string, value: string) {
     if (!client) await initConnection();
     return await client.set(key, value);
+}
+
+export async function remove(key: string) {
+    if (!client) await initConnection();
+    return await client.del(key);
+}
+
+export async function clearAll() {
+    if (!client) await initConnection();
+    return await client.flushAll();
 }
