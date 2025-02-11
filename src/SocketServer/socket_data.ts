@@ -218,10 +218,12 @@ export class SocketData {
                             await redis.pushFront(key, JSON.stringify(rate));
                         }
                     }
+                    let cntRemove = 0;
                     while ((await redis.length(key) > 300)) {
                         await redis.popBack(key);
+                        cntRemove++;
                     }
-                    console.log(`cached ${key}_${cnt}`);
+                    console.log(`cached ${key}_${cnt}-${cntRemove}`);
                 }
                 catch (err) {
                     console.error(err);
