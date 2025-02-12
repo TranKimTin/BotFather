@@ -183,7 +183,7 @@ export class SocketData {
 
         let idx = this.timeframes.indexOf(timeframe) - 1;
         while (idx >= 0) {
-            this.mergeRates(this.gData[symbol][this.timeframes[idx]], this.gData[symbol][timeframe], timeframe);
+            this.mergeRates(this.gData[symbol][this.timeframes[idx]], rates, timeframe);
             idx--;
         }
         if (!this.isValidRates(rates)) {
