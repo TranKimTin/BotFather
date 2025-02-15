@@ -137,7 +137,7 @@ export class SocketData {
             }
         }
         for (let rate of rates) {  //time ASC
-            if (ratesHigher.length === 0 || rate.startTime > ratesHigher[0].startTime) {
+            if (ratesHigher.length === 0 || util.getStartTime(timeframe, rate.startTime) > ratesHigher[0].startTime) {
                 ratesHigher.unshift({
                     symbol: rate.symbol,
                     startTime: util.getStartTime(timeframe, rate.startTime),
