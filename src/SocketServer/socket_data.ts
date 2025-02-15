@@ -152,9 +152,6 @@ export class SocketData {
                     interval: timeframe,
                     isFinal: rate.isFinal && ((rate.startTime + util.timeframeToNumberMiliseconds(rate.interval) - util.getStartTime(timeframe, rate.startTime) === util.timeframeToNumberMiliseconds(timeframe)) ? true : false)
                 });
-                if (ratesHigher.length > 0 && !ratesHigher[1].isFinal) {
-                    console.log('merge rate error aaaa', JSON.stringify(rate), JSON.stringify(ratesHigher));
-                }
             }
             else if (util.getStartTime(timeframe, rate.startTime) === ratesHigher[0].startTime) {
                 ratesHigher[0].high = Math.max(ratesHigher[0].high, rate.high);
