@@ -128,7 +128,7 @@ export class SocketData {
     private mergeRates(ratesLower: Array<RateData>, ratesHigher: Array<RateData>, timeframe: string) {
         if (ratesLower.length === 0) return;
         if (util.timeframeToNumberMinutes(timeframe) % util.timeframeToNumberMinutes(ratesLower[0].interval) !== 0) return;
-        
+
         const rates: Array<RateData> = [];
         for (const rate of ratesLower) { //time DESC
             if (ratesHigher.length === 0 || ratesHigher[0].startTime <= rate.startTime) {
@@ -160,7 +160,7 @@ export class SocketData {
                 ratesHigher[0].isFinal = rate.isFinal && ((rate.startTime + util.timeframeToNumberMiliseconds(rate.interval) - util.getStartTime(timeframe, rate.startTime) === util.timeframeToNumberMiliseconds(timeframe)) ? true : false)
             }
             else {
-                console.error('merge rate error', rate, ratesHigher[0]);
+                console.error(`merge rate error ${this.broker}`, rate, ratesHigher[0]);
             }
         }
     }
@@ -196,7 +196,7 @@ export class SocketData {
             idx--;
         }
         if (!this.isValidRates(rates)) {
-            console.error(`rate is invalid`, JSON.stringify(rates.map(item => item.timestring)));
+            console.error(`rate is invalid ${key} `, JSON.stringify(rates.map(item => item.timestring)));
             await redis.remove(key);
             const result = await this.getOHLCV!(symbol, timeframe);
             return result;
