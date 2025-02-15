@@ -57,6 +57,9 @@ export class SocketData {
                     this.onCloseCandle(this.broker, data.symbol, data.interval, [...dataList]);
                     this.cacheData(dataList);
                 }
+                else {
+                    console.log(`ignore onCloseCandle ${this.broker} - ${dataList.length}`, dataList[0])
+                }
             }
         }
         else if (dataList[0].startTime < data.startTime) {
