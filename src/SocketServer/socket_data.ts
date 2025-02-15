@@ -160,7 +160,7 @@ export class SocketData {
                 ratesHigher[0].isFinal = rate.isFinal && ((rate.startTime + util.timeframeToNumberMiliseconds(rate.interval) - util.getStartTime(timeframe, rate.startTime) === util.timeframeToNumberMiliseconds(timeframe)) ? true : false)
             }
             else {
-                console.log('merge rate error', rate, ratesHigher[0]);
+                console.error('merge rate error', rate, ratesHigher[0]);
             }
         }
     }
