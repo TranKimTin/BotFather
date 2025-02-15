@@ -127,6 +127,8 @@ export class SocketData {
 
     private mergeRates(ratesLower: Array<RateData>, ratesHigher: Array<RateData>, timeframe: string) {
         if (ratesLower.length === 0) return;
+        if (util.timeframeToNumberMinutes(timeframe) % util.timeframeToNumberMinutes(ratesLower[0].interval) !== 0) return;
+        
         const rates: Array<RateData> = [];
         for (const rate of ratesLower) { //time DESC
             if (ratesHigher.length === 0 || ratesHigher[0].startTime <= rate.startTime) {
