@@ -67,11 +67,14 @@ export class SocketData {
             while (dataList.length > 300) {
                 dataList.pop();
             }
-            // if (dataList[1] && !dataList[1].isFinal) {
-            //     dataList[1].isFinal = true;
-            //     console.log('forces final', dataList[1]);
-            //     this.onCloseCandle(this.broker, data.symbol, data.interval, dataList.slice(1));
-            // }
+            if (dataList[1] && !dataList[1].isFinal) {
+                dataList[1].isFinal = true;
+                console.log('forces final', dataList[1]);
+                if (dataList.length > 5) {
+                    this.onCloseCandle(this.broker, data.symbol, data.interval, dataList.slice(1));
+                    this.cacheData(dataList);
+                }
+            }
         }
         else {
             console.log(`${this.broker}: merge error`);
@@ -222,9 +225,11 @@ export class SocketData {
                         }
                     }
                     let cntRemove = 0;
-                    while ((await redis.length(key) > 300)) {
+                    let cachedLength = await redis.length(key);
+                    while ((cachedLength > 300)) {
                         await redis.popBack(key);
                         cntRemove++;
+                        cachedLength--;
                     }
                     console.log(`cached ${key}_${cnt}-${cntRemove}`);
                 }
