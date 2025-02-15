@@ -150,14 +150,15 @@ export class SocketData {
                     interval: timeframe,
                     isFinal: rate.isFinal && ((rate.startTime + util.timeframeToNumberMiliseconds(rate.interval) - util.getStartTime(timeframe, rate.startTime) === util.timeframeToNumberMiliseconds(timeframe)) ? true : false)
                 });
-                if(ratesHigher.length > 0 && !ratesHigher[1].isFinal){
-                    console.log('merge rate error', JSON.stringify(rate), JSON.stringify(ratesHigher));
+                if (ratesHigher.length > 0 && !ratesHigher[1].isFinal) {
+                    console.log('merge rate error aaaa', JSON.stringify(rate), JSON.stringify(ratesHigher));
                 }
             }
             else if (util.getStartTime(timeframe, rate.startTime) === ratesHigher[0].startTime) {
                 ratesHigher[0].high = Math.max(ratesHigher[0].high, rate.high);
                 ratesHigher[0].low = Math.min(ratesHigher[0].low, rate.low);
                 ratesHigher[0].close = rate.close;
+                ratesHigher[0].isFinal = rate.isFinal && ((rate.startTime + util.timeframeToNumberMiliseconds(rate.interval) - util.getStartTime(timeframe, rate.startTime) === util.timeframeToNumberMiliseconds(timeframe)) ? true : false)
             }
             else {
                 console.log('merge rate error', rate, ratesHigher[0]);
