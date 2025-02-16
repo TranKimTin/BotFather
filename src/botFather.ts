@@ -62,11 +62,14 @@ export class BotFather {
             const key = `${broker}:${symbol}:${timeframe}`;
             if (!this.symbolListener[key]) return;
 
-            // console.log('onCloseCandle', broker, symbol, timeframe, 'runtime=', -1);
+            // console.log(`onCloseCandle ${broker} ${symbol} ${timeframe} runtime = ${-1} ms`);
 
+            const t1 = new Date().getTime();
             const workerData: WorkerData = { broker, symbol, timeframe, data };
             const runtime = await this.worker.exec(workerData);
-            console.log('onCloseCandle', broker, symbol, timeframe, 'runtime=', runtime);
+            const t2 = new Date().getTime();
+            const totalTime = t2 - t1;
+            console.log(`onCloseCandle ${broker} ${symbol} ${timeframe} runtime = ${runtime} ms, totalTime = ${totalTime} ms`);
         }
         catch (err) {
             console.error(err);
