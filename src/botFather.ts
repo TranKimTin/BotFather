@@ -49,6 +49,7 @@ export class BotFather {
         this.connectToWebConfig(8080);
 
         this.initBotChildren();
+        setInterval(this.tickHandler.bind(this), 1000);
     }
 
     private connectSocketServer() {
@@ -141,6 +142,22 @@ export class BotFather {
 
     public async init() {
         console.log('BotFather init');
+    }
+
+    private tickHandler() {
+        const binance = this.socketList[0];
+        const binanceFuture = this.socketList[1];
+
+        const symbolList = binance.getSymbols();
+        for (const symbol of symbolList) {
+            const spotPrice = binance.getLastPrice(symbol);
+            const futurePrice = binanceFuture.getLastPrice(symbol);
+            if (!spotPrice || !futurePrice) continue;
+            const diff = (futurePrice - spotPrice) / spotPrice * 100;
+            if (diff > 1) {
+                this.telegram.sendMessage(`${symbol} - spot: ${spotPrice}, future: ${futurePrice}, diff: ${diff} %`, 1833284254);
+            }
+        }
     }
 
 };

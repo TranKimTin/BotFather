@@ -248,6 +248,14 @@ export class SocketData {
         return this.gData[symbol][timeframe];
     }
 
+    public getLastPrice(symbol: string): number {
+        return this.gLastPrice[symbol] || 0;
+    }
+
+    public getSymbols() {
+        return this.symbolList;
+    }
+
     public async initData() {
         // timeframes = ['1m', '15m', '4h', '1d'];
         if (!this.getSymbolList) throw 'Missing fundtion getSymbolList';
