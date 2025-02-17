@@ -154,8 +154,8 @@ export class BotFather {
             const futurePrice = binanceFuture.getLastPrice(symbol);
             if (!spotPrice || !futurePrice) continue;
             const diff = (futurePrice - spotPrice) / spotPrice * 100;
-            if (diff > 1) {
-                this.telegram.sendMessage(`${symbol} - spot: ${spotPrice}, future: ${futurePrice}, diff: ${diff} %`, 1833284254);
+            if (diff > 2) {
+                this.telegram.sendMessage(`${symbol} - diff: ${+diff.toFixed(3)} %, spot: ${spotPrice}, future: ${futurePrice}`, 1833284254);
             }
         }
     }
