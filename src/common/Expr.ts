@@ -5,7 +5,7 @@ import { ABSContext, AddSubContext, AmplContext, AmplPContext, Avg_amplContext, 
 import { ExprVisitor } from './generated/ExprVisitor';
 import * as util from '../common/util';
 import moment from "moment";
-import { ExprArgs, NodeData, NODE_TYPE, RateData } from "../common/Interface";
+import { ExprArgs, NodeData, NODE_TYPE, RateData, MAX_CANDLE } from "../common/Interface";
 import * as Cache from './Cache';
 
 export class CustomErrorListener extends BaseErrorListener {
@@ -1224,8 +1224,8 @@ async function test() {
     const symbol = 'BTCUSDT';
     const timeframe = '1h';
     const data = (broker == 'binance_future')
-        ? await util.getBinanceFutureOHLCV(symbol, timeframe, 300)
-        : await util.getBinanceOHLCV(symbol, timeframe, 300);
+        ? await util.getBinanceFutureOHLCV(symbol, timeframe, MAX_CANDLE)
+        : await util.getBinanceOHLCV(symbol, timeframe, MAX_CANDLE);
     data.shift();
 
     console.log(data[0]);

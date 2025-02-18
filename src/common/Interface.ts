@@ -189,3 +189,5 @@ export interface WorkerData {
     timeframe: string,
     data: Array<RateData>
 }
+
+export const MAX_CANDLE = 500

@@ -1,14 +1,14 @@
 import * as util from '../common/util';
 import WebSocket from 'ws';
 import ReconnectingWebSocket from 'reconnecting-websocket';
-import { RateData } from '../common/Interface';
+import { MAX_CANDLE, RateData } from '../common/Interface';
 import { SocketData } from './socket_data';
 
 export class OkxSocket extends SocketData {
     public static readonly broker = 'okx'
 
     constructor(onCloseCandle: (broker: string, symbol: string, timeframe: string, data: Array<RateData>) => void) {
-        const timeframes = [/*'1m', '3m', */'5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'];
+        const timeframes = [/*'1m', '3m', */'5m', '15m', '30m', '1h', /*'2h',*/ '4h', /*'6h', '8h', '12h',*/ '1d'];
         super(timeframes, OkxSocket.broker, 20, onCloseCandle);
     }
 
@@ -17,9 +17,9 @@ export class OkxSocket extends SocketData {
     }
 
     protected getOHLCV = (symbol: string, timeframe: string, since?: number) => {
-        if (!since) return util.getOkxOHLCV(symbol, timeframe, 300);
-        else return (since + util.timeframeToNumberMiliseconds(timeframe) * (300) < new Date().getTime())
-            ? util.getOkxOHLCVHistory(symbol, timeframe, 300, since)
+        if (!since) return util.getOkxOHLCV(symbol, timeframe, MAX_CANDLE);
+        else return (since + util.timeframeToNumberMiliseconds(timeframe) * (MAX_CANDLE) < new Date().getTime())
+            ? util.getOkxOHLCVHistory(symbol, timeframe, MAX_CANDLE, since)
             : util.getOkxOHLCV(symbol, timeframe, Math.ceil((new Date().getTime() - since) / util.timeframeToNumberMiliseconds(timeframe)));
     };
 

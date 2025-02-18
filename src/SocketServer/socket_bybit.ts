@@ -1,7 +1,7 @@
 import * as util from '../common/util';
 import WebSocket from 'ws';
 import ReconnectingWebSocket from 'reconnecting-websocket';
-import { RateData } from '../common/Interface';
+import { MAX_CANDLE, RateData } from '../common/Interface';
 import { SocketData } from './socket_data';
 
 interface BybitCandle {
@@ -22,7 +22,7 @@ export class BybitSocket extends SocketData {
     public static readonly broker = 'bybit'
 
     constructor(onCloseCandle: (broker: string, symbol: string, timeframe: string, data: Array<RateData>) => void) {
-        const timeframes = [/*'1m', '3m', */'5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'];
+        const timeframes = [/*'1m', '3m', */'5m', '15m', '30m', '1h', /*'2h',*/ '4h', /*'6h', '8h', '12h',*/ '1d'];
         super(timeframes, BybitSocket.broker, 100, onCloseCandle);
     }
 
@@ -31,7 +31,7 @@ export class BybitSocket extends SocketData {
     }
 
     protected getOHLCV = (symbol: string, timeframe: string, since?: number) => {
-        return util.getBybitOHLCV(symbol, timeframe, 300, since);
+        return util.getBybitOHLCV(symbol, timeframe, MAX_CANDLE, since);
     };
 
     protected init = () => {

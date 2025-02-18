@@ -1,7 +1,7 @@
 import * as util from '../common/util';
 import moment from 'moment';
 import delay from 'delay';
-import { RateData } from '../common/Interface';
+import { MAX_CANDLE, RateData } from '../common/Interface';
 import * as redis from '../common/redis';
 
 export class SocketData {
@@ -64,7 +64,7 @@ export class SocketData {
         }
         else if (dataList[0].startTime < data.startTime) {
             dataList.unshift(data);
-            while (dataList.length > 300) {
+            while (dataList.length > MAX_CANDLE) {
                 dataList.pop();
             }
             if (dataList[1] && !dataList[1].isFinal) {
@@ -229,7 +229,7 @@ export class SocketData {
                     }
                     let cntRemove = 0;
                     let cachedLength = await redis.length(key);
-                    while ((cachedLength > 300)) {
+                    while ((cachedLength > MAX_CANDLE)) {
                         await redis.popBack(key);
                         cntRemove++;
                         cachedLength--;

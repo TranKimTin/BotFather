@@ -5,7 +5,7 @@ import moment from 'moment';
 import delay from 'delay';
 import * as util from './common/util';
 import dotenv from 'dotenv';
-import { Digit, IParamsConstructor, Order, Position, RateData } from './common/Interface';
+import { Digit, IParamsConstructor, MAX_CANDLE, Order, Position, RateData } from './common/Interface';
 
 dotenv.config({ path: '../.env' });
 
@@ -73,7 +73,7 @@ class BinanceFuture {
         }
     }
 
-    async init(numbler_candle_load: number = 300): Promise<void> {
+    async init(numbler_candle_load: number = MAX_CANDLE): Promise<void> {
         // if (!this.isReadOnly)
         await this.onInitStart();
         console.log('init digits...');

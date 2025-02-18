@@ -37,7 +37,7 @@ export class BotFather {
             new BinanceFutureSocket(this.onCloseCandle.bind(this)),
             new BybitSocket(this.onCloseCandle.bind(this)),
             new BybitFutureSocket(this.onCloseCandle.bind(this)),
-            new OkxSocket(this.onCloseCandle.bind(this))
+            // new OkxSocket(this.onCloseCandle.bind(this))
         ];
         this.connectSocketServer();
         this.hostWebServer = process.env.HOST_WEB_SERVER || 'http://localhost';

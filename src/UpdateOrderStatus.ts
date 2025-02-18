@@ -1,4 +1,4 @@
-import { NODE_TYPE, ORDER_STATUS, RateData } from './common/Interface';
+import { MAX_CANDLE, NODE_TYPE, ORDER_STATUS, RateData } from './common/Interface';
 import * as mysql from './WebConfig/lib/mysql';
 import * as util from './common/util';
 import axios from 'axios';
@@ -35,7 +35,7 @@ async function handleOrder(order: Order) {
 
         const timeframe = '1m';
         const since = lastTimeUpdated ? (lastTimeUpdated + 60000) : order.createdTime;
-        const limit = 300;
+        const limit = MAX_CANDLE;
         const data: Array<RateData> = await util.getOHLCV(broker, symbol, timeframe, limit, since)
             .then(data => data.reverse()); //time tang dan
 

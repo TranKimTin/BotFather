@@ -1,4 +1,4 @@
-import { BotInfo, CustomRequest, NODE_TYPE, Node, NodeData, ROLE, RateData, UserTokenInfo } from '../../common/Interface';
+import { BotInfo, CustomRequest, MAX_CANDLE, NODE_TYPE, Node, NodeData, ROLE, RateData, UserTokenInfo } from '../../common/Interface';
 import { calculate, calculateSubExpr, isValidCondition } from '../../common/Expr';
 import * as util from '../../common/util'
 import * as mysql from '../lib/mysql';
@@ -156,7 +156,7 @@ export async function getHistoryOrder(botName: string, filterBroker: Array<strin
 }
 
 export async function calculator(broker: string, symbol: string, timeframe: string, expr: string) {
-    const data = await util.getOHLCV(broker, symbol, timeframe, 300);
+    const data = await util.getOHLCV(broker, symbol, timeframe, MAX_CANDLE);
 
     if (data[0] && !data[0].isFinal) {
         data.shift();
