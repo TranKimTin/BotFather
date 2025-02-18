@@ -190,4 +190,4 @@ export interface WorkerData {
     data: Array<RateData>
 }
 
-export const MAX_CANDLE = 500
+export const MAX_CANDLE = 600
