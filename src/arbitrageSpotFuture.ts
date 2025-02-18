@@ -6,6 +6,7 @@ import Telegram from './common/telegram';
 dotenv.config({ path: '../.env' });
 
 async function main() {
+    console.log('start arbitrage');
     const telegram = new Telegram(undefined, undefined, false);
     const client = Binance();
     const spotList = await util.getBinanceSymbolList();
@@ -49,6 +50,8 @@ async function main() {
             }
         }
     });
+
+    console.log('arbitrage init done');
 
     setInterval(() => {
         for (let symbol of symbolList) {
