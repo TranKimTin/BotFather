@@ -1,55 +1,87 @@
 import dotenv from 'dotenv';
 import * as util from './common/util';
-import Binance from 'binance-api-node'
 import Telegram from './common/telegram';
+import ReconnectingWebSocket from 'reconnecting-websocket';
+import WebSocket from 'ws';
 
 dotenv.config({ path: '../.env' });
 
+const telegram = new Telegram(undefined, undefined, false);
+let symbolList: Array<string> = [];
+const volume = 15; //USDT
+const spotPrice: { [key: string]: number } = {};
+const futurePrice: { [key: string]: number } = {};
+
+function connectSocketSpot() {
+    const streams = symbolList.map(symbol => `${symbol.toLowerCase()}@depth5@100ms`).join("/");
+    const url = `wss://stream.binance.com:9443/stream?streams=${streams}`;
+    const rws = new ReconnectingWebSocket(url, [], { WebSocket: WebSocket });
+    const TAG = 'Binance';
+
+    rws.addEventListener('open', () => {
+        console.log(`${TAG}: socket connected`);
+    });
+
+    rws.addEventListener('message', (event) => {
+        const mess = event.data;
+        const { stream, data } = JSON.parse(mess.toString());
+        const symbol = stream.split('@')[0].toUpperCase();
+
+
+        
+    });
+
+    rws.addEventListener('error', (err) => {
+        console.error(`${TAG}: WebSocket error`, err);
+        // util.restartApp();
+    });
+
+    rws.addEventListener('close', (event) => {
+        console.error(`${TAG}: WebSocket connection closed, ${event.code} ${event.reason}`);
+    });
+}
 async function main() {
     console.log('start arbitrage');
-    const telegram = new Telegram(undefined, undefined, false);
-    const client = Binance();
     const spotList = await util.getBinanceSymbolList();
     const futureList = await util.getBinanceFutureSymbolList();
-    const symbolList: Array<string> = spotList.filter(item => futureList.includes(item));
-    const volume = 15; //USDT
-
-    const spotPrice: { [key: string]: number } = {};
-    const futurePrice: { [key: string]: number } = {};
+    symbolList = spotList.filter(item => futureList.includes(item));
 
     for (const symbol of symbolList) {
         spotPrice[symbol] = 0;
         futurePrice[symbol] = 0;
     }
 
-    const args = symbolList.map(symbol => ({ symbol, level: 5 }));
-    client.ws.partialDepth(args, depth => {
-        const symbol = depth.symbol.split('@')[0];
-        let totalVol = 0;
-        for (const data of depth.asks) {
-            const price = +data.price;
-            const quantity = +data.quantity;
-            totalVol += price * quantity;
-            if (totalVol >= volume) {
-                spotPrice[symbol] = price;
-                break;
-            }
-        }
-    });
+    // const urlFuture = `wss://fstream.binance.com:9443/stream?streams=${streams}`;
 
-    client.ws.futuresPartialDepth(args, (depth: any) => {
-        const symbol = depth.symbol;
-        let totalVol = 0;
-        for (const data of depth.bidDepth) {
-            const price = +data.price;
-            const quantity = +data.quantity;
-            totalVol += price * quantity;
-            if (totalVol >= volume) {
-                futurePrice[symbol] = price;
-                break;
-            }
-        }
-    });
+    connectSocketSpot();
+
+    // client.ws.partialDepth(args, depth => {
+    //     const symbol = depth.symbol.split('@')[0];
+    //     let totalVol = 0;
+    //     for (const data of depth.asks) {
+    //         const price = +data.price;
+    //         const quantity = +data.quantity;
+    //         totalVol += price * quantity;
+    //         if (totalVol >= volume) {
+    //             spotPrice[symbol] = price;
+    //             break;
+    //         }
+    //     }
+    // });
+
+    // client.ws.futuresPartialDepth(args, (depth: any) => {
+    //     const symbol = depth.symbol;
+    //     let totalVol = 0;
+    //     for (const data of depth.bidDepth) {
+    //         const price = +data.price;
+    //         const quantity = +data.quantity;
+    //         totalVol += price * quantity;
+    //         if (totalVol >= volume) {
+    //             futurePrice[symbol] = price;
+    //             break;
+    //         }
+    //     }
+    // });
 
     console.log('arbitrage init done');
 
