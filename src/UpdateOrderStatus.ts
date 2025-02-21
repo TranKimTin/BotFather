@@ -4,6 +4,7 @@ import * as util from './common/util';
 import axios from 'axios';
 import dotenv from 'dotenv';
 import moment from 'moment';
+import * as redis from './common/redis';
 
 dotenv.config({ path: `${__dirname}/../.env` });
 
@@ -29,6 +30,30 @@ interface Order {
     lastTimeUpdated: number
 };
 
+function isValidRates(rates: Array<RateData>): boolean {
+    if (rates.length <= 1) return true;
+    const timeIntervalMiliseconds = rates[0].startTime - rates[1].startTime;
+    for (let i = 2; i < rates.length; i++) {
+        if (rates[i - 1].startTime - rates[i].startTime !== timeIntervalMiliseconds) {
+            return false;
+        }
+    }
+    return true;
+}
+
+async function getOHLCV(broker: string, symbol: string, timeframe: string, limit: number, since?: number): Promise<Array<RateData>> {
+    const key = `${broker}_${symbol}_${timeframe}`;
+    const data: Array<RateData> = (await redis.getArray(key)).map(item => JSON.parse(item));
+
+    if (isValidRates(data)) {
+        while (since && data.length > 0 && data.at(-1)!.startTime < since) {
+            data.pop();
+        }
+        if (data.length > 0) return data;
+    }
+    return util.getOHLCV(broker, symbol, timeframe, limit, since)
+}
+
 async function handleOrder(order: Order) {
     try {
         const { broker, symbol, lastTimeUpdated } = order;
@@ -36,7 +61,7 @@ async function handleOrder(order: Order) {
         const timeframe = '1m';
         const since = lastTimeUpdated ? (lastTimeUpdated + 60000) : order.createdTime;
         const limit = MAX_CANDLE;
-        const data: Array<RateData> = await util.getOHLCV(broker, symbol, timeframe, limit, since)
+        const data: Array<RateData> = await getOHLCV(broker, symbol, timeframe, limit, since)
             .then(data => data.reverse()); //time tang dan
 
         let isUpdated: boolean = false;
@@ -195,8 +220,8 @@ async function updateRate() {
                 const timeframe = '1m';
                 const since = closeTime;
                 const limit = 1;
-                const rate: RateData = await util.getOHLCV(broker, symbol, timeframe, limit, since).then(data => data[0]);;
-   
+                const rate: RateData = await getOHLCV(broker, symbol, timeframe, limit, since).then(data => data[0]);;
+
                 await mysql.query(
                     `INSERT INTO Rates(symbol,timestamp,open,high,low,close) VALUES(?,?,?,?,?,?)`,
                     [s, closeTime, rate.open, rate.high, rate.low, rate.close]

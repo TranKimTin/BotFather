@@ -59,7 +59,7 @@ export class BotFather {
 
     private async onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
         try {
-            const key = `${broker}:${symbol}:${timeframe}`;
+            const key = `${broker}_${symbol}_${timeframe}`;
             if (!this.symbolListener[key]) return;
 
             // console.log(`onCloseCandle ${broker} ${symbol} ${timeframe} runtime = ${-1} ms`);
@@ -129,7 +129,7 @@ export class BotFather {
             for (const timeframe of bot.timeframes) {
                 for (const s of bot.symbolList) {
                     const [broker, symbol] = s.split(':');
-                    const key = `${broker}:${symbol}:${timeframe}`;
+                    const key = `${broker}_${symbol}_${timeframe}`;
                     this.symbolListener[key] = true;
                 }
             }
