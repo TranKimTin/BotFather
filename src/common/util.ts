@@ -48,8 +48,35 @@ export function restartApp() {
     });
 }
 
-export function iCCI(data: Array<RateData>, period: number) {
-    const prices = data.map(item => ({ high: item.high, low: item.low, close: item.close })).reverse();
+function convertDataToArrayPrices(data: Array<RateData>, size: number) {
+    size = Math.min(size, data.length);
+    const arr = new Array(size);
+    for (let i = 0; i < size; i++) {
+        arr[i] = data[i].close;
+    }
+    return arr;
+}
+
+function convertDataToArrayPricesHigh(data: Array<RateData>, size: number) {
+    size = Math.min(size, data.length);
+    const arr = new Array(size);
+    for (let i = 0; i < size; i++) {
+        arr[i] = data[i].high;
+    }
+    return arr;
+}
+
+function convertDataToArrayPricesLow(data: Array<RateData>, size: number) {
+    size = Math.min(size, data.length);
+    const arr = new Array(size);
+    for (let i = 0; i < size; i++) {
+        arr[i] = data[i].low;
+    }
+    return arr;
+}
+
+export function iCCI(data: Array<RateData>, period: number, maxPeriod: number) {
+    const prices = data.slice(0, maxPeriod + period + 1).reverse();
     const sma = (data: Array<number>) => data.reduce((sum, value) => sum + value, 0) / data.length;
 
     const typicalPrices = [];
@@ -69,8 +96,8 @@ export function iCCI(data: Array<RateData>, period: number) {
     return ccis.reverse();
 }
 
-export function iRSI(data: Array<RateData>, period: number) {
-    const prices = data.map(item => item.close);
+export function iRSI(data: Array<RateData>, period: number, maxPeriod: number) {
+    const prices = convertDataToArrayPrices(data, maxPeriod + period + 250);
     const gains = [];
     const losses = [];
     let avgGain = 0;
@@ -149,7 +176,7 @@ export async function getBinanceFutureSymbolList() {
 export async function getBybitSymbolList() {
     const url = `https://api.bybit.com/v5/market/tickers?category=spot`;
     // const url = `https://api.bybit.com/spot/v3/public/symbols`;
-    const res = await axios.get(url,{ timeout: 60000 });
+    const res = await axios.get(url, { timeout: 60000 });
 
     // const data = await res.data as { result: { list: Array<{ name: string, quoteCoin: string }> } };
     // return data.result.list
@@ -556,8 +583,8 @@ export async function getOkxOHLCVHistory(symbol: string, timeframe: string, limi
     return result;
 }
 
-export function iMA(data: Array<RateData>, period: number) {
-    const values = data.map(item => item.close);
+export function iMA(data: Array<RateData>, period: number, maxPeriod: number) {
+    const values = convertDataToArrayPrices(data, maxPeriod + period + 1);
     const MAs = indicator.SMA.calculate({
         period,
         values,
@@ -566,8 +593,8 @@ export function iMA(data: Array<RateData>, period: number) {
     return MAs;
 }
 
-export function iEMA(data: Array<RateData>, period: number) {
-    const values = data.map(item => item.close);
+export function iEMA(data: Array<RateData>, period: number, maxPeriod: number) {
+    const values = convertDataToArrayPrices(data, maxPeriod + period + 400);
     const EMAs = indicator.EMA.calculate({
         period,
         values,
@@ -576,9 +603,9 @@ export function iEMA(data: Array<RateData>, period: number) {
     return EMAs;
 }
 
-export function iMACD(data: Array<RateData>, fastPeriod: number, slowPeriod: number, signalPeriod: number) {
-    const values = data.map(item => item.close);
-    const EMAs = indicator.MACD.calculate({
+export function iMACD(data: Array<RateData>, fastPeriod: number, slowPeriod: number, signalPeriod: number, maxPeriod: number) {
+    const values = convertDataToArrayPrices(data, maxPeriod + slowPeriod + signalPeriod + 150);
+    const MACDs = indicator.MACD.calculate({
         values,
         fastPeriod,
         slowPeriod,
@@ -587,26 +614,32 @@ export function iMACD(data: Array<RateData>, fastPeriod: number, slowPeriod: num
         SimpleMASignal: false,
         reversedInput: true
     });
-    return EMAs.map(item => ({
-        MACD: item.MACD || 0,
-        signal: item.signal || 0,
-        histogram: item.histogram || 0
-    }));
+
+    const result: Array<{ MACD: number, signal: number, histogram: number }> = new Array(MACDs.length);
+    for (let i = 0; i < MACDs.length; i++) {
+        result[i] = {
+            MACD: MACDs[i].MACD || 0,
+            signal: MACDs[i].signal || 0,
+            histogram: MACDs[i].histogram || 0
+        }
+    }
+    return result;
 }
 
-export function iBB(data: Array<RateData>, period: number, multiplier: number) {
-    const values = data.map(item => item.close);
-    const EMAs = indicator.BollingerBands.calculate({
+export function iBB(data: Array<RateData>, period: number, multiplier: number, maxPeriod: number) {
+    const values = convertDataToArrayPrices(data, maxPeriod + period + 1);
+    const BBs = indicator.BollingerBands.calculate({
         period,
         values,
         stdDev: multiplier,
         reversedInput: true
     });
-    return EMAs;
+    return BBs;
 }
 
 export function iZigZag(data: Array<RateData>, deviation: number, depth: number, byPercent: boolean) {
     if (data.length == 0) return [];
+
 
     const NO_TREND = null;
     const UP_TREND = 1;
@@ -697,12 +730,11 @@ export function iZigZag(data: Array<RateData>, deviation: number, depth: number,
     return result;
 }
 
-export function iATR(data: Array<RateData>, period: number) {
-    const values = data;
+export function iATR(data: Array<RateData>, period: number, maxPeriod: number) {
     const ATRs = indicator.ATR.calculate({
-        high: values.map(item => item.high),
-        low: values.map(item => item.low),
-        close: values.map(item => item.close),
+        high: convertDataToArrayPricesHigh(data, maxPeriod + period + 200),
+        low: convertDataToArrayPricesLow(data, maxPeriod + period + 200),
+        close: convertDataToArrayPrices(data, maxPeriod + period + 200),
         period,
         reversedInput: true
     });

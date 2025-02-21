@@ -298,7 +298,7 @@ export class Expr extends ExprVisitor<any> {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
 
-        const RSIs = util.iRSI(this.data, period);
+        const RSIs = util.iRSI(this.data, period, shift);
         if (shift >= RSIs.length) throw `RSI out of range. length = ${RSIs.length}`;
         return RSIs[shift];
     };
@@ -306,7 +306,7 @@ export class Expr extends ExprVisitor<any> {
     visitRsi_slope = (ctx: Rsi_slopeContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
-        const RSIs = util.iRSI(this.data, period);
+        const RSIs = util.iRSI(this.data, period, shift);
         if (shift >= RSIs.length - 1) throw `rsi_slope out of range. length = ${RSIs.length}`;
 
         const diffRSI = RSIs[shift] - RSIs[shift + 1];
@@ -320,7 +320,7 @@ export class Expr extends ExprVisitor<any> {
     visitMa = (ctx: MaContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
-        const MAs = util.iMA(this.data, period);
+        const MAs = util.iMA(this.data, period, shift);
         if (shift >= MAs.length) throw `ma out of range. length = ${MAs.length}`;
 
         return MAs[shift];
@@ -329,7 +329,7 @@ export class Expr extends ExprVisitor<any> {
     visitEma = (ctx: EmaContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
-        const EMAs = util.iEMA(this.data, period);
+        const EMAs = util.iEMA(this.data, period, shift);
         if (shift >= EMAs.length) throw `ema out of range. length = ${EMAs.length}`;
 
         return EMAs[shift];
@@ -341,7 +341,7 @@ export class Expr extends ExprVisitor<any> {
         const signalPeriod = parseInt(ctx.INT(2)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(3)?.getText() || "0", 10);
 
-        const MACDs = util.iMACD(this.data, fastPeriod, slowPeriod, signalPeriod);
+        const MACDs = util.iMACD(this.data, fastPeriod, slowPeriod, signalPeriod, shift);
         if (shift >= MACDs.length) throw `macd_value out of range. length = ${MACDs.length}`;
         if (fastPeriod >= slowPeriod) throw `macd_value period invalid`;
 
@@ -354,7 +354,7 @@ export class Expr extends ExprVisitor<any> {
         const signalPeriod = parseInt(ctx.INT(2)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(3)?.getText() || "0", 10);
 
-        const MACDs = util.iMACD(this.data, fastPeriod, slowPeriod, signalPeriod);
+        const MACDs = util.iMACD(this.data, fastPeriod, slowPeriod, signalPeriod, shift);
         if (shift >= MACDs.length) throw `macd_signal out of range. length = ${MACDs.length}`;
         if (fastPeriod >= slowPeriod) throw `macd_signal period invalid`;
 
@@ -367,7 +367,7 @@ export class Expr extends ExprVisitor<any> {
         const signalPeriod = parseInt(ctx.INT(2)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(3)?.getText() || "0", 10);
 
-        const MACDs = util.iMACD(this.data, fastPeriod, slowPeriod, signalPeriod);
+        const MACDs = util.iMACD(this.data, fastPeriod, slowPeriod, signalPeriod, shift);
         if (shift >= MACDs.length) throw `macd_histogram out of range. length = ${MACDs.length}`;
         if (fastPeriod >= slowPeriod) throw `macd_histogram period invalid`;
 
@@ -379,7 +379,7 @@ export class Expr extends ExprVisitor<any> {
         const multiplier = parseFloat(ctx.number()?.getText() || "0");
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
 
-        const BBs = util.iBB(this.data, period, multiplier);
+        const BBs = util.iBB(this.data, period, multiplier, shift);
         if (shift >= BBs.length) throw `bb_upper out of range. length = ${BBs.length}`;
 
         return BBs[shift].upper;
@@ -390,7 +390,7 @@ export class Expr extends ExprVisitor<any> {
         const multiplier = parseFloat(ctx.number()?.getText() || "0");
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
 
-        const BBs = util.iBB(this.data, period, multiplier);
+        const BBs = util.iBB(this.data, period, multiplier, shift);
         if (shift >= BBs.length) throw `bb_upper out of range. length = ${BBs.length}`;
 
         return BBs[shift].lower;
@@ -401,7 +401,7 @@ export class Expr extends ExprVisitor<any> {
         const multiplier = parseFloat(ctx.number()?.getText() || "0");
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
 
-        const BBs = util.iBB(this.data, period, multiplier);
+        const BBs = util.iBB(this.data, period, multiplier, shift);
         if (shift >= BBs.length) throw `bb_upper out of range. length = ${BBs.length}`;
 
         return BBs[shift].middle;
@@ -417,7 +417,7 @@ export class Expr extends ExprVisitor<any> {
         const shift = parseInt(ctx.INT(3)?.getText() || "0", 10);
 
         const rates = this.data.slice(shift);
-        const RSIs = util.iRSI(this.data, period);
+        const RSIs = util.iRSI(this.data, period, shift);
         const fakeData = RSIs.filter(item => item).map(item => ({ high: item, low: item } as RateData));
 
         let zigzag = util.iZigZag(fakeData, deviation, depth, false);
@@ -463,7 +463,7 @@ export class Expr extends ExprVisitor<any> {
             diffPercents.push(parseFloat(ctx.number_(i)?.getText() || '0'));
         }
 
-        const values = util.iMACD(this.data, fastPeriod, slowPeriod, signalPeriod);
+        const values = util.iMACD(this.data, fastPeriod, slowPeriod, signalPeriod, shift + 1);
         if (shift >= values.length - 1) throw `macd_n_dinh out of range. length = ${values.length}`;
         if (fastPeriod >= slowPeriod) throw `macd_n_dinh period invalid`;
 
@@ -641,11 +641,11 @@ export class Expr extends ExprVisitor<any> {
         const signalPeriod = parseInt(ctx.INT(2)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(3)?.getText() || "0", 10);
 
-        const MACDs = util.iMACD(this.data, fastPeriod, slowPeriod, signalPeriod);
+        const MACDs = util.iMACD(this.data, fastPeriod, slowPeriod, signalPeriod, shift + slowPeriod + 2);
         if (shift >= MACDs.length) return false;
         if (fastPeriod >= slowPeriod) return false;
 
-        const MASignals = util.iMA(MACDs.map(item => ({ close: item.MACD } as RateData)), slowPeriod);
+        const MASignals = util.iMA(MACDs.map(item => ({ close: item.MACD } as RateData)), slowPeriod, shift + 1);
         if (shift >= MASignals.length - 1) return false;
 
         const diffMACD = MACDs[shift].MACD - MACDs[shift + 1].MACD;
@@ -704,9 +704,9 @@ export class Expr extends ExprVisitor<any> {
         const periodMA = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(2)?.getText() || "0", 10);
 
-        const RSIs = util.iRSI(this.data, periodRSI);
+        const RSIs = util.iRSI(this.data, periodRSI, shift + periodMA + 1);
         const fakeData = RSIs.map(item => ({ close: item } as RateData));
-        const MARSIs = util.iMA(fakeData, periodMA);
+        const MARSIs = util.iMA(fakeData, periodMA, shift);
 
         if (shift >= MARSIs.length) return false;
         return parseFloat(MARSIs[shift].toFixed(2));
@@ -906,7 +906,7 @@ export class Expr extends ExprVisitor<any> {
         const depth = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(2)?.getText() || "0", 10);
 
-        const RSIs = util.iRSI(this.data, period);
+        const RSIs = util.iRSI(this.data, period, shift + depth);
 
         if (shift + depth >= RSIs.length) throw `min_crsi out of range. length = ${this.data.length}`;
 
@@ -922,7 +922,7 @@ export class Expr extends ExprVisitor<any> {
         const depth = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(2)?.getText() || "0", 10);
 
-        const RSIs = util.iRSI(this.data, period);
+        const RSIs = util.iRSI(this.data, period, shift + depth);
 
         if (shift + depth >= RSIs.length) throw `min_crsi out of range. length = ${this.data.length}`;
 
