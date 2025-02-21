@@ -107,7 +107,7 @@ async function main() {
             const futureBid = futurePrice[symbol];
             if (!spotAsk || !futureBid) continue;
             const diff = (futureBid - spotAsk) / spotAsk * 100;
-            if (diff > 0.1) {
+            if (diff > 0.5) {
                 telegram.sendMessage(`${symbol} - diff: ${+diff.toFixed(3)} %, spot: ${spotAsk}, future: ${futureBid}`, 1833284254);
             }
         }

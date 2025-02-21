@@ -23,16 +23,6 @@ console.error = function () {
     }
 };
 
-interface OHLCV {
-    symbol: string,
-    startTime: number,
-    open: number
-    high: number,
-    low: number,
-    close: number,
-    volume: number
-}
-
 export function restartApp() {
     pm2.connect((err) => {
         if (err) {
