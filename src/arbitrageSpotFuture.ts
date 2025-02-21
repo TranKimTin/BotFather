@@ -27,8 +27,53 @@ function connectSocketSpot() {
         const { stream, data } = JSON.parse(mess.toString());
         const symbol = stream.split('@')[0].toUpperCase();
 
+        let totalVol = 0;
+        for (const item of data.asks) {
+            const price = +item[0];
+            const quantity = +item[1];
+            totalVol += price * quantity;
+            if (totalVol >= volume) {
+                spotPrice[symbol] = price;
+                break;
+            }
+        }
+    });
 
-        
+    rws.addEventListener('error', (err) => {
+        console.error(`${TAG}: WebSocket error`, err);
+        // util.restartApp();
+    });
+
+    rws.addEventListener('close', (event) => {
+        console.error(`${TAG}: WebSocket connection closed, ${event.code} ${event.reason}`);
+    });
+}
+
+function connectSocketFuture() {
+    const streams = symbolList.map(symbol => `${symbol.toLowerCase()}@depth5@100ms`).join("/");
+    const url = `wss://fstream.binance.com/stream?streams=${streams}`;
+    const rws = new ReconnectingWebSocket(url, [], { WebSocket: WebSocket });
+    const TAG = 'BinanceFuture';
+
+    rws.addEventListener('open', () => {
+        console.log(`${TAG}: socket connected`);
+    });
+
+    rws.addEventListener('message', (event) => {
+        const mess = event.data;
+        const { data } = JSON.parse(mess.toString());
+
+        const symbol = data.s;
+        let totalVol = 0;
+        for (const item of data.b) {
+            const price = +item[0];
+            const quantity = +item[1];
+            totalVol += price * quantity;
+            if (totalVol >= volume) {
+                futurePrice[symbol] = price;
+                break;
+            }
+        }
     });
 
     rws.addEventListener('error', (err) => {
@@ -51,37 +96,8 @@ async function main() {
         futurePrice[symbol] = 0;
     }
 
-    // const urlFuture = `wss://fstream.binance.com:9443/stream?streams=${streams}`;
-
     connectSocketSpot();
-
-    // client.ws.partialDepth(args, depth => {
-    //     const symbol = depth.symbol.split('@')[0];
-    //     let totalVol = 0;
-    //     for (const data of depth.asks) {
-    //         const price = +data.price;
-    //         const quantity = +data.quantity;
-    //         totalVol += price * quantity;
-    //         if (totalVol >= volume) {
-    //             spotPrice[symbol] = price;
-    //             break;
-    //         }
-    //     }
-    // });
-
-    // client.ws.futuresPartialDepth(args, (depth: any) => {
-    //     const symbol = depth.symbol;
-    //     let totalVol = 0;
-    //     for (const data of depth.bidDepth) {
-    //         const price = +data.price;
-    //         const quantity = +data.quantity;
-    //         totalVol += price * quantity;
-    //         if (totalVol >= volume) {
-    //             futurePrice[symbol] = price;
-    //             break;
-    //         }
-    //     }
-    // });
+    connectSocketFuture();
 
     console.log('arbitrage init done');
 
@@ -91,7 +107,7 @@ async function main() {
             const futureBid = futurePrice[symbol];
             if (!spotAsk || !futureBid) continue;
             const diff = (futureBid - spotAsk) / spotAsk * 100;
-            if (diff > 1.3) {
+            if (diff > 0.1) {
                 telegram.sendMessage(`${symbol} - diff: ${+diff.toFixed(3)} %, spot: ${spotAsk}, future: ${futureBid}`, 1833284254);
             }
         }
