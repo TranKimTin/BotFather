@@ -9,8 +9,9 @@ dotenv.config({ path: '../.env' });
 const telegram = new Telegram(undefined, undefined, false);
 let symbolList: Array<string> = [];
 const volume = 15; //USDT
-const spotPrice: { [key: string]: number } = {};
-const futurePrice: { [key: string]: number } = {};
+const spotData: { [key: string]: { price: number, lastUpdate: number } } = {};
+const futureData: { [key: string]: { price: number, lastUpdate: number } } = {};
+const lastSendTele: { [key: string]: number } = {};
 
 function connectSocketSpot() {
     const streams = symbolList.map(symbol => `${symbol.toLowerCase()}@depth5@100ms`).join("/");
@@ -33,8 +34,10 @@ function connectSocketSpot() {
             const quantity = +item[1];
             totalVol += price * quantity;
             if (totalVol >= volume) {
-                spotPrice[symbol] = price;
-                break;
+                spotData[symbol].price = price;
+                spotData[symbol].lastUpdate = new Date().getTime();
+                check(symbol);
+                return;
             }
         }
     });
@@ -70,8 +73,10 @@ function connectSocketFuture() {
             const quantity = +item[1];
             totalVol += price * quantity;
             if (totalVol >= volume) {
-                futurePrice[symbol] = price;
-                break;
+                futureData[symbol].price = price;
+                futureData[symbol].lastUpdate = new Date().getTime();
+                check(symbol);
+                return;
             }
         }
     });
@@ -85,6 +90,24 @@ function connectSocketFuture() {
         console.error(`${TAG}: WebSocket connection closed, ${event.code} ${event.reason}`);
     });
 }
+
+function check(symbol: string) {
+    const spotAsk: number = spotData[symbol].price;
+    const futureBid: number = futureData[symbol].price;
+    const lastUpdateSpot = spotData[symbol].lastUpdate;
+    const lastUpdateFuture = futureData[symbol].lastUpdate;
+
+    if (!spotAsk || !futureBid) return;
+    if (Math.abs(lastUpdateFuture - lastUpdateSpot) > 150) return;
+
+    const diff = (futureBid - spotAsk) / spotAsk * 100;
+    const now = new Date().getTime();
+    if (diff > 0.5 && now - lastSendTele[symbol] > 1000) {
+        telegram.sendMessage(`${symbol} - diff: ${+diff.toFixed(3)} %, spot: ${spotAsk}, future: ${futureBid}`, 1833284254);
+        lastSendTele[symbol] = new Date().getTime();
+    }
+}
+
 async function main() {
     console.log('start arbitrage');
     const spotList = await util.getBinanceSymbolList();
@@ -92,26 +115,21 @@ async function main() {
     symbolList = spotList.filter(item => futureList.includes(item));
 
     for (const symbol of symbolList) {
-        spotPrice[symbol] = 0;
-        futurePrice[symbol] = 0;
+        spotData[symbol] = {
+            price: 0,
+            lastUpdate: 0
+        };
+        futureData[symbol] = {
+            price: 0,
+            lastUpdate: 0
+        };
+        lastSendTele[symbol] = 0;
     }
 
     connectSocketSpot();
     connectSocketFuture();
 
     console.log('arbitrage init done');
-
-    setInterval(() => {
-        for (let symbol of symbolList) {
-            const spotAsk = spotPrice[symbol];
-            const futureBid = futurePrice[symbol];
-            if (!spotAsk || !futureBid) continue;
-            const diff = (futureBid - spotAsk) / spotAsk * 100;
-            if (diff > 0.5) {
-                telegram.sendMessage(`${symbol} - diff: ${+diff.toFixed(3)} %, spot: ${spotAsk}, future: ${futureBid}`, 1833284254);
-            }
-        }
-    }, 1000);
 }
 
 
