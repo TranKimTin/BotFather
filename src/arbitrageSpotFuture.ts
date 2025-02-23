@@ -98,13 +98,16 @@ function check(symbol: string) {
     const lastUpdateFuture = futureData[symbol].lastUpdate;
 
     if (!spotAsk || !futureBid) return;
-    if (Math.abs(lastUpdateFuture - lastUpdateSpot) > 150) return;
+    if (Math.abs(lastUpdateFuture - lastUpdateSpot) > 100) return;
 
     const diff = (futureBid - spotAsk) / spotAsk * 100;
     const now = new Date().getTime();
-    if (diff > 0.5 && now - lastSendTele[symbol] > 1000) {
+    if (diff > 1 && now - lastSendTele[symbol] > 1000) {
         telegram.sendMessage(`${symbol} - diff: ${+diff.toFixed(3)} %, spot: ${spotAsk}, future: ${futureBid}`, 1833284254);
         lastSendTele[symbol] = new Date().getTime();
+    }
+    else if (diff > 1) {
+        console.log(`${symbol} - diff: ${+diff.toFixed(3)} %, spot: ${spotAsk}, future: ${futureBid}`);
     }
 }
 
