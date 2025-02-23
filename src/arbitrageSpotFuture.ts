@@ -106,7 +106,7 @@ function check(symbol: string) {
         telegram.sendMessage(`${symbol} - diff: ${+diff.toFixed(3)} %, spot: ${spotAsk}, future: ${futureBid}`, 1833284254);
         lastSendTele[symbol] = new Date().getTime();
     }
-    else if (diff > 1) {
+    else if (diff > 0.5) {
         console.log(`${symbol} - diff: ${+diff.toFixed(3)} %, spot: ${spotAsk}, future: ${futureBid}`);
     }
 }
