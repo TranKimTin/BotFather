@@ -11,6 +11,7 @@ import dotenv from 'dotenv';
 
 dotenv.config({ path: `${__dirname}/../../.env` });
 
+// indicator.setConfig('precision', 10);
 
 let binance = new ccxt.binance({ 'timeout': 30000 });
 let binanceFuture = new ccxt.binanceusdm({ 'timeout': 30000 });
@@ -76,62 +77,78 @@ function convertDataToArrayPricesLow(data: Array<RateData>, size: number) {
 }
 
 export function iCCI(data: Array<RateData>, period: number, maxPeriod: number) {
-    const prices = data.slice(0, maxPeriod + period + 1).reverse();
-    const sma = (data: Array<number>) => data.reduce((sum, value) => sum + value, 0) / data.length;
+    const close = convertDataToArrayPrices(data, maxPeriod + period + 1);
+    const high = convertDataToArrayPricesHigh(data, maxPeriod + period + 1);
+    const low = convertDataToArrayPricesLow(data, maxPeriod + period + 1);
 
-    const typicalPrices = [];
-    for (let i = 0; i < prices.length; i++) {
-        const { high, low, close } = prices[i];
-        typicalPrices.push((high + low + close) / 3);
-    }
+    return indicator.CCI.calculate({
+        high,
+        low,
+        close,
+        period: period,
+        reversedInput: true
+    });
 
-    const ccis = [];
-    for (let i = 0; i <= typicalPrices.length - period; i++) {
-        const slice = typicalPrices.slice(i, i + period);
-        const avg = sma(slice);
-        const meanDeviation = sma(slice.map(tp => Math.abs(tp - avg)));
-        ccis.push((typicalPrices[i + period - 1] - avg) / (0.015 * meanDeviation));
-    }
+    // const sma = (data: Array<number>) => data.reduce((sum, value) => sum + value, 0) / data.length;
 
-    return ccis.reverse();
+    // const typicalPrices = [];
+    // for (let i = 0; i < prices.length; i++) {
+    //     const { high, low, close } = prices[i];
+    //     typicalPrices.push((high + low + close) / 3);
+    // }
+
+    // const ccis = [];
+    // for (let i = 0; i <= typicalPrices.length - period; i++) {
+    //     const slice = typicalPrices.slice(i, i + period);
+    //     const avg = sma(slice);
+    //     const meanDeviation = sma(slice.map(tp => Math.abs(tp - avg)));
+    //     ccis.push((typicalPrices[i + period - 1] - avg) / (0.015 * meanDeviation));
+    // }
+
+    // return ccis.reverse();
 }
 
 export function iRSI(data: Array<RateData>, period: number, maxPeriod: number) {
     const prices = convertDataToArrayPrices(data, maxPeriod + period + 250);
-    const gains = [];
-    const losses = [];
-    let avgGain = 0;
-    let avgLoss = 0;
-    let rs = 0;
-    const RSI: Array<number> = [];
+    return indicator.RSI.calculate({
+        values: prices,
+        period: period,
+        reversedInput: true
+    });
+    // const gains = [];
+    // const losses = [];
+    // let avgGain = 0;
+    // let avgLoss = 0;
+    // let rs = 0;
+    // const RSI: Array<number> = [];
 
-    for (let i = 1; i < prices.length; i++) {
-        const delta = prices[prices.length - i - 1] - prices[prices.length - i];
+    // for (let i = 1; i < prices.length; i++) {
+    //     const delta = prices[prices.length - i - 1] - prices[prices.length - i];
 
-        if (delta > 0) {
-            gains.push(delta);
-            losses.push(0);
-        } else {
-            gains.push(0);
-            losses.push(Math.abs(delta));
-        }
+    //     if (delta > 0) {
+    //         gains.push(delta);
+    //         losses.push(0);
+    //     } else {
+    //         gains.push(0);
+    //         losses.push(Math.abs(delta));
+    //     }
 
-        if (i >= period) {
-            if (i === period) {
-                avgGain = gains.slice(0, period).reduce((a, b) => a + b, 0) / period;
-                avgLoss = losses.slice(0, period).reduce((a, b) => a + b, 0) / period;
-            } else {
-                avgGain = (avgGain * (period - 1) + gains[i - 1]) / period;
-                avgLoss = (avgLoss * (period - 1) + losses[i - 1]) / period;
-            }
+    //     if (i >= period) {
+    //         if (i === period) {
+    //             avgGain = gains.slice(0, period).reduce((a, b) => a + b, 0) / period;
+    //             avgLoss = losses.slice(0, period).reduce((a, b) => a + b, 0) / period;
+    //         } else {
+    //             avgGain = (avgGain * (period - 1) + gains[i - 1]) / period;
+    //             avgLoss = (avgLoss * (period - 1) + losses[i - 1]) / period;
+    //         }
 
-            rs = (avgGain / avgLoss) || 0;
-            const rsi = 100 - (100 / (1 + rs));
-            RSI[prices.length - i - 1] = +rsi.toFixed(2);
-        }
-    }
+    //         rs = (avgGain / avgLoss) || 0;
+    //         const rsi = 100 - (100 / (1 + rs));
+    //         RSI[prices.length - i - 1] = +rsi.toFixed(2);
+    //     }
+    // }
 
-    return RSI;
+    // return RSI;
 }
 
 export async function getDigitsFuture() {
