@@ -88,24 +88,6 @@ export function iCCI(data: Array<RateData>, period: number, maxPeriod: number) {
         period: period,
         reversedInput: true
     });
-
-    // const sma = (data: Array<number>) => data.reduce((sum, value) => sum + value, 0) / data.length;
-
-    // const typicalPrices = [];
-    // for (let i = 0; i < prices.length; i++) {
-    //     const { high, low, close } = prices[i];
-    //     typicalPrices.push((high + low + close) / 3);
-    // }
-
-    // const ccis = [];
-    // for (let i = 0; i <= typicalPrices.length - period; i++) {
-    //     const slice = typicalPrices.slice(i, i + period);
-    //     const avg = sma(slice);
-    //     const meanDeviation = sma(slice.map(tp => Math.abs(tp - avg)));
-    //     ccis.push((typicalPrices[i + period - 1] - avg) / (0.015 * meanDeviation));
-    // }
-
-    // return ccis.reverse();
 }
 
 export function iRSI(data: Array<RateData>, period: number, maxPeriod: number) {
