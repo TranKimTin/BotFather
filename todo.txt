@@ -12,4 +12,4 @@
 - đăng nhập bằng telegram
 - người dùng gửi signal đến tele khác?
 - tự cập nhật new list, dell list coin
-- optimize perfomance
+- optimize perfomance: mỗi broker = 1 thread. mỗi thread gọi 1 worker xử lý oncloseCandle
