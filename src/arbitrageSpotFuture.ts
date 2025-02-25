@@ -101,7 +101,6 @@ function check(symbol: string) {
     if (Math.abs(lastUpdateFuture - lastUpdateSpot) > 100) return;
 
     const diff = (futureBid - spotAsk) / spotAsk * 100;
-    const now = new Date().getTime();
 
     if (diff >= 1) {
         cnt[symbol]++;
