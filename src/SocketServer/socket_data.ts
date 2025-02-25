@@ -74,7 +74,7 @@ export class SocketData {
         }
         else {
             console.log(`${this.broker}: merge error`);
-            console.log(dataList[0], data);
+            // console.log(dataList[0], data);
         }
     }
 
