@@ -187,7 +187,8 @@ export interface WorkerData {
     broker: string,
     symbol: string,
     timeframe: string,
-    data: Array<RateData>
+    data: Array<RateData>,
+    lastTimeUpdated: number
 }
 
 export const MAX_CANDLE = 600

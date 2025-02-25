@@ -13,6 +13,7 @@ import { StaticPool } from 'node-worker-threads-pool';
 let socket: SocketData;
 let symbolListener: { [key: string]: boolean };
 let botChildren: Array<BotInfo>;
+let lastTimeUpdated = 0;
 const worker = new StaticPool({
     size: os.cpus().length,
     task: './worker.js'
@@ -31,7 +32,6 @@ async function initSocketData(broker: string) {
 async function initBotChildren() {
     const botList: Array<any> = await mysql.query(`SELECT id, botName, idTelegram, route, symbolList, timeframes, treeData FROM Bot`);
     botChildren = [];
-    const botIDs: { [key: string]: number } = {};
 
     for (let bot of botList) {
         const botInfo: BotInfo = {
@@ -44,7 +44,6 @@ async function initBotChildren() {
         };
         botInfo.symbolList.sort();
         botChildren.push(botInfo);
-        botIDs[bot.botName] = bot.id;
     }
 
     symbolListener = {};
@@ -59,9 +58,9 @@ async function initBotChildren() {
         }
     }
 
+    lastTimeUpdated = new Date().getTime();
+
     console.log('init bot list', botChildren.length);
-    await worker.exec({ type: 'setBotChildren', value: botChildren });
-    await worker.exec({ type: 'setBotIDs', value: botIDs });
 }
 
 async function onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
@@ -71,8 +70,8 @@ async function onCloseCandle(broker: string, symbol: string, timeframe: string, 
 
         // console.log(`onCloseCandle ${broker} ${symbol} ${timeframe} runtime = ${-1} ms`);
 
-        const workerData: WorkerData = { broker, symbol, timeframe, data };
-        const runtime = await worker.exec({ type: 'onCloseCandle', value: workerData });
+        const workerData: WorkerData = { broker, symbol, timeframe, data, lastTimeUpdated };
+        const runtime = await worker.exec(workerData);
         console.log(`onCloseCandle ${broker} ${symbol} ${timeframe} runtime = ${runtime} ms`);
     }
     catch (err) {

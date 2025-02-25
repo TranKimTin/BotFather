@@ -8,13 +8,12 @@ import * as util from './common/util';
 let botChildren: Array<BotInfo> = [];
 const telegram = new Telegram(undefined, undefined, false);
 let botIDs: { [key: string]: number } = {};
+let lastTimeUpdated = 0;
 function onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
     for (const botInfo of botChildren) {
         try {
             const { botName, idTelegram, symbolList, timeframes, route } = botInfo;
-            if (!timeframes.includes(timeframe) || !symbolList.includes(`${broker}:${symbol}`)) continue;
-
-            // console.log("onCloseCandle", { symbol, timeframe });
+            if (!timeframes.includes(timeframe) || !binarySearch(symbolList, `${broker}:${symbol}`)) continue;
 
             const visited: { [key: string]: boolean } = {};
             dfs_handleLogic(route, broker, symbol, timeframe, data, idTelegram, visited, botIDs[botName]);
@@ -23,6 +22,27 @@ function onCloseCandle(broker: string, symbol: string, timeframe: string, data: 
             console.error({ symbol, timeframe }, err);
         }
     }
+}
+
+async function initBotChildren() {
+    const botList: Array<any> = await mysql.query(`SELECT id, botName, idTelegram, route, symbolList, timeframes, treeData FROM Bot`);
+    botChildren = [];
+
+    for (let bot of botList) {
+        const botInfo: BotInfo = {
+            botName: bot.botName,
+            idTelegram: bot.idTelegram,
+            route: JSON.parse(bot.route),
+            symbolList: JSON.parse(bot.symbolList),
+            timeframes: JSON.parse(bot.timeframes),
+            treeData: JSON.parse(bot.treeData)
+        };
+        botInfo.symbolList.sort();
+        botChildren.push(botInfo);
+        botIDs[bot.botName] = bot.id;
+    }
+
+    console.log('init bot list', botChildren.length);
 }
 
 function binarySearch(arr: Array<string>, target: string): boolean {
@@ -298,20 +318,17 @@ function adjustParam(data: NodeData, args: ExprArgs): boolean {
 
 if (parentPort) {
     console.log('worker loaded');
-    parentPort.on('message', async (msg: { type: string, value: any }) => {
+    parentPort.on('message', async (msg: WorkerData) => {
         const t1 = new Date().getTime();
-        if (msg.type === 'onCloseCandle') {
-            const workerData: WorkerData = msg.value;
-            const { broker, symbol, timeframe, data } = workerData;
 
-            onCloseCandle(broker, symbol, timeframe, data);
+        const workerData: WorkerData = msg;
+        const { broker, symbol, timeframe, data } = workerData;
+
+        if (workerData.lastTimeUpdated != lastTimeUpdated) {
+            await initBotChildren();
+            lastTimeUpdated = workerData.lastTimeUpdated;
         }
-        else if (msg.type === 'setBotChildren') {
-            botChildren = msg.value;
-        }
-        else if (msg.type === 'setBotIDs') {
-            botIDs = msg.value;
-        }
+        onCloseCandle(broker, symbol, timeframe, data);
 
         const t2 = new Date().getTime();
         parentPort!.postMessage(t2 - t1);

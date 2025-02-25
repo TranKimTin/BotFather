@@ -54,7 +54,7 @@ export class SocketData {
                     this.cacheData(dataList);
                 }
                 else {
-                    console.log(`ignore onCloseCandle ${this.broker} - ${dataList.length}`, dataList[0])
+                    // console.log(`ignore onCloseCandle ${this.broker} - ${dataList.length}`, dataList[0])
                 }
             }
         }
@@ -64,7 +64,7 @@ export class SocketData {
                 dataList.pop();
             }
             if (dataList[1] && !dataList[1].isFinal) {
-                console.log(`forces final ${this.broker}`, dataList[1]);
+                // console.log(`forces final ${this.broker}`, dataList[1]);
                 if (dataList.length > 5) {
                     dataList[1].isFinal = true;
                     this.onCloseCandle(this.broker, data.symbol, data.interval, dataList.slice(1));
