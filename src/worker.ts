@@ -12,8 +12,8 @@ const botIDs: { [key: string]: number } = {};
 function onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
     for (const botInfo of botChildren) {
         try {
-            const { botName, idTelegram, symbolList, timeframes, treeData, route } = botInfo;
-            if (!timeframes.includes(timeframe) || !symbolList.includes(`${broker}:${symbol}`)) continue;
+            const { botName, idTelegram, symbolList, timeframes, route } = botInfo;
+            if (!timeframes.includes(timeframe) || !binarySearch(symbolList, `${broker}:${symbol}`)) continue;
 
             // console.log("onCloseCandle", { symbol, timeframe });
 
@@ -25,6 +25,25 @@ function onCloseCandle(broker: string, symbol: string, timeframe: string, data: 
         }
     }
 }
+
+function binarySearch(arr: Array<string>, target: string): boolean {
+    let left = 0;
+    let right = arr.length - 1;
+
+    while (left <= right) {
+        const mid = Math.floor((left + right) / 2);
+        if (arr[mid] === target) {
+            return true;
+        } else if (arr[mid] < target) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+
+    return false;
+}
+
 
 function dfs_handleLogic(node: Node, broker: string, symbol: string, timeframe: string, data: RateData[], idTelegram: TelegramIdType, visited: { [key: string]: boolean }, botID: number) {
     const { id, next } = node;
@@ -292,6 +311,7 @@ async function initBotChildren() {
             treeData: JSON.parse(bot.treeData)
         };
         botChildren.push(botInfo);
+        botInfo.symbolList.sort();
         botIDs[bot.botName] = bot.id;
     }
     console.log('initBotChildren', botChildren.length);

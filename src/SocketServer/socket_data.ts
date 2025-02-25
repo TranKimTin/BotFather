@@ -7,7 +7,6 @@ import * as redis from '../common/redis';
 export class SocketData {
     private broker: string;
     protected gData: { [key: string]: { [key: string]: Array<RateData> } };
-    protected gLastPrice: { [key: string]: number };
     protected gLastUpdated: { [key: string]: number };
     protected timeframes: Array<string>;
     protected symbolList: Array<string>;
@@ -26,7 +25,6 @@ export class SocketData {
         this.onCloseCandle = onCloseCandle;
 
         this.gData = {};
-        this.gLastPrice = {};
         this.gLastUpdated = {};
         this.symbolList = [];
 
@@ -35,8 +33,6 @@ export class SocketData {
 
     protected mergeData(data: RateData, isFinalMinute: boolean) {
         if (!this.onCloseCandle) throw 'Missing function onCloseCandle';
-
-        this.gLastPrice[data.symbol] = data.close;
 
         const dataList = this.gData[data.symbol][data.interval];
         if (dataList.length === 0) {
@@ -109,7 +105,6 @@ export class SocketData {
         this.cacheData(rates);
         const lastData = this.gData[symbol][timeframe].reverse();
         this.gData[symbol][timeframe] = rates;
-        this.gLastPrice[symbol] = this.gData[symbol][timeframe][0]?.close || 0;
 
         for (const data of lastData) {
             if (this.gData[symbol][timeframe].length === 0) {
@@ -246,10 +241,6 @@ export class SocketData {
     public getData(symbol: string, timeframe: string) {
         if (!this.gData || !this.gData[symbol] || !this.gData[symbol][timeframe]) return [];
         return this.gData[symbol][timeframe];
-    }
-
-    public getLastPrice(symbol: string): number {
-        return this.gLastPrice[symbol] || 0;
     }
 
     public getSymbols() {
