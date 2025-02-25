@@ -1,14 +1,13 @@
 import { parentPort } from 'worker_threads';
 import * as mysql from './WebConfig/lib/mysql';
 import { calculate, calculateSubExpr } from './common/Expr';
-import { BotInfo, ExprArgs, NODE_TYPE, Node, NodeData, ORDER_STATUS, RateData, TelegramIdType, UNIT } from './common/Interface';
+import { BotInfo, ExprArgs, NODE_TYPE, Node, NodeData, ORDER_STATUS, RateData, TelegramIdType, UNIT, WorkerData } from './common/Interface';
 import Telegram from './common/telegram';
 import * as util from './common/util';
-import fs from 'fs';
 
 let botChildren: Array<BotInfo> = [];
 const telegram = new Telegram(undefined, undefined, false);
-const botIDs: { [key: string]: number } = {};
+let botIDs: { [key: string]: number } = {};
 function onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
     for (const botInfo of botChildren) {
         try {
@@ -297,44 +296,25 @@ function adjustParam(data: NodeData, args: ExprArgs): boolean {
     return true;
 }
 
-async function initBotChildren() {
-    const botList: Array<any> = await mysql.query(`SELECT id, botName, idTelegram, route, symbolList, timeframes, treeData FROM Bot`);
-    botChildren = [];
-
-    for (let bot of botList) {
-        const botInfo: BotInfo = {
-            botName: bot.botName,
-            idTelegram: bot.idTelegram,
-            route: JSON.parse(bot.route),
-            symbolList: JSON.parse(bot.symbolList),
-            timeframes: JSON.parse(bot.timeframes),
-            treeData: JSON.parse(bot.treeData)
-        };
-        botChildren.push(botInfo);
-        botInfo.symbolList.sort();
-        botIDs[bot.botName] = bot.id;
-    }
-    console.log('initBotChildren', botChildren.length);
-}
-
-const tempFile = 'temp.txt';
-let lastTimeUpdatedBotList = fs.existsSync(tempFile) ? fs.readFileSync(tempFile).toString() : '';
-
 if (parentPort) {
     console.log('worker loaded');
-    initBotChildren();
-    parentPort.on('message', async (msg: { broker: string, symbol: string, timeframe: string, data: Array<RateData> }) => {
-        const { broker, symbol, timeframe, data } = msg;
-        if (!broker || !symbol || !timeframe || !data) throw 'worker data error';
+    parentPort.on('message', async (msg: { type: string, value: any }) => {
         const t1 = new Date().getTime();
-        let lastTime = fs.existsSync(tempFile) ? fs.readFileSync(tempFile).toString() : '';
-        if (lastTime !== lastTimeUpdatedBotList) {
-            lastTimeUpdatedBotList = lastTime;
-            await initBotChildren();
+        if (msg.type === 'onCloseCandle') {
+            const workerData: WorkerData = msg.value;
+            const { broker, symbol, timeframe, data } = workerData;
+
+            onCloseCandle(broker, symbol, timeframe, data);
         }
-        onCloseCandle(broker, symbol, timeframe, data);
+        else if (msg.type === 'setBotChildren') {
+            botChildren = msg.value;
+        }
+        else if (msg.type === 'setBotIDs') {
+            botIDs = msg.value;
+        }
+
         const t2 = new Date().getTime();
-        parentPort?.postMessage(t2 - t1);
+        parentPort!.postMessage(t2 - t1);
     });
 }
 else {
