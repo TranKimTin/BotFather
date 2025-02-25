@@ -11,7 +11,7 @@ let symbolList: Array<string> = [];
 const volume = 15; //USDT
 const spotData: { [key: string]: { price: number, lastUpdate: number } } = {};
 const futureData: { [key: string]: { price: number, lastUpdate: number } } = {};
-const lastSendTele: { [key: string]: number } = {};
+const cnt: { [key: string]: number } = {};
 
 function connectSocketSpot() {
     const streams = symbolList.map(symbol => `${symbol.toLowerCase()}@depth5@100ms`).join("/");
@@ -102,9 +102,16 @@ function check(symbol: string) {
 
     const diff = (futureBid - spotAsk) / spotAsk * 100;
     const now = new Date().getTime();
-    if (diff > 1 && now - lastSendTele[symbol] > 1000) {
+
+    if (diff >= 1) {
+        cnt[symbol]++;
+    }
+    else {
+        cnt[symbol] = 0;
+    }
+
+    if (cnt[symbol] >= 3) {
         telegram.sendMessage(`${symbol} - diff: ${+diff.toFixed(3)} %, spot: ${spotAsk}, future: ${futureBid}`, 1833284254);
-        lastSendTele[symbol] = new Date().getTime();
     }
     else if (diff > 0.5) {
         console.log(`${symbol} - diff: ${+diff.toFixed(3)} %, spot: ${spotAsk}, future: ${futureBid}`);
@@ -126,7 +133,7 @@ async function main() {
             price: 0,
             lastUpdate: 0
         };
-        lastSendTele[symbol] = 0;
+        cnt[symbol] = 0;
     }
 
     connectSocketSpot();
