@@ -12,7 +12,7 @@ function onCloseCandle(broker: string, symbol: string, timeframe: string, data: 
     for (const botInfo of botChildren) {
         try {
             const { botName, idTelegram, symbolList, timeframes, route } = botInfo;
-            if (!timeframes.includes(timeframe) || !binarySearch(symbolList, `${broker}:${symbol}`)) continue;
+            if (!timeframes.includes(timeframe) || !symbolList.includes(`${broker}:${symbol}`)) continue;
 
             // console.log("onCloseCandle", { symbol, timeframe });
 
