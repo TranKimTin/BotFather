@@ -173,8 +173,12 @@ export class SocketData {
 
     private async getRates(symbol: string, timeframe: string, res: { fromCache: boolean }): Promise<Array<RateData>> {
         res.fromCache = false;
-        if (timeframe === '1m') return this.getOHLCV!(symbol, timeframe);
         const key = `${this.broker}_${symbol}_${timeframe}`;
+
+        if (timeframe === '1m') {
+            await redis.remove(key);
+            return this.getOHLCV!(symbol, timeframe);
+        }
 
         const rates: Array<RateData> = (await redis.getArray(key)).map(item => JSON.parse(item));
         for (let item of rates) {
@@ -202,7 +206,7 @@ export class SocketData {
     }
 
     private async cacheData(data: Array<RateData>) {
-        if (data.length === 0 || data[0].interval === '1m') return;
+        if (data.length === 0) return;
         setTimeout(() => {
             setImmediate(async () => {
                 try {
