@@ -77,7 +77,7 @@ async function onCloseCandle(broker: string, symbol: string, timeframe: string, 
         console.log(`onCloseCandle ${broker} ${symbol} ${timeframe} runtime = ${result.runtime} ms`);
     }
     catch (err) {
-        console.error(err);
+        console.error('onCloseCandle error', err);
     }
 }
 
