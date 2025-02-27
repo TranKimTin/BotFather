@@ -1,5 +1,4 @@
-import { Socket } from "socket.io-client";
-import { DefaultEventsMap } from 'socket.io/dist/typed-events';
+import { Indicator } from "technicalindicators/declarations/indicator/indicator";
 
 export interface Node {
     data: NodeData;
@@ -122,7 +121,8 @@ export interface ExprArgs {
     broker: string;
     symbol: string;
     timeframe: string;
-    data: Array<RateData>
+    data: Array<RateData>,
+    cacheIndicator: CacheIndicator
 }
 
 export interface CustomRequest extends Request {
@@ -183,12 +183,33 @@ export interface UserTokenInfo {
     role: ROLE
 }
 
+export const MAX_CANDLE = 600
+
+export interface CustomIndicator {
+    indicator: any,
+    value: Array<any>,
+    lastUpdateTime: number
+}
+export interface CacheIndicator {
+    [key: string]: CustomIndicator
+}
+
 export interface WorkerData {
     broker: string,
     symbol: string,
     timeframe: string,
     data: Array<RateData>,
-    lastTimeUpdated: number
+    lastTimeUpdated: number,
+    cacheIndicator: CacheIndicator
 }
 
-export const MAX_CANDLE = 600
+export interface MACD_Output {
+    MACD: number;
+    signal: number;
+    histogram: number;
+}
+
+export interface WorkerResult {
+    runtime: number,
+    cacheIndicator: CacheIndicator
+}

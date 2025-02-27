@@ -166,7 +166,8 @@ export async function calculator(broker: string, symbol: string, timeframe: stri
         broker: broker,
         symbol: symbol,
         timeframe: timeframe,
-        data: data
+        data: data,
+        cacheIndicator: {}
     };
 
 

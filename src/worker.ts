@@ -1,7 +1,7 @@
 import { parentPort } from 'worker_threads';
 import * as mysql from './WebConfig/lib/mysql';
 import { calculate, calculateSubExpr } from './common/Expr';
-import { BotInfo, ExprArgs, NODE_TYPE, Node, NodeData, ORDER_STATUS, RateData, TelegramIdType, UNIT, WorkerData } from './common/Interface';
+import { BotInfo, CacheIndicator, ExprArgs, NODE_TYPE, Node, NodeData, ORDER_STATUS, RateData, TelegramIdType, UNIT, WorkerData } from './common/Interface';
 import Telegram from './common/telegram';
 import * as util from './common/util';
 
@@ -9,14 +9,14 @@ let botChildren: Array<BotInfo> = [];
 const telegram = new Telegram(undefined, undefined, false);
 let botIDs: { [key: string]: number } = {};
 let lastTimeUpdated = 0;
-function onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
+function onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>, cacheIndicator: CacheIndicator) {
     for (const botInfo of botChildren) {
         try {
             const { botName, idTelegram, symbolList, timeframes, route } = botInfo;
             if (!timeframes.includes(timeframe) || !binarySearch(symbolList, `${broker}:${symbol}`)) continue;
 
             const visited: { [key: string]: boolean } = {};
-            dfs_handleLogic(route, broker, symbol, timeframe, data, idTelegram, visited, botIDs[botName]);
+            dfs_handleLogic(route, broker, symbol, timeframe, data, idTelegram, visited, botIDs[botName], cacheIndicator);
         }
         catch (err) {
             console.error({ symbol, timeframe }, err);
@@ -64,27 +64,28 @@ function binarySearch(arr: Array<string>, target: string): boolean {
 }
 
 
-function dfs_handleLogic(node: Node, broker: string, symbol: string, timeframe: string, data: RateData[], idTelegram: TelegramIdType, visited: { [key: string]: boolean }, botID: number) {
+function dfs_handleLogic(node: Node, broker: string, symbol: string, timeframe: string, data: RateData[], idTelegram: TelegramIdType, visited: { [key: string]: boolean }, botID: number, cacheIndicator: CacheIndicator) {
     const { id, next } = node;
     const nodeData = node.data;
 
     if (visited[id] === true) return;
     visited[id] = true;
-    if (handleLogic(nodeData, broker, symbol, timeframe, data, idTelegram, botID)) {
+    if (handleLogic(nodeData, broker, symbol, timeframe, data, idTelegram, botID, cacheIndicator)) {
         for (const child of next) {
-            dfs_handleLogic(child, broker, symbol, timeframe, data, idTelegram, visited, botID);
+            dfs_handleLogic(child, broker, symbol, timeframe, data, idTelegram, visited, botID, cacheIndicator);
         }
     }
 }
 
-function handleLogic(nodeData: NodeData, broker: string, symbol: string, timeframe: string, data: RateData[], idTelegram: TelegramIdType, botID: number): boolean {
+function handleLogic(nodeData: NodeData, broker: string, symbol: string, timeframe: string, data: RateData[], idTelegram: TelegramIdType, botID: number, cacheIndicator: CacheIndicator): boolean {
     if (nodeData.type === NODE_TYPE.START) return true;
 
     const exprArgs: ExprArgs = {
         broker,
         symbol,
         timeframe,
-        data
+        data,
+        cacheIndicator
     };
 
     if (nodeData.type === NODE_TYPE.EXPR) {
@@ -322,16 +323,17 @@ if (parentPort) {
         const t1 = new Date().getTime();
 
         const workerData: WorkerData = msg;
-        const { broker, symbol, timeframe, data } = workerData;
+        const { broker, symbol, timeframe, data, cacheIndicator } = workerData;
 
         if (workerData.lastTimeUpdated != lastTimeUpdated) {
             await initBotChildren();
             lastTimeUpdated = workerData.lastTimeUpdated;
         }
-        onCloseCandle(broker, symbol, timeframe, data);
+        onCloseCandle(broker, symbol, timeframe, data, cacheIndicator);
 
         const t2 = new Date().getTime();
-        parentPort!.postMessage(t2 - t1);
+        const runtime = t2 - t1;
+        parentPort!.postMessage({ runtime, cacheIndicator });
     });
 }
 else {

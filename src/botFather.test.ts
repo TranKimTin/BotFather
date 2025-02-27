@@ -41,7 +41,7 @@ describe('util', function () {
             const period = 8;
             const values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
             const data = values.map(item => ({ close: item } as RateData));
-            const ma = util.iMA(data, period, 5);
+            const ma = util.iMA(data, period);
             const expected = [4.5, 5.5, 6.5, 7.5, 8.5, 9.5];
             assert.deepStrictEqual(ma, expected);
         });

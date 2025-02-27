@@ -554,7 +554,7 @@ async function main() {
 }
 
 async function onCloseCandle(symbol: string, timeframe: string, data: Array<RateData>) {
-    const rsi = util.iRSI(data, 14, 1);
+    const rsi = util.iRSI(data, 14);
 
     const curRSI = rsi[0];
     const preRSI = rsi[1];

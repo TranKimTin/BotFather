@@ -2,16 +2,18 @@ import moment, { DurationInputArg2 } from 'moment';
 import zlib from 'zlib';
 import fs from 'fs';
 import * as ccxt from 'ccxt'
-import * as indicator from 'technicalindicators';
+import * as technicalindicators from 'technicalindicators';
 import _ from 'lodash';
 import axios from 'axios';
-import { FundingRate, RateData } from './Interface';
+import { CacheIndicator, CustomIndicator, FundingRate, MACD_Output, MAX_CANDLE, RateData } from './Interface';
 import pm2 from 'pm2';
 import dotenv from 'dotenv';
+import { MACDOutput } from 'technicalindicators/declarations/moving_averages/MACD';
+import { BollingerBandsOutput } from 'technicalindicators/declarations/volatility/BollingerBands';
 
 dotenv.config({ path: `${__dirname}/../../.env` });
 
-// indicator.setConfig('precision', 10);
+// technicalindicators.setConfig('precision', 10);
 
 let binance = new ccxt.binance({ 'timeout': 30000 });
 let binanceFuture = new ccxt.binanceusdm({ 'timeout': 30000 });
@@ -76,27 +78,63 @@ function convertDataToArrayPricesLow(data: Array<RateData>, size: number) {
     return arr;
 }
 
-export function iCCI(data: Array<RateData>, period: number, maxPeriod: number) {
-    const close = convertDataToArrayPrices(data, maxPeriod + period + 1);
-    const high = convertDataToArrayPricesHigh(data, maxPeriod + period + 1);
-    const low = convertDataToArrayPricesLow(data, maxPeriod + period + 1);
 
-    return indicator.CCI.calculate({
-        high,
-        low,
-        close,
-        period: period,
-        reversedInput: true
-    });
+function updateCacheIndicator(data: Array<RateData>, cached: CustomIndicator, isValueCandle: boolean = false) {
+    let i = 0;
+    while (i < data.length && data[i].startTime > cached.lastUpdateTime) {
+        i++;
+    }
+    i--;
+    while (i >= 0) {
+        cached.value.unshift(cached.indicator.nextValue(isValueCandle ? data[i] : data[i].close));
+        i--;
+    }
+
+    while (cached.value.length > MAX_CANDLE) {
+        cached.value.pop();
+    }
+
+    cached.lastUpdateTime = data[0].startTime;
 }
 
-export function iRSI(data: Array<RateData>, period: number, maxPeriod: number) {
-    const prices = convertDataToArrayPrices(data, maxPeriod + period + 250);
-    return indicator.RSI.calculate({
-        values: prices,
-        period: period,
-        reversedInput: true
-    });
+export function iCCI(data: Array<RateData>, period: number, cacheIndicator: CacheIndicator = {}): Array<number> {
+    const key = `cci_${period}`;
+    if (!cacheIndicator[key]) {
+        cacheIndicator[key] = {
+            indicator: new technicalindicators.CCI({
+                period,
+                high: [],
+                low: [],
+                close: [],
+                reversedInput: true
+            }),
+            lastUpdateTime: 0,
+            value: []
+        };
+    }
+
+    updateCacheIndicator(data, cacheIndicator[key], true);
+    return cacheIndicator[key].value;
+}
+
+
+export function iRSI(data: Array<RateData>, period: number, cacheIndicator: CacheIndicator = {}): Array<number> {
+    const key = `rsi_${period}`;
+    if (!cacheIndicator[key]) {
+        cacheIndicator[key] = {
+            indicator: new technicalindicators.RSI({
+                period,
+                values: [],
+                reversedInput: true
+            }),
+            lastUpdateTime: 0,
+            value: []
+        };
+    }
+
+    updateCacheIndicator(data, cacheIndicator[key]);
+    return cacheIndicator[key].value;
+
     // const gains = [];
     // const losses = [];
     // let avgGain = 0;
@@ -582,58 +620,81 @@ export async function getOkxOHLCVHistory(symbol: string, timeframe: string, limi
     return result;
 }
 
-export function iMA(data: Array<RateData>, period: number, maxPeriod: number) {
-    const values = convertDataToArrayPrices(data, maxPeriod + period + 1);
-    const MAs = indicator.SMA.calculate({
-        period,
-        values,
-        reversedInput: true
-    });
-    return MAs;
-}
-
-export function iEMA(data: Array<RateData>, period: number, maxPeriod: number) {
-    const values = convertDataToArrayPrices(data, maxPeriod + period + 400);
-    const EMAs = indicator.EMA.calculate({
-        period,
-        values,
-        reversedInput: true
-    });
-    return EMAs;
-}
-
-export function iMACD(data: Array<RateData>, fastPeriod: number, slowPeriod: number, signalPeriod: number, maxPeriod: number) {
-    const values = convertDataToArrayPrices(data, maxPeriod + slowPeriod + signalPeriod + 150);
-    const MACDs = indicator.MACD.calculate({
-        values,
-        fastPeriod,
-        slowPeriod,
-        signalPeriod,
-        SimpleMAOscillator: false,
-        SimpleMASignal: false,
-        reversedInput: true
-    });
-
-    const result: Array<{ MACD: number, signal: number, histogram: number }> = new Array(MACDs.length);
-    for (let i = 0; i < MACDs.length; i++) {
-        result[i] = {
-            MACD: MACDs[i].MACD || 0,
-            signal: MACDs[i].signal || 0,
-            histogram: MACDs[i].histogram || 0
-        }
+export function iMA(data: Array<RateData>, period: number, cacheIndicator: CacheIndicator = {}): Array<number> {
+    const key = `sma_${period}`;
+    if (!cacheIndicator[key]) {
+        cacheIndicator[key] = {
+            indicator: new technicalindicators.SMA({
+                period,
+                values: [],
+                reversedInput: true
+            }),
+            lastUpdateTime: 0,
+            value: []
+        };
     }
-    return result;
+
+    updateCacheIndicator(data, cacheIndicator[key]);
+    return cacheIndicator[key].value;
 }
 
-export function iBB(data: Array<RateData>, period: number, multiplier: number, maxPeriod: number) {
-    const values = convertDataToArrayPrices(data, maxPeriod + period + 1);
-    const BBs = indicator.BollingerBands.calculate({
-        period,
-        values,
-        stdDev: multiplier,
-        reversedInput: true
-    });
-    return BBs;
+export function iEMA(data: Array<RateData>, period: number, cacheIndicator: CacheIndicator = {}): Array<number> {
+    const key = `ema_${period}`;
+    if (!cacheIndicator[key]) {
+        cacheIndicator[key] = {
+            indicator: new technicalindicators.EMA({
+                period,
+                values: [],
+                reversedInput: true
+            }),
+            lastUpdateTime: 0,
+            value: []
+        };
+    }
+
+    updateCacheIndicator(data, cacheIndicator[key]);
+    return cacheIndicator[key].value;
+}
+
+export function iMACD(data: Array<RateData>, fastPeriod: number, slowPeriod: number, signalPeriod: number, cacheIndicator: CacheIndicator = {}): Array<MACD_Output> {
+    const key = `macd_${fastPeriod}_${slowPeriod}_${signalPeriod}`;
+    if (!cacheIndicator[key]) {
+        cacheIndicator[key] = {
+            indicator: new technicalindicators.MACD({
+                values: [],
+                fastPeriod,
+                slowPeriod,
+                signalPeriod,
+                SimpleMAOscillator: false,
+                SimpleMASignal: false,
+                reversedInput: true
+            }),
+            lastUpdateTime: 0,
+            value: []
+        };
+    }
+
+    updateCacheIndicator(data, cacheIndicator[key]);
+    return cacheIndicator[key].value;
+}
+
+export function iBB(data: Array<RateData>, period: number, multiplier: number, cacheIndicator: CacheIndicator = {}): Array<BollingerBandsOutput> {
+    const key = `bb_${period}_${multiplier}`;
+    if (!cacheIndicator[key]) {
+        cacheIndicator[key] = {
+            indicator: new technicalindicators.BollingerBands({
+                period,
+                values: [],
+                stdDev: multiplier,
+                reversedInput: true
+            }),
+            lastUpdateTime: 0,
+            value: []
+        };
+    }
+
+    updateCacheIndicator(data, cacheIndicator[key]);
+    return cacheIndicator[key].value;
 }
 
 export function iZigZag(data: Array<RateData>, deviation: number, depth: number, byPercent: boolean) {
@@ -729,15 +790,24 @@ export function iZigZag(data: Array<RateData>, deviation: number, depth: number,
     return result;
 }
 
-export function iATR(data: Array<RateData>, period: number, maxPeriod: number) {
-    const ATRs = indicator.ATR.calculate({
-        high: convertDataToArrayPricesHigh(data, maxPeriod + period + 200),
-        low: convertDataToArrayPricesLow(data, maxPeriod + period + 200),
-        close: convertDataToArrayPrices(data, maxPeriod + period + 200),
-        period,
-        reversedInput: true
-    });
-    return ATRs;
+export function iATR(data: Array<RateData>, period: number, cacheIndicator: CacheIndicator = {}) {
+    const key = `atr_${period}`;
+    if (!cacheIndicator[key]) {
+        cacheIndicator[key] = {
+            indicator: new technicalindicators.ATR({
+                high: [],
+                low: [],
+                close: [],
+                period,
+                reversedInput: true
+            }),
+            lastUpdateTime: 0,
+            value: []
+        };
+    }
+
+    updateCacheIndicator(data, cacheIndicator[key], true);
+    return cacheIndicator[key].value;
 }
 
 export function isBearishEngulfing(candle1: RateData, candle2: RateData): boolean {
@@ -747,7 +817,7 @@ export function isBearishEngulfing(candle1: RateData, candle2: RateData): boolea
         close: [candle1.close, candle2.close],
         low: [candle1.low, candle2.low]
     };
-    return indicator.bearishengulfingpattern(twoDayBearishInput);
+    return technicalindicators.bearishengulfingpattern(twoDayBearishInput);
 }
 
 export function isBullishEngulfing(candle1: RateData, candle2: RateData): boolean {
@@ -757,7 +827,7 @@ export function isBullishEngulfing(candle1: RateData, candle2: RateData): boolea
         close: [candle1.close, candle2.close],
         low: [candle1.low, candle2.low]
     };
-    return indicator.bullishengulfingpattern(twoDayBullishInput);
+    return technicalindicators.bullishengulfingpattern(twoDayBullishInput);
 }
 
 export function isBullishHammer(candle: RateData): boolean {
@@ -767,7 +837,7 @@ export function isBullishHammer(candle: RateData): boolean {
         close: [candle.close],
         low: [candle.low]
     };
-    return indicator.bullishhammerstick(singleInput);
+    return technicalindicators.bullishhammerstick(singleInput);
 }
 
 export function isBearishHammer(candle: RateData): boolean {
@@ -777,7 +847,7 @@ export function isBearishHammer(candle: RateData): boolean {
         close: [candle.close],
         low: [candle.low]
     };
-    return indicator.bearishhammerstick(singleInput);
+    return technicalindicators.bearishhammerstick(singleInput);
 }
 
 export function isBullish(data: Array<RateData>, shift: number): boolean {
@@ -791,7 +861,7 @@ export function isBullish(data: Array<RateData>, shift: number): boolean {
         high: rates.map(candle => candle.high),
         low: rates.map(candle => candle.low)
     };
-    return indicator.bullish(input);
+    return technicalindicators.bullish(input);
 }
 
 export function isBearish(data: Array<RateData>, shift: number): boolean {
@@ -805,7 +875,7 @@ export function isBearish(data: Array<RateData>, shift: number): boolean {
         high: rates.map(candle => candle.high),
         low: rates.map(candle => candle.low)
     };
-    return indicator.bearish(input);
+    return technicalindicators.bearish(input);
 }
 
 
@@ -821,33 +891,33 @@ export function listBullBear(data: Array<RateData>, shift: number): Array<string
     const list: Array<string> = [];
 
     //bullish
-    if (indicator.bullishengulfingpattern(input)) list.push('BullishEngulfingPattern');
-    if (indicator.downsidetasukigap(input)) list.push('DownsideTasukiGap');
-    if (indicator.bullishharami(input)) list.push('BullishHaramiCross');
-    if (indicator.morningdojistar(input)) list.push('MorningDojiStar');
-    if (indicator.morningstar(input)) list.push('MorningStar');
-    if (indicator.bullishmarubozu(input)) list.push('BullishMarubozu');
-    if (indicator.piercingline(input)) list.push('PiercingLine');
-    if (indicator.threewhitesoldiers(input)) list.push('ThreeWhiteSoldiers');
-    if (indicator.bullishhammerstick(input)) list.push('BullishHammerStick');
-    if (indicator.hammerpattern(input)) list.push('HammerPattern');
-    if (indicator.hammerpatternunconfirmed(input)) list.push('HammerPatternUnconfirmed');
-    if (indicator.tweezerbottom(input)) list.push('TweezerBottom');
+    if (technicalindicators.bullishengulfingpattern(input)) list.push('BullishEngulfingPattern');
+    if (technicalindicators.downsidetasukigap(input)) list.push('DownsideTasukiGap');
+    if (technicalindicators.bullishharami(input)) list.push('BullishHaramiCross');
+    if (technicalindicators.morningdojistar(input)) list.push('MorningDojiStar');
+    if (technicalindicators.morningstar(input)) list.push('MorningStar');
+    if (technicalindicators.bullishmarubozu(input)) list.push('BullishMarubozu');
+    if (technicalindicators.piercingline(input)) list.push('PiercingLine');
+    if (technicalindicators.threewhitesoldiers(input)) list.push('ThreeWhiteSoldiers');
+    if (technicalindicators.bullishhammerstick(input)) list.push('BullishHammerStick');
+    if (technicalindicators.hammerpattern(input)) list.push('HammerPattern');
+    if (technicalindicators.hammerpatternunconfirmed(input)) list.push('HammerPatternUnconfirmed');
+    if (technicalindicators.tweezerbottom(input)) list.push('TweezerBottom');
 
     //bearish
-    if (indicator.bearishengulfingpattern(input)) list.push('BearishEngulfingPattern');
-    if (indicator.bearishharami(input)) list.push('BearishHarami');
-    if (indicator.bearishharamicross(input)) list.push('BearishHaramiCross');
-    if (indicator.eveningdojistar(input)) list.push('EveningDojiStar');
-    if (indicator.eveningstar(input)) list.push('EveningStar');
-    if (indicator.bearishmarubozu(input)) list.push('BearishMarubozu');
-    if (indicator.threeblackcrows(input)) list.push('ThreeBlackCrows');
-    if (indicator.bearishhammerstick(input)) list.push('BearishHammerStick');
-    if (indicator.bearishinvertedhammerstick(input)) list.push('BearishInvertedHammerStick');
-    if (indicator.hangingman(input)) list.push('HangingMan');
-    if (indicator.shootingstar(input)) list.push('ShootingStar');
-    if (indicator.shootingstarunconfirmed(input)) list.push('ShootingStarUnconfirmed');
-    if (indicator.tweezertop(input)) list.push('TweezerTop');
+    if (technicalindicators.bearishengulfingpattern(input)) list.push('BearishEngulfingPattern');
+    if (technicalindicators.bearishharami(input)) list.push('BearishHarami');
+    if (technicalindicators.bearishharamicross(input)) list.push('BearishHaramiCross');
+    if (technicalindicators.eveningdojistar(input)) list.push('EveningDojiStar');
+    if (technicalindicators.eveningstar(input)) list.push('EveningStar');
+    if (technicalindicators.bearishmarubozu(input)) list.push('BearishMarubozu');
+    if (technicalindicators.threeblackcrows(input)) list.push('ThreeBlackCrows');
+    if (technicalindicators.bearishhammerstick(input)) list.push('BearishHammerStick');
+    if (technicalindicators.bearishinvertedhammerstick(input)) list.push('BearishInvertedHammerStick');
+    if (technicalindicators.hangingman(input)) list.push('HangingMan');
+    if (technicalindicators.shootingstar(input)) list.push('ShootingStar');
+    if (technicalindicators.shootingstarunconfirmed(input)) list.push('ShootingStarUnconfirmed');
+    if (technicalindicators.tweezertop(input)) list.push('TweezerTop');
 
     return list;
 }
@@ -859,7 +929,7 @@ export function iDoji(candle: RateData): boolean {
         close: [candle.close],
         low: [candle.low]
     };
-    return indicator.doji(singleInput);
+    return technicalindicators.doji(singleInput);
 }
 
 export async function getOHLCV(broker: string, symbol: string, timeframe: string, limit: number, since?: number): Promise<Array<RateData>> {

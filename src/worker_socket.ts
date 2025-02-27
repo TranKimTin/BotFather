@@ -1,6 +1,6 @@
 import { parentPort } from 'worker_threads';
 import * as mysql from './WebConfig/lib/mysql';
-import { BotInfo, RateData, WorkerData } from './common/Interface';
+import { BotInfo, CacheIndicator, RateData, WorkerData, WorkerResult } from './common/Interface';
 import os from 'os';
 import { SocketData } from './SocketServer/socket_data';
 import { BinanceSocket } from './SocketServer/socket_binance';
@@ -18,6 +18,7 @@ const worker = new StaticPool({
     size: os.cpus().length,
     task: './worker.js'
 });
+const cacheIndicators: { [key: string]: CacheIndicator } = {}
 
 async function initSocketData(broker: string) {
     if (broker === 'binance') socket = new BinanceSocket(onCloseCandle);
@@ -70,9 +71,10 @@ async function onCloseCandle(broker: string, symbol: string, timeframe: string, 
 
         // console.log(`onCloseCandle ${broker} ${symbol} ${timeframe} runtime = ${-1} ms`);
 
-        const workerData: WorkerData = { broker, symbol, timeframe, data, lastTimeUpdated };
-        const runtime = await worker.exec(workerData);
-        console.log(`onCloseCandle ${broker} ${symbol} ${timeframe} runtime = ${runtime} ms`);
+        const workerData: WorkerData = { broker, symbol, timeframe, data, lastTimeUpdated, cacheIndicator: cacheIndicators[key] || {} };
+        const result: WorkerResult = await worker.exec(workerData);
+        cacheIndicators[key] = result.cacheIndicator;
+        console.log(`onCloseCandle ${broker} ${symbol} ${timeframe} runtime = ${result.runtime} ms`);
     }
     catch (err) {
         console.error(err);
