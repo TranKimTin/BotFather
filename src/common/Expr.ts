@@ -35,22 +35,22 @@ export class Expr extends ExprVisitor<any> {
         this.cacheIndicator = args.cacheIndicator;
     }
 
-    visit(tree: antlr.ParseTree) {
-        const timestamp = this.data[0]?.startTime;
-        const treeText = tree.getText();
-        if (timestamp && tree.getChildCount() === 1 && isNaN(Number(treeText))) {
-            const key = `${treeText}_${this.broker}:${this.symbol}:${this.timeframe}:${timestamp / 1000}`;
-            const cacheValue = Cache.get(key);
-            if (cacheValue) {
-                return cacheValue;
-            }
-            //else
-            const value = super.visit(tree);
-            Cache.set(key, value, 180000);
-            return value;
-        }
-        return super.visit(tree);
-    }
+    // visit(tree: antlr.ParseTree) {
+    //     const timestamp = this.data[0]?.startTime;
+    //     const treeText = tree.getText();
+    //     if (timestamp && tree.getChildCount() === 1 && isNaN(Number(treeText))) {
+    //         const key = `${treeText}_${this.broker}:${this.symbol}:${this.timeframe}:${timestamp / 1000}`;
+    //         const cacheValue = Cache.get(key);
+    //         if (cacheValue) {
+    //             return cacheValue;
+    //         }
+    //         //else
+    //         const value = super.visit(tree);
+    //         Cache.set(key, value, 180000);
+    //         return value;
+    //     }
+    //     return super.visit(tree);
+    // }
 
     visitAddSub = (ctx: AddSubContext) => {
         const A = ctx.expr(0);
