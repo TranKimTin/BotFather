@@ -73,7 +73,7 @@ export class SocketData {
             }
         }
         else {
-            console.log(`${this.broker}: merge error`);
+            // console.log(`${this.broker}: merge error`);
             // console.log(dataList[0], data);
         }
     }
@@ -195,12 +195,12 @@ export class SocketData {
             idx--;
         }
         if (!this.isValidRates(rates)) {
-            console.error(`rate is invalid ${key} `, JSON.stringify(rates.map(item => item.timestring)));
+            // console.error(`rate is invalid ${key} `, JSON.stringify(rates.map(item => item.timestring)));
             await redis.remove(key);
             const result = await this.getOHLCV!(symbol, timeframe);
             return result;
         }
-        console.log(`get data from cache ${key}_${rates.length}`);
+        // console.log(`get data from cache ${key}_${rates.length}`);
         res.fromCache = true;
         return rates;
     }
@@ -232,7 +232,7 @@ export class SocketData {
                     cntRemove++;
                     cachedLength--;
                 }
-                console.log(`cached ${key}_${cnt}-${cntRemove}`);
+                // console.log(`cached ${key}_${cnt}-${cntRemove}`);
             }
             catch (err) {
                 console.error(err);
