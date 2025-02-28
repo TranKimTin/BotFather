@@ -1,7 +1,7 @@
 import * as antlr from "antlr4ng";
 import { BaseErrorListener, CharStream, CommonTokenStream, RecognitionException, Recognizer, Token } from 'antlr4ng';
 import { ExprLexer } from './generated/ExprLexer';
-import { ABSContext, AddSubContext, AmplContext, AmplPContext, Avg_amplContext, Avg_amplPContext, Avg_closeContext, Avg_highContext, Avg_lowContext, Avg_openContext, Bb_lowerContext, Bb_middleContext, Bb_upperContext, Bearish_engulfingContext, Bearish_hammerContext, BearishContext, BrokerContext, Bull_bear_listContext, Bullish_engulfingContext, Bullish_hammerContext, BullishContext, ChangeContext, ChangePContext, CloseContext, ComparisonContext, DojiContext, EmaContext, ExprParser, FloatContext, HighContext, HourContext, IAvgOpenContext, IntContext, IRSIContext, LowContext, Lower_shadowContext, Lower_shadowPContext, Macd_histogramContext, Macd_n_dinhContext, Macd_signalContext, Macd_slopeContext, Macd_valueContext, MaContext, MarsiContext, Max_amplContext, Max_amplPContext, Max_changeContext, Max_changePContext, Max_closeContext, Max_highContext, Max_lowContext, Max_openContext, Max_rsiContext, MAXContext, Min_amplContext, Min_amplPContext, Min_changeContext, Min_changePContext, Min_closeContext, Min_highContext, Min_lowContext, Min_openContext, Min_rsiContext, MINContext, MinuteContext, MulDivContext, NegativeContext, NumberContext, OpenContext, ParensContext, PositiveContext, Rsi_phan_kiContext, Rsi_slopeContext, RsiContext, StringContext, SymbolContext, TimeframeContext, Upper_shadowContext, Upper_shadowPContext, Volume24h_in_usdContext, VolumeContext } from './generated/ExprParser';
+import { ABSContext, AddSubContext, AmplContext, AmplPContext, Avg_amplContext, Avg_amplPContext, Avg_closeContext, Avg_highContext, Avg_lowContext, Avg_openContext, Bb_lowerContext, Bb_middleContext, Bb_upperContext, Bearish_engulfingContext, Bearish_hammerContext, BearishContext, BrokerContext, Bull_bear_listContext, Bullish_engulfingContext, Bullish_hammerContext, BullishContext, ChangeContext, ChangePContext, CloseContext, ComparisonContext, DojiContext, EmaContext, ExprContext, ExprParser, FloatContext, HighContext, HourContext, IAvgOpenContext, IntContext, IRSIContext, LowContext, Lower_shadowContext, Lower_shadowPContext, Macd_histogramContext, Macd_n_dinhContext, Macd_signalContext, Macd_slopeContext, Macd_valueContext, MaContext, MarsiContext, Max_amplContext, Max_amplPContext, Max_changeContext, Max_changePContext, Max_closeContext, Max_highContext, Max_lowContext, Max_openContext, Max_rsiContext, MAXContext, Min_amplContext, Min_amplPContext, Min_changeContext, Min_changePContext, Min_closeContext, Min_highContext, Min_lowContext, Min_openContext, Min_rsiContext, MINContext, MinuteContext, MulDivContext, NegativeContext, NumberContext, OpenContext, ParensContext, PositiveContext, Rsi_phan_kiContext, Rsi_slopeContext, RsiContext, StringContext, SymbolContext, TimeframeContext, Upper_shadowContext, Upper_shadowPContext, Volume24h_in_usdContext, VolumeContext } from './generated/ExprParser';
 import { ExprVisitor } from './generated/ExprVisitor';
 import * as util from '../common/util';
 import moment from "moment";
@@ -963,22 +963,30 @@ export class Expr extends ExprVisitor<any> {
     };
 }
 
+const cacheParseTree: { [key: string]: ExprContext } = {};
 
 export function calculate(condition: string, args: ExprArgs): any {
     try {
         // const inputStream = CharStream.fromString(condition.toLowerCase().replace(/\s+/g, ''));
-        const inputStream = CharStream.fromString(condition.toLowerCase());
-        const lexer = new ExprLexer(inputStream);
-        const tokenStream = new CommonTokenStream(lexer);
-        const parser = new ExprParser(tokenStream);
+        let tree = cacheParseTree[condition];
+        if (!tree) {
+            const inputStream = CharStream.fromString(condition.toLowerCase());
+            const lexer = new ExprLexer(inputStream);
+            const tokenStream = new CommonTokenStream(lexer);
+            const parser = new ExprParser(tokenStream);
 
-        lexer.removeErrorListeners();
-        lexer.addErrorListener(new CustomErrorListener());
+            lexer.removeErrorListeners();
+            lexer.addErrorListener(new CustomErrorListener());
 
-        parser.removeErrorListeners();
-        parser.addErrorListener(new CustomErrorListener());
+            parser.removeErrorListeners();
+            parser.addErrorListener(new CustomErrorListener());
 
-        const tree = parser.expr();
+            tree = parser.expr();
+
+            cacheParseTree[condition] = tree;
+            console.log('cache')
+        }
+
 
         const evalVisitor = new Expr(args);
         const result = evalVisitor.visit(tree);
@@ -995,18 +1003,24 @@ export function calculate(condition: string, args: ExprArgs): any {
 
 function isValidExpr(expr: string): boolean {
     try {
-        const inputStream = CharStream.fromString(expr);
-        const lexer = new ExprLexer(inputStream);
-        const tokenStream = new CommonTokenStream(lexer);
-        const parser = new ExprParser(tokenStream);
+        let tree = cacheParseTree[expr];
+        if (!tree) {
+            const inputStream = CharStream.fromString(expr);
+            const lexer = new ExprLexer(inputStream);
+            const tokenStream = new CommonTokenStream(lexer);
+            const parser = new ExprParser(tokenStream);
 
-        lexer.removeErrorListeners();
-        lexer.addErrorListener(new CustomErrorListener());
+            lexer.removeErrorListeners();
+            lexer.addErrorListener(new CustomErrorListener());
 
-        parser.removeErrorListeners();
-        parser.addErrorListener(new CustomErrorListener());
+            parser.removeErrorListeners();
+            parser.addErrorListener(new CustomErrorListener());
 
-        const tree = parser.expr();
+            tree = parser.expr();
+
+            cacheParseTree[expr] = tree;
+        }
+
 
         return true;
     }
