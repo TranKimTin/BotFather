@@ -88,7 +88,7 @@ async function onCloseCandle(broker: string, symbol: string, timeframe: string, 
         // console.log(result)
         const runtime = worker.onCloseCandle(broker, symbol, timeframe, data, cacheIndicators[key]);
         console.log(`onCloseCandle ${broker} ${symbol} ${timeframe} runtime = ${runtime} ms`);
-        console.log(cacheIndicators);
+        console.log(cacheIndicators[key]);
     }
     catch (err) {
         console.error('onCloseCandle error', err);
