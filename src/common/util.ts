@@ -85,6 +85,7 @@ function updateCacheIndicator(data: Array<RateData>, cached: CustomIndicator, is
         i++;
     }
     i--;
+    console.log({ i });
     while (i >= 0) {
         cached.value.unshift(cached.indicator.nextValue(isValueCandle ? data[i] : data[i].close));
         i--;
