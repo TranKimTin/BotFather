@@ -20,6 +20,8 @@ const worker = new StaticPool({
 });
 const cacheIndicators: { [key: string]: CacheIndicator } = {}
 
+
+
 async function initSocketData(broker: string) {
     if (broker === 'binance') socket = new BinanceSocket(onCloseCandle);
     else if (broker === 'binance_future') socket = new BinanceFutureSocket(onCloseCandle);
@@ -65,7 +67,7 @@ async function initBotChildren() {
 }
 
 async function onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
-    try {
+    // try {
         const key = `${broker}_${symbol}_${timeframe}`;
         if (!symbolListener[key]) return;
 
@@ -75,10 +77,11 @@ async function onCloseCandle(broker: string, symbol: string, timeframe: string, 
         const result: WorkerResult = await worker.exec(workerData);
         cacheIndicators[key] = result.cacheIndicator;
         console.log(`onCloseCandle ${broker} ${symbol} ${timeframe} runtime = ${result.runtime} ms`);
-    }
-    catch (err) {
-        console.error('onCloseCandle error', err);
-    }
+        console.log(result)
+    // }
+    // catch (err) {
+    //     console.error('onCloseCandle error', err);
+    // }
 }
 
 if (parentPort) {
