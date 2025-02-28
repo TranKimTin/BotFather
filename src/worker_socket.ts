@@ -8,16 +8,17 @@ import { BinanceFutureSocket } from './SocketServer/socket_binance_future';
 import { BybitSocket } from './SocketServer/socket_bybit';
 import { BybitFutureSocket } from './SocketServer/socket_bybit_future';
 import { OkxSocket } from './SocketServer/socket_okx';
-import { StaticPool } from 'node-worker-threads-pool';
+import * as worker from './worker';
+// import { StaticPool } from 'node-worker-threads-pool';
 
 let socket: SocketData;
 let symbolListener: { [key: string]: boolean };
 let botChildren: Array<BotInfo>;
 let lastTimeUpdated = 0;
-const worker = new StaticPool({
-    size: os.cpus().length,
-    task: './worker.js'
-});
+// const worker = new StaticPool({
+//     size: os.cpus().length,
+//     task: './worker.js'
+// });
 const cacheIndicators: { [key: string]: CacheIndicator } = {}
 
 
@@ -35,6 +36,7 @@ async function initSocketData(broker: string) {
 async function initBotChildren() {
     const botList: Array<any> = await mysql.query(`SELECT id, botName, idTelegram, route, symbolList, timeframes, treeData FROM Bot`);
     botChildren = [];
+    const botIDs: { [key: string]: number } = {};
 
     for (let bot of botList) {
         const botInfo: BotInfo = {
@@ -47,6 +49,7 @@ async function initBotChildren() {
         };
         botInfo.symbolList.sort();
         botChildren.push(botInfo);
+        botIDs[bot.botName] = bot.id;
     }
 
     symbolListener = {};
@@ -62,26 +65,33 @@ async function initBotChildren() {
     }
 
     lastTimeUpdated = new Date().getTime();
+    worker.setBot(botChildren, botIDs)
 
     console.log('init bot list', botChildren.length);
 }
 
 async function onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
-    // try {
+    try {
         const key = `${broker}_${symbol}_${timeframe}`;
         if (!symbolListener[key]) return;
 
+        if (!cacheIndicators[key]) {
+            cacheIndicators[key] = {};
+        }
+
         // console.log(`onCloseCandle ${broker} ${symbol} ${timeframe} runtime = ${-1} ms`);
 
-        const workerData: WorkerData = { broker, symbol, timeframe, data, lastTimeUpdated, cacheIndicator: cacheIndicators[key] || {} };
-        const result: WorkerResult = await worker.exec(workerData);
-        cacheIndicators[key] = result.cacheIndicator;
-        console.log(`onCloseCandle ${broker} ${symbol} ${timeframe} runtime = ${result.runtime} ms`);
-        console.log(result)
-    // }
-    // catch (err) {
-    //     console.error('onCloseCandle error', err);
-    // }
+        // const workerData: WorkerData = { broker, symbol, timeframe, data, lastTimeUpdated, cacheIndicator: cacheIndicators[key] || {} };
+        // const result: WorkerResult = await worker.exec(workerData);
+        // cacheIndicators[key] = result.cacheIndicator;
+        // console.log(`onCloseCandle ${broker} ${symbol} ${timeframe} runtime = ${result.runtime} ms`);
+        // console.log(result)
+        const runtime = worker.onCloseCandle(broker, symbol, timeframe, data, cacheIndicators[key])
+        console.log(`onCloseCandle ${broker} ${symbol} ${timeframe} runtime = ${runtime} ms`);
+    }
+    catch (err) {
+        console.error('onCloseCandle error', err);
+    }
 }
 
 if (parentPort) {
