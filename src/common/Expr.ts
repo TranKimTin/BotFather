@@ -732,175 +732,131 @@ export class Expr extends ExprVisitor<any> {
     visitAvg_open = (ctx: Avg_openContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
-        if (shift + period >= this.data.length) throw `avg_open out of range. length = ${this.data.length}`;
 
-        let sum = 0;
-        for (let i = 0; i < period; i++) {
-            sum += this.data[shift + i].open;
-        }
-        sum /= period;
-        return sum;
+        const avgs = util.iAvgRate(this.data, period, 'open', this.cacheIndicator);
+        if (shift >= avgs.length) throw `avg_open out of range. length = ${this.data.length}`;
+
+        return avgs[shift];
     };
     visitAvg_high = (ctx: Avg_highContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
-        if (shift + period >= this.data.length) throw `avg_high out of range. length = ${this.data.length}`;
 
-        let sum = 0;
-        for (let i = 0; i < period; i++) {
-            sum += this.data[shift + i].high;
-        }
-        sum /= period;
-        return sum;
+        const avgs = util.iAvgRate(this.data, period, 'high', this.cacheIndicator);
+        if (shift >= avgs.length) throw `avg_high out of range. length = ${this.data.length}`;
+
+        return avgs[shift];
     };
     visitAvg_low = (ctx: Avg_lowContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
-        if (shift + period >= this.data.length) throw `avg_low out of range. length = ${this.data.length}`;
 
-        let sum = 0;
-        for (let i = 0; i < period; i++) {
-            sum += this.data[shift + i].low;
-        }
-        sum /= period;
-        return sum;
+        const avgs = util.iAvgRate(this.data, period, 'low', this.cacheIndicator);
+        if (shift >= avgs.length) throw `avg_low out of range. length = ${this.data.length}`;
+
+        return avgs[shift];
     };
 
     visitAvg_close = (ctx: Avg_closeContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
-        if (shift + period >= this.data.length) throw `avg_close out of range. length = ${this.data.length}`;
 
-        let sum = 0;
-        for (let i = 0; i < period; i++) {
-            sum += this.data[shift + i].close;
-        }
-        sum /= period;
-        return sum;
+        const avgs = util.iAvgRate(this.data, period, 'close', this.cacheIndicator);
+        if (shift >= avgs.length) throw `avg_close out of range. length = ${this.data.length}`;
+
+        return avgs[shift];
     };
 
     visitAvg_ampl = (ctx: Avg_amplContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
-        if (shift + period >= this.data.length) throw `avg_ampl out of range. length = ${this.data.length}`;
 
-        let sum = 0;
-        for (let i = 0; i < period; i++) {
-            const ampl = this.data[shift + i].high - this.data[shift + i].low;
-            sum += ampl;
-        }
-        sum /= period;
-        return sum;
+        let avgs = util.iAvgAmpl(this.data, period, false, this.cacheIndicator);
+        if (shift >= avgs.length) throw `avg_ampl out of range. length = ${this.data.length}`;
+
+        return avgs[shift];
     };
 
     visitAvg_amplP = (ctx: Avg_amplPContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
-        if (shift + period >= this.data.length) throw `avg_ampl out of range. length = ${this.data.length}`;
 
-        let sum = 0;
-        for (let i = 0; i < period; i++) {
-            const ampl = this.data[shift + i].high - this.data[shift + i].low;
-            sum += (ampl / this.data[shift + i].open * 100);
-        }
-        sum /= period;
-        return sum;
+        let avgs = util.iAvgAmpl(this.data, period, true, this.cacheIndicator);
+        if (shift >= avgs.length) throw `avg_amplP out of range. length = ${this.data.length}`;
+
+        return avgs[shift];
     };
 
     visitMax_open = (ctx: Max_openContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
-        if (shift + period >= this.data.length) throw `max_open out of range. length = ${this.data.length}`;
 
-        let max = this.data[shift].open;
-        for (let i = 1; i < period; i++) {
-            max = Math.max(max, this.data[shift + i].open);
-        }
-        return max;
+        const maxs = util.iMaxRate(this.data, period, 'open', this.cacheIndicator);
+        if (shift >= maxs.length) throw `max_open out of range. length = ${this.data.length}`;
+        return maxs[shift];
     };
 
     visitMax_high = (ctx: Max_highContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
-        if (shift + period >= this.data.length) throw `max_high out of range. length = ${this.data.length}`;
 
-        let max = this.data[shift].high;
-        for (let i = 1; i < period; i++) {
-            max = Math.max(max, this.data[shift + i].high);
-        }
-        return max;
+        const maxs = util.iMaxRate(this.data, period, 'high', this.cacheIndicator);
+        if (shift >= maxs.length) throw `max_high out of range. length = ${this.data.length}`;
+        return maxs[shift];
     };
 
     visitMax_low = (ctx: Max_lowContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
-        if (shift + period >= this.data.length) throw `max_low out of range. length = ${this.data.length}`;
 
-        let max = this.data[shift].low;
-        for (let i = 1; i < period; i++) {
-            max = Math.max(max, this.data[shift + i].low);
-        }
-        return max;
+        const maxs = util.iMaxRate(this.data, period, 'low', this.cacheIndicator);
+        if (shift >= maxs.length) throw `max_lơ out of range. length = ${this.data.length}`;
+        return maxs[shift];
     };
 
     visitMax_close = (ctx: Max_closeContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
-        if (shift + period >= this.data.length) throw `max_close out of range. length = ${this.data.length}`;
 
-        let max = this.data[shift].close;
-        for (let i = 1; i < period; i++) {
-            max = Math.max(max, this.data[shift + i].close);
-        }
-        return max;
+        const maxs = util.iMaxRate(this.data, period, 'close', this.cacheIndicator);
+        if (shift >= maxs.length) throw `max_close out of range. length = ${this.data.length}`;
+        return maxs[shift];
     };
 
     visitMin_open = (ctx: Min_openContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
-        if (shift + period >= this.data.length) throw `min_open out of range. length = ${this.data.length}`;
 
-        let min = this.data[shift].open;
-        for (let i = 1; i < period; i++) {
-            min = Math.min(min, this.data[shift + i].open);
-        }
-        return min;
+        const mins = util.iMinRate(this.data, period, 'open', this.cacheIndicator);
+        if (shift >= mins.length) throw `min_open out of range. length = ${this.data.length}`;
+        return mins[shift];
     };
 
     visitMin_high = (ctx: Min_highContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
-        if (shift + period >= this.data.length) throw `min_high out of range. length = ${this.data.length}`;
 
-        let min = this.data[shift].high;
-        for (let i = 1; i < period; i++) {
-            min = Math.min(min, this.data[shift + i].high);
-        }
-        return min;
+        const mins = util.iMinRate(this.data, period, 'high', this.cacheIndicator);
+        if (shift >= mins.length) throw `min_high out of range. length = ${this.data.length}`;
+        return mins[shift];
     };
 
     visitMin_low = (ctx: Min_lowContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
-        if (shift + period >= this.data.length) throw `min_low out of range. length = ${this.data.length}`;
 
-        let min = this.data[shift].low;
-        for (let i = 1; i < period; i++) {
-            min = Math.min(min, this.data[shift + i].low);
-        }
-        return min;
+        const mins = util.iMinRate(this.data, period, 'low', this.cacheIndicator);
+        if (shift >= mins.length) throw `min_low out of range. length = ${this.data.length}`;
+        return mins[shift];
     };
 
     visitMin_close = (ctx: Min_closeContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
-        if (shift + period >= this.data.length) throw `min_close out of range. length = ${this.data.length}`;
 
-        let min = this.data[shift].close;
-        for (let i = 1; i < period; i++) {
-            min = Math.min(min, this.data[shift + i].close);
-        }
-        return min;
+        const mins = util.iMinRate(this.data, period, 'close', this.cacheIndicator);
+        if (shift >= mins.length) throw `min_close out of range. length = ${this.data.length}`;
+        return mins[shift];
     };
 
     visitMin_rsi = (ctx: Min_rsiContext) => {
@@ -910,7 +866,7 @@ export class Expr extends ExprVisitor<any> {
 
         const RSIs = util.iRSI(this.data, period, this.cacheIndicator);
 
-        if (shift + depth >= RSIs.length) throw `min_crsi out of range. length = ${this.data.length}`;
+        if (shift + depth >= RSIs.length) throw `min_rsi out of range. length = ${this.data.length}`;
 
         let min = RSIs[shift];
         for (let i = 1; i < depth; i++) {
@@ -926,7 +882,7 @@ export class Expr extends ExprVisitor<any> {
 
         const RSIs = util.iRSI(this.data, period, this.cacheIndicator);
 
-        if (shift + depth >= RSIs.length) throw `min_crsi out of range. length = ${this.data.length}`;
+        if (shift + depth >= RSIs.length) throw `max_rsi out of range. length = ${this.data.length}`;
 
         let max = RSIs[shift];
         for (let i = 1; i < depth; i++) {
@@ -938,104 +894,72 @@ export class Expr extends ExprVisitor<any> {
     visitMin_change = (ctx: Min_changeContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
-        if (shift + period >= this.data.length) throw `min_change out of range. length = ${this.data.length}`;
 
-        let min = this.data[shift].close - this.data[shift].open;
-        for (let i = 1; i < period; i++) {
-            const change = this.data[shift + i].close - this.data[shift + i].open;
-            min = Math.min(min, change);
-        }
-        return min;
+        const mins = util.iMinChange(this.data, period, false, this.cacheIndicator);
+        if (shift >= mins.length) throw `min_change out of range. length = ${this.data.length}`;
+        return mins[shift];
     };
     visitMax_change = (ctx: Max_changeContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
-        if (shift + period >= this.data.length) throw `max_change out of range. length = ${this.data.length}`;
 
-        let max = this.data[shift].close - this.data[shift].open;
-        for (let i = 1; i < period; i++) {
-            const change = this.data[shift + i].close - this.data[shift + i].open;
-            max = Math.max(max, change);
-        }
-        return max;
+        const maxs = util.iMaxChange(this.data, period, false, this.cacheIndicator)
+        if (shift >= maxs.length) throw `max_change out of range. length = ${this.data.length}`;
+        return maxs[shift];
     };
 
     visitMin_changeP = (ctx: Min_changePContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
-        if (shift + period >= this.data.length) throw `min_changeP out of range. length = ${this.data.length}`;
 
-        let min = (this.data[shift].close - this.data[shift].open) / this.data[shift].open * 100;
-        for (let i = 1; i < period; i++) {
-            const change = (this.data[shift + i].close - this.data[shift + i].open) / this.data[shift + i].open * 100;
-            min = Math.min(min, change);
-        }
-        return min;
+        const mins = util.iMinChange(this.data, period, true, this.cacheIndicator);
+        if (shift >= mins.length) throw `min_changeP out of range. length = ${this.data.length}`;
+        return mins[shift];
     };
 
     visitMax_changeP = (ctx: Max_changePContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
-        if (shift + period >= this.data.length) throw `max_changeP out of range. length = ${this.data.length}`;
 
-        let max = (this.data[shift].close - this.data[shift].open) / this.data[shift].open * 100;
-        for (let i = 1; i < period; i++) {
-            const change = (this.data[shift + i].close - this.data[shift + i].open) / this.data[shift + i].open * 100;
-            max = Math.max(max, change);
-        }
-        return max;
+        const maxs = util.iMaxChange(this.data, period, true, this.cacheIndicator)
+        if (shift >= maxs.length) throw `max_changeP out of range. length = ${this.data.length}`;
+        return maxs[shift];
     };
 
     visitMin_ampl = (ctx: Min_amplContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
-        if (shift + period >= this.data.length) throw `min_ampl out of range. length = ${this.data.length}`;
 
-        let min = this.data[shift].high - this.data[shift].low;
-        for (let i = 1; i < period; i++) {
-            const ampl = this.data[shift + i].high - this.data[shift + i].low;
-            min = Math.min(min, ampl);
-        }
-        return min;
+        const mins = util.iMinAmpl(this.data, period, false, this.cacheIndicator);
+        if (shift >= this.data.length) throw `min_ampl out of range. length = ${this.data.length}`;
+        return mins[shift];
     };
 
     visitMax_ampl = (ctx: Max_amplContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
-        if (shift + period >= this.data.length) throw `max_ampl out of range. length = ${this.data.length}`;
 
-        let max = this.data[shift].high - this.data[shift].low;
-        for (let i = 1; i < period; i++) {
-            const ampl = this.data[shift + i].high - this.data[shift + i].low;
-            max = Math.max(max, ampl);
-        }
-        return max;
+        const maxs = util.iMaxAmpl(this.data, period, false, this.cacheIndicator);
+        if (shift >= this.data.length) throw `max_ampl out of range. length = ${this.data.length}`;
+        return maxs[shift];
     };
 
     visitMin_amplP = (ctx: Min_amplPContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
-        if (shift + period >= this.data.length) throw `min_amplP out of range. length = ${this.data.length}`;
 
-        let min = (this.data[shift].high - this.data[shift].low) / this.data[shift].open * 100;
-        for (let i = 1; i < period; i++) {
-            const ampl = (this.data[shift + i].high - this.data[shift + i].low) / this.data[shift + i].open * 100;
-            min = Math.min(min, ampl);
-        }
-        return min;
+        const mins = util.iMinAmpl(this.data, period, true, this.cacheIndicator);
+        if (shift >= this.data.length) throw `min_amplP out of range. length = ${this.data.length}`;
+        return mins[shift];
     };
 
     visitMax_amplP = (ctx: Max_amplPContext) => {
         const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(1)?.getText() || "0", 10);
-        if (shift + period >= this.data.length) throw `max_amplP out of range. length = ${this.data.length}`;
 
-        let max = (this.data[shift].high - this.data[shift].low) / this.data[shift].open * 100;
-        for (let i = 1; i < period; i++) {
-            const ampl = (this.data[shift + i].high - this.data[shift + i].low) / this.data[shift + i].open * 100;
-            max = Math.max(max, ampl);
-        }
-        return max;
+        const maxs = util.iMaxAmpl(this.data, period, true, this.cacheIndicator);
+        if (shift >= this.data.length) throw `max_amplP out of range. length = ${this.data.length}`;
+        return maxs[shift];
     };
 }
 

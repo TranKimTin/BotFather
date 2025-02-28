@@ -5,11 +5,12 @@ import * as ccxt from 'ccxt'
 import * as technicalindicators from 'technicalindicators';
 import _ from 'lodash';
 import axios from 'axios';
-import { CacheIndicator, CustomIndicator, FundingRate, MACD_Output, MAX_CANDLE, RateData } from './Interface';
+import { CacheIndicator, CacheIndicatorItem, FundingRate, MACD_Output, MAX_CANDLE, RateData, RateKey } from './Interface';
 import pm2 from 'pm2';
 import dotenv from 'dotenv';
 import { MACDOutput } from 'technicalindicators/declarations/moving_averages/MACD';
 import { BollingerBandsOutput } from 'technicalindicators/declarations/volatility/BollingerBands';
+import * as customIndicator from './CustomIndicator';
 
 dotenv.config({ path: `${__dirname}/../../.env` });
 
@@ -79,23 +80,152 @@ function convertDataToArrayPricesLow(data: Array<RateData>, size: number) {
 }
 
 
-function updateCacheIndicator(data: Array<RateData>, cached: CustomIndicator, isValueCandle: boolean = false) {
+function updateCacheIndicator(data: Array<RateData>, cached: CacheIndicatorItem, isValueCandle: boolean = false) {
     let i = 0;
     while (i < data.length && data[i].startTime > cached.lastUpdateTime) {
         i++;
     }
     i--;
     while (i >= 0) {
-        cached.value.unshift(cached.indicator.nextValue(isValueCandle ? data[i] : data[i].close));
+        cached.values.unshift(cached.indicator.nextValue(isValueCandle ? data[i] : data[i].close));
         i--;
     }
 
-    while (cached.value.length > MAX_CANDLE) {
-        cached.value.pop();
+    while (cached.values.length > MAX_CANDLE) {
+        cached.values.pop();
     }
 
     cached.lastUpdateTime = data[0].startTime;
 }
+
+export function iAvgRate(data: Array<RateData>, period: number, rateKey: RateKey, cacheIndicator: CacheIndicator = {}): Array<number> {
+    const key = `avg_${rateKey}_${period}`;
+    if (!cacheIndicator[key]) {
+        cacheIndicator[key] = {
+            indicator: new customIndicator.AvgRate({
+                period,
+                key: rateKey
+            }),
+            lastUpdateTime: 0,
+            values: []
+        };
+    }
+    updateCacheIndicator(data, cacheIndicator[key], true);
+    return cacheIndicator[key].values;
+}
+
+export function iAvgAmpl(data: Array<RateData>, period: number, byPercent: boolean, cacheIndicator: CacheIndicator = {}): Array<number> {
+    const key = `avgampl_${byPercent}_${period}`;
+    if (!cacheIndicator[key]) {
+        cacheIndicator[key] = {
+            indicator: new customIndicator.AvgAmpl({
+                period,
+                byPercent: byPercent
+            }),
+            lastUpdateTime: 0,
+            values: []
+        };
+    }
+    updateCacheIndicator(data, cacheIndicator[key], true);
+    return cacheIndicator[key].values;
+}
+
+export function iMaxRate(data: Array<RateData>, period: number, rateKey: RateKey, cacheIndicator: CacheIndicator = {}): Array<number> {
+    const key = `max_${rateKey}_${period}`;
+    if (!cacheIndicator[key]) {
+        cacheIndicator[key] = {
+            indicator: new customIndicator.MaxRate({
+                period,
+                key: rateKey
+            }),
+            lastUpdateTime: 0,
+            values: []
+        };
+    }
+    updateCacheIndicator(data, cacheIndicator[key], true);
+    return cacheIndicator[key].values;
+}
+
+export function iMinRate(data: Array<RateData>, period: number, rateKey: RateKey, cacheIndicator: CacheIndicator = {}): Array<number> {
+    const key = `min_${rateKey}_${period}`;
+    if (!cacheIndicator[key]) {
+        cacheIndicator[key] = {
+            indicator: new customIndicator.MinRate({
+                period,
+                key: rateKey
+            }),
+            lastUpdateTime: 0,
+            values: []
+        };
+    }
+    updateCacheIndicator(data, cacheIndicator[key], true);
+    return cacheIndicator[key].values;
+}
+
+export function iMaxChange(data: Array<RateData>, period: number, byPercent: boolean, cacheIndicator: CacheIndicator = {}): Array<number> {
+    const key = `maxchange_${byPercent}_${period}`;
+    if (!cacheIndicator[key]) {
+        cacheIndicator[key] = {
+            indicator: new customIndicator.MaxChange({
+                period,
+                byPercent
+            }),
+            lastUpdateTime: 0,
+            values: []
+        };
+    }
+    updateCacheIndicator(data, cacheIndicator[key], true);
+    return cacheIndicator[key].values;
+}
+
+export function iMinChange(data: Array<RateData>, period: number, byPercent: boolean, cacheIndicator: CacheIndicator = {}): Array<number> {
+    const key = `minchange_${byPercent}_${period}`;
+    if (!cacheIndicator[key]) {
+        cacheIndicator[key] = {
+            indicator: new customIndicator.MinChange({
+                period,
+                byPercent
+            }),
+            lastUpdateTime: 0,
+            values: []
+        };
+    }
+    updateCacheIndicator(data, cacheIndicator[key], true);
+    return cacheIndicator[key].values;
+}
+
+export function iMaxAmpl(data: Array<RateData>, period: number, byPercent: boolean, cacheIndicator: CacheIndicator = {}): Array<number> {
+    const key = `maxampl_${byPercent}_${period}`;
+    if (!cacheIndicator[key]) {
+        cacheIndicator[key] = {
+            indicator: new customIndicator.MaxAmpl({
+                period,
+                byPercent
+            }),
+            lastUpdateTime: 0,
+            values: []
+        };
+    }
+    updateCacheIndicator(data, cacheIndicator[key], true);
+    return cacheIndicator[key].values;
+}
+
+export function iMinAmpl(data: Array<RateData>, period: number, byPercent: boolean, cacheIndicator: CacheIndicator = {}): Array<number> {
+    const key = `minampl_${byPercent}_${period}`;
+    if (!cacheIndicator[key]) {
+        cacheIndicator[key] = {
+            indicator: new customIndicator.MinAmpl({
+                period,
+                byPercent
+            }),
+            lastUpdateTime: 0,
+            values: []
+        };
+    }
+    updateCacheIndicator(data, cacheIndicator[key], true);
+    return cacheIndicator[key].values;
+}
+
 
 export function iCCI(data: Array<RateData>, period: number, cacheIndicator: CacheIndicator = {}): Array<number> {
     const key = `cci_${period}`;
@@ -109,12 +239,12 @@ export function iCCI(data: Array<RateData>, period: number, cacheIndicator: Cach
                 reversedInput: true
             }),
             lastUpdateTime: 0,
-            value: []
+            values: []
         };
     }
 
     updateCacheIndicator(data, cacheIndicator[key], true);
-    return cacheIndicator[key].value;
+    return cacheIndicator[key].values;
 }
 
 
@@ -128,12 +258,12 @@ export function iRSI(data: Array<RateData>, period: number, cacheIndicator: Cach
                 reversedInput: true
             }),
             lastUpdateTime: 0,
-            value: []
+            values: []
         };
     }
 
     updateCacheIndicator(data, cacheIndicator[key]);
-    return cacheIndicator[key].value;
+    return cacheIndicator[key].values;
 
     // const gains = [];
     // const losses = [];
@@ -630,12 +760,12 @@ export function iMA(data: Array<RateData>, period: number, cacheIndicator: Cache
                 reversedInput: true
             }),
             lastUpdateTime: 0,
-            value: []
+            values: []
         };
     }
 
     updateCacheIndicator(data, cacheIndicator[key]);
-    return cacheIndicator[key].value;
+    return cacheIndicator[key].values;
 }
 
 export function iEMA(data: Array<RateData>, period: number, cacheIndicator: CacheIndicator = {}): Array<number> {
@@ -648,12 +778,12 @@ export function iEMA(data: Array<RateData>, period: number, cacheIndicator: Cach
                 reversedInput: true
             }),
             lastUpdateTime: 0,
-            value: []
+            values: []
         };
     }
 
     updateCacheIndicator(data, cacheIndicator[key]);
-    return cacheIndicator[key].value;
+    return cacheIndicator[key].values;
 }
 
 export function iMACD(data: Array<RateData>, fastPeriod: number, slowPeriod: number, signalPeriod: number, cacheIndicator: CacheIndicator = {}): Array<MACD_Output> {
@@ -670,12 +800,12 @@ export function iMACD(data: Array<RateData>, fastPeriod: number, slowPeriod: num
                 reversedInput: true
             }),
             lastUpdateTime: 0,
-            value: []
+            values: []
         };
     }
 
     updateCacheIndicator(data, cacheIndicator[key]);
-    return cacheIndicator[key].value;
+    return cacheIndicator[key].values;
 }
 
 export function iBB(data: Array<RateData>, period: number, multiplier: number, cacheIndicator: CacheIndicator = {}): Array<BollingerBandsOutput> {
@@ -689,12 +819,12 @@ export function iBB(data: Array<RateData>, period: number, multiplier: number, c
                 reversedInput: true
             }),
             lastUpdateTime: 0,
-            value: []
+            values: []
         };
     }
 
     updateCacheIndicator(data, cacheIndicator[key]);
-    return cacheIndicator[key].value;
+    return cacheIndicator[key].values;
 }
 
 export function iZigZag(data: Array<RateData>, deviation: number, depth: number, byPercent: boolean) {
@@ -802,12 +932,12 @@ export function iATR(data: Array<RateData>, period: number, cacheIndicator: Cach
                 reversedInput: true
             }),
             lastUpdateTime: 0,
-            value: []
+            values: []
         };
     }
 
     updateCacheIndicator(data, cacheIndicator[key], true);
-    return cacheIndicator[key].value;
+    return cacheIndicator[key].values;
 }
 
 export function isBearishEngulfing(candle1: RateData, candle2: RateData): boolean {

@@ -185,13 +185,13 @@ export interface UserTokenInfo {
 
 export const MAX_CANDLE = 600
 
-export interface CustomIndicator {
+export interface CacheIndicatorItem {
     indicator: any,
-    value: Array<any>,
+    values: Array<any>,
     lastUpdateTime: number
 }
 export interface CacheIndicator {
-    [key: string]: CustomIndicator
+    [key: string]: CacheIndicatorItem
 }
 
 export interface WorkerData {
@@ -213,3 +213,5 @@ export interface WorkerResult {
     runtime: number,
     cacheIndicator: CacheIndicator
 }
+
+export type RateKey = 'open' | 'high' | 'low' | 'close' | 'volume';
