@@ -57,7 +57,6 @@ async function initSocketData(broker: string) {
 
 
 async function initCache(broker: string) {
-    console.log(`${broker} init cache...`);
     const botList = await mysql.query(`SELECT * FROM Bot`);
 
     const setExpr: Set<string> = new Set();
@@ -94,13 +93,13 @@ async function initCache(broker: string) {
                 cacheIndicator: cacheIndicators[key]
             }
             for (const expr of exprList) {
-                const e = calculateSubExpr(expr, args);
-                calculate(e, args)
+                setImmediate(() => {
+                    const e = calculateSubExpr(expr, args);
+                    calculate(e, args)
+                });
             }
         }
     }
-
-    console.log(`${broker} init cache done`);
 }
 
 async function initBotChildren() {
