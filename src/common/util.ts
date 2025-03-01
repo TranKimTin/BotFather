@@ -1,14 +1,12 @@
 import moment, { DurationInputArg2 } from 'moment';
 import zlib from 'zlib';
-import fs from 'fs';
 import * as ccxt from 'ccxt'
 import * as technicalindicators from 'technicalindicators';
 import _ from 'lodash';
 import axios from 'axios';
-import { CacheIndicator, CacheIndicatorItem, FundingRate, MACD_Output, MAX_CANDLE, RateData, RateKey } from './Interface';
+import { CacheIndicator, CacheIndicatorItem, FundingRate, MACD_Output, MAX_CACHE_SIZE, RateData, RateKey } from './Interface';
 import pm2 from 'pm2';
 import dotenv from 'dotenv';
-import { MACDOutput } from 'technicalindicators/declarations/moving_averages/MACD';
 import { BollingerBandsOutput } from 'technicalindicators/declarations/volatility/BollingerBands';
 import * as customIndicator from './CustomIndicator';
 
@@ -52,34 +50,6 @@ export function restartApp() {
     });
 }
 
-function convertDataToArrayPrices(data: Array<RateData>, size: number) {
-    size = Math.min(size, data.length);
-    const arr = new Array(size);
-    for (let i = 0; i < size; i++) {
-        arr[i] = data[i].close;
-    }
-    return arr;
-}
-
-function convertDataToArrayPricesHigh(data: Array<RateData>, size: number) {
-    size = Math.min(size, data.length);
-    const arr = new Array(size);
-    for (let i = 0; i < size; i++) {
-        arr[i] = data[i].high;
-    }
-    return arr;
-}
-
-function convertDataToArrayPricesLow(data: Array<RateData>, size: number) {
-    size = Math.min(size, data.length);
-    const arr = new Array(size);
-    for (let i = 0; i < size; i++) {
-        arr[i] = data[i].low;
-    }
-    return arr;
-}
-
-
 function updateCacheIndicator(data: Array<RateData>, cached: CacheIndicatorItem, isValueCandle: boolean = false) {
     let i = 0;
     while (i < data.length && data[i].startTime > cached.lastUpdateTime) {
@@ -91,7 +61,7 @@ function updateCacheIndicator(data: Array<RateData>, cached: CacheIndicatorItem,
         i--;
     }
 
-    while (cached.values.length > MAX_CANDLE) {
+    while (cached.values.length > MAX_CACHE_SIZE) {
         cached.values.pop();
     }
 

@@ -184,6 +184,7 @@ export interface UserTokenInfo {
 }
 
 export const MAX_CANDLE = 600
+export const MAX_CACHE_SIZE = 300
 
 export interface CacheIndicatorItem {
     indicator: any,
