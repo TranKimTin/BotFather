@@ -965,26 +965,32 @@ export class Expr extends ExprVisitor<any> {
 
 const cacheParseTree: { [key: string]: ExprContext } = {};
 
+export function getParseTree(condition: string): ExprContext {
+    let tree = cacheParseTree[condition];
+    if (!tree) {
+        const inputStream = CharStream.fromString(condition.toLowerCase());
+        const lexer = new ExprLexer(inputStream);
+        const tokenStream = new CommonTokenStream(lexer);
+        const parser = new ExprParser(tokenStream);
+
+        lexer.removeErrorListeners();
+        lexer.addErrorListener(new CustomErrorListener());
+
+        parser.removeErrorListeners();
+        parser.addErrorListener(new CustomErrorListener());
+
+        tree = parser.expr();
+
+        cacheParseTree[condition] = tree;
+    }
+    return tree;
+}
+
 export function calculate(condition: string, args: ExprArgs): any {
     try {
         // const inputStream = CharStream.fromString(condition.toLowerCase().replace(/\s+/g, ''));
-        let tree = cacheParseTree[condition];
-        if (!tree) {
-            const inputStream = CharStream.fromString(condition.toLowerCase());
-            const lexer = new ExprLexer(inputStream);
-            const tokenStream = new CommonTokenStream(lexer);
-            const parser = new ExprParser(tokenStream);
 
-            lexer.removeErrorListeners();
-            lexer.addErrorListener(new CustomErrorListener());
-
-            parser.removeErrorListeners();
-            parser.addErrorListener(new CustomErrorListener());
-
-            tree = parser.expr();
-
-            cacheParseTree[condition] = tree;
-        }
+        const tree = getParseTree(condition)
 
         const evalVisitor = new Expr(args);
         const result = evalVisitor.visit(tree);

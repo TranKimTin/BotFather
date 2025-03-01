@@ -9,7 +9,8 @@ import { BybitSocket } from './SocketServer/socket_bybit';
 import { BybitFutureSocket } from './SocketServer/socket_bybit_future';
 import { OkxSocket } from './SocketServer/socket_okx';
 import * as worker from './worker';
-import { calculate, calculateSubExpr } from './common/Expr';
+import { calculate, calculateSubExpr, getParseTree } from './common/Expr';
+import exp from 'constants';
 // import { StaticPool } from 'node-worker-threads-pool';
 
 let socket: SocketData;
@@ -57,6 +58,8 @@ async function initSocketData(broker: string) {
 
 
 async function initCache(broker: string) {
+    console.log(`${broker} init cache...`);
+
     const botList = await mysql.query(`SELECT * FROM Bot`);
 
     const setExpr: Set<string> = new Set();
@@ -73,33 +76,14 @@ async function initCache(broker: string) {
 
     const exprList = Array.from(setExpr);
 
-    const symbolList: Array<string> = socket.getSymbols();
-    const timeframeList: Array<string> = socket.getTimeframes();
-    for (const symbol of symbolList) {
-        for (const timeframe of timeframeList) {
-            const key = `${broker}_${symbol}_${timeframe}`;
-            if (!symbolListener[key]) continue;
-
-            if (!cacheIndicators[key]) {
-                cacheIndicators[key] = {};
-            }
-
-            const data = socket.getData(symbol, timeframe);
-            const args: ExprArgs = {
-                broker,
-                symbol,
-                timeframe,
-                data,
-                cacheIndicator: cacheIndicators[key]
-            }
-            for (const expr of exprList) {
-                setImmediate(() => {
-                    const e = calculateSubExpr(expr, args);
-                    calculate(e, args)
-                });
-            }
+    for (const expr of exprList) {
+        if (!expr.includes('{')) {
+            getParseTree(expr);
         }
     }
+
+    console.log(`${broker} init cache done`);
+
 }
 
 async function initBotChildren() {
