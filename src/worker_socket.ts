@@ -1,6 +1,6 @@
 import { parentPort } from 'worker_threads';
 import * as mysql from './WebConfig/lib/mysql';
-import { BotInfo, CacheIndicator, RateData, WorkerData, WorkerResult } from './common/Interface';
+import { BotInfo, CacheIndicator, ExprArgs, NODE_TYPE, RateData, WorkerData, WorkerResult } from './common/Interface';
 import os from 'os';
 import { SocketData } from './SocketServer/socket_data';
 import { BinanceSocket } from './SocketServer/socket_binance';
@@ -9,6 +9,7 @@ import { BybitSocket } from './SocketServer/socket_bybit';
 import { BybitFutureSocket } from './SocketServer/socket_bybit_future';
 import { OkxSocket } from './SocketServer/socket_okx';
 import * as worker from './worker';
+import { calculate, calculateSubExpr } from './common/Expr';
 // import { StaticPool } from 'node-worker-threads-pool';
 
 let socket: SocketData;
@@ -21,7 +22,28 @@ let lastTimeUpdated = 0;
 // });
 const cacheIndicators: { [key: string]: CacheIndicator } = {}
 
+if (parentPort) {
+    console.log('worker_socket loaded');
+    parentPort.on('message', async (msg: { type: string, value: any }) => {
+        const t1 = new Date().getTime();
+        const { type, value } = msg;
+        if (type === 'init') {
+            await initBotChildren();
+            await initSocketData(value);
+            await initCache(value);
+        }
+        else if (type === 'update') {
+            await initBotChildren();
+        }
 
+        const t2 = new Date().getTime();
+        parentPort!.postMessage(t2 - t1);
+    });
+}
+else {
+    console.error(`Worker thread error.`)
+    throw 'parentPort is null';
+}
 
 async function initSocketData(broker: string) {
     if (broker === 'binance') socket = new BinanceSocket(onCloseCandle);
@@ -31,6 +53,54 @@ async function initSocketData(broker: string) {
     else if (broker === 'okx') socket = new OkxSocket(onCloseCandle);
 
     await socket.initData();
+}
+
+
+async function initCache(broker: string) {
+    console.log(`${broker} init cache...`);
+    const botList = await mysql.query(`SELECT * FROM Bot`);
+
+    const setExpr: Set<string> = new Set();
+    for (const bot of botList) {
+        const treeData = JSON.parse(bot.treeData);
+
+        for (let node of treeData.elements.nodes) {
+            if (node.data.type === NODE_TYPE.EXPR) {
+                const expr = node.data.value;
+                setExpr.add(expr);
+            }
+        }
+    }
+
+    const exprList = Array.from(setExpr);
+
+    const symbolList: Array<string> = socket.getSymbols();
+    const timeframeList: Array<string> = socket.getTimeframes();
+    for (const symbol of symbolList) {
+        for (const timeframe of timeframeList) {
+            const key = `${broker}_${symbol}_${timeframe}`;
+            if (!symbolListener[key]) continue;
+
+            if (!cacheIndicators[key]) {
+                cacheIndicators[key] = {};
+            }
+
+            const data = socket.getData(symbol, timeframe);
+            const args: ExprArgs = {
+                broker,
+                symbol,
+                timeframe,
+                data,
+                cacheIndicator: cacheIndicators[key]
+            }
+            for (const expr of exprList) {
+                const e = calculateSubExpr(expr, args);
+                calculate(e, args)
+            }
+        }
+    }
+
+    console.log(`${broker} init cache done`);
 }
 
 async function initBotChildren() {
@@ -94,26 +164,4 @@ async function onCloseCandle(broker: string, symbol: string, timeframe: string, 
     catch (err) {
         console.error('onCloseCandle error', err);
     }
-}
-
-if (parentPort) {
-    console.log('worker_socket loaded');
-    parentPort.on('message', async (msg: { type: string, value: any }) => {
-        const t1 = new Date().getTime();
-        const { type, value } = msg;
-        if (type === 'init') {
-            await initBotChildren();
-            await initSocketData(value);
-        }
-        else if (type === 'update') {
-            await initBotChildren();
-        }
-
-        const t2 = new Date().getTime();
-        parentPort!.postMessage(t2 - t1);
-    });
-}
-else {
-    console.error(`Worker thread error.`)
-    throw 'parentPort is null';
 }

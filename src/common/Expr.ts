@@ -984,9 +984,7 @@ export function calculate(condition: string, args: ExprArgs): any {
             tree = parser.expr();
 
             cacheParseTree[condition] = tree;
-            console.log('cache')
         }
-
 
         const evalVisitor = new Expr(args);
         const result = evalVisitor.visit(tree);

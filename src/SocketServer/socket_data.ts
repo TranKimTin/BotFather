@@ -17,7 +17,6 @@ export class SocketData {
     protected getOHLCV?: (symbol: string, timeframe: string, since?: number) => Promise<Array<RateData>>;
     protected init?: () => void;
 
-
     constructor(timeframes: Array<string>, broker: string, symbolLoadConcurrent: number, onCloseCandle: (broker: string, symbol: string, timeframe: string, data: Array<RateData>) => void) {
         this.broker = broker;
         this.timeframes = timeframes;
@@ -247,6 +246,10 @@ export class SocketData {
 
     public getSymbols() {
         return this.symbolList;
+    }
+
+    public getTimeframes() {
+        return this.timeframes;
     }
 
     public async initData() {
