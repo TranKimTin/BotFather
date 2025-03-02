@@ -199,8 +199,13 @@ export interface WorkerData {
     broker: string,
     symbol: string,
     timeframe: string,
-    data: Array<RateData>,
-    lastTimeUpdated: number
+    lastTimeUpdated: number,
+    startTime: Float64Array,
+    open: Float64Array,
+    high: Float64Array,
+    low: Float64Array,
+    close: Float64Array,
+    volume: Float64Array
 }
 
 export interface MACD_Output {

@@ -4,6 +4,7 @@ import { calculate, calculateSubExpr } from './common/Expr';
 import { BotInfo, CacheIndicator, ExprArgs, NODE_TYPE, Node, NodeData, ORDER_STATUS, RateData, TelegramIdType, UNIT, WorkerData } from './common/Interface';
 import Telegram from './common/telegram';
 import * as util from './common/util';
+import moment from 'moment';
 
 let botChildren: Array<BotInfo> = [];
 const telegram = new Telegram(undefined, undefined, false);
@@ -324,11 +325,28 @@ if (parentPort) {
         const t1 = new Date().getTime();
 
         const workerData: WorkerData = msg;
-        const { broker, symbol, timeframe, data } = workerData;
+        const { broker, symbol, timeframe, startTime, open, high, low, close, volume } = workerData;
 
         if (workerData.lastTimeUpdated != lastTimeUpdated) {
             await initBotChildren();
             lastTimeUpdated = workerData.lastTimeUpdated;
+        }
+
+        const size = open.length;
+        const data: Array<RateData> = new Array(size);
+        for (let i = 0; i < size; i++) {
+            data[i] = {
+                symbol,
+                interval: timeframe,
+                open: open[i],
+                high: high[i],
+                low: low[i],
+                close: close[i],
+                volume: volume[i],
+                isFinal: true,
+                startTime: startTime[i],
+                timestring: moment(startTime[i]).format('YYYY-MM-DD HH:mm:ss')
+            };
         }
         onCloseCandle(broker, symbol, timeframe, data);
 

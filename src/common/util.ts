@@ -50,6 +50,54 @@ export function restartApp() {
     });
 }
 
+export function convertDataToArrayStartTime(data: Array<RateData>) {
+    const arr = new Array(data.length);
+    for (let i = 0; i < data.length; i++) {
+        arr[i] = data[i].startTime;
+    }
+    return arr;
+}
+
+export function convertDataToArrayPricesOpen(data: Array<RateData>) {
+    const arr = new Array(data.length);
+    for (let i = 0; i < data.length; i++) {
+        arr[i] = data[i].open;
+    }
+    return arr;
+}
+
+export function convertDataToArrayPricesClose(data: Array<RateData>) {
+    const arr = new Array(data.length);
+    for (let i = 0; i < data.length; i++) {
+        arr[i] = data[i].close;
+    }
+    return arr;
+}
+
+export function convertDataToArrayPricesHigh(data: Array<RateData>) {
+    const arr = new Array(data.length);
+    for (let i = 0; i < data.length; i++) {
+        arr[i] = data[i].high;
+    }
+    return arr;
+}
+
+export function convertDataToArrayPricesLow(data: Array<RateData>) {
+    const arr = new Array(data.length);
+    for (let i = 0; i < data.length; i++) {
+        arr[i] = data[i].low;
+    }
+    return arr;
+}
+
+export function convertDataToArrayVolume(data: Array<RateData>) {
+    const arr = new Array(data.length);
+    for (let i = 0; i < data.length; i++) {
+        arr[i] = data[i].volume;
+    }
+    return arr;
+}
+
 function updateCacheIndicator(data: Array<RateData>, cached: CacheIndicatorItem, isValueCandle: boolean = false) {
     let i = (cached.lastUpdateTime === 0) ? data.length : 0;
     while (i < data.length && data[i].startTime > cached.lastUpdateTime) {

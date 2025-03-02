@@ -9,6 +9,7 @@ import { BybitSocket } from './SocketServer/socket_bybit';
 import { BybitFutureSocket } from './SocketServer/socket_bybit_future';
 import { OkxSocket } from './SocketServer/socket_okx';
 import { StaticPool } from 'node-worker-threads-pool';
+import * as util from './common/util';
 
 let socket: SocketData;
 let symbolListener: { [key: string]: boolean };
@@ -94,7 +95,31 @@ async function onCloseCandle(broker: string, symbol: string, timeframe: string, 
 
         // console.log(`onCloseCandle ${broker} ${symbol} ${timeframe} runtime = ${-1} ms`);
 
-        const workerData: WorkerData = { broker, symbol, timeframe, data, lastTimeUpdated };
+        const openBuffer = new SharedArrayBuffer(data.length * 8);
+        const open = new Float64Array(openBuffer);
+        open.set(util.convertDataToArrayPricesOpen(data));
+
+        const highBuffer = new SharedArrayBuffer(data.length * 8);
+        const high = new Float64Array(highBuffer);
+        high.set(util.convertDataToArrayPricesHigh(data));
+
+        const lowBuffer = new SharedArrayBuffer(data.length * 8);
+        const low = new Float64Array(lowBuffer);
+        low.set(util.convertDataToArrayPricesLow(data));
+
+        const closeBuffer = new SharedArrayBuffer(data.length * 8);
+        const close = new Float64Array(closeBuffer);
+        close.set(util.convertDataToArrayPricesClose(data));
+
+        const volumeBuffer = new SharedArrayBuffer(data.length * 8);
+        const volume = new Float64Array(volumeBuffer);
+        volume.set(util.convertDataToArrayVolume(data));
+
+        const startTimeBuffer = new SharedArrayBuffer(data.length * 8);
+        const startTime = new Float64Array(startTimeBuffer);
+        startTime.set(util.convertDataToArrayStartTime(data));
+
+        const workerData: WorkerData = { broker, symbol, timeframe, lastTimeUpdated, startTime, open, high, low, close, volume };
         const runtime: number = await worker.exec(workerData);
         console.log(`onCloseCandle ${broker} ${symbol} ${timeframe} runtime = ${runtime} ms`);
     }
