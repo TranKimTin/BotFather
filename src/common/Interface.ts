@@ -200,19 +200,13 @@ export interface WorkerData {
     symbol: string,
     timeframe: string,
     data: Array<RateData>,
-    lastTimeUpdated: number,
-    cacheIndicator: CacheIndicator
+    lastTimeUpdated: number
 }
 
 export interface MACD_Output {
     MACD: number;
     signal: number;
     histogram: number;
-}
-
-export interface WorkerResult {
-    runtime: number,
-    cacheIndicator: CacheIndicator
 }
 
 export type RateKey = 'open' | 'high' | 'low' | 'close' | 'volume';

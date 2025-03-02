@@ -1,6 +1,6 @@
 import { parentPort } from 'worker_threads';
 import * as mysql from './WebConfig/lib/mysql';
-import { BotInfo, CacheIndicator, ExprArgs, NODE_TYPE, RateData, WorkerData, WorkerResult } from './common/Interface';
+import { BotInfo, NODE_TYPE, RateData, WorkerData } from './common/Interface';
 import os from 'os';
 import { SocketData } from './SocketServer/socket_data';
 import { BinanceSocket } from './SocketServer/socket_binance';
@@ -8,20 +8,17 @@ import { BinanceFutureSocket } from './SocketServer/socket_binance_future';
 import { BybitSocket } from './SocketServer/socket_bybit';
 import { BybitFutureSocket } from './SocketServer/socket_bybit_future';
 import { OkxSocket } from './SocketServer/socket_okx';
-import * as worker from './worker';
-import { calculate, calculateSubExpr, getParseTree } from './common/Expr';
-import exp from 'constants';
-// import { StaticPool } from 'node-worker-threads-pool';
+import { getParseTree } from './common/Expr';
+import { StaticPool } from 'node-worker-threads-pool';
 
 let socket: SocketData;
 let symbolListener: { [key: string]: boolean };
 let botChildren: Array<BotInfo>;
 let lastTimeUpdated = 0;
-// const worker = new StaticPool({
-//     size: os.cpus().length,
-//     task: './worker.js'
-// });
-const cacheIndicators: { [key: string]: CacheIndicator } = {}
+const worker = new StaticPool({
+    size: os.cpus().length,
+    task: './worker.js'
+});
 
 if (parentPort) {
     console.log('worker_socket loaded');
@@ -118,7 +115,6 @@ async function initBotChildren() {
     }
 
     lastTimeUpdated = new Date().getTime();
-    worker.setBot(botChildren, botIDs)
 
     console.log('init bot list', botChildren.length);
 }
@@ -128,20 +124,10 @@ async function onCloseCandle(broker: string, symbol: string, timeframe: string, 
         const key = `${broker}_${symbol}_${timeframe}`;
         if (!symbolListener[key]) return;
 
-        if (!cacheIndicators[key]) {
-            cacheIndicators[key] = {};
-        }
-
         // console.log(`onCloseCandle ${broker} ${symbol} ${timeframe} runtime = ${-1} ms`);
 
-        // const workerData: WorkerData = { broker, symbol, timeframe, data, lastTimeUpdated, cacheIndicator: cacheIndicators[key] || {} };
-        // const result: WorkerResult = await worker.exec(workerData);
-        // cacheIndicators[key] = result.cacheIndicator;
-        // console.log(`onCloseCandle ${broker} ${symbol} ${timeframe} runtime = ${result.runtime} ms`);
-        // console.log(result)
-
-        const runtime = worker.onCloseCandle(broker, symbol, timeframe, data, cacheIndicators[key]);
-
+        const workerData: WorkerData = { broker, symbol, timeframe, data, lastTimeUpdated };
+        const runtime: number = await worker.exec(workerData);
         console.log(`onCloseCandle ${broker} ${symbol} ${timeframe} runtime = ${runtime} ms`);
     }
     catch (err) {

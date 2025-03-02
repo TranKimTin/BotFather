@@ -51,7 +51,7 @@ export function restartApp() {
 }
 
 function updateCacheIndicator(data: Array<RateData>, cached: CacheIndicatorItem, isValueCandle: boolean = false) {
-    let i = 0;
+    let i = (cached.lastUpdateTime === 0) ? data.length : 0;
     while (i < data.length && data[i].startTime > cached.lastUpdateTime) {
         i++;
     }

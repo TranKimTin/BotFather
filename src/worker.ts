@@ -8,9 +8,9 @@ import * as util from './common/util';
 let botChildren: Array<BotInfo> = [];
 const telegram = new Telegram(undefined, undefined, false);
 let botIDs: { [key: string]: number } = {};
-// let lastTimeUpdated = 0;
-export function onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>, cacheIndicator: CacheIndicator) {
-    const t1 = new Date().getTime();
+let lastTimeUpdated = 0;
+export function onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
+    const cacheIndicator: CacheIndicator = {};
     for (const botInfo of botChildren) {
         try {
             const { botName, idTelegram, symbolList, timeframes, route } = botInfo;
@@ -23,36 +23,28 @@ export function onCloseCandle(broker: string, symbol: string, timeframe: string,
             console.error({ symbol, timeframe }, err);
         }
     }
-    const t2 = new Date().getTime();
-    return t2 - t1;
 }
 
-export function setBot(_botChildren: Array<BotInfo>, _botIDs: { [key: string]: number }) {
-    console.log(`setBot ${_botChildren.length}`);
-    botChildren = _botChildren;
-    botIDs = _botIDs;
+async function initBotChildren() {
+    const botList: Array<any> = await mysql.query(`SELECT id, botName, idTelegram, route, symbolList, timeframes, treeData FROM Bot`);
+    botChildren = [];
+
+    for (let bot of botList) {
+        const botInfo: BotInfo = {
+            botName: bot.botName,
+            idTelegram: bot.idTelegram,
+            route: JSON.parse(bot.route),
+            symbolList: JSON.parse(bot.symbolList),
+            timeframes: JSON.parse(bot.timeframes),
+            treeData: JSON.parse(bot.treeData)
+        };
+        botInfo.symbolList.sort();
+        botChildren.push(botInfo);
+        botIDs[bot.botName] = bot.id;
+    }
+
+    console.log('init bot list', botChildren.length);
 }
-
-// async function initBotChildren() {
-//     const botList: Array<any> = await mysql.query(`SELECT id, botName, idTelegram, route, symbolList, timeframes, treeData FROM Bot`);
-//     botChildren = [];
-
-//     for (let bot of botList) {
-//         const botInfo: BotInfo = {
-//             botName: bot.botName,
-//             idTelegram: bot.idTelegram,
-//             route: JSON.parse(bot.route),
-//             symbolList: JSON.parse(bot.symbolList),
-//             timeframes: JSON.parse(bot.timeframes),
-//             treeData: JSON.parse(bot.treeData)
-//         };
-//         botInfo.symbolList.sort();
-//         botChildren.push(botInfo);
-//         botIDs[bot.botName] = bot.id;
-//     }
-
-//     console.log('init bot list', botChildren.length);
-// }
 
 function binarySearch(arr: Array<string>, target: string): boolean {
     let left = 0;
@@ -326,26 +318,26 @@ function adjustParam(data: NodeData, args: ExprArgs): boolean {
     return true;
 }
 
-// if (parentPort) {
-//     console.log('worker loaded');
-//     parentPort.on('message', async (msg: WorkerData) => {
-//         const t1 = new Date().getTime();
+if (parentPort) {
+    console.log('worker loaded');
+    parentPort.on('message', async (msg: WorkerData) => {
+        const t1 = new Date().getTime();
 
-//         const workerData: WorkerData = msg;
-//         const { broker, symbol, timeframe, data, cacheIndicator } = workerData;
+        const workerData: WorkerData = msg;
+        const { broker, symbol, timeframe, data } = workerData;
 
-//         if (workerData.lastTimeUpdated != lastTimeUpdated) {
-//             await initBotChildren();
-//             lastTimeUpdated = workerData.lastTimeUpdated;
-//         }
-//         onCloseCandle(broker, symbol, timeframe, data, cacheIndicator);
+        if (workerData.lastTimeUpdated != lastTimeUpdated) {
+            await initBotChildren();
+            lastTimeUpdated = workerData.lastTimeUpdated;
+        }
+        onCloseCandle(broker, symbol, timeframe, data);
 
-//         const t2 = new Date().getTime();
-//         const runtime = t2 - t1;
-//         parentPort!.postMessage({ runtime, cacheIndicator });
-//     });
-// }
-// else {
-//     console.error(`Worker thread error.`)
-//     throw 'parentPort is null';
-// }
+        const t2 = new Date().getTime();
+        const runtime = t2 - t1;
+        parentPort!.postMessage(runtime);
+    });
+}
+else {
+    console.error(`Worker thread error.`)
+    throw 'parentPort is null';
+}
