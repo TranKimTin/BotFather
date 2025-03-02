@@ -1,6 +1,6 @@
 import { parentPort } from 'worker_threads';
 import * as mysql from './WebConfig/lib/mysql';
-import { BotInfo, NODE_TYPE, RateData, WorkerData } from './common/Interface';
+import { BotInfo, RateData, WorkerData } from './common/Interface';
 import os from 'os';
 import { SocketData } from './SocketServer/socket_data';
 import { BinanceSocket } from './SocketServer/socket_binance';
@@ -8,7 +8,6 @@ import { BinanceFutureSocket } from './SocketServer/socket_binance_future';
 import { BybitSocket } from './SocketServer/socket_bybit';
 import { BybitFutureSocket } from './SocketServer/socket_bybit_future';
 import { OkxSocket } from './SocketServer/socket_okx';
-import { getParseTree } from './common/Expr';
 import { StaticPool } from 'node-worker-threads-pool';
 
 let socket: SocketData;
@@ -28,7 +27,6 @@ if (parentPort) {
         if (type === 'init') {
             await initBotChildren();
             await initSocketData(value);
-            await initCache(value);
         }
         else if (type === 'update') {
             await initBotChildren();
@@ -51,36 +49,6 @@ async function initSocketData(broker: string) {
     else if (broker === 'okx') socket = new OkxSocket(onCloseCandle);
 
     await socket.initData();
-}
-
-
-async function initCache(broker: string) {
-    console.log(`${broker} init cache...`);
-
-    const botList = await mysql.query(`SELECT * FROM Bot`);
-
-    const setExpr: Set<string> = new Set();
-    for (const bot of botList) {
-        const treeData = JSON.parse(bot.treeData);
-
-        for (let node of treeData.elements.nodes) {
-            if (node.data.type === NODE_TYPE.EXPR) {
-                const expr = node.data.value;
-                setExpr.add(expr);
-            }
-        }
-    }
-
-    const exprList = Array.from(setExpr);
-
-    for (const expr of exprList) {
-        if (!expr.includes('{')) {
-            getParseTree(expr);
-        }
-    }
-
-    console.log(`${broker} init cache done`);
-
 }
 
 async function initBotChildren() {
