@@ -21,6 +21,7 @@ export class BotFather {
             const worker = new StaticPool({ size: 1, task: './worker_socket.js' });
             worker.exec({ type: 'init', value: broker });
             this.workerList.push(worker);
+            break;
         }
 
         this.connectToWebConfig(8080);
