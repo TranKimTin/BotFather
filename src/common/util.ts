@@ -106,11 +106,10 @@ function updateCacheIndicator(data: Array<RateData>, cached: CacheIndicatorItem,
     i--;
     while (i >= 0) {
         cached.values.unshift(cached.indicator.nextValue(isValueCandle ? data[i] : data[i].close));
+        if (cached.values.length > MAX_CACHE_SIZE) {
+            cached.values.pop();
+        }
         i--;
-    }
-
-    while (cached.values.length > MAX_CACHE_SIZE) {
-        cached.values.pop();
     }
 
     cached.lastUpdateTime = data[0].startTime;
