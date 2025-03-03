@@ -225,3 +225,8 @@ export interface HandleLogicArgs {
     botID: number,
     cacheIndicator: CacheIndicator
 }
+
+export interface DequeItem {
+    value: number;
+    index: number;
+};

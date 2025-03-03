@@ -1,4 +1,4 @@
-import { MACD_Output, RateData, RateKey } from "./Interface";
+import { DequeItem, MACD_Output, RateData, RateKey } from "./Interface";
 
 export class AvgRate {
     private sum;
@@ -49,175 +49,229 @@ export class AvgAmpl {
     }
 }
 
-export class MaxRate {
-    private max;
-    private period: number;
-    private values: Array<number>;
-    private key: RateKey;
 
-    constructor(args: { period: number, key: RateKey }) {
-        this.max = -Infinity;
-        this.values = [];
+export class MaxRate {
+    private period: number;
+    private key: RateKey;
+    private deque: DequeItem[];
+    private currentIndex: number;
+
+    constructor(args: { period: number; key: RateKey }) {
         this.period = args.period;
         this.key = args.key;
+        this.deque = [];
+        this.currentIndex = -1;
     }
 
-    public nextValue(rate: RateData) {
-        this.max = Math.max(this.max, rate[this.key]);
-        this.values.push(rate[this.key]);
-        if (this.values.length > this.period) {
-            const last: number = this.values.shift()!;
-            if (last === this.max) {
-                this.max = Math.max(...this.values);
-            }
+
+    public nextValue(rate: RateData): number {
+        const value = rate[this.key] as number;
+        this.currentIndex++;
+
+        while (this.deque.length > 0 && this.deque[0].index <= this.currentIndex - this.period) {
+            this.deque.shift();
         }
-        return this.max;
+
+        while (this.deque.length > 0 && this.deque[this.deque.length - 1].value <= value) {
+            this.deque.pop();
+        }
+
+        this.deque.push({ value, index: this.currentIndex });
+
+        if (this.currentIndex < this.period - 1) {
+            return -Infinity;
+        }
+
+        return this.deque[0].value;
     }
 }
 
-export class MinRate {
-    private min;
-    private period: number;
-    private values: Array<number>;
-    private key: RateKey;
 
-    constructor(args: { period: number, key: RateKey }) {
-        this.min = Infinity;
-        this.values = [];
+export class MinRate {
+    private period: number;
+    private key: RateKey;
+    private deque: DequeItem[];
+    private currentIndex: number;
+
+    constructor(args: { period: number; key: RateKey }) {
         this.period = args.period;
         this.key = args.key;
+        this.deque = [];
+        this.currentIndex = -1;
     }
 
-    public nextValue(rate: RateData) {
-        this.min = Math.min(this.min, rate[this.key]);
-        this.values.push(rate[this.key]);
-        if (this.values.length > this.period) {
-            const last: number = this.values.shift()!;
-            if (last === this.min) {
-                this.min = Math.min(...this.values);
-            }
+    public nextValue(rate: RateData): number {
+        const value = rate[this.key] as number;
+        this.currentIndex++;
+
+        while (this.deque.length > 0 && this.deque[0].index <= this.currentIndex - this.period) {
+            this.deque.shift();
         }
-        return this.min;
+
+        while (this.deque.length > 0 && this.deque[this.deque.length - 1].value >= value) {
+            this.deque.pop();
+        }
+
+        this.deque.push({ value, index: this.currentIndex });
+
+        if (this.currentIndex < this.period - 1) {
+            return Infinity;
+        }
+
+        return this.deque[0].value;
     }
 }
 
 export class MaxChange {
-    private max;
     private period: number;
-    private values: Array<number>;
     private byPercent: boolean;
+    private deque: DequeItem[];
+    private currentIndex: number;
 
-    constructor(args: { period: number, byPercent: boolean }) {
-        this.max = -Infinity;
-        this.values = [];
+    constructor(args: { period: number; byPercent: boolean }) {
         this.period = args.period;
         this.byPercent = args.byPercent;
+        this.deque = [];
+        this.currentIndex = -1;
     }
 
-    public nextValue(rate: RateData) {
+    public nextValue(rate: RateData): number {
         let change = rate.close - rate.open;
         if (this.byPercent) {
-            change = change / rate.open * 100;
+            change = (change / rate.open) * 100;
         }
-        this.max = Math.max(this.max, change);
-        this.values.push(change);
-        if (this.values.length > this.period) {
-            const last: number = this.values.shift()!;
-            if (last === this.max) {
-                this.max = Math.max(...this.values);
-            }
+
+        this.currentIndex++;
+
+        while (this.deque.length > 0 && this.deque[0].index <= this.currentIndex - this.period) {
+            this.deque.shift();
         }
-        return this.max;
+
+        while (this.deque.length > 0 && this.deque[this.deque.length - 1].value <= change) {
+            this.deque.pop();
+        }
+
+        this.deque.push({ value: change, index: this.currentIndex });
+
+        if (this.currentIndex < this.period - 1) {
+            return -Infinity;
+        }
+
+        return this.deque[0].value;
     }
 }
 
 export class MinChange {
-    private min;
     private period: number;
-    private values: Array<number>;
     private byPercent: boolean;
+    private deque: DequeItem[];
+    private currentIndex: number;
 
-    constructor(args: { period: number, byPercent: boolean }) {
-        this.min = Infinity;
-        this.values = [];
+    constructor(args: { period: number; byPercent: boolean }) {
         this.period = args.period;
         this.byPercent = args.byPercent;
+        this.deque = [];
+        this.currentIndex = -1;
     }
 
-    public nextValue(rate: RateData) {
+    public nextValue(rate: RateData): number {
         let change = rate.close - rate.open;
         if (this.byPercent) {
-            change = change / rate.open * 100;
+            change = (change / rate.open) * 100;
         }
-        this.min = Math.min(this.min, change);
-        this.values.push(change);
-        if (this.values.length > this.period) {
-            const last: number = this.values.shift()!;
-            if (last === this.min) {
-                this.min = Math.min(...this.values);
-            }
+        this.currentIndex++;
+
+        while (this.deque.length > 0 && this.deque[0].index <= this.currentIndex - this.period) {
+            this.deque.shift();
         }
-        return this.min;
+
+        while (this.deque.length > 0 && this.deque[this.deque.length - 1].value >= change) {
+            this.deque.pop();
+        }
+
+        this.deque.push({ value: change, index: this.currentIndex });
+
+        if (this.currentIndex < this.period - 1) {
+            return Infinity;
+        }
+
+        return this.deque[0].value;
     }
 }
 
 export class MaxAmpl {
-    private max;
     private period: number;
-    private values: Array<number>;
     private byPercent: boolean;
+    private deque: DequeItem[];
+    private currentIndex: number;
 
-    constructor(args: { period: number, byPercent: boolean }) {
-        this.max = -Infinity;
-        this.values = [];
+    constructor(args: { period: number; byPercent: boolean }) {
         this.period = args.period;
         this.byPercent = args.byPercent;
+        this.deque = [];
+        this.currentIndex = -1; // Nến đầu tiên có index = 0
     }
 
-    public nextValue(rate: RateData) {
+    public nextValue(rate: RateData): number {
         let ampl = rate.high - rate.low;
         if (this.byPercent) {
-            ampl = ampl / rate.open * 100;
+            ampl = (ampl / rate.open) * 100;
         }
-        this.max = Math.max(this.max, ampl);
-        this.values.push(ampl);
-        if (this.values.length > this.period) {
-            const last: number = this.values.shift()!;
-            if (last === this.max) {
-                this.max = Math.max(...this.values);
-            }
+        this.currentIndex++;
+
+        while (this.deque.length > 0 && this.deque[0].index <= this.currentIndex - this.period) {
+            this.deque.shift();
         }
-        return this.max;
+
+        while (this.deque.length > 0 && this.deque[this.deque.length - 1].value <= ampl) {
+            this.deque.pop();
+        }
+
+        this.deque.push({ value: ampl, index: this.currentIndex });
+
+        if (this.currentIndex < this.period - 1) {
+            return -Infinity;
+        }
+
+        return this.deque[0].value;
     }
 }
 
 export class MinAmpl {
-    private min;
     private period: number;
-    private values: Array<number>;
     private byPercent: boolean;
+    private deque: DequeItem[];
+    private currentIndex: number;
 
-    constructor(args: { period: number, byPercent: boolean }) {
-        this.min = Infinity;
-        this.values = [];
+    constructor(args: { period: number; byPercent: boolean }) {
         this.period = args.period;
         this.byPercent = args.byPercent;
+        this.deque = [];
+        this.currentIndex = -1;
     }
 
-    public nextValue(rate: RateData) {
+    public nextValue(rate: RateData): number | undefined {
         let ampl = rate.high - rate.low;
         if (this.byPercent) {
-            ampl = ampl / rate.open * 100;
+            ampl = (ampl / rate.open) * 100;
         }
-        this.min = Math.min(this.min, ampl);
-        this.values.push(ampl);
-        if (this.values.length > this.period) {
-            const last: number = this.values.shift()!;
-            if (last === this.min) {
-                this.min = Math.min(...this.values);
-            }
+        this.currentIndex++;
+
+        while (this.deque.length > 0 && this.deque[0].index <= this.currentIndex - this.period) {
+            this.deque.shift();
         }
-        return this.min;
+
+        while (this.deque.length > 0 && this.deque[this.deque.length - 1].value >= ampl) {
+            this.deque.pop();
+        }
+
+        this.deque.push({ value: ampl, index: this.currentIndex });
+
+        if (this.currentIndex < this.period - 1) {
+            return undefined;
+        }
+
+        return this.deque[0].value;
     }
 }
 
