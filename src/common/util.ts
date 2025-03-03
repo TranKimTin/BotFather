@@ -511,8 +511,7 @@ export async function getBinanceOHLCV(symbol: string, timeframe: string, limit: 
             const isFinal = true;
             const change = (close - open) / open;
             const ampl = (high - low) / open;
-            const timestring = moment(startTime).format('YYYY-MM-DD HH:mm:SS');
-            return { symbol, startTime, timestring, open, high, low, close, volume, interval, isFinal, change, ampl };
+            return { symbol, startTime, open, high, low, close, volume, interval, isFinal, change, ampl };
         }).filter(item => !check[item.startTime]);
         if (data.length == 0) break;
         data.sort((a, b) => a.startTime - b.startTime);
@@ -547,8 +546,7 @@ export async function getBinanceFutureOHLCV(symbol: string, timeframe: string, l
             const isFinal = true;
             const change = (close - open) / open;
             const ampl = (high - low) / open;
-            const timestring = moment(startTime).format('YYYY-MM-DD HH:mm:SS');
-            return { symbol, startTime, timestring, open, high, low, close, volume, interval, isFinal, change, ampl };
+            return { symbol, startTime, open, high, low, close, volume, interval, isFinal, change, ampl };
         }).filter(item => !check[item.startTime]);
         if (data.length == 0) break;
         data.sort((a, b) => a.startTime - b.startTime);
@@ -606,8 +604,7 @@ export async function getBybitOHLCV(symbol: string, timeframe: string, limit: nu
         const isFinal = true;
         const change = (close - open) / open;
         const ampl = (high - low) / open;
-        const timestring = moment(startTime).format('YYYY-MM-DD HH:mm:SS');
-        return { symbol, startTime, timestring, open, high, low, close, volume, interval, isFinal, change, ampl };
+        return { symbol, startTime, open, high, low, close, volume, interval, isFinal, change, ampl };
     });
     result.sort((a, b) => b.startTime - a.startTime);
     if (result.length) result[0].isFinal = false;
@@ -656,8 +653,7 @@ export async function getBybitFutureOHLCV(symbol: string, timeframe: string, lim
         const isFinal = true;
         const change = (close - open) / open;
         const ampl = (high - low) / open;
-        const timestring = moment(startTime).format('YYYY-MM-DD HH:mm:SS');
-        return { symbol, startTime, timestring, open, high, low, close, volume, interval, isFinal, change, ampl };
+        return { symbol, startTime, open, high, low, close, volume, interval, isFinal, change, ampl };
     });
     result.sort((a, b) => b.startTime - a.startTime);
     if (result.length) result[0].isFinal = false;
@@ -707,8 +703,7 @@ export async function getOkxOHLCV(symbol: string, timeframe: string, limit: numb
         const isFinal = !!+item[8];
         const change = (close - open) / open;
         const ampl = (high - low) / open;
-        const timestring = moment(startTime).format('YYYY-MM-DD HH:mm:SS');
-        return { symbol, startTime, timestring, open, high, low, close, volume, interval, isFinal, change, ampl };
+        return { symbol, startTime, open, high, low, close, volume, interval, isFinal, change, ampl };
     });
     result.sort((a, b) => b.startTime - a.startTime);
     // if (result.length) result[0].isFinal = false;
@@ -758,8 +753,7 @@ export async function getOkxOHLCVHistory(symbol: string, timeframe: string, limi
         const isFinal = !!+item[8];
         const change = (close - open) / open;
         const ampl = (high - low) / open;
-        const timestring = moment(startTime).format('YYYY-MM-DD HH:mm:SS');
-        return { symbol, startTime, timestring, open, high, low, close, volume, interval, isFinal, change, ampl };
+        return { symbol, startTime, open, high, low, close, volume, interval, isFinal, change, ampl };
     });
     result.sort((a, b) => b.startTime - a.startTime);
     // if (result.length) result[0].isFinal = false;

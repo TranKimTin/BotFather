@@ -175,7 +175,7 @@ export async function calculator(broker: string, symbol: string, timeframe: stri
 
     const value = calculate(expr, args);
     if (value === null) throw `Biểu thức không hợp lệ ${expr}`;
-    return `${value}    (${data[0].timestring})`;
+    return value;
 }
 
 export async function saveBot(data: BotInfo, userData: UserTokenInfo) {

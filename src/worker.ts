@@ -124,7 +124,7 @@ function handleLogic(nodeData: NodeData, broker: string, symbol: string, timefra
         let mess = emoji[broker];
         mess += `\n<a href="${url[broker]}"><b>${symbol}</b></a>`;
         mess += `\n${broker}`;
-        mess += `\n${timeframe} ${data[0].timestring}`;
+        mess += `\n${timeframe} ${moment(data[0].startTime).format('DD/MM/YYYY HH:mm')}`;
         mess += `\n${content}`;
 
         if (content === '<--->') mess = '--------------------';
@@ -344,8 +344,7 @@ if (parentPort) {
                 close: close[i],
                 volume: volume[i],
                 isFinal: true,
-                startTime: startTime[i],
-                timestring: moment(startTime[i]).format('YYYY-MM-DD HH:mm:ss')
+                startTime: startTime[i]
             };
         }
         onCloseCandle(broker, symbol, timeframe, data);

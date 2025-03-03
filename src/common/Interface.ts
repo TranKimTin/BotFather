@@ -65,7 +65,6 @@ export type TelegramIdType = string | number;
 export interface RateData {
     symbol: string,
     startTime: number,
-    timestring: string,
     open: number,
     high: number,
     low: number,
