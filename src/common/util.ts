@@ -12,7 +12,7 @@ import * as customIndicator from './CustomIndicator';
 
 dotenv.config({ path: `${__dirname}/../../.env` });
 
-// technicalindicators.setConfig('precision', 10);
+technicalindicators.setConfig('precision', 10);
 
 let binance = new ccxt.binance({ 'timeout': 30000 });
 let binanceFuture = new ccxt.binanceusdm({ 'timeout': 30000 });
@@ -241,81 +241,6 @@ export function iMinAmpl(data: Array<RateData>, period: number, byPercent: boole
     }
     updateCacheIndicator(data, cacheIndicator[key], true);
     return cacheIndicator[key].values;
-}
-
-
-export function iCCI(data: Array<RateData>, period: number, cacheIndicator: CacheIndicator = {}): Array<number> {
-    const key = `cci_${period}`;
-    if (!cacheIndicator[key]) {
-        cacheIndicator[key] = {
-            indicator: new technicalindicators.CCI({
-                period,
-                high: [],
-                low: [],
-                close: [],
-                reversedInput: true
-            }),
-            lastUpdateTime: 0,
-            values: []
-        };
-    }
-
-    updateCacheIndicator(data, cacheIndicator[key], true);
-    return cacheIndicator[key].values;
-}
-
-
-export function iRSI(data: Array<RateData>, period: number, cacheIndicator: CacheIndicator = {}): Array<number> {
-    const key = `rsi_${period}`;
-    if (!cacheIndicator[key]) {
-        cacheIndicator[key] = {
-            indicator: new technicalindicators.RSI({
-                period,
-                values: [],
-                reversedInput: true
-            }),
-            lastUpdateTime: 0,
-            values: []
-        };
-    }
-
-    updateCacheIndicator(data, cacheIndicator[key]);
-    return cacheIndicator[key].values;
-
-    // const gains = [];
-    // const losses = [];
-    // let avgGain = 0;
-    // let avgLoss = 0;
-    // let rs = 0;
-    // const RSI: Array<number> = [];
-
-    // for (let i = 1; i < prices.length; i++) {
-    //     const delta = prices[prices.length - i - 1] - prices[prices.length - i];
-
-    //     if (delta > 0) {
-    //         gains.push(delta);
-    //         losses.push(0);
-    //     } else {
-    //         gains.push(0);
-    //         losses.push(Math.abs(delta));
-    //     }
-
-    //     if (i >= period) {
-    //         if (i === period) {
-    //             avgGain = gains.slice(0, period).reduce((a, b) => a + b, 0) / period;
-    //             avgLoss = losses.slice(0, period).reduce((a, b) => a + b, 0) / period;
-    //         } else {
-    //             avgGain = (avgGain * (period - 1) + gains[i - 1]) / period;
-    //             avgLoss = (avgLoss * (period - 1) + losses[i - 1]) / period;
-    //         }
-
-    //         rs = (avgGain / avgLoss) || 0;
-    //         const rsi = 100 - (100 / (1 + rs));
-    //         RSI[prices.length - i - 1] = +rsi.toFixed(2);
-    //     }
-    // }
-
-    // return RSI;
 }
 
 export async function getDigitsFuture() {
@@ -761,21 +686,65 @@ export async function getOkxOHLCVHistory(symbol: string, timeframe: string, limi
     return result;
 }
 
-export function iMA(data: Array<RateData>, period: number, cacheIndicator: CacheIndicator = {}): Array<number> {
-    const key = `sma_${period}`;
+
+
+export function iCCI(data: Array<RateData>, period: number, cacheIndicator: CacheIndicator = {}): Array<number> {
+    const key = `cci_${period}`;
     if (!cacheIndicator[key]) {
         cacheIndicator[key] = {
-            indicator: new technicalindicators.SMA({
+            indicator: new technicalindicators.CCI({
                 period,
-                values: [],
-                reversedInput: true
+                high: [],
+                low: [],
+                close: [],
+                reversedInput: true,
+                format: (val) => val
             }),
             lastUpdateTime: 0,
             values: []
         };
     }
 
-    updateCacheIndicator(data, cacheIndicator[key]);
+    updateCacheIndicator(data, cacheIndicator[key], true);
+    return cacheIndicator[key].values;
+}
+
+
+export function iRSI(data: Array<RateData>, period: number, cacheIndicator: CacheIndicator = {}): Array<number> {
+    const key = `rsi_${period}`;
+    if (!cacheIndicator[key]) {
+        cacheIndicator[key] = {
+            indicator: new customIndicator.RSI({
+                period,
+                // values: [],
+                // reversedInput: true,
+                // format: (val) => val 
+            }),
+            lastUpdateTime: 0,
+            values: []
+        };
+    }
+
+    updateCacheIndicator(data, cacheIndicator[key], true);
+    return cacheIndicator[key].values;
+}
+
+export function iMA(data: Array<RateData>, period: number, cacheIndicator: CacheIndicator = {}): Array<number> {
+    const key = `sma_${period}`;
+    if (!cacheIndicator[key]) {
+        cacheIndicator[key] = {
+            indicator: new customIndicator.SMA({
+                period,
+                // values: [],
+                // reversedInput: true,
+                // format: (val) => val 
+            }),
+            lastUpdateTime: 0,
+            values: []
+        };
+    }
+
+    updateCacheIndicator(data, cacheIndicator[key], true);
     return cacheIndicator[key].values;
 }
 
@@ -783,17 +752,18 @@ export function iEMA(data: Array<RateData>, period: number, cacheIndicator: Cach
     const key = `ema_${period}`;
     if (!cacheIndicator[key]) {
         cacheIndicator[key] = {
-            indicator: new technicalindicators.EMA({
+            indicator: new customIndicator.EMA({
                 period,
-                values: [],
-                reversedInput: true
+                // values: [],
+                // reversedInput: true,
+                // format: (val) => val 
             }),
             lastUpdateTime: 0,
             values: []
         };
     }
 
-    updateCacheIndicator(data, cacheIndicator[key]);
+    updateCacheIndicator(data, cacheIndicator[key], true);
     return cacheIndicator[key].values;
 }
 
@@ -801,21 +771,22 @@ export function iMACD(data: Array<RateData>, fastPeriod: number, slowPeriod: num
     const key = `macd_${fastPeriod}_${slowPeriod}_${signalPeriod}`;
     if (!cacheIndicator[key]) {
         cacheIndicator[key] = {
-            indicator: new technicalindicators.MACD({
-                values: [],
+            indicator: new customIndicator.MACD({
+                // values: [],
                 fastPeriod,
                 slowPeriod,
                 signalPeriod,
-                SimpleMAOscillator: false,
-                SimpleMASignal: false,
-                reversedInput: true
+                // SimpleMAOscillator: false,
+                // SimpleMASignal: false,
+                // reversedInput: true,
+                // format: (val) => val 
             }),
             lastUpdateTime: 0,
-            values: []
+            values: [],
         };
     }
 
-    updateCacheIndicator(data, cacheIndicator[key]);
+    updateCacheIndicator(data, cacheIndicator[key], true);
     return cacheIndicator[key].values;
 }
 
@@ -823,18 +794,19 @@ export function iBB(data: Array<RateData>, period: number, multiplier: number, c
     const key = `bb_${period}_${multiplier}`;
     if (!cacheIndicator[key]) {
         cacheIndicator[key] = {
-            indicator: new technicalindicators.BollingerBands({
+            indicator: new customIndicator.BollingerBands({
                 period,
-                values: [],
+                // values: [],
                 stdDev: multiplier,
-                reversedInput: true
+                // reversedInput: true,
+                // format: (val) => val 
             }),
             lastUpdateTime: 0,
             values: []
         };
     }
 
-    updateCacheIndicator(data, cacheIndicator[key]);
+    updateCacheIndicator(data, cacheIndicator[key], true);
     return cacheIndicator[key].values;
 }
 
@@ -935,12 +907,13 @@ export function iATR(data: Array<RateData>, period: number, cacheIndicator: Cach
     const key = `atr_${period}`;
     if (!cacheIndicator[key]) {
         cacheIndicator[key] = {
-            indicator: new technicalindicators.ATR({
-                high: [],
-                low: [],
-                close: [],
+            indicator: new customIndicator.ATR({
+                // high: [],
+                // low: [],
+                // close: [],
                 period,
-                reversedInput: true
+                // reversedInput: true,
+                // format: (val) => val
             }),
             lastUpdateTime: 0,
             values: []
