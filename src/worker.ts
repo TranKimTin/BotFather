@@ -1,7 +1,7 @@
 import { parentPort } from 'worker_threads';
 import * as mysql from './WebConfig/lib/mysql';
 import { calculate, calculateSubExpr } from './common/Expr';
-import { BotInfo, CacheIndicator, ExprArgs, NODE_TYPE, Node, NodeData, ORDER_STATUS, RateData, TelegramIdType, UNIT, WorkerData } from './common/Interface';
+import { BotInfo, CacheIndicator, ExprArgs, HandleLogicArgs, NODE_TYPE, Node, NodeData, ORDER_STATUS, RateData, TelegramIdType, UNIT, WorkerData } from './common/Interface';
 import Telegram from './common/telegram';
 import * as util from './common/util';
 import moment from 'moment';
@@ -18,7 +18,8 @@ export function onCloseCandle(broker: string, symbol: string, timeframe: string,
             if (!timeframes.includes(timeframe) || !binarySearch(symbolList, `${broker}:${symbol}`)) continue;
 
             const visited: { [key: string]: boolean } = {};
-            dfs_handleLogic(route, broker, symbol, timeframe, data, idTelegram, visited, botIDs[botName], cacheIndicator);
+            const handleLogicArgs: HandleLogicArgs = { broker, symbol, timeframe, data, idTelegram, visited, botID: botIDs[botName], cacheIndicator };
+            dfs_handleLogic(route, handleLogicArgs);
         }
         catch (err) {
             console.error({ symbol, timeframe }, err);
@@ -66,21 +67,22 @@ function binarySearch(arr: Array<string>, target: string): boolean {
 }
 
 
-function dfs_handleLogic(node: Node, broker: string, symbol: string, timeframe: string, data: RateData[], idTelegram: TelegramIdType, visited: { [key: string]: boolean }, botID: number, cacheIndicator: CacheIndicator) {
+function dfs_handleLogic(node: Node, args: HandleLogicArgs) {
     const { id, next } = node;
     const nodeData = node.data;
 
-    if (visited[id] === true) return;
-    visited[id] = true;
-    if (handleLogic(nodeData, broker, symbol, timeframe, data, idTelegram, botID, cacheIndicator)) {
+    if (args.visited[id] === true) return;
+    args.visited[id] = true;
+    if (handleLogic(nodeData, args)) {
         for (const child of next) {
-            dfs_handleLogic(child, broker, symbol, timeframe, data, idTelegram, visited, botID, cacheIndicator);
+            dfs_handleLogic(child, args);
         }
     }
 }
 
-function handleLogic(nodeData: NodeData, broker: string, symbol: string, timeframe: string, data: RateData[], idTelegram: TelegramIdType, botID: number, cacheIndicator: CacheIndicator): boolean {
+function handleLogic(nodeData: NodeData, args: HandleLogicArgs): boolean {
     if (nodeData.type === NODE_TYPE.START) return true;
+    const { broker, symbol, timeframe, data, idTelegram, botID, cacheIndicator } = args;
 
     const exprArgs: ExprArgs = {
         broker,
@@ -124,7 +126,7 @@ function handleLogic(nodeData: NodeData, broker: string, symbol: string, timefra
         let mess = emoji[broker];
         mess += `\n<a href="${url[broker]}"><b>${symbol}</b></a>`;
         mess += `\n${broker}`;
-        mess += `\n${timeframe} ${data[0].timestring}`;
+        mess += `\n${timeframe} ${moment(data[0].startTime).format('DD/MM/YYYY HH:mm')}`;
         mess += `\n${content}`;
 
         if (content === '<--->') mess = '--------------------';
@@ -344,8 +346,7 @@ if (parentPort) {
                 close: close[i],
                 volume: volume[i],
                 isFinal: true,
-                startTime: startTime[i],
-                timestring: moment(startTime[i]).format('YYYY-MM-DD HH:mm:ss')
+                startTime: startTime[i]
             };
         }
         onCloseCandle(broker, symbol, timeframe, data);

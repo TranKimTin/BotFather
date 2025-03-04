@@ -54,7 +54,6 @@ export class OkxSocket extends SocketData {
                 const rate: RateData = {
                     symbol: symbol,
                     startTime: +candle[0],
-                    timestring: '',
                     open: +candle[1],
                     high: +candle[2],
                     low: +candle[3],

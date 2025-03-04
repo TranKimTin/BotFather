@@ -65,7 +65,6 @@ export type TelegramIdType = string | number;
 export interface RateData {
     symbol: string,
     startTime: number,
-    timestring: string,
     open: number,
     high: number,
     low: number,
@@ -215,3 +214,19 @@ export interface MACD_Output {
 }
 
 export type RateKey = 'open' | 'high' | 'low' | 'close' | 'volume';
+
+export interface HandleLogicArgs {
+    broker: string,
+    symbol: string,
+    timeframe: string,
+    data: RateData[],
+    idTelegram: TelegramIdType,
+    visited: { [key: string]: boolean },
+    botID: number,
+    cacheIndicator: CacheIndicator
+}
+
+export interface DequeItem {
+    value: number;
+    index: number;
+};

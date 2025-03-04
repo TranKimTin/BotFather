@@ -327,7 +327,6 @@ export default class Backtest {
                 data.unshift({
                     symbol: symbol,
                     startTime: util.getStartTime(tf, this.timeCurrent.valueOf()),
-                    timestring: moment(util.getStartTime(tf, this.timeCurrent.valueOf())).format('YYYY-MM-DD HH:mm:SS'),
                     open: price,
                     high: price,
                     low: price,

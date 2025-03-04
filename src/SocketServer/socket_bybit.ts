@@ -62,7 +62,6 @@ export class BybitSocket extends SocketData {
                 const rate: RateData = {
                     symbol: symbol,
                     startTime: candle.start,
-                    timestring: '',
                     open: +candle.open,
                     high: +candle.high,
                     low: +candle.low,

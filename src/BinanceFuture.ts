@@ -148,7 +148,6 @@ class BinanceFuture {
                 const data = {
                     symbol: candle.symbol,
                     startTime: util.getStartTime(tf, candle.startTime),
-                    timestring: moment(util.getStartTime(tf, candle.startTime)).format('YYYY-MM-DD HH:mm:SS'),
                     open: +candle.open,
                     high: +candle.high,
                     low: +candle.low,

@@ -46,8 +46,7 @@ export class BinanceSocket extends SocketData {
                 close: +kline.c,
                 volume: +kline.v,
                 interval: kline.i,
-                isFinal: !!+kline.x,
-                timestring: ''
+                isFinal: !!+kline.x
             };
 
             this.fetchCandles(candle);

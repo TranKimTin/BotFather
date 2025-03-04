@@ -83,7 +83,6 @@ export class SocketData {
             const data: RateData = {
                 symbol: candle.symbol,
                 startTime: util.getStartTime(tf, candle.startTime),
-                timestring: moment(util.getStartTime(tf, candle.startTime)).format('YYYY-MM-DD HH:mm:SS'),
                 open: candle.open,
                 high: candle.high,
                 low: candle.low,
@@ -137,7 +136,6 @@ export class SocketData {
                 ratesHigher.unshift({
                     symbol: rate.symbol,
                     startTime: util.getStartTime(timeframe, rate.startTime),
-                    timestring: moment(util.getStartTime(timeframe, rate.startTime)).format('YYYY-MM-DD HH:mm:SS'),
                     open: rate.open,
                     high: rate.high,
                     low: rate.low,
@@ -194,7 +192,6 @@ export class SocketData {
             idx--;
         }
         if (!this.isValidRates(rates)) {
-            // console.error(`rate is invalid ${key} `, JSON.stringify(rates.map(item => item.timestring)));
             await redis.remove(key);
             const result = await this.getOHLCV!(symbol, timeframe);
             return result;
