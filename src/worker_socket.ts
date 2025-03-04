@@ -1,6 +1,6 @@
 import { parentPort } from 'worker_threads';
 import * as mysql from './WebConfig/lib/mysql';
-import { BotInfo, RateData, WorkerData } from './common/Interface';
+import { BotInfo, CacheIndicator, RateData, WorkerData } from './common/Interface';
 import os from 'os';
 import { SocketData } from './SocketServer/socket_data';
 import { BinanceSocket } from './SocketServer/socket_binance';
@@ -8,17 +8,20 @@ import { BinanceFutureSocket } from './SocketServer/socket_binance_future';
 import { BybitSocket } from './SocketServer/socket_bybit';
 import { BybitFutureSocket } from './SocketServer/socket_bybit_future';
 import { OkxSocket } from './SocketServer/socket_okx';
-import { StaticPool } from 'node-worker-threads-pool';
+// import { StaticPool } from 'node-worker-threads-pool';
 import * as util from './common/util';
+import * as worker from './worker';
 
 let socket: SocketData;
 let symbolListener: { [key: string]: boolean };
 let botChildren: Array<BotInfo>;
 let lastTimeUpdated = 0;
-const worker = new StaticPool({
-    size: os.cpus().length,
-    task: './worker.js'
-});
+const cacheIndicators: { [key: string]: CacheIndicator } = {};
+
+// const worker = new StaticPool({
+//     size: os.cpus().length,
+//     task: './worker.js'
+// });
 
 if (parentPort) {
     console.log('worker_socket loaded');
@@ -83,7 +86,8 @@ async function initBotChildren() {
         }
     }
 
-    lastTimeUpdated = new Date().getTime();
+    // lastTimeUpdated = new Date().getTime();
+    worker.setBotData(botChildren, botIDs)
 
     console.log('init bot list', botChildren.length);
 }
@@ -119,8 +123,15 @@ async function onCloseCandle(broker: string, symbol: string, timeframe: string, 
         const startTime = new Float64Array(startTimeBuffer);
         startTime.set(util.convertDataToArrayStartTime(data));
 
-        const workerData: WorkerData = { broker, symbol, timeframe, lastTimeUpdated, startTime, open, high, low, close, volume };
-        const runtime: number = await worker.exec(workerData);
+        // const workerData: WorkerData = { broker, symbol, timeframe, lastTimeUpdated, startTime, open, high, low, close, volume };
+        // const runtime: number = await worker.exec(workerData);
+
+        if (!cacheIndicators[key]) {
+            cacheIndicators[key] = {};
+        }
+
+        const runtime = worker.onCloseCandle(broker, symbol, timeframe, data, cacheIndicators[key]);
+
         console.log(`onCloseCandle ${broker} ${symbol} ${timeframe} runtime = ${runtime} ms`);
     }
     catch (err) {
