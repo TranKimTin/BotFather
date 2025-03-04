@@ -99,29 +99,29 @@ async function onCloseCandle(broker: string, symbol: string, timeframe: string, 
 
         // console.log(`onCloseCandle ${broker} ${symbol} ${timeframe} runtime = ${-1} ms`);
 
-        const openBuffer = new SharedArrayBuffer(data.length * 8);
-        const open = new Float64Array(openBuffer);
-        open.set(util.convertDataToArrayPricesOpen(data));
+        // const openBuffer = new SharedArrayBuffer(data.length * 8);
+        // const open = new Float64Array(openBuffer);
+        // open.set(util.convertDataToArrayPricesOpen(data));
 
-        const highBuffer = new SharedArrayBuffer(data.length * 8);
-        const high = new Float64Array(highBuffer);
-        high.set(util.convertDataToArrayPricesHigh(data));
+        // const highBuffer = new SharedArrayBuffer(data.length * 8);
+        // const high = new Float64Array(highBuffer);
+        // high.set(util.convertDataToArrayPricesHigh(data));
 
-        const lowBuffer = new SharedArrayBuffer(data.length * 8);
-        const low = new Float64Array(lowBuffer);
-        low.set(util.convertDataToArrayPricesLow(data));
+        // const lowBuffer = new SharedArrayBuffer(data.length * 8);
+        // const low = new Float64Array(lowBuffer);
+        // low.set(util.convertDataToArrayPricesLow(data));
 
-        const closeBuffer = new SharedArrayBuffer(data.length * 8);
-        const close = new Float64Array(closeBuffer);
-        close.set(util.convertDataToArrayPricesClose(data));
+        // const closeBuffer = new SharedArrayBuffer(data.length * 8);
+        // const close = new Float64Array(closeBuffer);
+        // close.set(util.convertDataToArrayPricesClose(data));
 
-        const volumeBuffer = new SharedArrayBuffer(data.length * 8);
-        const volume = new Float64Array(volumeBuffer);
-        volume.set(util.convertDataToArrayVolume(data));
+        // const volumeBuffer = new SharedArrayBuffer(data.length * 8);
+        // const volume = new Float64Array(volumeBuffer);
+        // volume.set(util.convertDataToArrayVolume(data));
 
-        const startTimeBuffer = new SharedArrayBuffer(data.length * 8);
-        const startTime = new Float64Array(startTimeBuffer);
-        startTime.set(util.convertDataToArrayStartTime(data));
+        // const startTimeBuffer = new SharedArrayBuffer(data.length * 8);
+        // const startTime = new Float64Array(startTimeBuffer);
+        // startTime.set(util.convertDataToArrayStartTime(data));
 
         // const workerData: WorkerData = { broker, symbol, timeframe, lastTimeUpdated, startTime, open, high, low, close, volume };
         // const runtime: number = await worker.exec(workerData);
