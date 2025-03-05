@@ -245,7 +245,7 @@ export class Expr extends ExprVisitor<any> {
         if (shift >= this.data.length) throw `change% out of range. length = ${this.data.length}`;
 
         const change: number = this.data[shift].close - this.data[shift].open;
-        return parseFloat((change / this.data[shift].open * 100).toFixed(2));
+        return change / this.data[shift].open * 100;
     };
 
     visitAmpl = (ctx: AmplContext) => {
@@ -261,7 +261,7 @@ export class Expr extends ExprVisitor<any> {
         if (shift >= this.data.length) throw `ampl% out of range. length = ${this.data.length}`;
 
         const ampl: number = this.data[shift].high - this.data[shift].low;
-        return parseFloat((ampl / this.data[shift].open * 100).toFixed(2));
+        return ampl / this.data[shift].open * 100;
     };
 
     visitUpper_shadow = (ctx: Upper_shadowContext) => {
@@ -277,7 +277,7 @@ export class Expr extends ExprVisitor<any> {
         if (shift >= this.data.length) throw `upper shadow % out of range. length = ${this.data.length}`;
 
         const diff: number = this.data[shift].high - Math.max(this.data[shift].open, this.data[shift].close);
-        return parseFloat((diff / this.data[shift].open * 100).toFixed(2));
+        return diff / this.data[shift].open * 100;
     };
 
     visitLower_shadow = (ctx: Lower_shadowContext) => {
@@ -293,7 +293,7 @@ export class Expr extends ExprVisitor<any> {
         if (shift >= this.data.length) throw `lower shadow % out of range. length = ${this.data.length}`;
 
         const diff: number = Math.min(this.data[shift].open, this.data[shift].close) - this.data[shift].low;
-        return parseFloat((diff / this.data[shift].open * 100).toFixed(2));
+        return diff / this.data[shift].open * 100;
     };
 
     visitRsi = (ctx: RsiContext) => {
@@ -711,7 +711,7 @@ export class Expr extends ExprVisitor<any> {
         const MARSIs = util.iMA(fakeData, periodMA, this.cacheIndicator);
 
         if (shift >= MARSIs.length) return false;
-        return parseFloat(MARSIs[shift].toFixed(2));
+        return MARSIs[shift];
     };
 
     visitBull_bear_list = (ctx: Bull_bear_listContext) => {
