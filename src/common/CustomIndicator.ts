@@ -519,3 +519,102 @@ export class ATR {
         return this.atr;
     }
 }
+
+export class MaxRsi {
+    private maxPeriod: number;
+    private rsiCalculator: RSI;
+    private deque: DequeItem[];
+    private currentIndex: number;
+
+    constructor(args: { period: number; rsiPeriod: number }) {
+        this.maxPeriod = args.period;
+        this.rsiCalculator = new RSI({ period: args.rsiPeriod });
+        this.deque = [];
+        this.currentIndex = -1;
+    }
+
+    public nextValue(rate: RateData): number {
+        const rsi = this.rsiCalculator.nextValue(rate);
+        if (rsi === 0) return 0;
+
+        this.currentIndex++;
+
+        while (this.deque.length > 0 && this.deque[0].index <= this.currentIndex - this.maxPeriod) {
+            this.deque.shift();
+        }
+
+        while (this.deque.length > 0 && this.deque[this.deque.length - 1].value <= rsi) {
+            this.deque.pop();
+        }
+
+        this.deque.push({ value: rsi, index: this.currentIndex });
+
+        if (this.currentIndex < this.maxPeriod - 1) return 0;
+
+        return this.deque[0].value;
+    }
+}
+
+export class MinRsi {
+    private minPeriod: number;
+    private rsiCalculator: RSI;
+    private deque: DequeItem[];
+    private currentIndex: number;
+
+    constructor(args: { period: number; rsiPeriod: number }) {
+        this.minPeriod = args.period;
+        this.rsiCalculator = new RSI({ period: args.rsiPeriod });
+        this.deque = [];
+        this.currentIndex = -1;
+    }
+
+    public nextValue(rate: RateData): number {
+        const rsi = this.rsiCalculator.nextValue(rate);
+        if (rsi === 0) return 0;
+
+        this.currentIndex++;
+
+        while (this.deque.length > 0 && this.deque[0].index <= this.currentIndex - this.minPeriod) {
+            this.deque.shift();
+        }
+
+        while (this.deque.length > 0 && this.deque[this.deque.length - 1].value >= rsi) {
+            this.deque.pop();
+        }
+
+        this.deque.push({ value: rsi, index: this.currentIndex });
+
+        if (this.currentIndex < this.minPeriod - 1) return 0;
+
+        return this.deque[0].value;
+    }
+}
+
+export class AvgRsi {
+    private avgPeriod: number;
+    private rsiCalculator: RSI;
+    private values: number[];
+    private sum: number;
+
+    constructor(args: { period: number; rsiPeriod: number }) {
+        this.avgPeriod = args.period;
+        this.rsiCalculator = new RSI({ period: args.rsiPeriod });
+        this.values = [];
+        this.sum = 0;
+    }
+
+    public nextValue(rate: RateData): number {
+        const rsi = this.rsiCalculator.nextValue(rate);
+        if (rsi === 0) return 0;
+
+        this.values.push(rsi);
+        this.sum += rsi;
+
+        if (this.values.length > this.avgPeriod) {
+            this.sum -= this.values.shift()!;
+        }
+
+        if (this.values.length < this.avgPeriod) return 0;
+        return this.sum / this.values.length;
+    }
+}

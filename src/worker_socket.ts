@@ -1,6 +1,6 @@
 import { parentPort } from 'worker_threads';
 import * as mysql from './WebConfig/lib/mysql';
-import { BotInfo, CacheIndicator, RateData, WorkerData } from './common/Interface';
+import { BotInfo, CacheIndicator, ExprArgs, NODE_TYPE, RateData, WorkerData } from './common/Interface';
 import os from 'os';
 import { SocketData } from './SocketServer/socket_data';
 import { BinanceSocket } from './SocketServer/socket_binance';
@@ -11,6 +11,7 @@ import { OkxSocket } from './SocketServer/socket_okx';
 // import { StaticPool } from 'node-worker-threads-pool';
 import * as util from './common/util';
 import * as worker from './worker';
+import { calculate, calculateSubExpr } from './common/Expr';
 
 let socket: SocketData;
 let symbolListener: { [key: string]: boolean };
@@ -31,6 +32,7 @@ if (parentPort) {
         if (type === 'init') {
             await initBotChildren();
             await initSocketData(value);
+            await initCache(value);
         }
         else if (type === 'update') {
             await initBotChildren();
@@ -90,6 +92,55 @@ async function initBotChildren() {
     worker.setBotData(botChildren, botIDs)
 
     console.log('init bot list', botChildren.length);
+}
+
+async function initCache(broker: string) {
+    if (broker !== 'binance_future') return;
+
+    console.log(`${broker} init cache...`);
+    const botList = await mysql.query(`SELECT * FROM Bot`);
+
+    const setExpr: Set<string> = new Set();
+    for (const bot of botList) {
+        const treeData = JSON.parse(bot.treeData);
+
+        for (let node of treeData.elements.nodes) {
+            if (node.data.type === NODE_TYPE.EXPR) {
+                const expr = node.data.value;
+                setExpr.add(expr);
+            }
+        }
+    }
+
+    const exprList = Array.from(setExpr);
+
+    const symbolList: Array<string> = socket.getSymbols();
+    const timeframeList: Array<string> = socket.getTimeframes();
+    for (const symbol of symbolList) {
+        for (const timeframe of timeframeList) {
+            const key = `${broker}_${symbol}_${timeframe}`;
+            if (!symbolListener[key]) continue;
+
+            if (!cacheIndicators[key]) {
+                cacheIndicators[key] = {};
+            }
+
+            const data = socket.getData(symbol, timeframe);
+            const args: ExprArgs = {
+                broker,
+                symbol,
+                timeframe,
+                data,
+                cacheIndicator: cacheIndicators[key]
+            }
+            for (const expr of exprList) {
+                const e = calculateSubExpr(expr, args);
+                calculate(e, args)
+            }
+        }
+    }
+
+    console.log(`${broker} init cache done`);
 }
 
 async function onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {

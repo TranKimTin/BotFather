@@ -706,12 +706,11 @@ export class Expr extends ExprVisitor<any> {
         const periodMA = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(2)?.getText() || "0", 10);
 
-        const RSIs = util.iRSI(this.data, periodRSI, this.cacheIndicator);
-        const fakeData = RSIs.map(item => ({ close: item } as RateData));
-        const MARSIs = util.iMA(fakeData, periodMA, this.cacheIndicator);
+        const avgRsis = util.iAvgRSI(this.data, periodRSI, periodMA, this.cacheIndicator);
 
-        if (shift >= MARSIs.length) return false;
-        return MARSIs[shift];
+        if (shift >= avgRsis.length) throw `avg_rsi out of range. length = ${avgRsis.length}`;
+
+        return avgRsis[shift];
     };
 
     visitBull_bear_list = (ctx: Bull_bear_listContext) => {
@@ -864,15 +863,10 @@ export class Expr extends ExprVisitor<any> {
         const depth = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(2)?.getText() || "0", 10);
 
-        const RSIs = util.iRSI(this.data, period, this.cacheIndicator);
+        const MinRSIs = util.iMinRSI(this.data, depth, period, this.cacheIndicator);
+        if (shift >= MinRSIs.length) throw `min_rsi out of range. length = ${this.data.length}`;
 
-        if (shift + depth >= RSIs.length) throw `min_rsi out of range. length = ${this.data.length}`;
-
-        let min = RSIs[shift];
-        for (let i = 1; i < depth; i++) {
-            min = Math.min(min, RSIs[shift + i]);
-        }
-        return min;
+        return MinRSIs[shift];
     };
 
     visitMax_rsi = (ctx: Max_rsiContext) => {
@@ -880,15 +874,10 @@ export class Expr extends ExprVisitor<any> {
         const depth = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(2)?.getText() || "0", 10);
 
-        const RSIs = util.iRSI(this.data, period, this.cacheIndicator);
+        const MaxRSIs = util.iMaxRSI(this.data, depth, period, this.cacheIndicator);
+        if (shift >= MaxRSIs.length) throw `max_rsi out of range. length = ${this.data.length}`;
 
-        if (shift + depth >= RSIs.length) throw `max_rsi out of range. length = ${this.data.length}`;
-
-        let max = RSIs[shift];
-        for (let i = 1; i < depth; i++) {
-            max = Math.max(max, RSIs[shift + i]);
-        }
-        return max;
+        return MaxRSIs[shift];
     };
 
     visitMin_change = (ctx: Min_changeContext) => {

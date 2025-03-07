@@ -243,6 +243,54 @@ export function iMinAmpl(data: Array<RateData>, period: number, byPercent: boole
     return cacheIndicator[key].values;
 }
 
+export function iMaxRSI(data: Array<RateData>, rsiPeriod: number, period: number, cacheIndicator: CacheIndicator = {}): Array<number> {
+    const key = `maxrsi_${rsiPeriod}_${period}`;
+    if (!cacheIndicator[key]) {
+        cacheIndicator[key] = {
+            indicator: new customIndicator.MaxRsi({
+                period,
+                rsiPeriod
+            }),
+            lastUpdateTime: 0,
+            values: []
+        };
+    }
+    updateCacheIndicator(data, cacheIndicator[key], true);
+    return cacheIndicator[key].values;
+}
+
+export function iMinRSI(data: Array<RateData>, rsiPeriod: number, period: number, cacheIndicator: CacheIndicator = {}): Array<number> {
+    const key = `minrsi_${rsiPeriod}_${period}`;
+    if (!cacheIndicator[key]) {
+        cacheIndicator[key] = {
+            indicator: new customIndicator.MinRsi({
+                period,
+                rsiPeriod
+            }),
+            lastUpdateTime: 0,
+            values: []
+        };
+    }
+    updateCacheIndicator(data, cacheIndicator[key], true);
+    return cacheIndicator[key].values;
+}
+
+export function iAvgRSI(data: Array<RateData>, rsiPeriod: number, period: number, cacheIndicator: CacheIndicator = {}): Array<number> {
+    const key = `avgrsi_${rsiPeriod}_${period}`;
+    if (!cacheIndicator[key]) {
+        cacheIndicator[key] = {
+            indicator: new customIndicator.AvgRsi({
+                period,
+                rsiPeriod
+            }),
+            lastUpdateTime: 0,
+            values: []
+        };
+    }
+    updateCacheIndicator(data, cacheIndicator[key], true);
+    return cacheIndicator[key].values;
+}
+
 export async function getDigitsFuture() {
     // const url = useFuture ? 'https://fapi.binance.com/fapi/v1/exchangeInfo' : 'https://api.binance.com/api/v1/exchangeInfo'
     const url = 'https://fapi.binance.com/fapi/v1/exchangeInfo';
@@ -1079,4 +1127,13 @@ export async function getBinanceFundingRate(symbol: string, limit: number, page:
     }
 
     return data;
+}
+
+export function hashString(str: string): number {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        // hash |= 0;
+    }
+    return hash;
 }
