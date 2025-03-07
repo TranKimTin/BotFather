@@ -32,7 +32,7 @@ if (parentPort) {
         if (type === 'init') {
             await initBotChildren();
             await initSocketData(value);
-            await initCache(value);
+            // await initCache(value);
         }
         else if (type === 'update') {
             await initBotChildren();
