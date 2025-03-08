@@ -178,7 +178,7 @@ export class SocketData {
         }
 
         const rates: Array<RateData> = (await redis.getArray(key)).map(item => JSON.parse(item));
-        for (let item of rates) {
+        for (const item of rates) {
             item.isFinal = true;
             item.cached = true;
         }

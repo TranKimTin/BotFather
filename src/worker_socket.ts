@@ -9,14 +9,14 @@ import { BybitSocket } from './SocketServer/socket_bybit';
 import { BybitFutureSocket } from './SocketServer/socket_bybit_future';
 import { OkxSocket } from './SocketServer/socket_okx';
 // import { StaticPool } from 'node-worker-threads-pool';
-import * as util from './common/util';
+// import * as util from './common/util';
 import * as worker from './worker';
 import { calculate, calculateSubExpr } from './common/Expr';
 
 let socket: SocketData;
 let symbolListener: { [key: string]: boolean };
-let botChildren: Array<BotInfo>;
-let lastTimeUpdated = 0;
+// let botChildren: Array<BotInfo>;
+// let lastTimeUpdated = 0;
 const cacheIndicators: { [key: string]: CacheIndicator } = {};
 
 // const worker = new StaticPool({
@@ -30,12 +30,12 @@ if (parentPort) {
         const t1 = new Date().getTime();
         const { type, value } = msg;
         if (type === 'init') {
-            await initBotChildren();
-            await initSocketData(value);
+            initSocketData(value);
             // await initCache(value);
         }
         else if (type === 'update') {
-            await initBotChildren();
+            symbolListener = value.symbolListener;
+            worker.setBotData(value.botChildren, value.botIDs);
         }
 
         const t2 = new Date().getTime();
@@ -55,43 +55,6 @@ async function initSocketData(broker: string) {
     else if (broker === 'okx') socket = new OkxSocket(onCloseCandle);
 
     await socket.initData();
-}
-
-async function initBotChildren() {
-    const botList: Array<any> = await mysql.query(`SELECT id, botName, idTelegram, route, symbolList, timeframes, treeData FROM Bot`);
-    botChildren = [];
-    const botIDs: { [key: string]: number } = {};
-
-    for (let bot of botList) {
-        const botInfo: BotInfo = {
-            botName: bot.botName,
-            idTelegram: bot.idTelegram,
-            route: JSON.parse(bot.route),
-            symbolList: JSON.parse(bot.symbolList),
-            timeframes: JSON.parse(bot.timeframes),
-            treeData: JSON.parse(bot.treeData)
-        };
-        botInfo.symbolList.sort();
-        botChildren.push(botInfo);
-        botIDs[bot.botName] = bot.id;
-    }
-
-    symbolListener = {};
-
-    for (const bot of botChildren) {
-        for (const timeframe of bot.timeframes) {
-            for (const s of bot.symbolList) {
-                const [broker, symbol] = s.split(':');
-                const key = `${broker}_${symbol}_${timeframe}`;
-                symbolListener[key] = true;
-            }
-        }
-    }
-
-    // lastTimeUpdated = new Date().getTime();
-    worker.setBotData(botChildren, botIDs)
-
-    console.log('init bot list', botChildren.length);
 }
 
 async function initCache(broker: string) {

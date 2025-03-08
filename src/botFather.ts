@@ -1,7 +1,9 @@
 import Telegram from './common/telegram';
 import io from 'socket.io-client';
 import { StaticPool } from 'node-worker-threads-pool';
+import * as mysql from './WebConfig/lib/mysql';
 import dotenv from 'dotenv';
+import { BotInfo } from './common/Interface';
 
 dotenv.config({ path: `${__dirname}/../.env` });
 
@@ -27,8 +29,40 @@ export class BotFather {
     }
 
     private async updateWorker() {
-        for (let item of this.workerList) {
-            const runtime = await item.exec({ type: 'update' });
+        const botList: Array<any> = await mysql.query(`SELECT id, botName, idTelegram, route, symbolList, timeframes, treeData FROM Bot`);
+        const botChildren = [];
+        const botIDs: { [key: string]: number } = {};
+
+        for (const bot of botList) {
+            const botInfo: BotInfo = {
+                botName: bot.botName,
+                idTelegram: bot.idTelegram,
+                route: JSON.parse(bot.route),
+                symbolList: JSON.parse(bot.symbolList),
+                timeframes: JSON.parse(bot.timeframes),
+                treeData: JSON.parse(bot.treeData)
+            };
+            botInfo.symbolList.sort();
+            botChildren.push(botInfo);
+            botIDs[bot.botName] = bot.id;
+        }
+
+        const symbolListener: { [key: string]: boolean } = {};
+
+        for (const bot of botChildren) {
+            for (const timeframe of bot.timeframes) {
+                for (const s of bot.symbolList) {
+                    const [broker, symbol] = s.split(':');
+                    const key = `${broker}_${symbol}_${timeframe}`;
+                    symbolListener[key] = true;
+                }
+            }
+        }
+
+        console.log('init bot list', botChildren.length);
+
+        for (const item of this.workerList) {
+            const runtime = await item.exec({ type: 'update', value: { symbolListener, botChildren, botIDs } });
             console.log(`update worker runtime = ${runtime} ms`);
         }
     }
