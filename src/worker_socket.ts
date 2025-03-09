@@ -140,11 +140,11 @@ async function onCloseCandle(broker: string, symbol: string, timeframe: string, 
         // const workerData: WorkerData = { broker, symbol, timeframe, lastTimeUpdated, startTime, open, high, low, close, volume };
         // const runtime: number = await worker.exec(workerData);
 
-        // if (!cacheIndicators[key]) {
-        //     cacheIndicators[key] = {};
-        // }
+        if (!cacheIndicators[key]) {
+            cacheIndicators[key] = {};
+        }
 
-        const runtime = worker.onCloseCandle(broker, symbol, timeframe, data, {});
+        const runtime = worker.onCloseCandle(broker, symbol, timeframe, data, cacheIndicators[key]);
 
         console.log(`onCloseCandle ${broker} ${symbol} ${timeframe} runtime = ${runtime} ms`);
     }
