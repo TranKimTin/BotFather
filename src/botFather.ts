@@ -11,7 +11,7 @@ dotenv.config({ path: `${__dirname}/../.env` });
 export class BotFather {
     private telegram: Telegram;
     private hostWebServer: string;
-    private workerList;
+    private workerList: Array<StaticPool<any, any>>;
 
     constructor() {
         this.telegram = new Telegram(undefined, undefined, true);
@@ -20,12 +20,16 @@ export class BotFather {
         const brokers = ['binance_future', 'binance', 'bybit', 'bybit_future', 'okx'];
         this.workerList = [];
         for (const broker of brokers) {
-            const worker = new StaticPool({ size: 1, task: './worker_socket.js' });
-            worker.exec({ type: 'init', value: broker });
-            this.workerList.push(worker);
+            this.initWorker(broker);
         }
 
         this.connectToWebConfig(8080);
+    }
+
+    private async initWorker(broker: string) {
+        const worker = new StaticPool({ size: 1, task: './worker_socket.js' });
+        this.workerList.push(worker);
+        await worker.exec({ type: 'init', value: broker });
     }
 
     private async updateWorker() {
@@ -61,8 +65,8 @@ export class BotFather {
 
         console.log('init bot list', botChildren.length);
 
-        for (const item of this.workerList) {
-            const runtime = await item.exec({ type: 'update', value: { symbolListener, botChildren, botIDs } });
+        for (const worker of this.workerList) {
+            const runtime = await worker.exec({ type: 'update', value: { symbolListener, botChildren, botIDs } });
             console.log(`update worker runtime = ${runtime} ms`);
         }
     }
