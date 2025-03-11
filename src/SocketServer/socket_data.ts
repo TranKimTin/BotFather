@@ -172,11 +172,6 @@ export class SocketData {
         res.fromCache = false;
         const key = `${this.broker}_${symbol}_${timeframe}`;
 
-        if (timeframe === '1m') {
-            await redis.remove(key);
-            return this.getOHLCV!(symbol, timeframe);
-        }
-
         const rates: Array<RateData> = (await redis.getArray(key)).map(item => JSON.parse(item));
         for (const item of rates) {
             item.isFinal = true;
@@ -184,6 +179,12 @@ export class SocketData {
         }
         if (rates.length === 0) {
             return this.getOHLCV!(symbol, timeframe);
+        }
+
+        if (timeframe === '1m') {
+            const since: number = rates[0].startTime + util.timeframeToNumberMiliseconds(timeframe);
+            const remainRates = await this.getOHLCV!(symbol, timeframe, since);
+            return [...remainRates, ...rates];
         }
 
         let idx = this.timeframes.indexOf(timeframe) - 1;

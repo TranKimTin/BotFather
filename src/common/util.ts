@@ -1095,7 +1095,7 @@ export function iDoji(candle: RateData): boolean {
 }
 
 export async function getOHLCV(broker: string, symbol: string, timeframe: string, limit: number, since?: number): Promise<Array<RateData>> {
-    //tinh tu thoi diem since, lay toi da limit candle
+    // tinh tu thoi diem since, lay toi da limit candle
     // if (since)
     // console.log(since + timeframeToNumberMiliseconds(timeframe) < new Date().getTime())
     if (since && !checkFinal(timeframe, since - 60000)) since = nextTime(since, timeframe);
