@@ -3,6 +3,7 @@ import * as util from './common/util';
 import Telegram from './common/telegram';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import WebSocket from 'ws';
+import moment from 'moment';
 
 dotenv.config({ path: '../.env' });
 
@@ -110,7 +111,7 @@ function check(symbol: string) {
     }
 
     if (cnt[symbol] >= 3) {
-        telegram.sendMessage(`${symbol} - diff: ${+diff.toFixed(3)} %, spot: ${spotAsk}, future: ${futureBid}`, 1833284254);
+        telegram.sendMessage(`${moment().format('HH:mm:ss.SSS')} ${symbol} - diff: ${+diff.toFixed(3)} %, spot: ${spotAsk}, future: ${futureBid} (${cnt[symbol]})`, 1833284254);
     }
     else if (diff > 0.5) {
         console.log(`${symbol} - diff: ${+diff.toFixed(3)} %, spot: ${spotAsk}, future: ${futureBid}`);
