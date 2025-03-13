@@ -859,22 +859,22 @@ export class Expr extends ExprVisitor<any> {
     };
 
     visitMin_rsi = (ctx: Min_rsiContext) => {
-        const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
+        const rsiPeriod = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const depth = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(2)?.getText() || "0", 10);
 
-        const MinRSIs = util.iMinRSI(this.data, depth, period, this.cacheIndicator);
+        const MinRSIs = util.iMinRSI(this.data, rsiPeriod, depth, this.cacheIndicator);
         if (shift >= MinRSIs.length) throw `min_rsi out of range. length = ${this.data.length}`;
 
         return MinRSIs[shift];
     };
 
     visitMax_rsi = (ctx: Max_rsiContext) => {
-        const period = parseInt(ctx.INT(0)?.getText() || "0", 10);
+        const rsiPeriod = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const depth = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const shift = parseInt(ctx.INT(2)?.getText() || "0", 10);
 
-        const MaxRSIs = util.iMaxRSI(this.data, depth, period, this.cacheIndicator);
+        const MaxRSIs = util.iMaxRSI(this.data, rsiPeriod, depth, this.cacheIndicator);
         if (shift >= MaxRSIs.length) throw `max_rsi out of range. length = ${this.data.length}`;
 
         return MaxRSIs[shift];
