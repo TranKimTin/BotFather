@@ -20,5 +20,10 @@ export async function getBotInfo(userData: UserTokenInfo) {
                 GROUP BY b.id
                 ORDER BY b.botName ASC;`;
     const data = await mysql.query(sql, [userData.id, userData.role, ROLE.ADMIN, ORDER_STATUS.MATCH_ENTRY, ORDER_STATUS.MATCH_TP, ORDER_STATUS.MATCH_SL]);
+    for (const item of data) {
+        if (item.winrate === null) {
+            item.winrate = 0;
+        }
+    }
     return data;
 }
