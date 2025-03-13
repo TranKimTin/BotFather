@@ -78,10 +78,6 @@ export class MaxRate {
 
         this.deque.push({ value, index: this.currentIndex });
 
-        if (this.currentIndex < this.period - 1) {
-            return -Infinity;
-        }
-
         return this.deque[0].value;
     }
 }
@@ -113,10 +109,6 @@ export class MinRate {
         }
 
         this.deque.push({ value, index: this.currentIndex });
-
-        if (this.currentIndex < this.period - 1) {
-            return Infinity;
-        }
 
         return this.deque[0].value;
     }
@@ -153,10 +145,6 @@ export class MaxChange {
 
         this.deque.push({ value: change, index: this.currentIndex });
 
-        if (this.currentIndex < this.period - 1) {
-            return -Infinity;
-        }
-
         return this.deque[0].value;
     }
 }
@@ -190,10 +178,6 @@ export class MinChange {
         }
 
         this.deque.push({ value: change, index: this.currentIndex });
-
-        if (this.currentIndex < this.period - 1) {
-            return Infinity;
-        }
 
         return this.deque[0].value;
     }
@@ -229,10 +213,6 @@ export class MaxAmpl {
 
         this.deque.push({ value: ampl, index: this.currentIndex });
 
-        if (this.currentIndex < this.period - 1) {
-            return -Infinity;
-        }
-
         return this.deque[0].value;
     }
 }
@@ -250,7 +230,7 @@ export class MinAmpl {
         this.currentIndex = -1;
     }
 
-    public nextValue(rate: RateData): number | undefined {
+    public nextValue(rate: RateData): number {
         let ampl = rate.high - rate.low;
         if (this.byPercent) {
             ampl = (ampl / rate.open) * 100;
@@ -266,10 +246,6 @@ export class MinAmpl {
         }
 
         this.deque.push({ value: ampl, index: this.currentIndex });
-
-        if (this.currentIndex < this.period - 1) {
-            return undefined;
-        }
 
         return this.deque[0].value;
     }
@@ -549,8 +525,6 @@ export class MaxRsi {
 
         this.deque.push({ value: rsi, index: this.currentIndex });
 
-        if (this.currentIndex < this.maxPeriod - 1) return 0;
-
         return this.deque[0].value;
     }
 }
@@ -583,8 +557,6 @@ export class MinRsi {
         }
 
         this.deque.push({ value: rsi, index: this.currentIndex });
-
-        if (this.currentIndex < this.minPeriod - 1) return 0;
 
         return this.deque[0].value;
     }
