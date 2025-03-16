@@ -14,7 +14,7 @@ import * as worker from './worker';
 import { calculate, calculateSubExpr } from './common/Expr';
 
 let socket: SocketData;
-let symbolListener: { [key: string]: boolean };
+let symbolListener: { [key: string]: boolean } = {};
 // let botChildren: Array<BotInfo>;
 // let lastTimeUpdated = 0;
 const cacheIndicators: { [key: string]: CacheIndicator } = {};
