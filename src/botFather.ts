@@ -4,6 +4,8 @@ import { StaticPool } from 'node-worker-threads-pool';
 import * as mysql from './WebConfig/lib/mysql';
 import dotenv from 'dotenv';
 import { BotInfo } from './common/Interface';
+import os from 'os';
+import * as util from './common/util';
 
 dotenv.config({ path: `${__dirname}/../.env` });
 
@@ -27,9 +29,32 @@ export class BotFather {
     }
 
     private async initWorker(broker: string) {
-        const worker = new StaticPool({ size: 1, task: './worker_socket.js' });
-        this.workerList.push(worker);
-        await worker.exec({ type: 'init', value: broker });
+        let symbolList: Array<string> = [];
+
+        if (broker === 'binance_future') {
+            symbolList = await util.getBinanceFutureSymbolList();
+        }
+        else if (broker === 'binance') {
+            symbolList = await util.getBinanceSymbolList();
+        }
+        else if (broker === 'bybit') {
+            symbolList = await util.getBybitSymbolList();
+        }
+        else if (broker === 'bybit_future') {
+            symbolList = await util.getBybitFutureSymbolList();
+        }
+        else if (broker === 'okx') {
+            symbolList = await util.getOkxSymbolList();
+        }
+
+        const threads = os.cpus().length;
+        const block = Math.ceil(symbolList.length / threads);
+        for (let i = 0; i < threads; i++) {
+            const subSymbols = symbolList.slice(i * block, (i + 1) * block);
+            const worker = new StaticPool({ size: 1, task: './worker_socket.js' });
+            this.workerList.push(worker);
+            await worker.exec({ type: 'init', value: { broker, symbolList: subSymbols } });
+        }
     }
 
     private async updateWorker() {

@@ -25,12 +25,12 @@ const cacheIndicators: { [key: string]: CacheIndicator } = {};
 // });
 
 if (parentPort) {
-    console.log('worker_socket loaded');
     parentPort.on('message', async (msg: { type: string, value: any }) => {
         const t1 = new Date().getTime();
         const { type, value } = msg;
         if (type === 'init') {
-            initSocketData(value);
+            const { broker, symbolList } = value;
+            initSocketData(broker, symbolList);
             // await initCache(value);
         }
         else if (type === 'update') {
@@ -47,12 +47,12 @@ else {
     throw 'parentPort is null';
 }
 
-async function initSocketData(broker: string) {
-    if (broker === 'binance') socket = new BinanceSocket(onCloseCandle);
-    else if (broker === 'binance_future') socket = new BinanceFutureSocket(onCloseCandle);
-    else if (broker === 'bybit') socket = new BybitSocket(onCloseCandle);
-    else if (broker === 'bybit_future') socket = new BybitFutureSocket(onCloseCandle);
-    else if (broker === 'okx') socket = new OkxSocket(onCloseCandle);
+async function initSocketData(broker: string, symbolList: Array<string>) {
+    if (broker === 'binance') socket = new BinanceSocket(onCloseCandle, symbolList);
+    else if (broker === 'binance_future') socket = new BinanceFutureSocket(onCloseCandle, symbolList);
+    else if (broker === 'bybit') socket = new BybitSocket(onCloseCandle, symbolList);
+    else if (broker === 'bybit_future') socket = new BybitFutureSocket(onCloseCandle, symbolList);
+    else if (broker === 'okx') socket = new OkxSocket(onCloseCandle, symbolList);
 
     await socket.initData();
 }

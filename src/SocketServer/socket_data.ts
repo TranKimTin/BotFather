@@ -12,20 +12,19 @@ export class SocketData {
     protected symbolList: Array<string>;
     protected symbolLoadConcurrent: number;
 
-    protected getSymbolList?: () => Promise<Array<string>>;
     protected onCloseCandle?: (broker: string, symbol: string, timeframe: string, data: Array<RateData>) => void;
     protected getOHLCV?: (symbol: string, timeframe: string, since?: number) => Promise<Array<RateData>>;
     protected init?: () => void;
 
-    constructor(timeframes: Array<string>, broker: string, symbolLoadConcurrent: number, onCloseCandle: (broker: string, symbol: string, timeframe: string, data: Array<RateData>) => void) {
+    constructor(timeframes: Array<string>, broker: string, symbolLoadConcurrent: number, onCloseCandle: (broker: string, symbol: string, timeframe: string, data: Array<RateData>) => void, symbolList: Array<string>) {
         this.broker = broker;
         this.timeframes = timeframes;
         this.symbolLoadConcurrent = symbolLoadConcurrent;
         this.onCloseCandle = onCloseCandle;
+        this.symbolList = symbolList;
 
         this.gData = {};
         this.gLastUpdated = {};
-        this.symbolList = [];
 
         if (this.timeframes[0] !== '1m') this.timeframes.unshift('1m');
     }
@@ -254,12 +253,10 @@ export class SocketData {
 
     public async initData() {
         // timeframes = ['1m', '15m', '4h', '1d'];
-        if (!this.getSymbolList) throw 'Missing fundtion getSymbolList';
         if (!this.init) throw 'Missing fundtion init';
 
-        console.log(`socket ${this.broker} restart`);
+        console.log(`socket ${this.broker} init`);
 
-        this.symbolList = await this.getSymbolList();
         console.log(`${this.broker}: Total ${this.symbolList.length} symbols`);
         console.log(`${this.broker}: init timeframe`, this.timeframes);
 
@@ -293,6 +290,9 @@ export class SocketData {
 
             await delay(delayTime);
         }
+
+        console.log(`socket ${this.broker} init done ${this.symbolList.length}`);
+
 
         const timeInterval = 10 * 60 * 1000;
         setInterval(() => {
