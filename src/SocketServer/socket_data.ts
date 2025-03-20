@@ -48,6 +48,7 @@ export class SocketData {
             if (data.isFinal && !dataList[0].isFinal) {
                 dataList[0].isFinal = data.isFinal;
                 if (dataList.length > 15) {
+                    console.log(`onCloseCandle ${this.broker} ${data.symbol} ${data.interval}`);
                     this.onCloseCandle(this.broker, data.symbol, data.interval, [...dataList]);
                     this.cacheData(dataList);
                 }
