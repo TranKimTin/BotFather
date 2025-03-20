@@ -74,7 +74,7 @@ export class BotFather {
                         symbolListener: this.symbolListener
                     }
                 });
-                await delay(1000);
+                await delay(2000);
             }
             catch (err) {
                 console.error(err);
