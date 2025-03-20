@@ -37,6 +37,7 @@ export class SocketData {
             dataList.push(data);
             return;
         }
+        console.log(`fetch ${data.symbol} ${isFinalMinute} ${dataList.length}`)
 
         if (dataList[0].startTime == data.startTime) {
             // dataList[0] = data;
@@ -79,7 +80,6 @@ export class SocketData {
     }
 
     protected fetchCandles(candle: RateData) {
-        console.log(`fetch ${candle.symbol}`)
         this.gLastUpdated[candle.symbol] = new Date().getTime();
         for (const tf of this.timeframes) {
             const data: RateData = {
