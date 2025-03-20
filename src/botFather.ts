@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import { BotInfo } from './common/Interface';
 import os from 'os';
 import * as util from './common/util';
+import delay from 'delay';
 
 dotenv.config({ path: `${__dirname}/../.env` });
 
@@ -55,7 +56,8 @@ export class BotFather {
             const subSymbols = symbolList.slice(i * block, (i + 1) * block);
             const worker = new StaticPool({ size: 1, task: './worker_socket.js' });
             this.workerList.push(worker);
-            await worker.exec({ type: 'init', value: { broker, symbolList: subSymbols } });
+            await worker.exec({ type: 'init', value: { broker, symbolList: subSymbols, id: `${i}/${threads}` } });
+            await delay(1000);
         }
     }
 
