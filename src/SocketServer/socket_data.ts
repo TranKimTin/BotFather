@@ -47,8 +47,9 @@ export class SocketData {
 
             if (data.isFinal && !dataList[0].isFinal) {
                 dataList[0].isFinal = data.isFinal;
+                console.log(`onCloseCandle ${this.broker} ${data.symbol} ${data.interval}`);
+
                 if (dataList.length > 15) {
-                    console.log(`onCloseCandle ${this.broker} ${data.symbol} ${data.interval}`);
                     this.onCloseCandle(this.broker, data.symbol, data.interval, [...dataList]);
                     this.cacheData(dataList);
                 }
@@ -78,6 +79,7 @@ export class SocketData {
     }
 
     protected fetchCandles(candle: RateData) {
+        console.log(`fetch ${candle.symbol}`)
         this.gLastUpdated[candle.symbol] = new Date().getTime();
         for (const tf of this.timeframes) {
             const data: RateData = {
