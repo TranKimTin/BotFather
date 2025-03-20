@@ -29,7 +29,8 @@ if (parentPort) {
         const t1 = new Date().getTime();
         const { type, value } = msg;
         if (type === 'init') {
-            const { broker, symbolList } = value;
+            const { broker, symbolList, id } = value;
+            console.log(`init worker ${broker} ${id}`);
             initSocketData(broker, symbolList);
             // await initCache(value);
         }
