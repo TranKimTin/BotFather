@@ -11,5 +11,5 @@ sudo rm /var/lib/apport/coredump/*
 
 
 fix out of heap memory
-pm2 start botFather.js --node-args="--max-old-space-size=8192" --log-date-format "YYYY.MM.DD HH:mm:ss.SSS Z"
+pm2 start botFather.js --node-args="--max-old-space-size=50000" --log-date-format "YYYY.MM.DD HH:mm:ss.SSS Z"
 pm2 start arbitrageSpotFuture.js --log-date-format "YYYY.MM.DD HH:mm:ss.SSS Z"
