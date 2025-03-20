@@ -31,7 +31,7 @@ if (parentPort) {
         if (type === 'init') {
             const { broker, symbolList, id } = value;
             console.log(`init worker ${broker} ${id}`);
-            initSocketData(broker, symbolList);
+            await initSocketData(broker, symbolList);
             // await initCache(value);
         }
         else if (type === 'update') {
