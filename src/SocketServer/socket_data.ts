@@ -37,7 +37,7 @@ export class SocketData {
             dataList.push(data);
             return;
         }
-        console.log(`fetch ${data.symbol} ${isFinalMinute} ${dataList.length}`)
+        // console.log(`mergeData ${data.symbol} ${isFinalMinute} ${dataList.length}`)
 
         if (dataList[0].startTime == data.startTime) {
             // dataList[0] = data;
