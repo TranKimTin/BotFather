@@ -15,10 +15,16 @@ export class BotFather {
     private telegram: Telegram;
     private hostWebServer: string;
     private workerList: Array<StaticPool<any, any>>;
+    private botChildren: Array<BotInfo>;
+    private botIDs: { [key: string]: number };
+    private symbolListener: { [key: string]: boolean };
 
     constructor() {
         this.telegram = new Telegram(undefined, undefined, true);
         this.hostWebServer = process.env.HOST_WEB_SERVER || 'http://localhost';
+        this.botChildren = [];
+        this.botIDs = {};
+        this.symbolListener = {};
 
         const brokers = ['binance_future', 'binance', 'bybit', 'bybit_future', 'okx'];
         this.workerList = [];
@@ -58,7 +64,16 @@ export class BotFather {
                 const subSymbols = symbolList.slice(i * block, (i + 1) * block);
                 const worker = new StaticPool({ size: 1, task: './worker_socket.js' });
                 this.workerList.push(worker);
-                await worker.exec({ type: 'init', value: { broker, symbolList: subSymbols, id: `${i}/${threads}` } });
+                await worker.exec({
+                    type: 'init', value: {
+                        broker,
+                        symbolList: subSymbols,
+                        id: `${i}/${threads}`,
+                        botChildren: this.botChildren,
+                        botIDs: this.botIDs,
+                        symbolListener: this.symbolListener
+                    }
+                });
                 await delay(1000);
             }
             catch (err) {
@@ -69,9 +84,8 @@ export class BotFather {
 
     private async updateWorker() {
         const botList: Array<any> = await mysql.query(`SELECT id, botName, idTelegram, route, symbolList, timeframes, treeData FROM Bot`);
-        const botChildren = [];
-        const botIDs: { [key: string]: number } = {};
-
+        this.botChildren = [];
+        this.botIDs = {};
         for (const bot of botList) {
             const botInfo: BotInfo = {
                 botName: bot.botName,
@@ -82,26 +96,25 @@ export class BotFather {
                 treeData: JSON.parse(bot.treeData)
             };
             botInfo.symbolList.sort();
-            botChildren.push(botInfo);
-            botIDs[bot.botName] = bot.id;
+            this.botChildren.push(botInfo);
+            this.botIDs[bot.botName] = bot.id;
         }
 
-        const symbolListener: { [key: string]: boolean } = {};
-
-        for (const bot of botChildren) {
+        this.symbolListener = {};
+        for (const bot of this.botChildren) {
             for (const timeframe of bot.timeframes) {
                 for (const s of bot.symbolList) {
                     const [broker, symbol] = s.split(':');
                     const key = `${broker}_${symbol}_${timeframe}`;
-                    symbolListener[key] = true;
+                    this.symbolListener[key] = true;
                 }
             }
         }
 
-        console.log('init bot list', botChildren.length);
+        console.log('init bot list', this.botChildren.length);
 
         for (const worker of this.workerList) {
-            const runtime = await worker.exec({ type: 'update', value: { symbolListener, botChildren, botIDs } });
+            const runtime = await worker.exec({ type: 'update', value: { symbolListener: this.symbolListener, botChildren: this.botChildren, botIDs: this.botIDs } });
             console.log(`update worker runtime = ${runtime} ms`);
         }
     }

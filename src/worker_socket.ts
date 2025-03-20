@@ -31,6 +31,10 @@ if (parentPort) {
         if (type === 'init') {
             const { broker, symbolList, id } = value;
             console.log(`init worker ${broker} ${id}`);
+
+            symbolListener = value.symbolListener;
+            worker.setBotData(value.botChildren, value.botIDs);
+
             await initSocketData(broker, symbolList);
             // await initCache(value);
         }
