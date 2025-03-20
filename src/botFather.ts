@@ -22,10 +22,11 @@ export class BotFather {
 
         const brokers = ['binance_future', 'binance', 'bybit', 'bybit_future', 'okx'];
         this.workerList = [];
-        for (const broker of brokers) {
-            this.initWorker(broker);
-        }
-
+        this.updateWorker().then(() => {
+            for (const broker of brokers) {
+                this.initWorker(broker);
+            }
+        });
         this.connectToWebConfig(8080);
     }
 
