@@ -53,11 +53,16 @@ export class BotFather {
 
         const block = Math.ceil(symbolList.length / threads);
         for (let i = 0; i < threads; i++) {
-            const subSymbols = symbolList.slice(i * block, (i + 1) * block);
-            const worker = new StaticPool({ size: 1, task: './worker_socket.js' });
-            this.workerList.push(worker);
-            await worker.exec({ type: 'init', value: { broker, symbolList: subSymbols, id: `${i}/${threads}` } });
-            await delay(1000);
+            try {
+                const subSymbols = symbolList.slice(i * block, (i + 1) * block);
+                const worker = new StaticPool({ size: 1, task: './worker_socket.js' });
+                this.workerList.push(worker);
+                await worker.exec({ type: 'init', value: { broker, symbolList: subSymbols, id: `${i}/${threads}` } });
+                await delay(1000);
+            }
+            catch (err) {
+                console.error(err);
+            }
         }
     }
 
