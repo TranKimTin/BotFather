@@ -101,7 +101,7 @@ export class BotFather {
                     }
                 }
                 const runtime = await this.createWorker(i, args);
-                console.log(`init ${broker} ${args.value.id} done runtime=${runtime}`);
+                console.log(`init ${broker} ${args.value.id} done runtime=${runtime} ms`);
 
                 await delay(2000);
             }
