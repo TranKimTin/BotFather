@@ -52,7 +52,7 @@ export class BotFather {
             });
 
             worker.on("exit", (code: any) => {
-                console.log(`worker ${index} closed code:${code}`);
+                console.error(`worker ${index} closed code:${code}`);
                 console.log(`restart worker ${index}`);
                 this.createWorker(index, args);
             });
