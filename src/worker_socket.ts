@@ -37,7 +37,7 @@ if (parentPort) {
             worker.setBotData(value.botChildren, value.botIDs);
 
             await initSocketData(broker, symbolList);
-            await initCache(broker);
+            initCache(broker);
             const t2 = new Date().getTime();
             parentPort!.postMessage(t2 - t1);
         }
@@ -62,7 +62,7 @@ async function initSocketData(broker: string, symbolList: Array<string>) {
     await socket.initData();
 }
 
-async function initCache(broker: string) {
+function initCache(broker: string) {
     console.log(`${broker} init cache...`);
 
     let cnt = 0;
