@@ -68,7 +68,7 @@ export class BotFather {
                     type: 'init', value: {
                         broker,
                         symbolList: subSymbols,
-                        id: `${i}/${threads}`,
+                        id: `${i + 1}/${threads}`,
                         botChildren: this.botChildren,
                         botIDs: this.botIDs,
                         symbolListener: this.symbolListener
