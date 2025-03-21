@@ -10,7 +10,7 @@ let botChildren: Array<BotInfo> = [];
 const telegram = new Telegram(undefined, undefined, false);
 let botIDs: { [key: string]: number } = {};
 // let lastTimeUpdated = 0;
-export function onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>, cacheIndicator: CacheIndicator) {
+export function onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>, cacheIndicator: CacheIndicator, initCache: boolean) {
     const t1 = new Date().getTime();
     for (const botInfo of botChildren) {
         try {
@@ -18,7 +18,7 @@ export function onCloseCandle(broker: string, symbol: string, timeframe: string,
             if (!timeframes.includes(timeframe) || !binarySearch(symbolList, `${broker}:${symbol}`)) continue;
 
             const visited: { [key: string]: boolean } = {};
-            const handleLogicArgs: HandleLogicArgs = { broker, symbol, timeframe, data, idTelegram, visited, botID: botIDs[botName], cacheIndicator };
+            const handleLogicArgs: HandleLogicArgs = { broker, symbol, timeframe, data, idTelegram, visited, botID: botIDs[botName], cacheIndicator, initCache };
             dfs_handleLogic(route, handleLogicArgs);
         }
         catch (err) {
@@ -108,6 +108,7 @@ function handleLogic(nodeData: NodeData, args: HandleLogicArgs): boolean {
         const result = calculate(expr, exprArgs);
         return Boolean(result);
     }
+    else if (args.initCache) return true;
 
     if (nodeData.type === NODE_TYPE.TELEGRAM) {
         if (!nodeData.value) return false;

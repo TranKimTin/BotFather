@@ -36,7 +36,7 @@ if (parentPort) {
             worker.setBotData(value.botChildren, value.botIDs);
 
             await initSocketData(broker, symbolList);
-            // await initCache(value);
+            await initCache(broker);
         }
         else if (type === 'update') {
             symbolListener = value.symbolListener;
@@ -63,48 +63,19 @@ async function initSocketData(broker: string, symbolList: Array<string>) {
 }
 
 async function initCache(broker: string) {
-    if (broker !== 'binance_future') return;
-
     console.log(`${broker} init cache...`);
-    const botList = await mysql.query(`SELECT * FROM Bot`);
-
-    const setExpr: Set<string> = new Set();
-    for (const bot of botList) {
-        const treeData = JSON.parse(bot.treeData);
-
-        for (let node of treeData.elements.nodes) {
-            if (node.data.type === NODE_TYPE.EXPR) {
-                const expr = node.data.value;
-                setExpr.add(expr);
-            }
-        }
-    }
-
-    const exprList = Array.from(setExpr);
 
     const symbolList: Array<string> = socket.getSymbols();
     const timeframeList: Array<string> = socket.getTimeframes();
     for (const symbol of symbolList) {
         for (const timeframe of timeframeList) {
+            const data = socket.getData(symbol, timeframe);
             const key = `${broker}_${symbol}_${timeframe}`;
+
             if (!symbolListener[key]) continue;
 
-            if (!cacheIndicators[key]) {
-                cacheIndicators[key] = {};
-            }
-
-            const data = socket.getData(symbol, timeframe);
-            const args: ExprArgs = {
-                broker,
-                symbol,
-                timeframe,
-                data,
-                cacheIndicator: cacheIndicators[key]
-            }
-            for (const expr of exprList) {
-                const e = calculateSubExpr(expr, args);
-                calculate(e, args)
-            }
+            const runtime = worker.onCloseCandle(broker, symbol, timeframe, data, cacheIndicators[key], true);
+            console.log(`init cache onCloseCandle ${broker} ${symbol} ${timeframe} runtime = ${runtime} ms`);
         }
     }
 
@@ -149,7 +120,7 @@ async function onCloseCandle(broker: string, symbol: string, timeframe: string, 
             cacheIndicators[key] = {};
         }
 
-        const runtime = worker.onCloseCandle(broker, symbol, timeframe, data, cacheIndicators[key]);
+        const runtime = worker.onCloseCandle(broker, symbol, timeframe, data, cacheIndicators[key], false);
 
         console.log(`onCloseCandle ${broker} ${symbol} ${timeframe} runtime = ${runtime} ms`);
     }

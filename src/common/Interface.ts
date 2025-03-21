@@ -223,7 +223,8 @@ export interface HandleLogicArgs {
     idTelegram: TelegramIdType,
     visited: { [key: string]: boolean },
     botID: number,
-    cacheIndicator: CacheIndicator
+    cacheIndicator: CacheIndicator,
+    initCache: boolean
 }
 
 export interface DequeItem {
