@@ -145,7 +145,7 @@ export class BotFather {
         console.log('init bot list', this.botChildren.length);
 
         for (const worker of this.workerList) {
-            await worker?.postMessage({ type: 'update', value: { symbolListener: this.symbolListener, botChildren: this.botChildren, botIDs: this.botIDs } });
+            worker?.postMessage({ type: 'update', value: { symbolListener: this.symbolListener, botChildren: this.botChildren, botIDs: this.botIDs } });
         }
     }
 

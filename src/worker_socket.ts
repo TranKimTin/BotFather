@@ -26,9 +26,10 @@ const cacheIndicators: { [key: string]: CacheIndicator } = {};
 
 if (parentPort) {
     parentPort.on('message', async (msg: { type: string, value: any }) => {
-        const t1 = new Date().getTime();
         const { type, value } = msg;
         if (type === 'init') {
+            const t1 = new Date().getTime();
+
             const { broker, symbolList, id } = value;
             console.log(`init worker ${broker} ${id}`);
 
@@ -37,14 +38,13 @@ if (parentPort) {
 
             await initSocketData(broker, symbolList);
             await initCache(broker);
+            const t2 = new Date().getTime();
+            parentPort!.postMessage(t2 - t1);
         }
         else if (type === 'update') {
             symbolListener = value.symbolListener;
             worker.setBotData(value.botChildren, value.botIDs);
         }
-
-        const t2 = new Date().getTime();
-        parentPort!.postMessage(t2 - t1);
     });
 }
 else {
