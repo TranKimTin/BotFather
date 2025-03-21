@@ -1,12 +1,13 @@
 import Telegram from './common/telegram';
 import io from 'socket.io-client';
-import { StaticPool } from 'node-worker-threads-pool';
 import * as mysql from './WebConfig/lib/mysql';
 import dotenv from 'dotenv';
 import { BotInfo } from './common/Interface';
 import os from 'os';
 import * as util from './common/util';
 import delay from 'delay';
+import { Worker } from "worker_threads";
+
 
 dotenv.config({ path: `${__dirname}/../.env` });
 
@@ -14,7 +15,7 @@ dotenv.config({ path: `${__dirname}/../.env` });
 export class BotFather {
     private telegram: Telegram;
     private hostWebServer: string;
-    private workerList: Array<StaticPool<any, any>>;
+    private workerList: Array<Worker>;
     private botChildren: Array<BotInfo>;
     private botIDs: { [key: string]: number };
     private symbolListener: { [key: string]: boolean };
@@ -34,6 +35,30 @@ export class BotFather {
             }
         });
         this.connectToWebConfig(8080);
+    }
+
+    private createWorker(index: number, args: any): Promise<any> {
+        return new Promise((resolve, reject) => {
+            const worker = new Worker('./worker_socket.js');
+            this.workerList[index] = worker;
+
+            worker.on("message", (msg: any) => {
+                resolve(msg);
+            });
+
+            worker.on("error", (err: any) => {
+                console.error(`worker ${index} error`, err);
+                reject(err);
+            });
+
+            worker.on("exit", (code: any) => {
+                console.log(`worker ${index} closed code:${code}`);
+                console.log(`restart worker ${index}`);
+                this.createWorker(index, args);
+            });
+
+            worker.postMessage(args);
+        });
     }
 
     private async initWorker(broker: string) {
@@ -59,13 +84,13 @@ export class BotFather {
         console.log(`initWorker ${broker} with ${threads} threads, symbolList.length = ${symbolList.length}`);
 
         const block = Math.ceil(symbolList.length / threads);
+        this.workerList = new Array(threads);
         for (let i = 0; i < threads; i++) {
             try {
                 const subSymbols = symbolList.slice(i * block, (i + 1) * block);
-                const worker = new StaticPool({ size: 1, task: './worker_socket.js' });
-                this.workerList.push(worker);
-                await worker.exec({
-                    type: 'init', value: {
+                const args = {
+                    type: 'init',
+                    value: {
                         broker,
                         symbolList: subSymbols,
                         id: `${i + 1}/${threads}`,
@@ -73,7 +98,10 @@ export class BotFather {
                         botIDs: this.botIDs,
                         symbolListener: this.symbolListener
                     }
-                });
+                }
+                const runtime = await this.createWorker(i, args);
+                console.log(`init ${broker} ${args.value.id} done runtime=${runtime}`);
+
                 await delay(2000);
             }
             catch (err) {
@@ -114,8 +142,7 @@ export class BotFather {
         console.log('init bot list', this.botChildren.length);
 
         for (const worker of this.workerList) {
-            const runtime = await worker.exec({ type: 'update', value: { symbolListener: this.symbolListener, botChildren: this.botChildren, botIDs: this.botIDs } });
-            console.log(`update worker runtime = ${runtime} ms`);
+            await worker?.postMessage({ type: 'update', value: { symbolListener: this.symbolListener, botChildren: this.botChildren, botIDs: this.botIDs } });
         }
     }
 
