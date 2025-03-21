@@ -81,6 +81,8 @@ export class BotFather {
             symbolList = await util.getOkxSymbolList();
         }
 
+        util.shuffleArray(symbolList);
+
         const threads = os.cpus().length;
         console.log(`initWorker ${broker} with ${threads} threads, symbolList.length = ${symbolList.length}`);
 
