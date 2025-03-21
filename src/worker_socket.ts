@@ -75,6 +75,10 @@ function initCache(broker: string) {
 
             if (!symbolListener[key]) continue;
 
+            if (!cacheIndicators[key]) {
+                cacheIndicators[key] = {};
+            }
+
             const runtime = worker.onCloseCandle(broker, symbol, timeframe, data, cacheIndicators[key], true);
             console.log(`init cache ${broker} ${symbol} ${timeframe} runtime = ${runtime} ms`);
             cnt += Object.keys(cacheIndicators[key]).length;
