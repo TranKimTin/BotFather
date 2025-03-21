@@ -75,7 +75,7 @@ async function initCache(broker: string) {
             if (!symbolListener[key]) continue;
 
             const runtime = worker.onCloseCandle(broker, symbol, timeframe, data, cacheIndicators[key], true);
-            console.log(`init cache onCloseCandle ${broker} ${symbol} ${timeframe} runtime = ${runtime} ms`);
+            console.log(`init cache ${broker} ${symbol} ${timeframe} runtime = ${runtime} ms`);
         }
     }
 
