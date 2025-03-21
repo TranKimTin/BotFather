@@ -206,39 +206,35 @@ export class SocketData {
 
     private async cacheData(data: Array<RateData>) {
         if (data.length === 0) return;
-        setTimeout(() => {
-            setImmediate(async () => {
-                try {
-                    const rates: Array<RateData> = []; //time ASC
-                    for (let i = 0; i < data.length && !data[i].cached; i++) {
-                        if (data[i].isFinal) {
-                            rates.unshift(data[i]);
-                        }
-                    }
-                    if (rates.length === 0) return;
-                    const key = `${this.broker}_${rates[0].symbol}_${rates[0].interval}`;
-                    let cnt = 0;
-                    for (let rate of rates) {
-                        if (!rate.cached) {
-                            rate.cached = true;
-                            cnt++;
-                            await redis.pushFront(key, JSON.stringify(rate));
-                        }
-                    }
-                    let cntRemove = 0;
-                    let cachedLength = await redis.length(key);
-                    while ((cachedLength > MAX_CANDLE)) {
-                        await redis.popBack(key);
-                        cntRemove++;
-                        cachedLength--;
-                    }
-                    // console.log(`cached ${key}_${cnt}-${cntRemove}`);
+        try {
+            const rates: Array<RateData> = []; //time ASC
+            for (let i = 0; i < data.length && !data[i].cached; i++) {
+                if (data[i].isFinal) {
+                    rates.unshift(data[i]);
                 }
-                catch (err) {
-                    console.error(err);
+            }
+            if (rates.length === 0) return;
+            const key = `${this.broker}_${rates[0].symbol}_${rates[0].interval}`;
+            let cnt = 0;
+            for (let rate of rates) {
+                if (!rate.cached) {
+                    rate.cached = true;
+                    cnt++;
+                    await redis.pushFront(key, JSON.stringify(rate));
                 }
-            });
-        }, 30000);
+            }
+            let cntRemove = 0;
+            let cachedLength = await redis.length(key);
+            while ((cachedLength > MAX_CANDLE)) {
+                await redis.popBack(key);
+                cntRemove++;
+                cachedLength--;
+            }
+            // console.log(`cached ${key}_${cnt}-${cntRemove}`);
+        }
+        catch (err) {
+            console.error(err);
+        }
     }
 
     public getData(symbol: string, timeframe: string) {
