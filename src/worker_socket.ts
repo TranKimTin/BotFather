@@ -65,6 +65,7 @@ async function initSocketData(broker: string, symbolList: Array<string>) {
 async function initCache(broker: string) {
     console.log(`${broker} init cache...`);
 
+    let cnt = 0;
     const symbolList: Array<string> = socket.getSymbols();
     const timeframeList: Array<string> = socket.getTimeframes();
     for (const symbol of symbolList) {
@@ -76,10 +77,11 @@ async function initCache(broker: string) {
 
             const runtime = worker.onCloseCandle(broker, symbol, timeframe, data, cacheIndicators[key], true);
             console.log(`init cache ${broker} ${symbol} ${timeframe} runtime = ${runtime} ms`);
+            cnt += Object.keys(cacheIndicators[key]).length;
         }
     }
 
-    console.log(`${broker} init cache done`);
+    console.log(`${broker} init cache done ${cnt} indicator`);
 }
 
 async function onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
