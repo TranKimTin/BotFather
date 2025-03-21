@@ -51,8 +51,9 @@ export class BotFather {
                 reject(err);
             });
 
-            worker.on("exit", (code: any) => {
+            worker.on("exit", async (code: any) => {
                 console.error(`worker ${index} closed code:${code}`);
+                await delay(1000);
                 console.log(`restart worker ${index}`);
                 this.createWorker(index, args);
             });
