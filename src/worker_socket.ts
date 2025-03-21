@@ -65,6 +65,7 @@ async function initSocketData(broker: string, symbolList: Array<string>) {
 function initCache(broker: string) {
     console.log(`${broker} init cache...`);
 
+    const t1 = new Date().getTime();
     let cnt = 0;
     const symbolList: Array<string> = socket.getSymbols();
     const timeframeList: Array<string> = socket.getTimeframes();
@@ -85,7 +86,8 @@ function initCache(broker: string) {
         }
     }
 
-    console.log(`${broker} init cache done ${cnt} indicator`);
+    const t2 = new Date().getTime();
+    console.log(`${broker} init cache done ${cnt} indicators, runtime=${t2 - t1} ms`);
 }
 
 async function onCloseCandle(broker: string, symbol: string, timeframe: string, data: Array<RateData>) {
