@@ -40,7 +40,10 @@ export class BotFather {
     private createWorker(index: number, args: any): Promise<any> {
         return new Promise((resolve, reject) => {
             const worker = new Worker('./worker_socket.js', {
-                execArgv: ["--max-old-space-size=32768"]
+                resourceLimits: {
+                    maxOldGenerationSizeMb: 32768,
+                    maxYoungGenerationSizeMb: 4096
+                }
             });
             this.workerList[index] = worker;
 
