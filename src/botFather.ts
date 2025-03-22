@@ -6,7 +6,8 @@ import { BotInfo } from './common/Interface';
 import os from 'os';
 import * as util from './common/util';
 import delay from 'delay';
-import { Worker } from "worker_threads";
+// import { Worker } from "worker_threads";
+import { ChildProcess, fork } from 'child_process';
 
 
 dotenv.config({ path: `${__dirname}/../.env` });
@@ -15,7 +16,7 @@ dotenv.config({ path: `${__dirname}/../.env` });
 export class BotFather {
     private telegram: Telegram;
     private hostWebServer: string;
-    private workerList: Array<Worker>;
+    private workerList: Array<ChildProcess>;
     private botChildren: Array<BotInfo>;
     private botIDs: { [key: string]: number };
     private symbolListener: { [key: string]: boolean };
@@ -39,11 +40,8 @@ export class BotFather {
 
     private createWorker(index: number, args: any): Promise<any> {
         return new Promise((resolve, reject) => {
-            const worker = new Worker('./worker_socket.js', {
-                resourceLimits: {
-                    maxOldGenerationSizeMb: 32768,
-                    maxYoungGenerationSizeMb: 32768
-                }
+            const worker = fork('./worker_socket.js', {
+                execArgv: ['--max-old-space-size=32768']
             });
             this.workerList[index] = worker;
 
@@ -63,7 +61,7 @@ export class BotFather {
                 this.createWorker(index, args);
             });
 
-            worker.postMessage(args);
+            worker.send(args);
         });
     }
 
@@ -150,7 +148,7 @@ export class BotFather {
         console.log('init bot list', this.botChildren.length);
 
         for (const worker of this.workerList) {
-            worker?.postMessage({ type: 'update', value: { symbolListener: this.symbolListener, botChildren: this.botChildren, botIDs: this.botIDs } });
+            worker?.send({ type: 'update', value: { symbolListener: this.symbolListener, botChildren: this.botChildren, botIDs: this.botIDs } });
         }
     }
 

@@ -1,4 +1,3 @@
-import { parentPort } from 'worker_threads';
 import { CacheIndicator, RateData } from './common/Interface';
 import { SocketData } from './SocketServer/socket_data';
 import { BinanceSocket } from './SocketServer/socket_binance';
@@ -13,33 +12,27 @@ let socket: SocketData;
 let symbolListener: { [key: string]: boolean } = {};
 const cacheIndicators: { [key: string]: CacheIndicator } = {};
 
-if (parentPort) {
-    parentPort.on('message', async (msg: { type: string, value: any }) => {
-        const { type, value } = msg;
-        if (type === 'init') {
-            const t1 = new Date().getTime();
+process.on('message', async (msg: { type: string, value: any }) => {
+    const { type, value } = msg;
+    if (type === 'init') {
+        const t1 = new Date().getTime();
 
-            const { broker, symbolList, id } = value;
-            console.log(`init worker ${broker} ${id}`);
+        const { broker, symbolList, id } = value;
+        console.log(`init worker ${broker} ${id}`);
 
-            symbolListener = value.symbolListener;
-            worker.setBotData(value.botChildren, value.botIDs);
+        symbolListener = value.symbolListener;
+        worker.setBotData(value.botChildren, value.botIDs);
 
-            await initSocketData(broker, symbolList);
-            initCache(broker);
-            const t2 = new Date().getTime();
-            parentPort!.postMessage(t2 - t1);
-        }
-        else if (type === 'update') {
-            symbolListener = value.symbolListener;
-            worker.setBotData(value.botChildren, value.botIDs);
-        }
-    });
-}
-else {
-    console.error(`Worker thread error.`)
-    throw 'parentPort is null';
-}
+        await initSocketData(broker, symbolList);
+        initCache(broker);
+        const t2 = new Date().getTime();
+        process.send!(t2 - t1);
+    }
+    else if (type === 'update') {
+        symbolListener = value.symbolListener;
+        worker.setBotData(value.botChildren, value.botIDs);
+    }
+});
 
 async function initSocketData(broker: string, symbolList: Array<string>) {
     if (broker === 'binance') socket = new BinanceSocket(onCloseCandle, symbolList);
