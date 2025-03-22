@@ -46,8 +46,9 @@ export class OkxSocket extends SocketData {
 
         // ws.on('message', function incoming(mess) {
         rws.addEventListener('message', (event) => {
-            const mess = event.data;
-            const data = JSON.parse(mess.toString()) as { event: string, arg: { channel: string, instId: string }, data: Array<Array<string>> };
+            const mess = event.data.toString();
+            if (mess === 'pong') return;
+            const data = JSON.parse(mess) as { event: string, arg: { channel: string, instId: string }, data: Array<Array<string>> };
             if (data.arg.channel !== 'candle1m' || data.event === 'subscribe') return;
 
 
