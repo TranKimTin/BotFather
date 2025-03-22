@@ -42,7 +42,7 @@ export class BotFather {
             const worker = new Worker('./worker_socket.js', {
                 resourceLimits: {
                     maxOldGenerationSizeMb: 32768,
-                    maxYoungGenerationSizeMb: 4096
+                    maxYoungGenerationSizeMb: 32768
                 }
             });
             this.workerList[index] = worker;
