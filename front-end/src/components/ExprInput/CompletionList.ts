@@ -564,15 +564,16 @@ export default [
     {
         type: 'function',
         label: 'marsi',
-        detail: '(period, n, i)',
-        apply: 'marsi(14, 20, 0)',
+        detail: '(period, from, to)',
+        apply: 'marsi(14, 14, 0)',
         boost: 0,
-        info: ` - Rsi trung bình trong n nến gần nhất
+        info: ` - Rsi trung bình từ nến from đến nến to
                 - period: số nến để tính rsi
                 - Giá trị từ 0 - 100
                 Ví dụ:
-                + marsi(14, 20, 0): trung bình rsi(14) trong 20 nến gần nhất tính từ nến 0 (0->19)
-                + marsi(14, 20, 1): trung bình rsi(14) trong 20 nến gần nhất tính từ nến 1 (1->20)
+                + marsi(14, 20, 0): trung bình rsi(14) từ nến 0 đến 20
+                + marsi(14, 15, 10): trung bình rsi(14) nến 10 đến 15
+                + marsi(14, 10, 15): trung bình rsi(14) nến 10 đến 15
                 `
     },
     {
@@ -606,301 +607,325 @@ export default [
     {
         type: 'function',
         label: 'avg_open',
-        detail: '(n, i)',
+        detail: '(from, to)',
         apply: 'avg_open(10, 0)',
         boost: 0,
-        info: ` - Giá mở trung bình trong n nến gần nhất tính từ nến thứ i
+        info: ` - Giá mở trung bình trong từ nến from đến nến to
                 Ví dụ:
-                + avg_open(10, 0): Giá mở trung bình 10 nến gần nhất tính từ nến 0 (0->9)
-                + avg_open(10, 1): Giá mở trung bình 10 nến gần nhất tính từ nến 1 (1->10)
+                + avg_open(10, 0): Giá mở trung bình từ nến 0 đến nến 10
+                + avg_open(15, 20): Giá mở trung bình từ nến 15 đến nến 20
+                + avg_open(20, 15): Giá mở trung bình từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'avg_high',
-        detail: '(n, i)',
+        detail: '(from, to)',
         apply: 'avg_high(10, 0)',
         boost: 0,
-        info: ` - Giá đỉnh trung bình trong n nến gần nhất tính từ nến thứ i
+        info: ` - Giá đỉnh trung bình trong từ nến from đến nến to
                 Ví dụ:
-                + avg_high(10, 0): Giá đỉnh trung bình 10 nến gần nhất tính từ nến 0 (0->9)
-                + avg_high(10, 1): Giá đỉnh trung bình 10 nến gần nhất tính từ nến 1 (1->10)
+                + avg_high(10, 0): Giá đỉnh trung bình từ nến 0 đến nến 10
+                + avg_high(15, 20): Giá đỉnh trung bình từ nến 15 đến nến 20
+                + avg_high(20, 15): Giá đỉnh trung bình từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'avg_low',
-        detail: '(n, i)',
+        detail: '(from, to)',
         apply: 'avg_low(10, 0)',
         boost: 0,
-        info: ` - Giá đáy trung bình trong n nến gần nhất tính từ nến thứ i
+        info: ` - Giá đáy trung bình trong từ nến from đến nến to
                 Ví dụ:
-                + avg_low(10, 0): Giá đáy trung bình 10 nến gần nhất tính từ nến 0 (0->9)
-                + avg_low(10, 1): Giá đáy trung bình 10 nến gần nhất tính từ nến 1 (1->10)
+                + avg_low(10, 0): Giá đáy trung bình từ nến 0 đến nến 10
+                + avg_low(15, 20): Giá đáy trung bình từ nến 15 đến nến 20
+                + avg_low(20, 15): Giá đáy trung bình từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'avg_close',
-        detail: '(n, i)',
+        detail: '(from, to)',
         apply: 'avg_close(10, 0)',
         boost: 0,
-        info: ` - Giá đóng trung bình trong n nến gần nhất tính từ nến thứ i
+        info: ` - Giá đóng trung bình trong từ nến from đến nến to
                 Ví dụ:
-                + avg_close(10, 0): Giá đóng trung bình 10 nến gần nhất tính từ nến 0 (0->9)
-                + avg_close(10, 1): Giá đóng trung bình 10 nến gần nhất tính từ nến 1 (1->10)
+                + avg_close(10, 0): Giá đóng trung bình từ nến 0 đến nến 10
+                + avg_close(15, 20): Giá đóng trung bình từ nến 15 đến nến 20
+                + avg_close(20, 15): Giá đóng trung bình từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'avg_ampl',
-        detail: '(n, i)',
+        detail: '(from, to)',
         apply: 'avg_ampl(10, 0)',
         boost: 0,
-        info: ` - Biên độ trung bình trong n nến gần nhất tính từ nến thứ i
-                - Đơn vị: USDT
+        info: ` - Biên độ trung bình trong từ nến from đến nến to
+                - Đơn vị: USDT
                 Ví dụ:
-                + avg_ampl(10, 0): Biên độ trung bình 10 nến gần nhất tính từ nến 0 (0->9)
-                + avg_ampl(10, 1): Biên độ trung bình 10 nến gần nhất tính từ nến 1 (1->10)
+                + avg_ampl(10, 0): Biên độ trung bình từ nến 0 đến nến 10
+                + avg_ampl(15, 20): Biên độ trung bình từ nến 15 đến nến 20
+                + avg_ampl(20, 15): Biên độ trung bình từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'avg_ampl%',
-        detail: '(n, i)',
+        detail: '(from, to)',
         apply: 'avg_ampl%(10, 0)',
         boost: 0,
-        info: ` - Biên độ trung bình trong n nến gần nhất tính từ nến thứ i
-                - Đơn vị: %
+        info: ` - Biên độ trung bình trong từ nến from đến nến to
+                - Đơn vị: %
                 Ví dụ:
-                + avg_ampl%(10, 0): Biên độ trung bình 10 nến gần nhất tính từ nến 0 (0->9)
-                + avg_ampl%(10, 1): Biên độ trung bình 10 nến gần nhất tính từ nến 1 (1->10)
+                + avg_ampl(10, 0): Biên độ trung bình từ nến 0 đến nến 10
+                + avg_ampl(15, 20): Biên độ trung bình từ nến 15 đến nến 20
+                + avg_ampl(20, 15): Biên độ trung bình từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'max_open',
-        detail: '(n, i)',
+        detail: '(from, to)',
         apply: 'max_open(10, 0)',
         boost: 0,
-        info: ` - Giá mở cao nhất trong n nến gần nhất tính từ nến thứ i
+        info: ` - Giá mở cao nhất từ nến from đến nến to
                 Ví dụ:
-                + max_open(10, 0): Giá mở cao nhất 10 nến gần nhất tính từ nến 0 (0->9)
-                + max_open(10, 1): Giá mở cao nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                + max_open(10, 0): Giá mở cao nhất từ nến 0 đến 10
+                + max_open(15, 20): Giá mở cao nhất từ nến 15 đến nến 20
+                + max_open(20, 15): Giá mở cao nhất từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'max_high',
-        detail: '(n, i)',
+        detail: '(from, to)',
         apply: 'max_high(10, 0)',
         boost: 0,
-        info: ` - Giá đỉnh cao nhất trong n nến gần nhất tính từ nến thứ i
+        info: ` - Giá đỉnh cao nhất từ nến from đến nến to
                 Ví dụ:
-                + max_high(10, 0): Giá đỉnh cao nhất 10 nến gần nhất tính từ nến 0 (0->9)
-                + max_high(10, 1): Giá đỉnh cao nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                + max_high(10, 0): Giá đỉnh cao nhất từ nến 0 đến 10
+                + max_high(15, 20): Giá đỉnh cao nhất từ nến 15 đến nến 20
+                + max_high(20, 15): Giá đỉnh cao nhất từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'max_low',
-        detail: '(n, i)',
+        detail: '(from, to)',
         apply: 'max_low(10, 0)',
         boost: 0,
-        info: ` - Giá đáy cao nhất trong n nến gần nhất tính từ nến thứ i
+        info: ` - Giá đáy cao nhất từ nến from đến nến to
                 Ví dụ:
-                + max_low(10, 0): Giá đáy cao nhất 10 nến gần nhất tính từ nến 0 (0->9)
-                + max_low(10, 1): Giá đáy cao nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                + max_low(10, 0): Giá đáy cao nhất từ nến 0 đến 10
+                + max_low(15, 20): Giá đáy cao nhất từ nến 15 đến nến 20
+                + max_low(20, 15): Giá đáy cao nhất từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'max_close',
-        detail: '(n, i)',
+        detail: '(from, to)',
         apply: 'max_close(10, 0)',
         boost: 0,
-        info: ` - Giá đóng cao nhất trong n nến gần nhất tính từ nến thứ i
+        info: ` - Giá đóng cao nhất từ nến from đến nến to
                 Ví dụ:
-                + max_close(10, 0): Giá đóng cao nhất 10 nến gần nhất tính từ nến 0 (0->9)
-                + max_close(10, 1): Giá đóng cao nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                + max_close(10, 0): Giá đóng cao nhất từ nến 0 đến 10
+                + max_close(15, 20): Giá đóng cao nhất từ nến 15 đến nến 20
+                + max_close(20, 15): Giá đóng cao nhất từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'min_open',
-        detail: '(n, i)',
+        detail: '(from, to)',
         apply: 'min_open(10, 0)',
         boost: 0,
-        info: ` - Giá mở thấp nhất trong n nến gần nhất tính từ nến thứ i
+        info: ` - Giá mở thấp nhất từ nến from đến nến to
                 Ví dụ:
-                + min_open(10, 0): Giá mở thấp nhất 10 nến gần nhất tính từ nến 0 (0->9)
-                + min_open(10, 1): Giá mở thấp nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                + min_open(10, 0): Giá mở thấp nhất từ nến 0 đến nến 10
+                + min_open(15, 20): Giá mở thấp nhất 15 đến nến 20
+                + min_open(20, 15): Giá mở thấp nhất 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'min_high',
-        detail: '(n, i)',
+        detail: '(from, to)',
         apply: 'min_high(10, 0)',
         boost: 0,
-        info: ` - Giá đỉnh thấp nhất trong n nến gần nhất tính từ nến thứ i
+        info: ` - Giá đỉnh thấp nhất từ nến from đến nến to
                 Ví dụ:
-                + min_high(10, 0): Giá đỉnh thấp nhất 10 nến gần nhất tính từ nến 0 (0->9)
-                + min_high(10, 1): Giá đỉnh thấp nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                + min_high(10, 0): Giá đỉnh thấp nhất từ nến 0 đến nến 10
+                + min_high(15, 20): Giá đỉnh thấp nhất 15 đến nến 20
+                + min_high(20, 15): Giá đỉnh thấp nhất 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'min_low',
-        detail: '(n, i)',
+        detail: '(from, to)',
         apply: 'min_low(10, 0)',
         boost: 0,
-        info: ` - Giá đáy thấp nhất trong n nến gần nhất tính từ nến thứ i
+        info: ` - Giá đáy thấp nhất từ nến from đến nến to
                 Ví dụ:
-                + min_low(10, 0): Giá đáy thấp nhất 10 nến gần nhất tính từ nến 0 (0->9)
-                + min_low(10, 1): Giá đáy thấp nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                + min_low(10, 0): Giá đáy thấp nhất từ nến 0 đến nến 10
+                + min_low(15, 20): Giá đáy thấp nhất 15 đến nến 20
+                + min_low(20, 15): Giá đáy thấp nhất 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'min_close',
-        detail: '(n, i)',
+        detail: '(from, to)',
         apply: 'min_close(10, 0)',
         boost: 0,
-        info: ` - Giá đóng thấp nhất trong n nến gần nhất tính từ nến thứ i
+        info: ` - Giá đóng thấp nhất từ nến from đến nến to
                 Ví dụ:
-                + min_close(10, 0): Giá đóng thấp nhất 10 nến gần nhất tính từ nến 0 (0->9)
-                + min_close(10, 1): Giá đóng thấp nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                + min_close(10, 0): Giá đóng thấp nhất từ nến 0 đến nến 10
+                + min_close(15, 20): Giá đóng thấp nhất 15 đến nến 20
+                + min_close(20, 15): Giá đóng thấp nhất 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'min_rsi',
-        detail: '(period, n, i)',
+        detail: '(period, from, to)',
         apply: 'min_rsi(14, 10, 0)',
         boost: 0,
-        info: ` - rsi thấp nhất trong n nến gần nhất tính từ nến thứ i
+        info: ` - rsi thấp nhất từ nến from đến nến to
                 - period: số nến để tính chỉ báo rsi
                 Ví dụ:
-                + min_rsi(10, 0): rsi thấp nhất 10 nến gần nhất tính từ nến 0 (0->9)
-                + min_rsi(10, 1): rsi thấp nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                + min_rsi(14, 10, 0): rsi thấp nhất từ nến 0 đến nến 10
+                + min_rsi(14, 15, 20): rsi thấp nhất từ nến 15 đến nến 20
+                + min_rsi(14, 20, 15): rsi thấp nhất từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'max_rsi',
-        detail: '(period, n, i)',
+        detail: '(period, from, to)',
         apply: 'max_rsi(14, 10, 0)',
         boost: 0,
-        info: ` - rsi cao nhất trong n nến gần nhất tính từ nến thứ i
+        info: ` - rsi cao nhất từ nến from đến nến to
                 - period: số nến để tính chỉ báo rsi
                 Ví dụ:
-                + max_rsi(10, 0): rsi cao nhất 10 nến gần nhất tính từ nến 0 (0->9)
-                + max_rsi(10, 1): rsi cao nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                + max_rsi(14, 10, 0): rsi cao nhất từ nến 0 đến nến 10
+                + max_rsi(14, 15, 20): rsi cao nhất từ nến 15 đến nến 20
+                + max_rsi(14, 20, 15): rsi cao nhất từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'min_change',
-        detail: '(n, i)',
+        detail: '(from, to)',
         apply: 'min_change(10, 0)',
         boost: 0,
-        info: ` - Thay đổi giá thấp nhất trong n nến gần nhất tính từ nến thứ i
+        info: ` - Thay đổi giá thấp nhất từ nến from đến nến to
                 - Đơn vị: USDT
                 Ví dụ:
-                + min_change(10, 0): Thay đổi giá thấp nhất 10 nến gần nhất tính từ nến 0 (0->9)
-                + min_change(10, 1): Thay đổi giá thấp nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                + min_change(10, 0): Thay đổi giá thấp nhất 0 đến nến 10
+                + min_change(15, 20): Thay đổi giá thấp từ nến 15 đến nến 20
+                + min_change(20, 15): Thay đổi giá thấp từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'max_change',
-        detail: '(n, i)',
+        detail: '(from, to)',
         apply: 'max_change(10, 0)',
         boost: 0,
-        info: ` - Thay đổi giá cao nhất trong n nến gần nhất tính từ nến thứ i
+        info: ` - Thay đổi giá cao nhất từ nến from đến nến to
                 - Đơn vị: USDT
                 Ví dụ:
-                + max_change(10, 0): Thay đổi giá cao nhất 10 nến gần nhất tính từ nến 0 (0->9)
-                + max_change(10, 1): Thay đổi giá cao nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                + max_change(10, 0): Thay đổi giá cao nhất 0 đến nến 10
+                + max_change(15, 20): Thay đổi giá cao từ nến 15 đến nến 20
+                + max_change(20, 15): Thay đổi giá cao từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'min_change%',
-        detail: '(n, i)',
+        detail: '(from, to)',
         apply: 'min_change%(10, 0)',
         boost: 0,
-        info: ` - Thay đổi giá thấp nhất trong n nến gần nhất tính từ nến thứ i
+        info: ` - Thay đổi giá thấp nhất từ nến from đến nến to
                 - Đơn vị: %
                 Ví dụ:
-                + min_change(10, 0): Thay đổi giá thấp nhất 10 nến gần nhất tính từ nến 0 (0->9)
-                + min_change(10, 1): Thay đổi giá thấp nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                + min_change(10, 0): Thay đổi giá thấp nhất 0 đến nến 10
+                + min_change(15, 20): Thay đổi giá thấp từ nến 15 đến nến 20
+                + min_change(20, 15): Thay đổi giá thấp từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'max_change%',
-        detail: '(n, i)',
+        detail: '(from, to)',
         apply: 'max_change%(10, 0)',
         boost: 0,
-        info: ` - Thay đổi giá cao nhất trong n nến gần nhất tính từ nến thứ i
+        info: ` - Thay đổi giá cao nhất từ nến from đến nến to
                 - Đơn vị: %
                 Ví dụ:
-                + max_change%(10, 0): Thay đổi giá cao nhất 10 nến gần nhất tính từ nến 0 (0->9)
-                + max_change%(10, 1): Thay đổi giá cao nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                + max_change(10, 0): Thay đổi giá cao nhất 0 đến nến 10
+                + max_change(15, 20): Thay đổi giá cao từ nến 15 đến nến 20
+                + max_change(20, 15): Thay đổi giá cao từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'min_ampl',
-        detail: '(n, i)',
+        detail: '(from, to)',
         apply: 'min_ampl(10, 0)',
         boost: 0,
-        info: ` - Biên độ giá thấp nhất trong n nến gần nhất tính từ nến thứ i
+        info: ` - Biên độ giá thấp nhất từ nến from đến nến to
                 - Đơn vị: USDT
                 Ví dụ:
-                + min_ampl(10, 0): Biên độ giá thấp nhất 10 nến gần nhất tính từ nến 0 (0->9)
-                + min_ampl(10, 1): Biên độ giá thấp nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                + min_ampl(10, 0): Biên độ giá thấp nhất từ nến 0 đến nến 10
+                + min_ampl(15, 20): Biên độ giá thấp nhất từ nến 15 đến nến 20
+                + min_ampl(20, 15): Biên độ giá thấp nhất từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'max_ampl',
-        detail: '(n, i)',
+        detail: '(from, to)',
         apply: 'max_ampl(10, 0)',
         boost: 0,
-        info: ` - Biên độ giá cap nhất trong n nến gần nhất tính từ nến thứ i
+        info: ` - Biên độ giá cao nhất từ nến from đến nến to
                 - Đơn vị: USDT
                 Ví dụ:
-                + max_ampl(10, 0): Biên độ giá cao nhất 10 nến gần nhất tính từ nến 0 (0->9)
-                + max_ampl(10, 1): Biên độ giá cao nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                + max_ampl(10, 0): Biên độ giá cao nhất từ nến 0 đến nến 10
+                + max_ampl(15, 20): Biên độ giá cao nhất từ nến 15 đến nến 20
+                + max_ampl(20, 15): Biên độ giá cao nhất từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'min_ampl%',
-        detail: '(n, i)',
+        detail: '(from, to)',
         apply: 'min_ampl%(10, 0)',
         boost: 0,
-        info: ` - Biên độ giá thấp nhất trong n nến gần nhất tính từ nến thứ i
+        info: ` - Biên độ giá thấp nhất từ nến from đến nến to
                 - Đơn vị: %
                 Ví dụ:
-                + min_ampl%(10, 0): Biên độ giá thấp nhất 10 nến gần nhất tính từ nến 0 (0->9)
-                + min_ampl%(10, 1): Biên độ giá thấp nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                + min_ampl(10, 0): Biên độ giá thấp nhất từ nến 0 đến nến 10
+                + min_ampl(15, 20): Biên độ giá thấp nhất từ nến 15 đến nến 20
+                + min_ampl(20, 15): Biên độ giá thấp nhất từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'max_ampl%',
-        detail: '(n, i)',
+        detail: '(from, to)',
         apply: 'max_ampl%(10, 0)',
         boost: 0,
-        info: ` - Biên độ giá cap nhất trong n nến gần nhất tính từ nến thứ i
+        info: ` - Biên độ giá cao nhất từ nến from đến nến to
                 - Đơn vị: %
                 Ví dụ:
-                + max_ampl%(10, 0): Biên độ giá cao nhất 10 nến gần nhất tính từ nến 0 (0->9)
-                + max_ampl%(10, 1): Biên độ giá cao nhất 10 nến gần nhất tính từ nến 1 (1->10)
+                + max_ampl(10, 0): Biên độ giá cao nhất từ nến 0 đến nến 10
+                + max_ampl(15, 20): Biên độ giá cao nhất từ nến 15 đến nến 20
+                + max_ampl(20, 15): Biên độ giá cao nhất từ nến 15 đến nến 20
                 `
     },
 ];

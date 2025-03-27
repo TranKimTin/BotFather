@@ -109,7 +109,6 @@ macd_histogram: 'macd_histogram' '(' INT ',' INT ',' INT (',' INT)? ')';
 bb_upper: 'bb_upper' '(' INT ','  number (',' INT)? ')';
 bb_middle: 'bb_middle' '(' INT ','  number (',' INT)? ')';
 bb_lower: 'bb_lower' '(' INT ','  number (',' INT)? ')';
-rsi_phan_ki: 'rsi_phan_ki' '(' INT ','  number ','  INT ','  INT ','  number ','  number (',' INT)? ')';
 macd_n_dinh: 'macd_n_dinh' '(' INT ',' INT ',' INT ',' INT ',' INT ',' INT ','  number ',' INT (',' number)* ')';
 macd_slope: 'macd_slope' '(' INT ',' INT ',' INT (',' INT)? ')';
 bullish_engulfing: 'bullish_engulfing' '(' INT? ')';
