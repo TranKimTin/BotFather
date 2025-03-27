@@ -42,7 +42,6 @@ expr
     | bb_upper                  # iBB_up
     | bb_middle                 # iBB_mid
     | bb_lower                  # iBB_low
-    | rsi_phan_ki               # iRSI_phan_ki
     | macd_n_dinh               # iMACD_n_dinh
     | macd_slope                # iMACD_slope
     | bullish_engulfing         # iBullish_engulfing
