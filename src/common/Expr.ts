@@ -672,7 +672,7 @@ export class Expr extends ExprVisitor<any> {
         const to = parseInt(ctx.INT(2)?.getText() || "0", 10);
 
         const periodMA = Math.abs(from - to);
-        const shift = to;
+        const shift = Math.min(from, to);
         const avgRsis = util.iAvgRSI(this.data, periodRSI, periodMA, this.cacheIndicator);
 
         if (shift >= avgRsis.length) throw `avg_rsi out of range. length = ${avgRsis.length}`;
@@ -699,7 +699,7 @@ export class Expr extends ExprVisitor<any> {
         const from = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const to = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const period = Math.abs(from - to);
-        const shift = to;
+        const shift = Math.min(from, to);
 
         const avgs = util.iAvgRate(this.data, period, 'open', this.cacheIndicator);
         if (shift >= avgs.length) throw `avg_open out of range. length = ${this.data.length}`;
@@ -710,7 +710,7 @@ export class Expr extends ExprVisitor<any> {
         const from = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const to = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const period = Math.abs(from - to);
-        const shift = to;
+        const shift = Math.min(from, to);
 
         const avgs = util.iAvgRate(this.data, period, 'high', this.cacheIndicator);
         if (shift >= avgs.length) throw `avg_high out of range. length = ${this.data.length}`;
@@ -721,7 +721,7 @@ export class Expr extends ExprVisitor<any> {
         const from = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const to = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const period = Math.abs(from - to);
-        const shift = to;
+        const shift = Math.min(from, to);
 
         const avgs = util.iAvgRate(this.data, period, 'low', this.cacheIndicator);
         if (shift >= avgs.length) throw `avg_low out of range. length = ${this.data.length}`;
@@ -733,7 +733,7 @@ export class Expr extends ExprVisitor<any> {
         const from = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const to = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const period = Math.abs(from - to);
-        const shift = to;
+        const shift = Math.min(from, to);
 
         const avgs = util.iAvgRate(this.data, period, 'close', this.cacheIndicator);
         if (shift >= avgs.length) throw `avg_close out of range. length = ${this.data.length}`;
@@ -745,7 +745,7 @@ export class Expr extends ExprVisitor<any> {
         const from = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const to = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const period = Math.abs(from - to);
-        const shift = to;
+        const shift = Math.min(from, to);
 
         let avgs = util.iAvgAmpl(this.data, period, false, this.cacheIndicator);
         if (shift >= avgs.length) throw `avg_ampl out of range. length = ${this.data.length}`;
@@ -757,7 +757,7 @@ export class Expr extends ExprVisitor<any> {
         const from = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const to = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const period = Math.abs(from - to);
-        const shift = to;
+        const shift = Math.min(from, to);
 
         let avgs = util.iAvgAmpl(this.data, period, true, this.cacheIndicator);
         if (shift >= avgs.length) throw `avg_amplP out of range. length = ${this.data.length}`;
@@ -769,7 +769,7 @@ export class Expr extends ExprVisitor<any> {
         const from = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const to = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const period = Math.abs(from - to);
-        const shift = to;
+        const shift = Math.min(from, to);
 
         const maxs = util.iMaxRate(this.data, period, 'open', this.cacheIndicator);
         if (shift >= maxs.length) throw `max_open out of range. length = ${this.data.length}`;
@@ -780,7 +780,7 @@ export class Expr extends ExprVisitor<any> {
         const from = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const to = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const period = Math.abs(from - to);
-        const shift = to;
+        const shift = Math.min(from, to);
 
         const maxs = util.iMaxRate(this.data, period, 'high', this.cacheIndicator);
         if (shift >= maxs.length) throw `max_high out of range. length = ${this.data.length}`;
@@ -791,7 +791,7 @@ export class Expr extends ExprVisitor<any> {
         const from = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const to = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const period = Math.abs(from - to);
-        const shift = to;
+        const shift = Math.min(from, to);
 
         const maxs = util.iMaxRate(this.data, period, 'low', this.cacheIndicator);
         if (shift >= maxs.length) throw `max_lơ out of range. length = ${this.data.length}`;
@@ -802,7 +802,7 @@ export class Expr extends ExprVisitor<any> {
         const from = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const to = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const period = Math.abs(from - to);
-        const shift = to;
+        const shift = Math.min(from, to);
 
         const maxs = util.iMaxRate(this.data, period, 'close', this.cacheIndicator);
         if (shift >= maxs.length) throw `max_close out of range. length = ${this.data.length}`;
@@ -813,7 +813,7 @@ export class Expr extends ExprVisitor<any> {
         const from = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const to = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const period = Math.abs(from - to);
-        const shift = to;
+        const shift = Math.min(from, to);
 
         const mins = util.iMinRate(this.data, period, 'open', this.cacheIndicator);
         if (shift >= mins.length) throw `min_open out of range. length = ${this.data.length}`;
@@ -824,7 +824,7 @@ export class Expr extends ExprVisitor<any> {
         const from = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const to = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const period = Math.abs(from - to);
-        const shift = to;
+        const shift = Math.min(from, to);
 
         const mins = util.iMinRate(this.data, period, 'high', this.cacheIndicator);
         if (shift >= mins.length) throw `min_high out of range. length = ${this.data.length}`;
@@ -835,7 +835,7 @@ export class Expr extends ExprVisitor<any> {
         const from = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const to = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const period = Math.abs(from - to);
-        const shift = to;
+        const shift = Math.min(from, to);
 
         const mins = util.iMinRate(this.data, period, 'low', this.cacheIndicator);
         if (shift >= mins.length) throw `min_low out of range. length = ${this.data.length}`;
@@ -846,7 +846,7 @@ export class Expr extends ExprVisitor<any> {
         const from = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const to = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const period = Math.abs(from - to);
-        const shift = to;
+        const shift = Math.min(from, to);
 
         const mins = util.iMinRate(this.data, period, 'close', this.cacheIndicator);
         if (shift >= mins.length) throw `min_close out of range. length = ${this.data.length}`;
@@ -858,7 +858,7 @@ export class Expr extends ExprVisitor<any> {
         const from = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const to = parseInt(ctx.INT(2)?.getText() || "0", 10);
         const depth = Math.abs(from - to);
-        const shift = to;
+        const shift = Math.min(from, to);
 
         const MinRSIs = util.iMinRSI(this.data, rsiPeriod, depth, this.cacheIndicator);
         if (shift >= MinRSIs.length) throw `min_rsi out of range. length = ${this.data.length}`;
@@ -871,7 +871,7 @@ export class Expr extends ExprVisitor<any> {
         const from = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const to = parseInt(ctx.INT(2)?.getText() || "0", 10);
         const depth = Math.abs(from - to);
-        const shift = to;
+        const shift = Math.min(from, to);
 
         const MaxRSIs = util.iMaxRSI(this.data, rsiPeriod, depth, this.cacheIndicator);
         if (shift >= MaxRSIs.length) throw `max_rsi out of range. length = ${this.data.length}`;
@@ -883,7 +883,7 @@ export class Expr extends ExprVisitor<any> {
         const from = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const to = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const period = Math.abs(from - to);
-        const shift = to;
+        const shift = Math.min(from, to);
 
         const mins = util.iMinChange(this.data, period, false, this.cacheIndicator);
         if (shift >= mins.length) throw `min_change out of range. length = ${this.data.length}`;
@@ -893,7 +893,7 @@ export class Expr extends ExprVisitor<any> {
         const from = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const to = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const period = Math.abs(from - to);
-        const shift = to;
+        const shift = Math.min(from, to);
 
         const maxs = util.iMaxChange(this.data, period, false, this.cacheIndicator)
         if (shift >= maxs.length) throw `max_change out of range. length = ${this.data.length}`;
@@ -904,7 +904,7 @@ export class Expr extends ExprVisitor<any> {
         const from = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const to = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const period = Math.abs(from - to);
-        const shift = to;
+        const shift = Math.min(from, to);
 
         const mins = util.iMinChange(this.data, period, true, this.cacheIndicator);
         if (shift >= mins.length) throw `min_changeP out of range. length = ${this.data.length}`;
@@ -915,7 +915,7 @@ export class Expr extends ExprVisitor<any> {
         const from = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const to = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const period = Math.abs(from - to);
-        const shift = to;
+        const shift = Math.min(from, to);
 
         const maxs = util.iMaxChange(this.data, period, true, this.cacheIndicator)
         if (shift >= maxs.length) throw `max_changeP out of range. length = ${this.data.length}`;
@@ -926,7 +926,7 @@ export class Expr extends ExprVisitor<any> {
         const from = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const to = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const period = Math.abs(from - to);
-        const shift = to;
+        const shift = Math.min(from, to);
 
         const mins = util.iMinAmpl(this.data, period, false, this.cacheIndicator);
         if (shift >= this.data.length) throw `min_ampl out of range. length = ${this.data.length}`;
@@ -937,7 +937,7 @@ export class Expr extends ExprVisitor<any> {
         const from = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const to = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const period = Math.abs(from - to);
-        const shift = to;
+        const shift = Math.min(from, to);
 
         const maxs = util.iMaxAmpl(this.data, period, false, this.cacheIndicator);
         if (shift >= this.data.length) throw `max_ampl out of range. length = ${this.data.length}`;
@@ -948,7 +948,7 @@ export class Expr extends ExprVisitor<any> {
         const from = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const to = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const period = Math.abs(from - to);
-        const shift = to;
+        const shift = Math.min(from, to);
 
         const mins = util.iMinAmpl(this.data, period, true, this.cacheIndicator);
         if (shift >= this.data.length) throw `min_amplP out of range. length = ${this.data.length}`;
@@ -959,7 +959,7 @@ export class Expr extends ExprVisitor<any> {
         const from = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const to = parseInt(ctx.INT(1)?.getText() || "0", 10);
         const period = Math.abs(from - to);
-        const shift = to;
+        const shift = Math.min(from, to);
 
         const maxs = util.iMaxAmpl(this.data, period, true, this.cacheIndicator);
         if (shift >= this.data.length) throw `max_amplP out of range. length = ${this.data.length}`;
