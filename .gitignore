@@ -147,3 +147,5 @@ src/test.ts
 !front-end/tailwind.config.js
 !front-end/postcss.config.js
 js/temp.txt
+/botfather_c++/.vs
+/botfather_c++/x64

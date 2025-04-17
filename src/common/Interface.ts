@@ -231,3 +231,13 @@ export interface DequeItem {
     value: number;
     index: number;
 };
+
+export interface NewOrderArgs {
+    symbol: string,
+    type: NODE_TYPE,
+    volume: string,
+    stop: string,
+    limit: string,
+    tp: string,
+    sl: string
+}
