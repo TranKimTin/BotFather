@@ -1,0 +1,123 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "C/C++: g++ build debug",
+            "command": "g++",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-g",
+                // "${file}",
+                "${workspaceFolder}/botfather_c++/botfather.cpp",
+                "-o",
+                // "${fileDirname}/${fileBasenameNoExtension}",
+                "${workspaceFolder}/botfather_c++/botfather",
+                "-lboost_system",
+                "-pthread",
+                "-lssl",
+                "-lcrypto"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build",
+            "detail": "g++"
+        },
+        {
+            "type": "cppbuild",
+            "label": "C/C++: g++ build release",
+            "command": "g++",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-O3",
+                // "${file}",
+                "${workspaceFolder}/botfather_c++/botfather.cpp",
+                "-o",
+                // "${fileDirname}/${fileBasenameNoExtension}",
+                "${workspaceFolder}/botfather_c++/botfather",
+                "-lboost_system",
+                "-pthread",
+                "-lssl",
+                "-lcrypto"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build",
+            "detail": "g++"
+        },
+        {
+            "label": "CMake: Configure Debug",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "-S",
+                "${workspaceFolder}/botfather_c++",
+                "-B",
+                "${workspaceFolder}/botfather_c++/build",
+                "-DCMAKE_BUILD_TYPE=Debug"
+            ],
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "Configure CMake project"
+        },
+        {
+            "label": "CMake: Configure Release",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "-S",
+                "${workspaceFolder}/botfather_c++",
+                "-B",
+                "${workspaceFolder}/botfather_c++/build",
+                "-DCMAKE_BUILD_TYPE=Release"
+            ],
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "Configure CMake project"
+        },
+        {
+            "label": "CMake: Build Debug",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceFolder}/botfather_c++/build"
+            ],
+            "group": "build",
+            "dependsOn": "CMake: Configure Debug",
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "Build CMake project"
+        },
+        {
+            "label": "CMake: Build Release",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceFolder}/botfather_c++/build"
+            ],
+            "group": "build",
+            "dependsOn": "CMake: Configure Release",
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "Build CMake project"
+        }
+    ]
+}

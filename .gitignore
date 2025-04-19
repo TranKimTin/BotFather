@@ -141,7 +141,6 @@ js/config83.txt
 js/botData/*
 js/public/*
 js/WebConfig/*
-.vscode/*
 src/test.ts
 /src/common/generated
 !front-end/tailwind.config.js
@@ -150,3 +149,4 @@ js/temp.txt
 /botfather_c++/.vs
 /botfather_c++/x64
 /botfather_c++/lib
+/botfather_c++/build
