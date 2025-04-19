@@ -64,6 +64,7 @@
                 "${workspaceFolder}/botfather_c++",
                 "-B",
                 "${workspaceFolder}/botfather_c++/build",
+                "-G Ninja",
                 "-DCMAKE_BUILD_TYPE=Debug"
             ],
             "group": "build",
@@ -81,6 +82,7 @@
                 "${workspaceFolder}/botfather_c++",
                 "-B",
                 "${workspaceFolder}/botfather_c++/build",
+                "-G Ninja",
                 "-DCMAKE_BUILD_TYPE=Release"
             ],
             "group": "build",
@@ -95,7 +97,8 @@
             "command": "cmake",
             "args": [
                 "--build",
-                "${workspaceFolder}/botfather_c++/build"
+                "${workspaceFolder}/botfather_c++/build",
+                "--", "-j", "$(nproc)"
             ],
             "group": "build",
             "dependsOn": "CMake: Configure Debug",
@@ -110,7 +113,8 @@
             "command": "cmake",
             "args": [
                 "--build",
-                "${workspaceFolder}/botfather_c++/build"
+                "${workspaceFolder}/botfather_c++/build",
+                "--", "-j", "$(nproc)"
             ],
             "group": "build",
             "dependsOn": "CMake: Configure Release",

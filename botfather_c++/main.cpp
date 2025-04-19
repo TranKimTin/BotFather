@@ -18,5 +18,6 @@ int main()
     long long t2 = clock();
 
     cout << "runtime=" << (t2 - t1) / 1000;
+    cout << "Hello world 123";
     return 0;
 }
