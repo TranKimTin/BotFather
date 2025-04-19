@@ -3,3 +3,4 @@ sudo apt-get install build-essential
 sudo apt-get install libboost-all-dev
 sudo apt-get install libssl-dev
 sudo apt-get install libwebsocketpp-dev libboost-system-dev
+sudo apt-get install nlohmann-json3-dev

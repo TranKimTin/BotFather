@@ -1,5 +1,3 @@
-import { Indicator } from "technicalindicators/declarations/indicator/indicator";
-
 export interface Node {
     data: NodeData;
     id: string;
