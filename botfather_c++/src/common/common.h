@@ -1,9 +1,13 @@
 #ifndef COMMON_TYPE
 #define COMMON_TYPE
 
+#include <iostream>
 #include <string>
 #include <vector>
 #include <unordered_map>
+
+#include <chrono>
+#include <thread>
 
 using namespace std;
 

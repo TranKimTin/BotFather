@@ -31,4 +31,5 @@ target_link_libraries(botfather
     OpenSSL::SSL
     OpenSSL::Crypto
     pthread
+    tbb
 )

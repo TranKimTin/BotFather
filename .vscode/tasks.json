@@ -4,58 +4,6 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "type": "cppbuild",
-            "label": "C/C++: g++ build debug",
-            "command": "g++",
-            "args": [
-                "-fdiagnostics-color=always",
-                "-g",
-                // "${file}",
-                "${workspaceFolder}/botfather_c++/botfather.cpp",
-                "-o",
-                // "${fileDirname}/${fileBasenameNoExtension}",
-                "${workspaceFolder}/botfather_c++/botfather",
-                "-lboost_system",
-                "-pthread",
-                "-lssl",
-                "-lcrypto"
-            ],
-            "options": {
-                "cwd": "${fileDirname}"
-            },
-            "problemMatcher": [
-                "$gcc"
-            ],
-            "group": "build",
-            "detail": "g++"
-        },
-        {
-            "type": "cppbuild",
-            "label": "C/C++: g++ build release",
-            "command": "g++",
-            "args": [
-                "-fdiagnostics-color=always",
-                "-O3",
-                // "${file}",
-                "${workspaceFolder}/botfather_c++/botfather.cpp",
-                "-o",
-                // "${fileDirname}/${fileBasenameNoExtension}",
-                "${workspaceFolder}/botfather_c++/botfather",
-                "-lboost_system",
-                "-pthread",
-                "-lssl",
-                "-lcrypto"
-            ],
-            "options": {
-                "cwd": "${fileDirname}"
-            },
-            "problemMatcher": [
-                "$gcc"
-            ],
-            "group": "build",
-            "detail": "g++"
-        },
-        {
             "label": "CMake: Configure Debug",
             "type": "shell",
             "command": "cmake",
