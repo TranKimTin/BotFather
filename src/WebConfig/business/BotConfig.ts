@@ -250,68 +250,6 @@ export async function checkNode(data: NodeData) {
     }
 }
 
-export async function getUnrealizedProfit(data: Array<{ timestamp: string, orderList: Array<{ symbol: string, broker: string, orderType: NODE_TYPE, entry: number, volume: number }> }>) {
-    const res: Array<number> = [];
-
-    for (const { timestamp, orderList } of data) {
-        const symbolList = [...new Set(orderList.map(item => `${item.broker}:${item.symbol}`))];
-        const timeInt = new Date(timestamp).getTime();
-
-        if (symbolList.length === 0) {
-            res.push(0);
-            continue;
-        }
-
-        const queryResponse = await mysql.query(
-            `SELECT symbol, close FROM Rates WHERE timestamp = ? AND symbol IN (?)`,
-            [timeInt, symbolList]
-        );
-
-        const prices: { [key: string]: number } = {};
-        for (let { symbol, close } of queryResponse) {
-            prices[symbol] = close;
-        }
-
-        let profit = 0;
-
-        let promiseList = [];
-        for (let order of orderList) {
-            promiseList.push((async function () {
-                const s = `${order.broker}:${order.symbol}`;
-                let p = prices[s];
-                if (p === undefined || p === -1) {
-                    const isUpdateDB: boolean = (p === undefined) ? true : false;
-                    prices[s] = -1;
-
-                    const rate = await util.getOHLCV(order.broker, order.symbol, '1m', 1, timeInt).then(data => data[0]);
-                    if (isUpdateDB && rate.isFinal) {
-                        await mysql.query(
-                            `INSERT INTO Rates(symbol,timestamp,open,high,low,close) VALUES(?,?,?,?,?,?)`,
-                            [s, timeInt, rate.open, rate.high, rate.low, rate.close]
-                        );
-                    }
-                    p = rate.close;
-                    prices[s] = p;
-                }
-                if ([NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_STOP_LIMIT, NODE_TYPE.BUY_STOP_MARKET].includes(order.orderType)) {
-                    profit += order.volume * (p - order.entry);
-                }
-                else if ([NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_STOP_LIMIT, NODE_TYPE.SELL_STOP_MARKET].includes(order.orderType)) {
-                    profit += order.volume * (order.entry - p);
-                }
-            })());
-
-            if (promiseList.length > 50) {
-                await Promise.all(promiseList);
-                promiseList = [];
-            }
-        }
-        await Promise.all(promiseList);
-        res.push(profit);
-    }
-    return res;
-}
-
 export async function deleteBot(botName: string) {
     const conncection = await mysql.getConnection();
     const [{ id }] = await mysql.query_transaction(conncection, `Select id FROM Bot WHERE botName = ?`, [botName]);

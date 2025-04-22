@@ -19,7 +19,6 @@ routes.get('/getBalance', requireToken, User.getBalance);
 
 routes.post("/save", requireToken, BotConfig.saveBot);
 routes.post("/check", requireToken, BotConfig.checkNode);
-routes.post("/getUnrealizedProfit", requireToken, BotConfig.getUnrealizedProfit);
 routes.post("/login", User.Login);
 routes.post("/logout", requireToken, User.Logout);
 

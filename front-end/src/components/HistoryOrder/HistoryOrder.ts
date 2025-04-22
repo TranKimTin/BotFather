@@ -43,8 +43,7 @@ export enum ORDER_STATUS {
 export interface PropData {
     timestamp: string,
     balance: number,
-    balanceNoFee: number,
-    equity: number
+    balanceNoFee: number
 }
 
 export default defineComponent({
@@ -103,7 +102,6 @@ export default defineComponent({
                     let feeGain = 0;
                     let feeLoss = 0;
                     let totalFee = 0;
-                    const argsEquity: Array<{ timestamp: string, orderList: Array<{ symbol: string, broker: string, orderType: string, entry: number, volume: number }> }> = [];
                     let lastTimeUpdated: string = '';
 
                     let sortedData = [...result];
@@ -142,52 +140,13 @@ export default defineComponent({
                             gain += order.profit;
                             feeGain += fee;
                             cntGain++;
-                            balanceData.push({ timestamp: order.timeTP, balance: gain + loss - totalFee, balanceNoFee: gain + loss, equity: 0 });
-
-                            //equity 
-                            const timeCurrent = new Date(order.timeTP).getTime();
-                            argsEquity.push({ timestamp: order.timeTP, orderList: [] });
-                            for (let j = 0; j < orderOpening.length; j++) {
-                                const o = orderOpening[j];
-                                if (o === undefined) continue;
-
-                                const timeEntry = new Date(o.timeEntry).getTime();
-                                const timeTP = new Date(o.timeTP).getTime();
-                                const timeSL = new Date(o.timeSL).getTime();
-
-                                if (o.timeEntry && timeEntry <= timeCurrent && ((!o.timeTP && !o.timeSL) || (o.timeTP && timeTP > timeCurrent) || (o.timeSL && timeSL > timeCurrent))) {
-                                    const { symbol, broker, orderType, entry, volume } = o;
-                                    argsEquity[argsEquity.length - 1].orderList.push({ symbol, broker, orderType, entry, volume });
-                                }
-                                else {
-                                    orderOpening[j] = undefined;
-                                }
-                            }
-                            orderOpening = orderOpening.filter(item => item !== undefined);
+                            balanceData.push({ timestamp: order.timeTP, balance: gain + loss - totalFee, balanceNoFee: gain + loss});
                         }
                         else if (order.timeSL) {
                             loss += order.profit;
                             feeLoss += fee;
                             cntLoss++;
-                            balanceData.push({ timestamp: order.timeSL, balance: gain + loss - totalFee, balanceNoFee: gain + loss, equity: 0 });
-
-                            //equity 
-                            const timeCurrent = new Date(order.timeSL).getTime();
-                            argsEquity.push({ timestamp: order.timeSL, orderList: [] });
-                            for (let j = 0; j < orderOpening.length; j++) {
-                                const o = orderOpening[j];
-                                if (o === undefined) continue;
-
-                                const timeEntry = new Date(o.timeEntry).getTime();
-                                const timeTP = new Date(o.timeTP).getTime();
-                                const timeSL = new Date(o.timeSL).getTime();
-
-                                if (o.timeEntry && timeEntry <= timeCurrent && ((!o.timeTP && !o.timeSL) || (o.timeTP && timeTP > timeCurrent) || (o.timeSL && timeSL > timeCurrent))) {
-                                    const { symbol, broker, orderType, entry, volume } = o;
-                                    argsEquity[argsEquity.length - 1].orderList.push({ symbol, broker, orderType, entry, volume });
-                                }
-                            }
-                            orderOpening = orderOpening.filter(item => item !== undefined);
+                            balanceData.push({ timestamp: order.timeSL, balance: gain + loss - totalFee, balanceNoFee: gain + loss });
                         }
                         else if (order.timeEntry && order.profit) {
                             cntOpening++;
@@ -241,37 +200,6 @@ export default defineComponent({
                             loadData(false);
                         });
                     }
-
-                    const step = Math.max(10, Math.ceil(argsEquity.length / 30));
-                    for (let idx = 0; idx < argsEquity.length; idx += step) {
-                        const newData = [...r_balanceData.value];
-
-                        const args = argsEquity.slice(idx, idx + step);
-                        const data = await axios.post('/getUnrealizedProfit', args);
-
-                        if (data.length === args.length) {
-                            for (let i = 0; i < data.length; i++) {
-                                newData[idx + i].equity = data[i] + newData[idx + i].balance;
-                            }
-                            r_balanceData.value = newData;
-                        }
-                        else {
-                            Toast.showError(`Update equity error ${idx}`);
-                        }
-                    }
-
-                    const newData = [...r_balanceData.value];
-
-                    if (lastTimeUpdated !== '' && newData.length > 0 && new Date(lastTimeUpdated).getTime() > new Date(newData[newData.length - 1].timestamp).getTime()) {
-                        newData.push({
-                            timestamp: lastTimeUpdated,
-                            balance: gain + loss - feeGain - feeLoss,
-                            balanceNoFee: gain + loss,
-                            equity: gain + loss - feeGain - feeLoss + unrealizedGain + unrealizedLoss
-                        });
-                        r_balanceData.value = newData;
-                    }
-
                 });
             }, isDelay ? 3000 : 0);
         }
