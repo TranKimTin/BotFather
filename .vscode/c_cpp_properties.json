@@ -3,7 +3,9 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/botfather_c++/include/**",
+                "${workspaceFolder}/botfather_c++/src/**",
+                "${workspaceFolder}/botfather_c++/external_include/**"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
