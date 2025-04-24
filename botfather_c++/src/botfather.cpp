@@ -1,8 +1,8 @@
-#include "common/common.h"
+#include "commonType.h"
 #include <tbb/task_group.h>
 #include <chrono>
 #include <thread>
-#include "common/Expr.h"
+#include "Expr.h"
 
 tbb::task_group task;
 

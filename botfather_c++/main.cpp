@@ -1,4 +1,4 @@
-#include "src/botfather.h"
+#include "botfather.h"
 
 int main()
 {

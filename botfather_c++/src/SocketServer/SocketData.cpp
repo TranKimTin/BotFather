@@ -1,4 +1,4 @@
-#include "../common/common.h"
+#include "commonType.h"
 #include <websocketpp/config/asio_client.hpp>
 #include <websocketpp/client.hpp>
 #include <boost/asio/ssl/context.hpp>
