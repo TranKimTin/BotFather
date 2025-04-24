@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.10)
 
 project(botfather)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
+set(ANTLR4_RUNTIME_INCLUDE "${CMAKE_SOURCE_DIR}/src/antlr/include/antlr4-runtime")
+set(ANTLR4_RUNTIME_LIB "${CMAKE_SOURCE_DIR}/src/antlr/lib")
 
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -32,4 +34,13 @@ target_link_libraries(botfather
     OpenSSL::Crypto
     pthread
     tbb
+    ${ANTLR4_RUNTIME_LIB}/libantlr4-runtime.so
+)
+
+target_include_directories(botfather PRIVATE
+    ${ANTLR4_RUNTIME_INCLUDE}
+)
+
+set_target_properties(botfather PROPERTIES
+    BUILD_RPATH "${ANTLR4_RUNTIME_LIB}"
 )
