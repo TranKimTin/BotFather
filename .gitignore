@@ -148,6 +148,5 @@ src/test.ts
 js/temp.txt
 /botfather_c++/.vs
 /botfather_c++/x64
-/botfather_c++/lib
 /botfather_c++/build
 /botfather_c++/src/common/generated
