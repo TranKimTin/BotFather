@@ -83,6 +83,7 @@
         "unordered_set": "cpp",
         "ranges": "cpp",
         "valarray": "cpp",
-        "cfenv": "cpp"
+        "cfenv": "cpp",
+        "queue": "cpp"
     }
 }

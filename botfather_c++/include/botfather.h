@@ -1,1 +1,1 @@
-int runApp();
+void runApp();
