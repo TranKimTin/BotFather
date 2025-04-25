@@ -1,52 +1,6 @@
 {
     "configurations": [
         {
-            "name": "C++ debug",
-            "type": "cppdbg",
-            "request": "launch",
-            // "program": "${fileDirname}/${fileBasenameNoExtension}",
-            "program": "${workspaceFolder}/botfather_c++/botfather",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "miDebuggerPath": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ],
-            "preLaunchTask": "C/C++: g++ build debug",
-            "miDebuggerArgs": ""
-        },
-        {
-            "name": "C++ run",
-            "type": "cppdbg",
-            "request": "launch",
-            // "program": "${fileDirname}/${fileBasenameNoExtension}",
-            "program": "${workspaceFolder}/botfather_c++/botfather",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "miDebuggerPath": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ],
-            "preLaunchTask": "C/C++: g++ build release",
-            "miDebuggerArgs": ""
-        },
-        {
             "name": "C++ Debug cmake",
             "type": "cppdbg",
             "request": "launch",
