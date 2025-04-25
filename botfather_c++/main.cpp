@@ -2,6 +2,5 @@
 
 int main()
 {
-    runApp();
-    return 0;
+    return runApp();
 }

@@ -1,3 +1,5 @@
+#pragma one
+
 #include "antlr4-runtime.h"
 #include "ExprBaseVisitor.h"
 #include "ExprLexer.h"

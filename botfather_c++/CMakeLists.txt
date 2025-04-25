@@ -28,28 +28,32 @@ list(APPEND SOURCES "main.cpp")
 
 add_executable(botfather ${SOURCES})
 
+file(GLOB LIB_FILES "${CMAKE_SOURCE_DIR}/lib/*.so*")
+message(STATUS "lib=${LIB_FILES}")
 target_link_libraries(botfather
     Boost::system
     OpenSSL::SSL
     OpenSSL::Crypto
     pthread
     tbb
-    ${CMAKE_SOURCE_DIR}/lib/libantlr4-runtime.so.4.13.2
+    ${LIB_FILES}
 )
 
 file(GLOB_RECURSE HEADER_DIRS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
-
 set(INCLUDE_DIRS "")
 foreach(header ${HEADER_DIRS})
     get_filename_component(dir ${header} DIRECTORY)
     list(APPEND INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/${dir})
 endforeach()
-
 list(REMOVE_DUPLICATES INCLUDE_DIRS)
+message(STATUS "INCLUDE_DIRS=${INCLUDE_DIRS}")
+
+file(GLOB EXTERNAL_INCLUDE "${CMAKE_SOURCE_DIR}/external_include/*")
+message(STATUS "EXTERNAL_INCLUDE=${EXTERNAL_INCLUDE}")
 
 target_include_directories(botfather PRIVATE
-    ${CMAKE_SOURCE_DIR}/external_include/antlr4-runtime
     ${INCLUDE_DIRS}
+    ${EXTERNAL_INCLUDE}
 )
 
 set_target_properties(botfather PROPERTIES
