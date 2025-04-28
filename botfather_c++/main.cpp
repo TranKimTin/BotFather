@@ -6,14 +6,14 @@ using namespace std;
 
 void init()
 {
-    cout << "hello\n";
+    LOGI("Hello BotFather!");
     TA_RetCode retCode;
 
     // // Khởi tạo TA-Lib
     retCode = TA_Initialize();
     if (retCode != TA_SUCCESS)
     {
-        cout << "init TA-Lib fail" << endl;
+        LOGE("init TA - Lib fail");
         throw "init TA - Lib fail";
     }
 }
@@ -25,6 +25,9 @@ void destroy()
 
 int main()
 {
+    // std::ios::sync_with_stdio(false);
+    // std::cin.tie(0);
+
     init();
     runApp();
     destroy();

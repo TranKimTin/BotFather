@@ -19,6 +19,7 @@ protected:
     RateData getOHLCV(string &symbol, string &timeframe, int limit, long long since = 0);
     vector<string> getSymbolList();
     void connectSocket();
+    void mergeData(string &symbol, string &timeframe, string &currentTF, double open, double high, double low, double close, double volume, long long timestamp, bool isFinal);
 
 public:
     SocketBinance();
