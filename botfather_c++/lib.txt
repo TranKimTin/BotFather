@@ -12,3 +12,5 @@ sudo apt-get install cmake
 sudo apt-get install ninja-build
 sudo apt install openjdk-11-jdk
 sudo apt install ccache
+
+sudo timedatectl set-timezone Asia/Ho_Chi_Minh

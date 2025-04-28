@@ -6,7 +6,7 @@ class SocketBinance
 {
 protected:
     string broker;
-    unordered_map<string, RateData> data;
+    unordered_map<string, RateData> data; // key = symbol + "_" + timeframe;
     vector<string> timeframes;
     vector<string> symbolList;
     WebSocket ws;
@@ -15,11 +15,12 @@ protected:
 
     shared_ptr<boost::asio::ssl::context> on_tls_init(connection_hdl);
 
-    // void onCloseCandle(string &broker, string &symbol, string &timeframe, RateData &data);
     RateData getOHLCV(string &symbol, string &timeframe, int limit, long long since = 0);
     vector<string> getSymbolList();
     void connectSocket();
     void mergeData(string &symbol, string &timeframe, string &currentTF, double open, double high, double low, double close, double volume, long long timestamp, bool isFinal);
+    void onCloseCandle(string &symbol, string &timeframe, RateData &data);
+    void adjustData(RateData &rateData);
 
 public:
     SocketBinance();

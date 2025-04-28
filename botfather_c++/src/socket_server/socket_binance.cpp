@@ -30,57 +30,6 @@ void SocketBinance::on_message(connection_hdl, message_ptr msg)
     }
 }
 
-void SocketBinance::mergeData(string &symbol, string &timeframe, string &currentTF, double open, double high, double low, double close, double volume, long long startTime, bool isFinal)
-{
-    if (data.find(symbol) == data.end())
-    {
-        data[symbol] = RateData();
-        data[symbol].symbol = symbol;
-        data[symbol].interval = timeframe;
-    }
-
-    RateData &rateData = data[symbol];
-
-    if (rateData.open.empty())
-    {
-        rateData.open.push_front(open);
-        rateData.high.push_front(high);
-        rateData.low.push_front(low);
-        rateData.close.push_front(close);
-        rateData.volume.push_front(volume);
-        rateData.startTime.push_front(getStartTime(timeframe, startTime));
-        rateData.isFinal = isFinal && checkFinal(timeframe, startTime, currentTF);
-        return;
-    }
-
-    if (rateData.startTime[0] == startTime)
-    {
-        rateData.high[0] = max(rateData.high[0], high);
-        rateData.low[0] = min(rateData.low[0], low);
-        rateData.close[0] = close;
-        rateData.volume[0] += isFinal ? volume : 0;
-
-        if (!rateData.isFinal && isFinal && checkFinal(timeframe, startTime, currentTF))
-        {
-            // force onclose candle
-            LOGI("force onclose candle");
-        }
-    }
-    else if (getStartTime(timeframe, startTime) > rateData.startTime[0])
-    {
-        rateData.open.push_front(open);
-        rateData.high.push_front(high);
-        rateData.low.push_front(low);
-        rateData.close.push_front(close);
-        rateData.volume.push_front(volume);
-        rateData.startTime.push_front(getStartTime(timeframe, startTime));
-    }
-    else
-    {
-        LOGI("Merge data fail");
-    }
-}
-
 shared_ptr<boost::asio::ssl::context> SocketBinance::on_tls_init(connection_hdl)
 {
     auto ctx = make_shared<boost::asio::ssl::context>(boost::asio::ssl::context::tlsv12_client);
@@ -99,7 +48,7 @@ SocketBinance::SocketBinance()
 
 void SocketBinance::connectSocket()
 {
-    LOGI("socket %s init %d symbols", broker.c_str(), symbolList.size());
+    LOGI("socket %s init %lu symbols", broker.c_str(), symbolList.size());
 
     ws.set_access_channels(websocketpp::log::alevel::none);
     ws.clear_access_channels(websocketpp::log::alevel::all);
@@ -176,4 +125,92 @@ RateData SocketBinance::getOHLCV(string &symbol, string &timeframe, int limit, l
     }
 
     return rateData;
+}
+
+void SocketBinance::adjustData(RateData &rateData)
+{
+    if (rateData.open.size() > MAX_CANDLE)
+    {
+        rateData.open.pop_back();
+        rateData.high.pop_back();
+        rateData.low.pop_back();
+        rateData.close.pop_back();
+        rateData.volume.pop_back();
+        rateData.startTime.pop_back();
+    }
+}
+
+void SocketBinance::mergeData(string &symbol, string &timeframe, string &currentTF, double open, double high, double low, double close, double volume, long long startTime, bool isFinal)
+{
+    string key = symbol + "_" + timeframe;
+    if (data.find(key) == data.end())
+    {
+        data[key] = RateData();
+        data[key].symbol = symbol;
+        data[key].interval = timeframe;
+    }
+
+    RateData &rateData = data[key];
+
+    long long rateStartTime = getStartTime(timeframe, startTime);
+
+    if (rateData.open.empty())
+    {
+        rateData.open.push_front(open);
+        rateData.high.push_front(high);
+        rateData.low.push_front(low);
+        rateData.close.push_front(close);
+        rateData.volume.push_front(volume);
+        rateData.startTime.push_front(rateStartTime);
+        rateData.isFinal = isFinal && checkFinal(timeframe, startTime, currentTF);
+
+        adjustData(rateData);
+        return;
+    }
+
+    if (rateData.startTime[0] == rateStartTime)
+    {
+        rateData.high[0] = max(rateData.high[0], high);
+        rateData.low[0] = min(rateData.low[0], low);
+        rateData.close[0] = close;
+        rateData.volume[0] += isFinal ? volume : 0;
+
+        if (!rateData.isFinal && isFinal && checkFinal(timeframe, startTime, currentTF))
+        {
+            // force onclose candle
+            LOGI("force onclose candle");
+            onCloseCandle(symbol, timeframe, rateData);
+        }
+    }
+    else if (rateStartTime > rateData.startTime[0])
+    {
+        rateData.open.push_front(open);
+        rateData.high.push_front(high);
+        rateData.low.push_front(low);
+        rateData.close.push_front(close);
+        rateData.volume.push_front(volume);
+        rateData.startTime.push_front(rateStartTime);
+
+        adjustData(rateData);
+        onCloseCandle(symbol, timeframe, rateData);
+    }
+    else
+    {
+        LOGI("Merge data fail");
+    }
+}
+
+void SocketBinance::onCloseCandle(string &symbol, string &timeframe, RateData &rateData)
+{
+    // if (rateData.startTime.size() < 15)
+    //     return;
+
+    long long startTime = rateData.startTime.back();
+    double open = rateData.open.back();
+    double high = rateData.high.back();
+    double low = rateData.low.back();
+    double close = rateData.close.back();
+    double volume = rateData.volume.back();
+
+    LOGI("%s %s %lld %f %f %f %f %f", symbol.c_str(), timeframe.c_str(), startTime, open, high, low, close, volume);
 }

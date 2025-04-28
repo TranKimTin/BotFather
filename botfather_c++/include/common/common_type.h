@@ -8,6 +8,9 @@
 #include <chrono>
 #include <thread>
 #include <cctype>
+#include <ctime>
+#include <iomanip>
+#include <sstream>
 
 #include <websocketpp/config/asio_client.hpp>
 #include <websocketpp/client.hpp>
@@ -17,16 +20,24 @@
 
 #define DEBUG 1
 
-// #define endl "\n"
+inline std::string current_timestamp() {
+    auto now = std::chrono::system_clock::now();
+    auto now_t = std::chrono::system_clock::to_time_t(now);
+    std::tm local_tm = *std::localtime(&now_t);
+
+    std::ostringstream oss;
+    oss << std::put_time(&local_tm, "%Y-%m-%d %H:%M:%S"); 
+    return oss.str();
+}
 
 #ifndef DEBUG
-#define LOGD(s, ...)
+#define LOGD(mess, ...)
 #else
-#define LOGD(s, ...) std::printf("[DEBUG]: " s "\n", ##__VA_ARGS__);
+#define LOGD(mess, ...) std::printf("[%s] [DEBUG] %s " mess "\n", current_timestamp().c_str(), __PRETTY_FUNCTION__, ##__VA_ARGS__);
 #endif
 
-#define LOGI(s, ...) std::printf("[INFO]: " s "\n", ##__VA_ARGS__);
-#define LOGE(s, ...) std::fprintf(stderr, "[ERROR]: " s "\n", ##__VA_ARGS__);
+#define LOGI(mess, ...) std::printf("[%s] [INFO] %s " mess "\n", current_timestamp().c_str(), __PRETTY_FUNCTION__, ##__VA_ARGS__);
+#define LOGE(mess, ...) std::fprintf(stderr, "[%s] [ERROR] %s " mess "\n", current_timestamp().c_str(), __PRETTY_FUNCTION__, ##__VA_ARGS__);
 
 using namespace std;
 
@@ -35,6 +46,7 @@ using websocketpp::connection_hdl;
 using message_ptr = websocketpp::config::asio_tls_client::message_type::ptr;
 using json = nlohmann::json;
 
+const int MAX_CANDLE = 600;
 struct RateData
 {
     string symbol;
