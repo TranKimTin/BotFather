@@ -1,5 +1,16 @@
 {
-    "cmake.sourceDirectory": "/mnt/d/git_project/trade/botfather_c++/websocketpp",
+    "cmake.sourceDirectory": "/mnt/d/git_project/trade/botfather_c++",
+    "C_Cpp.intelliSenseEngine": "default",
+    "C_Cpp.autoAddFileAssociations": true,
+    "files.watcherExclude": {
+        "**/build/**": true,
+        "**/.git/**": true,
+        "**/node_modules/**": true
+    },
+    "files.exclude": {
+        "**/*.o": true,
+        "**/*.out": true
+    },
     "files.associations": {
         "cctype": "cpp",
         "clocale": "cpp",
