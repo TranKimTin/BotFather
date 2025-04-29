@@ -46,23 +46,6 @@ SocketBinance::SocketBinance(const int _BATCH_SIZE) : BATCH_SIZE(_BATCH_SIZE)
     connectSocket();
 }
 
-// void SocketBinance::onSocketConnected(connection_hdl hdl)
-// {
-//     LOGI("Socket %s connected", broker.c_str());
-//     for (auto tf : timeframes)
-//     {
-//         for (auto symbol : symbolList)
-//         {
-//             string key = symbol + "_" + tf;
-//             if (data.find(key) == data.end())
-//             {
-//                 data[key] = getOHLCV(symbol, tf, MAX_CANDLE);
-//                 LOGD("Get data %s %s %ld", symbol.c_str(), tf.c_str(), data[key].startTime.size());
-//             }
-//         }
-//     }
-// }
-
 void SocketBinance::onSocketConnected(connection_hdl hdl)
 {
     LOGI("Socket %s connected", broker.c_str());
