@@ -9,6 +9,6 @@ using namespace std;
 
 void runApp()
 {
-    SocketBinance binance;
+    SocketBinance binance(50);
 
 }

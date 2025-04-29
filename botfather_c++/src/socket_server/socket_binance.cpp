@@ -37,13 +37,74 @@ shared_ptr<boost::asio::ssl::context> SocketBinance::on_tls_init(connection_hdl)
     return ctx;
 }
 
-SocketBinance::SocketBinance()
+SocketBinance::SocketBinance(const int _BATCH_SIZE) : BATCH_SIZE(_BATCH_SIZE)
 {
     broker = "binance";
     timeframes = {"1m", "5m", "15m", "30m", "1h", "4h", "1d"};
     symbolList = getSymbolList();
 
     connectSocket();
+}
+
+// void SocketBinance::onSocketConnected(connection_hdl hdl)
+// {
+//     LOGI("Socket %s connected", broker.c_str());
+//     for (auto tf : timeframes)
+//     {
+//         for (auto symbol : symbolList)
+//         {
+//             string key = symbol + "_" + tf;
+//             if (data.find(key) == data.end())
+//             {
+//                 data[key] = getOHLCV(symbol, tf, MAX_CANDLE);
+//                 LOGD("Get data %s %s %ld", symbol.c_str(), tf.c_str(), data[key].startTime.size());
+//             }
+//         }
+//     }
+// }
+
+void SocketBinance::onSocketConnected(connection_hdl hdl)
+{
+    LOGI("Socket %s connected", broker.c_str());
+
+    vector<pair<string, string>> tasks;
+
+    // Gom task trước
+    for (const auto &tf : timeframes)
+    {
+        for (const auto &symbol : symbolList)
+        {
+            string key = symbol + "_" + tf;
+            if (data.find(key) == data.end())
+            {
+                tasks.emplace_back(symbol, tf);
+            }
+        }
+    }
+
+    for (int i = 0; i < tasks.size(); i += BATCH_SIZE)
+    {
+        vector<std::future<void>> futures;
+        int end = min(i + BATCH_SIZE, (int)tasks.size());
+
+        for (int j = i; j < end; ++j)
+        {
+            auto [symbol, tf] = tasks[j];
+
+            futures.emplace_back(std::async(std::launch::async, [this, symbol, tf]()
+                                            {
+                string key = symbol + "_" + tf;
+                data[key]  = getOHLCV(symbol, tf, MAX_CANDLE);
+                LOGD("Get data %s %s %ld", symbol.c_str(), tf.c_str(), data[key].startTime.size()); }));
+        }
+
+        // Chờ batch này xong
+        for (auto &f : futures)
+            f.get();
+
+        // (Tùy chọn) nghỉ một chút để tránh rate limit
+        SLEEP_FOR(5000);
+    }
 }
 
 void SocketBinance::connectSocket()
@@ -60,8 +121,7 @@ void SocketBinance::connectSocket()
                                      std::placeholders::_1,
                                      std::placeholders::_2));
     ws.set_tls_init_handler(std::bind(&SocketBinance::on_tls_init, this, std::placeholders::_1));
-    ws.set_open_handler([this](connection_hdl hdl)
-                        { LOGI("Socket %s connected", broker.c_str()); });
+    ws.set_open_handler(std::bind(&SocketBinance::onSocketConnected, this, std::placeholders::_1));
 
     string uri = "wss://stream.binance.com:9443/stream?streams=";
     for (int i = 0; i < symbolList.size(); i++)
@@ -100,7 +160,7 @@ vector<string> SocketBinance::getSymbolList()
     return symbols;
 }
 
-RateData SocketBinance::getOHLCV(string &symbol, string &timeframe, int limit, long long since)
+RateData SocketBinance::getOHLCV(const string &symbol, const string &timeframe, int limit, long long since)
 {
     string url = "https://api.binance.com/api/v3/klines?symbol=" + symbol + "&interval=" + timeframe + "&limit=" + to_string(limit);
     if (since > 0)
@@ -117,11 +177,11 @@ RateData SocketBinance::getOHLCV(string &symbol, string &timeframe, int limit, l
     for (const auto &item : j)
     {
         rateData.startTime.push_back(item[0].get<long long>());
-        rateData.open.push_back(item[1].get<double>());
-        rateData.high.push_back(item[2].get<double>());
-        rateData.low.push_back(item[3].get<double>());
-        rateData.close.push_back(item[4].get<double>());
-        rateData.volume.push_back(item[5].get<double>());
+        rateData.open.push_back(stod(item[1].get<string>()));
+        rateData.high.push_back(stod(item[2].get<string>()));
+        rateData.low.push_back(stod(item[3].get<string>()));
+        rateData.close.push_back(stod(item[4].get<string>()));
+        rateData.volume.push_back(stod(item[5].get<string>()));
     }
 
     return rateData;
@@ -156,15 +216,6 @@ void SocketBinance::mergeData(string &symbol, string &timeframe, string &current
 
     if (rateData.open.empty())
     {
-        rateData.open.push_front(open);
-        rateData.high.push_front(high);
-        rateData.low.push_front(low);
-        rateData.close.push_front(close);
-        rateData.volume.push_front(volume);
-        rateData.startTime.push_front(rateStartTime);
-        rateData.isFinal = isFinal && checkFinal(timeframe, startTime, currentTF);
-
-        adjustData(rateData);
         return;
     }
 

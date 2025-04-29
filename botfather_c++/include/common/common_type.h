@@ -39,6 +39,8 @@ inline std::string current_timestamp() {
 #define LOGI(mess, ...) std::printf("[%s] [INFO] %s " mess "\n", current_timestamp().c_str(), __PRETTY_FUNCTION__, ##__VA_ARGS__);
 #define LOGE(mess, ...) std::fprintf(stderr, "[%s] [ERROR] %s " mess "\n", current_timestamp().c_str(), __PRETTY_FUNCTION__, ##__VA_ARGS__);
 
+#define SLEEP_FOR(ms) std::this_thread::sleep_for(std::chrono::milliseconds(ms))
+
 using namespace std;
 
 typedef websocketpp::client<websocketpp::config::asio_tls_client> WebSocket;
