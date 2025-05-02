@@ -211,13 +211,19 @@ void SocketBinance::mergeData(string &symbol, string &timeframe, string &current
 
         if (!rateData.isFinal && isFinal && checkFinal(timeframe, startTime, currentTF))
         {
-            // force onclose candle
-            LOGI("force onclose candle");
+            rateData.isFinal = true;
             onCloseCandle(symbol, timeframe, rateData);
         }
     }
     else if (rateStartTime > rateData.startTime[0])
     {
+        if (!rateData.isFinal)
+        {
+            rateData.isFinal = true;
+            LOGI("Force final %s %s %lld", symbol.c_str(), timeframe.c_str(), toTimeString(rateStartTime));
+            onCloseCandle(symbol, timeframe, rateData);
+        }
+
         rateData.open.push_front(open);
         rateData.high.push_front(high);
         rateData.low.push_front(low);
@@ -226,7 +232,6 @@ void SocketBinance::mergeData(string &symbol, string &timeframe, string &current
         rateData.startTime.push_front(rateStartTime);
 
         adjustData(rateData);
-        onCloseCandle(symbol, timeframe, rateData);
     }
     else
     {

@@ -1,12 +1,12 @@
 #include "botfather.h"
 #include "common_type.h"
 #include "ta_libc.h"
+#include "util.h"
 
 using namespace std;
 
 void init()
 {
-    LOGI("Hello BotFather!");
     TA_RetCode retCode;
 
     // // Khởi tạo TA-Lib
@@ -27,6 +27,11 @@ int main()
 {
     // std::ios::sync_with_stdio(false);
     // std::cin.tie(0);
+
+    auto now = std::chrono::system_clock::now();
+    auto duration = now.time_since_epoch();
+    long long milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+    LOGI("Hello BotFather! %s", toTimeString(milliseconds).c_str());
 
     init();
     runApp();

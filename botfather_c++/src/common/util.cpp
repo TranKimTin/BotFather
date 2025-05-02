@@ -115,3 +115,20 @@ long long nextTime(long long timestamp, const string &timeframe)
     long long offsetTime = timeframeToNumberMiliseconds(timeframe);
     return startTime + offsetTime;
 }
+
+string toTimeString(long long timestampMs)
+{
+    time_t timestampSec = timestampMs / 1000;
+    tm tm;
+    localtime_r(&timestampSec, &tm); 
+
+    std::ostringstream oss;
+    oss << std::setfill('0')
+        << std::setw(4) << (tm.tm_year + 1900) << "-"
+        << std::setw(2) << (tm.tm_mon + 1) << "-"
+        << std::setw(2) << tm.tm_mday << " "
+        << std::setw(2) << tm.tm_hour << ":"
+        << std::setw(2) << tm.tm_min;
+
+    return oss.str();
+}
