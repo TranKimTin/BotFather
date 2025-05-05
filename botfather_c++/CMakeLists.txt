@@ -41,6 +41,7 @@ target_link_libraries(botfather
     OpenSSL::Crypto
     pthread
     tbb
+    -lhiredis
     ${LIB_FILES}
 )
 

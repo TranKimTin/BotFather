@@ -1,4 +1,5 @@
 #include "util.h"
+#include "fstream"
 
 string toLowerCase(string str)
 {
@@ -9,11 +10,11 @@ string toLowerCase(string str)
     return str;
 }
 
-bool endsWith(const std::string &str, const std::string &suffix)
+bool endsWith(const string &str, const string &suffix)
 {
     if (suffix.size() > str.size())
         return false;
-    return std::equal(suffix.rbegin(), suffix.rend(), str.rbegin());
+    return equal(suffix.rbegin(), suffix.rend(), str.rbegin());
 }
 
 bool checkFinal(const string &tf, long long startTime, string &currentTF)
@@ -120,15 +121,44 @@ string toTimeString(long long timestampMs)
 {
     time_t timestampSec = timestampMs / 1000;
     tm tm;
-    localtime_r(&timestampSec, &tm); 
+    localtime_r(&timestampSec, &tm);
 
-    std::ostringstream oss;
-    oss << std::setfill('0')
-        << std::setw(4) << (tm.tm_year + 1900) << "-"
-        << std::setw(2) << (tm.tm_mon + 1) << "-"
-        << std::setw(2) << tm.tm_mday << " "
-        << std::setw(2) << tm.tm_hour << ":"
-        << std::setw(2) << tm.tm_min;
+    ostringstream oss;
+    oss << setfill('0')
+        << setw(4) << (tm.tm_year + 1900) << "-"
+        << setw(2) << (tm.tm_mon + 1) << "-"
+        << setw(2) << tm.tm_mday << " "
+        << setw(2) << tm.tm_hour << ":"
+        << setw(2) << tm.tm_min;
 
     return oss.str();
+}
+
+map<string, string> readEnvFile()
+{
+    ifstream file(".env");
+    map<string, string> envMap;
+    string line;
+
+    while (getline(file, line))
+    {
+        if (line.empty() || line[0] == '#')
+            continue;
+
+        size_t eqPos = line.find('=');
+        if (eqPos == string::npos)
+            continue;
+
+        string key = line.substr(0, eqPos);
+        string value = line.substr(eqPos + 1);
+
+        key.erase(0, key.find_first_not_of(" \t\r\n"));
+        key.erase(key.find_last_not_of(" \t\r\n") + 1);
+        value.erase(0, value.find_first_not_of(" \t\r\n"));
+        value.erase(value.find_last_not_of(" \t\r\n") + 1);
+
+        envMap[key] = value;
+    }
+
+    return envMap;
 }

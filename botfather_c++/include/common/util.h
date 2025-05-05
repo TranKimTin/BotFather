@@ -9,3 +9,4 @@ int timeframeToNumberMinutes(const string &tf);
 long long timeframeToNumberMiliseconds(const string &tf);
 long long nextTime(long long timestamp, const string &timeframe);
 string toTimeString(long long timestampMs);
+map<string, string> readEnvFile();
