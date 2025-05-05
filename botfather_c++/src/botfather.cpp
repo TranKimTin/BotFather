@@ -17,16 +17,11 @@ void runApp()
 
     Redis::getInstance().connect(env["REDIS_SERVER"], stoi(env["REDIS_PORT"]), env["REDIS_PASSWORD"]);
 
-    Redis::getInstance().pushBack("key", "value");
-    Redis::getInstance().pushBack("key", "value");
-    Redis::getInstance().pushBack("key", "value");
-    Redis::getInstance().pushBack("key", "value");
-
-    auto list = Redis::getInstance().getList("key");
-    for (const auto &item : list)
+    vector<string> list = Redis::getInstance().getList("binance_future_BTCUSDT_15m");
+    LOGD("list size: %lu", list.size());
+    for (int i=0; i<list.size(); i++)
     {
+        string item = list[i];
         LOGD("item: %s", item.c_str());
     }
-
-    Redis::getInstance().clearList("mylist");
 }

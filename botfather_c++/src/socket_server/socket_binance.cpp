@@ -220,7 +220,7 @@ void SocketBinance::mergeData(string &symbol, string &timeframe, string &current
         if (!rateData.isFinal)
         {
             rateData.isFinal = true;
-            LOGI("Force final %s %s %lld", symbol.c_str(), timeframe.c_str(), toTimeString(rateStartTime));
+            LOGI("Force final %s %s %s", symbol.c_str(), timeframe.c_str(), toTimeString(rateStartTime).c_str());
             onCloseCandle(symbol, timeframe, rateData);
         }
 
