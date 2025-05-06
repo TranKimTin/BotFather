@@ -173,7 +173,7 @@
 
                                 <td
                                     class="px-6 py-4 text-sm font-medium leading-5 border-b border-gray-200 whitespace-nowrap">
-                                    <a href="#" class="text-indigo-600 hover:text-indigo-900"><i
+                                    <a :href="`/history/${u.botName}`" class="text-indigo-600 hover:text-indigo-900"><i
                                             class="pi pi-cog"></i></a>
                                 </td>
                             </tr>
