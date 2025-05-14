@@ -15,7 +15,7 @@ export function onCloseCandle(broker: string, symbol: string, timeframe: string,
     for (const botInfo of botChildren) {
         try {
             const { botName, idTelegram, symbolList, timeframes, route } = botInfo;
-            if (botName === '0_0_0_2R-Trade_10-5-2025_V7') {
+            if (botName === '0_0_0_2R-Trade_10-5-2025_V7' && broker === 'binance_future' && symbol === 'ARKMUSDT' && timeframe === '5m') {
                 console.log(botInfo)
                 console.log('id', botIDs[botName]);
                 console.log({ broker, symbol, timeframe })
