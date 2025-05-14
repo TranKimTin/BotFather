@@ -15,6 +15,13 @@ export function onCloseCandle(broker: string, symbol: string, timeframe: string,
     for (const botInfo of botChildren) {
         try {
             const { botName, idTelegram, symbolList, timeframes, route } = botInfo;
+            if (botName === '0_0_0_2R-Trade_10-5-2025_V7') {
+                console.log(botInfo)
+                console.log('id', botIDs[botName]);
+                console.log({ broker, symbol, timeframe })
+                console.log('----------------')
+            }
+
             if (!timeframes.includes(timeframe) || !binarySearch(symbolList, `${broker}:${symbol}`)) continue;
 
             const visited: { [key: string]: boolean } = {};
@@ -32,7 +39,6 @@ export function onCloseCandle(broker: string, symbol: string, timeframe: string,
 export function setBotData(_botChildren: Array<BotInfo>, _botIDs: { [key: string]: number }) {
     botChildren = _botChildren;
     botIDs = _botIDs;
-    console.log('setBotData', JSON.stringify(botChildren));
 }
 
 // async function initBotChildren() {
