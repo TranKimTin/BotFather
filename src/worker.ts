@@ -32,6 +32,7 @@ export function onCloseCandle(broker: string, symbol: string, timeframe: string,
 export function setBotData(_botChildren: Array<BotInfo>, _botIDs: { [key: string]: number }) {
     botChildren = _botChildren;
     botIDs = _botIDs;
+    console.log('setBotData', JSON.stringify(botChildren));
 }
 
 // async function initBotChildren() {
