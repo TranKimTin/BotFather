@@ -4,15 +4,72 @@ import Telegram from './common/telegram';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import WebSocket from 'ws';
 import moment from 'moment';
+import Binance, { NewFuturesOrder, OrderType } from 'binance-api-node'
+import axios from 'axios';
+import crypto from 'crypto';
 
 dotenv.config({ path: '../.env' });
 
 const telegram = new Telegram(undefined, undefined, false);
 let symbolList: Array<string> = [];
-const volume = 15; //USDT
+const volume = 11; //USDT
+const volumeCheck = 100;
 const spotData: { [key: string]: { price: number, lastUpdate: number } } = {};
 const futureData: { [key: string]: { price: number, lastUpdate: number } } = {};
 const cnt: { [key: string]: number } = {};
+
+const client = Binance({
+    apiKey: process.env.API_KEY,
+    apiSecret: process.env.SECRET_KEY,
+    // httpFutures: 'https://testnet.binancefuture.com',
+    // wsFutures: 'wss://stream.binancefuture.com/ws'
+});
+
+let spotDigit: Awaited<ReturnType<typeof util.getDigitsSpot>>;
+let futureDigit: Awaited<ReturnType<typeof util.getDigitsFuture>>;
+
+async function placeMarketOrder(symbol: string, side: 'BUY' | 'SELL', quantity: string) {
+    try {
+        const order = await client.order({
+            symbol: symbol,
+            side: 'BUY',
+            type: OrderType.MARKET,
+            quantity: quantity,
+        });
+
+        console.log('Lệnh mua thành công:', order);
+    } catch (error) {
+        console.error('Lỗi khi đặt lệnh:', error);
+    }
+}
+
+async function futurePlaceMarketOrder(symbol: string, side: 'BUY' | 'SELL', quantity: string) {
+    const baseUrl = 'https://papi.binance.com';
+    const endpoint = '/papi/v1/um/order';
+
+    const data = {
+        symbol: symbol,
+        side: side,
+        type: 'MARKET',
+        quantity: quantity,
+        timestamp: Date.now().toString(),
+    };
+
+    const query = new URLSearchParams(data).toString();
+    const signature = crypto.createHmac('sha256', process.env.SECRET_KEY as string).update(query).digest('hex');
+
+    try {
+        console.log(process.env.SECRET_KEY)
+        console.log(`${baseUrl}${endpoint}?${query}&signature=${signature}`)
+        const response = await axios.post(`${baseUrl}${endpoint}?${query}&signature=${signature}`, null, {
+            headers: { 'X-MBX-APIKEY': process.env.API_KEY }
+        });
+        console.log('✅ Lệnh LONG UM thành công:', response.data);
+    } catch (error: any) {
+        console.error('❌ Lỗi đặt lệnh LONG UM:', error.response?.data || error.message);
+    }
+}
+
 
 function connectSocketSpot() {
     const streams = symbolList.map(symbol => `${symbol.toLowerCase()}@depth5@100ms`).join("/");
@@ -34,7 +91,7 @@ function connectSocketSpot() {
             const price = +item[0];
             const quantity = +item[1];
             totalVol += price * quantity;
-            if (totalVol >= volume) {
+            if (totalVol >= volumeCheck) {
                 spotData[symbol].price = price;
                 spotData[symbol].lastUpdate = new Date().getTime();
                 check(symbol);
@@ -73,7 +130,7 @@ function connectSocketFuture() {
             const price = +item[0];
             const quantity = +item[1];
             totalVol += price * quantity;
-            if (totalVol >= volume) {
+            if (totalVol >= volumeCheck) {
                 futureData[symbol].price = price;
                 futureData[symbol].lastUpdate = new Date().getTime();
                 check(symbol);
@@ -92,7 +149,10 @@ function connectSocketFuture() {
     });
 }
 
+let isOrdered = false;
 function check(symbol: string) {
+    if (isOrdered) return;
+
     const spotAsk: number = spotData[symbol].price;
     const futureBid: number = futureData[symbol].price;
     const lastUpdateSpot = spotData[symbol].lastUpdate;
@@ -111,7 +171,22 @@ function check(symbol: string) {
     }
 
     if (cnt[symbol] >= 3) {
-        telegram.sendMessage(`${moment().format('HH:mm:ss.SSS')} ${symbol} - diff: ${+diff.toFixed(3)} %, spot: ${spotAsk}, future: ${futureBid} (${cnt[symbol]})`, 1833284254);
+        isOrdered = true;
+
+        const quantity = (volume / futureBid).toFixed(futureDigit[symbol].volume);
+
+        telegram.sendMessage(`${moment().format('HH:mm:ss.SSS')} ${symbol} - diff: ${+diff.toFixed(3)} %, spot: ${spotAsk}, future: ${futureBid}, volume: ${quantity} (${cnt[symbol]})`, 1833284254);
+
+
+
+        Promise.all([
+            placeMarketOrder(symbol, 'BUY', quantity),
+            futurePlaceMarketOrder(symbol, 'SELL', quantity)
+        ]).then(data => {
+            console.log(data);
+            process.exit();
+        });
+
     }
     else if (diff > 0.5) {
         console.log(`${symbol} - diff: ${+diff.toFixed(3)} %, spot: ${spotAsk}, future: ${futureBid}`);
@@ -120,6 +195,10 @@ function check(symbol: string) {
 
 async function main() {
     console.log('start arbitrage');
+
+    spotDigit = await util.getDigitsSpot();
+    futureDigit = await util.getDigitsFuture();
+
     const spotList = await util.getBinanceSymbolList();
     const futureList = await util.getBinanceFutureSymbolList();
     symbolList = spotList.filter(item => futureList.includes(item));
@@ -140,6 +219,9 @@ async function main() {
     connectSocketFuture();
 
     console.log('arbitrage init done');
+
+    // await placeMarketOrder('BTCUSDT', 'BUY', '0.00005');
+    // await futurePlaceMarketOrder('JUPUSDT', 'SELL', '9');
 }
 
 

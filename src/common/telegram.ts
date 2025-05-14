@@ -58,6 +58,7 @@ export default class Telegram {
         try {
             console.log(this.TAG, 'Send message telegram', id, mess);
             id = id || chatID;
+            return;
             mess = this.encodeHTML(mess);
             this.listMess[id] = this.listMess[id] || [];
             this.listMess[id].push(mess);

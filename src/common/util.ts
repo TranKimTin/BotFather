@@ -291,16 +291,32 @@ export function iAvgRSI(data: Array<RateData>, rsiPeriod: number, period: number
     return cacheIndicator[key].values;
 }
 
+export async function getDigitsSpot() {
+    const url = 'https://api.binance.com/api/v1/exchangeInfo';
+    const res = await axios.get(url, { timeout: 60000 });
+    const data: any = res.data;
+    const digits: { [key: string]: { price: number, volume: number, minVolumeInUSD: number } } = {};
+    for (const item of data.symbols) {
+        digits[item.symbol] = {
+            price: +item.baseAssetPrecision,
+            volume: +item.quotePrecision,
+            minVolumeInUSD: +item.filters.filter((i: any) => i.filterType === 'NOTIONAL')[0].minNotional
+        }
+    }
+    return digits;
+}
+
 export async function getDigitsFuture() {
     // const url = useFuture ? 'https://fapi.binance.com/fapi/v1/exchangeInfo' : 'https://api.binance.com/api/v1/exchangeInfo'
     const url = 'https://fapi.binance.com/fapi/v1/exchangeInfo';
     const res = await axios.get(url, { timeout: 60000 });
     const data: any = res.data;
-    const digits: { [key: string]: { price: number, volume: number } } = {};
+    const digits: { [key: string]: { price: number, volume: number, minVolumeInUSD: number } } = {};
     for (const item of data.symbols) {
         digits[item.symbol] = {
-            price: item.pricePrecision,
-            volume: item.quantityPrecision
+            price: +item.pricePrecision,
+            volume: +item.quantityPrecision,
+            minVolumeInUSD: +item.filters.filter((i: any) => i.filterType === 'MIN_NOTIONAL')[0].notional
         }
     }
     return digits;
