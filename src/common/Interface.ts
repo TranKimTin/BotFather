@@ -222,7 +222,8 @@ export interface HandleLogicArgs {
     visited: { [key: string]: boolean },
     botID: number,
     cacheIndicator: CacheIndicator,
-    initCache: boolean
+    initCache: boolean,
+    bot: BotInfo
 }
 
 export interface DequeItem {
