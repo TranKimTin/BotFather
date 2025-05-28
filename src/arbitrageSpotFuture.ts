@@ -163,14 +163,14 @@ function check(symbol: string) {
 
     const diff = (futureBid - spotAsk) / spotAsk * 100;
 
-    if (diff >= 1) {
+    if (diff >= 0.7) {
         cnt[symbol]++;
     }
     else {
         cnt[symbol] = 0;
     }
 
-    if (cnt[symbol] >= 3) {
+    if (cnt[symbol] >= 10) {
         isOrdered = true;
 
         const quantity = (volume / futureBid).toFixed(futureDigit[symbol].volume);
