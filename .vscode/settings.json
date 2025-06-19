@@ -95,6 +95,7 @@
         "ranges": "cpp",
         "valarray": "cpp",
         "cfenv": "cpp",
-        "queue": "cpp"
+        "queue": "cpp",
+        "xstring": "cpp"
     }
 }

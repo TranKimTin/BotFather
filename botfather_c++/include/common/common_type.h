@@ -54,7 +54,8 @@ struct RateData
 {
     string symbol;
     string interval;
-    bool isFinal;
+    bool isFinal = false;
+    bool isBlocking = false;
     deque<double> open;
     deque<double> high;
     deque<double> low;

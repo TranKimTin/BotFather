@@ -18,12 +18,14 @@ protected:
     void onSocketConnected(connection_hdl hdl);
 
     RateData getOHLCV(const string &symbol, const string &timeframe, int limit, long long since = 0);
+    RateData getOHLCVFromCache(const string &symbol, const string &timeframe);
+    void updateCache(const RateData &rateData);
     vector<string> getSymbolList();
     void connectSocket();
-    void mergeData(string &symbol, string &timeframe, string &currentTF, double open, double high, double low, double close, double volume, long long timestamp, bool isFinal);
-    void onCloseCandle(string &symbol, string &timeframe, RateData &data);
+    void mergeData(const string &symbol, string &timeframe, string &currentTF, double open, double high, double low, double close, double volume, long long timestamp, bool isFinal);
+    void onCloseCandle(const string &symbol, string &timeframe, RateData &data);
     void adjustData(RateData &rateData);
-
+    bool isValidData(const RateData &rateData);
 public:
     SocketBinance(const int _BATCH_SIZE);
 };

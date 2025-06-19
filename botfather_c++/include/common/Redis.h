@@ -17,6 +17,9 @@ public:
     bool pushBack(const string& key, const string& value);
     string popFront(const string& key);
     string popBack(const string& key);
+    string front(const string& key);
+    string back(const string& key);
+    int size(const string& key);
     vector<string> getList(const string& key);
     bool clearList(const string& key);
 

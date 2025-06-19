@@ -156,3 +156,42 @@ bool Redis::clearList(const string &key)
         freeReplyObject(reply);
     return success;
 }
+
+string Redis::front(const string &key)
+{
+    lock_guard<mutex> lock(mMutex);
+    if (!context)
+        return "";
+
+    redisReply *reply = (redisReply *)redisCommand(context, "LINDEX %s 0", key.c_str());
+    string result = (reply && reply->type == REDIS_REPLY_STRING) ? reply->str : "";
+    if (reply)
+        freeReplyObject(reply);
+    return result;
+}
+
+string Redis::back(const string &key)
+{
+    lock_guard<mutex> lock(mMutex);
+    if (!context)
+        return "";
+
+    redisReply *reply = (redisReply *)redisCommand(context, "LINDEX %s -1", key.c_str());
+    string result = (reply && reply->type == REDIS_REPLY_STRING) ? reply->str : "";
+    if (reply)
+        freeReplyObject(reply);
+    return result;
+}
+
+int Redis::size(const string &key)
+{
+    lock_guard<mutex> lock(mMutex);
+    if (!context)
+        return 0;
+
+    redisReply *reply = (redisReply *)redisCommand(context, "LLEN %s", key.c_str());
+    int size = (reply && reply->type == REDIS_REPLY_INTEGER) ? reply->integer : 0;
+    if (reply)
+        freeReplyObject(reply);
+    return size;
+}

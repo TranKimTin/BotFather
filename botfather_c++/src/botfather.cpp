@@ -11,17 +11,9 @@ using namespace std;
 
 void runApp()
 {
-    // SocketBinance binance(50);
-
-    map<string, string> env = readEnvFile();
+     map<string, string> env = readEnvFile();
 
     Redis::getInstance().connect(env["REDIS_SERVER"], stoi(env["REDIS_PORT"]), env["REDIS_PASSWORD"]);
-
-    vector<string> list = Redis::getInstance().getList("binance_future_BTCUSDT_15m");
-    LOGD("list size: %lu", list.size());
-    for (int i=0; i<list.size(); i++)
-    {
-        string item = list[i];
-        LOGD("item: %s", item.c_str());
-    }
+    
+    SocketBinance binance(10);
 }
