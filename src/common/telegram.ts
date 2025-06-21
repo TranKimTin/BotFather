@@ -23,15 +23,13 @@ export default class Telegram {
 
 
     constructor(tag?: string, token?: string, polling?: boolean) {
-        polling = false;
-
         const botToken: any = token || process.env.TELEGRAM_TOKEN;
         this.timeoutMess = {};
         this.listMess = {};
         this.listErr = [];
         this.list = [];
         this.TAG = tag ? `${tag}\n` : '';
-        this.bot = new TelegramBot(botToken, { polling: !!polling });
+        this.bot = new TelegramBot(botToken, { polling: !!polling, baseApiUrl: 'https://telegram.kimtin-tr.workers.dev' });
 
         if (polling) {
             this.bot.on('message', (msg) => {
@@ -59,7 +57,6 @@ export default class Telegram {
     sendMessage(mess: string, id: TelegramIdType = '') {
         try {
             console.log(this.TAG, 'Send message telegram', id, mess);
-            return;
             id = id || chatID;
             mess = this.encodeHTML(mess);
             this.listMess[id] = this.listMess[id] || [];
@@ -79,7 +76,6 @@ export default class Telegram {
     sendError(mess: string) {
         try {
             console.log(this.TAG, 'Send error telegram', mess);
-            return;
             mess = `❗️❗️❗️ Có lỗi ❗️❗️❗️\n<b>${mess}</b>`;
             this.listErr.push(mess);
             clearTimeout(this.timeoutErr);
