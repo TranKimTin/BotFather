@@ -11,6 +11,8 @@ protected:
     vector<string> symbolList;
     WebSocket ws;
     const int BATCH_SIZE;
+    std::mutex mMutex;
+
 
     void on_message(connection_hdl, message_ptr msg);
 
@@ -22,8 +24,8 @@ protected:
     void updateCache(const RateData &rateData);
     vector<string> getSymbolList();
     void connectSocket();
-    void mergeData(const string &symbol, string &timeframe, string &currentTF, double open, double high, double low, double close, double volume, long long timestamp, bool isFinal);
-    void onCloseCandle(const string &symbol, string &timeframe, RateData &data);
+    void mergeData(RateData &rateData, const string &symbol, string &timeframe, string &currentTF, double open, double high, double low, double close, double volume, long long timestamp, bool isFinal, bool ignoreClose);
+    void onCloseCandle(const string &symbol, string &timeframe, RateData& data);
     void adjustData(RateData &rateData);
     bool isValidData(const RateData &rateData);
 public:

@@ -3,7 +3,8 @@
 #include "axios.h"
 #include <tbb/task_group.h>
 #include "util.h"
-#include <Redis.h>
+#include "Redis.h"
+#include "CustomIndicator.h"
 
 static tbb::task_group task;
 
@@ -28,11 +29,11 @@ void SocketBinance::on_message(connection_hdl, message_ptr msg)
     for (auto tf : timeframes)
     {
         string key = symbol + "_" + tf;
-        if (data[key].isBlocking)
-        {
-            continue;
-        }
-        mergeData(symbol, tf, interval, open, high, low, close, volume, startTime, isFinal);
+
+        RateData &rateData = data[key];
+        if (rateData.startTime.size()) continue;
+        
+        mergeData(rateData, symbol, tf, interval, open, high, low, close, volume, startTime, isFinal, false);
     }
 }
 
@@ -47,7 +48,8 @@ SocketBinance::SocketBinance(const int _BATCH_SIZE) : BATCH_SIZE(_BATCH_SIZE)
 {
     broker = "binance";
     timeframes = {"1m", "5m", "15m", "30m", "1h", "4h", "1d"};
-    symbolList = getSymbolList();
+    // symbolList = getSymbolList();
+    symbolList.push_back("BTCUSDT");
     symbolList.resize(1); // Chỉ lấy 1 symbol để test
     // for (const string &tf : timeframes)
     // {
@@ -62,8 +64,6 @@ SocketBinance::SocketBinance(const int _BATCH_SIZE) : BATCH_SIZE(_BATCH_SIZE)
             data[key] = RateData();
             data[key].symbol = symbol;
             data[key].interval = tf;
-            data[key].isBlocking = true;
-            data[key].isFinal = false;
         }
     }
 
@@ -76,7 +76,7 @@ void SocketBinance::onSocketConnected(connection_hdl hdl)
 
     for (int i = 0; i < symbolList.size(); i += BATCH_SIZE)
     {
-        vector<std::future<void>> futures;
+        vector<future<void>> futures;
         int end = min(i + BATCH_SIZE, (int)symbolList.size());
 
         for (int j = i; j < end; ++j)
@@ -85,12 +85,11 @@ void SocketBinance::onSocketConnected(connection_hdl hdl)
 
             futures.emplace_back(std::async(std::launch::async, [this, symbol]()
                                             {
+                LOGD("get data %s", symbol.c_str());
                 for(int k=0; k<timeframes.size(); k++)
                 {
                     string tf = timeframes[k];
-                    string key = symbol + "_" + tf;
-                    RateData &rateData = data[key];
-                    // data[key]  = getOHLCV(symbol, tf, MAX_CANDLE);
+                    RateData rateData;
                     if(tf == "1m")
                     {
                         rateData = getOHLCV(symbol, tf, MAX_CANDLE);
@@ -101,7 +100,6 @@ void SocketBinance::onSocketConnected(connection_hdl hdl)
                             rateData = getOHLCV(symbol, tf, MAX_CANDLE);
                         }
                         else{
-                            rateData.isBlocking = true;
                             for(int m = k-1; m >= 0; m--) {
                                 if(timeframeToNumberMinutes(tf) % timeframeToNumberMinutes(timeframes[m]) != 0){
                                     continue;
@@ -120,7 +118,7 @@ void SocketBinance::onSocketConnected(connection_hdl hdl)
                                     double low = smaller.low[l];
                                     double close = smaller.close[l];
                                     double volume = smaller.volume[l];
-                                    mergeData(symbol, tf, timeframes[m], open, high, low, close, volume, startTime, true);
+                                    mergeData(rateData, symbol, tf, timeframes[m], open, high, low, close, volume, startTime, l > 0, true);
                                     l--;
                                 }
                             }
@@ -129,9 +127,16 @@ void SocketBinance::onSocketConnected(connection_hdl hdl)
                                 LOGE("Invalid data for %s %s", symbol.c_str(), tf.c_str());
                                 rateData = getOHLCV(symbol, tf, MAX_CANDLE);
                             }
+                            else {
+                                LOGD("data valid %s %s", symbol.c_str(), tf.c_str());
+                            }
                         }
-                        rateData.isBlocking = false;
                     }
+
+                    
+                    string key = symbol + "_" + tf;
+                    data[key] = rateData;
+                    
                     updateCache(rateData);
 
                     LOGD("Get OHLCV %s %s - %d items", symbol.c_str(), tf.c_str(), (int)rateData.startTime.size());
@@ -254,7 +259,7 @@ RateData SocketBinance::getOHLCVFromCache(const string &symbol, const string &ti
     RateData rateData;
     rateData.symbol = symbol;
     rateData.interval = timeframe;
-    rateData.isFinal = true;
+
     for (const string &item : ohlcv)
     {
         // item: startTime_open_high_low_close_volume
@@ -319,7 +324,7 @@ void SocketBinance::updateCache(const RateData &rateData)
         }
         i--;
         int cnt = 0;
-        while (i >= 0)
+        while (i > 0)
         {
             // item: startTime_open_high_low_close_volume
             string item = to_string(rateData.startTime[i]) + "_" +
@@ -328,16 +333,14 @@ void SocketBinance::updateCache(const RateData &rateData)
                           to_string(rateData.low[i]) + "_" +
                           to_string(rateData.close[i]) + "_" +
                           to_string(rateData.volume[i]);
-            if (i > 0 || rateData.isFinal)
-            {
-                if (!Redis::getInstance().pushFront(key, item))
-                {
-                    LOGE("Failed to update cache for %s %s", symbol.c_str(), timeframe.c_str());
-                    return;
-                }
 
-                cnt++;
+            if (!Redis::getInstance().pushFront(key, item))
+            {
+                LOGE("Failed to update cache for %s %s", symbol.c_str(), timeframe.c_str());
+                return;
             }
+
+            cnt++;
             i--;
         }
         LOGD("Update cache %s %s - %d items", symbol.c_str(), timeframe.c_str(), cnt);
@@ -361,18 +364,14 @@ void SocketBinance::adjustData(RateData &rateData)
     }
 }
 
-void SocketBinance::mergeData(const string &symbol, string &timeframe, string &currentTF, double open, double high, double low, double close, double volume, long long startTime, bool isFinal)
+void SocketBinance::mergeData(RateData &rateData, const string &symbol, string &timeframe, string &currentTF, double open, double high, double low, double close, double volume, long long startTime, bool isFinal, bool ignoreClose)
 {
     if (timeframeToNumberMinutes(timeframe) % timeframeToNumberMinutes(currentTF) != 0)
     {
         return;
     }
-    string key = symbol + "_" + timeframe;
-
-    RateData &rateData = data[key];
 
     long long rateStartTime = getStartTime(timeframe, startTime);
-    long long timeintervalMiliseconds = timeframeToNumberMiliseconds(timeframe);
 
     if (rateData.open.empty())
     {
@@ -386,17 +385,14 @@ void SocketBinance::mergeData(const string &symbol, string &timeframe, string &c
         rateData.close[0] = close;
         rateData.volume[0] += isFinal ? volume : 0;
 
-        if (!rateData.isFinal && isFinal && checkFinal(timeframe, startTime, currentTF))
+        if (!ignoreClose && isFinal && checkFinal(timeframe, startTime, currentTF))
         {
-            rateData.isFinal = true;
             onCloseCandle(symbol, timeframe, rateData);
         }
     }
-    else if (rateStartTime - rateData.startTime[0] == timeintervalMiliseconds)
+    else if (rateStartTime > rateData.startTime[0])
     {
-        if (!rateData.isFinal)
-        {
-            rateData.isFinal = true;
+        if(!ignoreClose){
             LOGI("Force final %s %s %s", symbol.c_str(), timeframe.c_str(), toTimeString(rateStartTime).c_str());
             onCloseCandle(symbol, timeframe, rateData);
         }
@@ -412,7 +408,7 @@ void SocketBinance::mergeData(const string &symbol, string &timeframe, string &c
     }
     else
     {
-        LOGI("Merge data fail");
+        LOGI("Merge data fail %s %s %s", symbol.c_str(), timeframe.c_str(), currentTF.c_str());
     }
 }
 
@@ -429,6 +425,16 @@ void SocketBinance::onCloseCandle(const string &symbol, string &timeframe, RateD
     double volume = rateData.volume.back();
 
     LOGI("%s %s %lld %f %f %f %f %f", symbol.c_str(), timeframe.c_str(), startTime, open, high, low, close, volume);
+
+    RSI iRSI(14);
+    int size = rateData.startTime.size();
+    double rsi;
+    for (int i = size - 1; i >= 0; i--)
+    {
+        rsi = iRSI.nextValue(rateData.close[i]);
+    }
+    LOGD("time: %s rsi=%f", toTimeString(rateData.startTime[0]).c_str(), rsi);
+
 
     updateCache(rateData);
 }

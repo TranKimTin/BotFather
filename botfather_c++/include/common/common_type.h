@@ -12,6 +12,7 @@
 #include <ctime>
 #include <iomanip>
 #include <sstream>
+#include <mutex>
 
 #include <websocketpp/config/asio_client.hpp>
 #include <websocketpp/client.hpp>
@@ -34,11 +35,11 @@ inline std::string current_timestamp() {
 #ifndef DEBUG
 #define LOGD(mess, ...)
 #else
-#define LOGD(mess, ...) std::printf("[%s] [DEBUG] %s " mess "\n", current_timestamp().c_str(), __PRETTY_FUNCTION__, ##__VA_ARGS__);
+#define LOGD(mess, ...) std::printf("[%s] [DEBUG] %s " mess "\n", current_timestamp().c_str(), __func__, ##__VA_ARGS__);
 #endif
 
-#define LOGI(mess, ...) std::printf("[%s] [INFO] %s " mess "\n", current_timestamp().c_str(), __PRETTY_FUNCTION__, ##__VA_ARGS__);
-#define LOGE(mess, ...) std::fprintf(stderr, "[%s] [ERROR] %s " mess "\n", current_timestamp().c_str(), __PRETTY_FUNCTION__, ##__VA_ARGS__);
+#define LOGI(mess, ...) std::printf("[%s] [INFO] %s " mess "\n", current_timestamp().c_str(), __func__, ##__VA_ARGS__);
+#define LOGE(mess, ...) std::fprintf(stderr, "[%s] [ERROR] %s " mess "\n", current_timestamp().c_str(), __func__, ##__VA_ARGS__);
 
 #define SLEEP_FOR(ms) std::this_thread::sleep_for(std::chrono::milliseconds(ms))
 
@@ -54,8 +55,6 @@ struct RateData
 {
     string symbol;
     string interval;
-    bool isFinal = false;
-    bool isBlocking = false;
     deque<double> open;
     deque<double> high;
     deque<double> low;
