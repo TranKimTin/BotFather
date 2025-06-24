@@ -47,7 +47,7 @@ shared_ptr<boost::asio::ssl::context> SocketBinance::on_tls_init(connection_hdl)
 
 SocketBinance::SocketBinance(const int _BATCH_SIZE) : BATCH_SIZE(_BATCH_SIZE)
 {
-    broker = "binance";
+    broker = "c_binance";
     timeframes = {"1m", "5m", "15m", "30m", "1h", "4h", "1d"};
     // symbolList = getSymbolList();
     symbolList.push_back("BTCUSDT");
@@ -86,7 +86,6 @@ void SocketBinance::onSocketConnected(connection_hdl hdl)
 
             futures.emplace_back(std::async(std::launch::async, [this, symbol]()
                                             {
-                LOGD("get data %s", symbol.c_str());
                 for(int k=0; k<timeframes.size(); k++)
                 {
                     string tf = timeframes[k];
@@ -139,8 +138,6 @@ void SocketBinance::onSocketConnected(connection_hdl hdl)
                     data[key] = rateData;
                     
                     updateCache(rateData);
-
-                    LOGD("Get OHLCV %s %s - %d items", symbol.c_str(), tf.c_str(), (int)rateData.startTime.size());
                 } }));
         }
 
@@ -248,12 +245,12 @@ RateData SocketBinance::getOHLCV(const string &symbol, const string &timeframe, 
         rateData.volume.push_front(stod(item[5].get<string>()));
     }
 
+    LOGD("Get OHLCV %s %s - %d items", symbol.c_str(), timeframe.c_str(), (int)rateData.startTime.size());
     return rateData;
 }
 
 RateData SocketBinance::getOHLCVFromCache(const string &symbol, const string &timeframe)
 {
-    string broker = "c_binance";
     string key = broker + "_" + symbol + "_" + timeframe;
     vector<string> ohlcv = Redis::getInstance().getList(key);
 
@@ -289,7 +286,6 @@ void SocketBinance::updateCache(const RateData &rateData)
         return;
     }
 
-    string broker = "c_binance";
     string symbol = rateData.symbol;
     string timeframe = rateData.interval;
 
@@ -298,7 +294,7 @@ void SocketBinance::updateCache(const RateData &rateData)
     int size = Redis::getInstance().size(key);
     if (size == 0)
     {
-        for (int i = rateData.startTime.size() - 1; i >= 0; i--)
+        for (int i = rateData.startTime.size() - 1; i > 0; i--)
         {
             // item: startTime_open_high_low_close_volume
             string item = to_string(rateData.startTime[i]) + "_" +
@@ -313,7 +309,7 @@ void SocketBinance::updateCache(const RateData &rateData)
                 return;
             };
         }
-        LOGD("Update cache %s %s - %d items", symbol.c_str(), timeframe.c_str(), (int)rateData.startTime.size());
+        LOGD("Update cache %s %s - %d items", symbol.c_str(), timeframe.c_str(), (int)rateData.startTime.size() - 1);
     }
     else
     {

@@ -19,7 +19,7 @@ bool endsWith(const string &str, const string &suffix)
 
 bool checkFinal(const string &tf, long long startTime, string &currentTF)
 {
-    long long nextTime = startTime / timeframeToNumberMiliseconds(currentTF) + 60;
+    long long nextTime = startTime / 1000 + timeframeToNumberSeconds(currentTF);
     if (tf == "1m")
         return nextTime % 60 == 0;
     if (tf == "3m")
@@ -107,7 +107,12 @@ int timeframeToNumberMinutes(const string &tf)
 
 long long timeframeToNumberMiliseconds(const string &tf)
 {
-    return (long long)timeframeToNumberMinutes(tf) * 60000;
+    return (long long)timeframeToNumberSeconds(tf) * 1000;
+}
+
+long long timeframeToNumberSeconds(const string &tf)
+{
+    return (long long)timeframeToNumberMinutes(tf) * 60;
 }
 
 long long nextTime(long long timestamp, const string &timeframe)

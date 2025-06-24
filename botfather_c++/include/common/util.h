@@ -7,6 +7,7 @@ bool checkFinal(const string &tf, long long startTime, string &currentTF);
 long long getStartTime(const string &tf, long long currentTime);
 int timeframeToNumberMinutes(const string &tf);
 long long timeframeToNumberMiliseconds(const string &tf);
+long long timeframeToNumberSeconds(const string &tf);
 long long nextTime(long long timestamp, const string &timeframe);
 string toTimeString(long long timestampMs);
 map<string, string> readEnvFile();
