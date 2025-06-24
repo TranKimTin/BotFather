@@ -13,7 +13,6 @@ protected:
     const int BATCH_SIZE;
     std::mutex mMutex;
 
-
     void on_message(connection_hdl, message_ptr msg);
 
     shared_ptr<boost::asio::ssl::context> on_tls_init(connection_hdl);
@@ -25,9 +24,10 @@ protected:
     vector<string> getSymbolList();
     void connectSocket();
     void mergeData(RateData &rateData, const string &symbol, string &timeframe, string &currentTF, double open, double high, double low, double close, double volume, long long timestamp, bool isFinal, bool ignoreClose);
-    void onCloseCandle(const string &symbol, string &timeframe, RateData& data);
     void adjustData(RateData &rateData);
     bool isValidData(const RateData &rateData);
+    void onCloseCandle(const string &symbol, string &timeframe, RateData &data);
+
 public:
     SocketBinance(const int _BATCH_SIZE);
 };
