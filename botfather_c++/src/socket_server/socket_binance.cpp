@@ -31,8 +31,9 @@ void SocketBinance::on_message(connection_hdl, message_ptr msg)
         string key = symbol + "_" + tf;
 
         RateData &rateData = data[key];
-        if (rateData.startTime.size()) continue;
-        
+        if (rateData.startTime.empty())
+            continue;
+
         mergeData(rateData, symbol, tf, interval, open, high, low, close, volume, startTime, isFinal, false);
     }
 }
@@ -392,7 +393,8 @@ void SocketBinance::mergeData(RateData &rateData, const string &symbol, string &
     }
     else if (rateStartTime > rateData.startTime[0])
     {
-        if(!ignoreClose){
+        if (!ignoreClose)
+        {
             LOGI("Force final %s %s %s", symbol.c_str(), timeframe.c_str(), toTimeString(rateStartTime).c_str());
             onCloseCandle(symbol, timeframe, rateData);
         }
@@ -434,7 +436,6 @@ void SocketBinance::onCloseCandle(const string &symbol, string &timeframe, RateD
         rsi = iRSI.nextValue(rateData.close[i]);
     }
     LOGD("time: %s rsi=%f", toTimeString(rateData.startTime[0]).c_str(), rsi);
-
 
     updateCache(rateData);
 }
