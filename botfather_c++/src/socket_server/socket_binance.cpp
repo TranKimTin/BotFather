@@ -4,7 +4,8 @@
 #include <tbb/task_group.h>
 #include "util.h"
 #include "Redis.h"
-#include "CustomIndicator.h"
+#include "ThreadPool.h"
+#include "Worker.h"
 
 static tbb::task_group task;
 
@@ -415,23 +416,17 @@ void SocketBinance::onCloseCandle(const string &symbol, string &timeframe, RateD
     // if (rateData.startTime.size() < 15)
     //     return;
 
-    long long startTime = rateData.startTime.back();
-    double open = rateData.open.back();
-    double high = rateData.high.back();
-    double low = rateData.low.back();
-    double close = rateData.close.back();
-    double volume = rateData.volume.back();
+    vector<double> open(rateData.open.begin(), rateData.open.end());
+    vector<double> high(rateData.high.begin(), rateData.high.end());
+    vector<double> low(rateData.low.begin(), rateData.low.end());
+    vector<double> close(rateData.close.begin(), rateData.close.end());
+    vector<double> volume(rateData.volume.begin(), rateData.volume.end());
+    vector<long long> startTime(rateData.startTime.begin(), rateData.startTime.end());
+    
+    shared_ptr<Worker> data = std::make_shared<Worker>(broker, symbol, timeframe, open, high, low, close, volume, startTime);
 
-    LOGI("%s %s %lld %f %f %f %f %f", symbol.c_str(), timeframe.c_str(), startTime, open, high, low, close, volume);
-
-    RSI iRSI(14);
-    int size = rateData.startTime.size();
-    double rsi;
-    for (int i = size - 1; i >= 0; i--)
-    {
-        rsi = iRSI.nextValue(rateData.close[i]);
-    }
-    LOGD("time: %s rsi=%f", toTimeString(rateData.startTime[0]).c_str(), rsi);
+    ThreadPool::getInstance().enqueue([data]()
+                                      { data->run(); });
 
     updateCache(rateData);
 }

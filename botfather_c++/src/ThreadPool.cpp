@@ -43,3 +43,9 @@ ThreadPool::~ThreadPool()
     for (thread &worker : workers)
         worker.join();
 }
+
+ThreadPool &ThreadPool::getInstance()
+{
+    static ThreadPool instance(4);
+    return instance;
+}

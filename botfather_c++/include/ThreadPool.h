@@ -14,12 +14,14 @@ using namespace std;
 class ThreadPool
 {
 public:
-    ThreadPool(size_t numThreads);
-    ~ThreadPool();
-
+    static ThreadPool& getInstance();
+    
     void enqueue(function<void()> task);
 
 private:
+    ThreadPool(size_t numThreads);
+    ~ThreadPool();
+
     vector<thread> workers;
     queue<function<void()>> tasks;
 
