@@ -390,11 +390,11 @@ void SocketBinance::mergeData(RateData &rateData, const string &symbol, string &
     }
     else if (rateStartTime > rateData.startTime[0])
     {
-        if (!ignoreClose)
-        {
-            LOGI("Force final %s %s %s", symbol.c_str(), timeframe.c_str(), toTimeString(rateStartTime).c_str());
-            onCloseCandle(symbol, timeframe, rateData);
-        }
+        // if (!ignoreClose)
+        // {
+        //     LOGI("Force final %s %s %s", symbol.c_str(), timeframe.c_str(), toTimeString(rateStartTime).c_str());
+        //     onCloseCandle(symbol, timeframe, rateData);
+        // }
 
         rateData.open.push_front(open);
         rateData.high.push_front(high);
@@ -422,11 +422,10 @@ void SocketBinance::onCloseCandle(const string &symbol, string &timeframe, RateD
     vector<double> close(rateData.close.begin(), rateData.close.end());
     vector<double> volume(rateData.volume.begin(), rateData.volume.end());
     vector<long long> startTime(rateData.startTime.begin(), rateData.startTime.end());
-    
-    shared_ptr<Worker> data = std::make_shared<Worker>(broker, symbol, timeframe, open, high, low, close, volume, startTime);
 
-    ThreadPool::getInstance().enqueue([data]()
-                                      { data->run(); });
+    shared_ptr<Worker> data = std::make_shared<Worker>(broker, symbol, timeframe, move(open), move(high), move(low), move(close), move(volume), move(startTime));
 
-    updateCache(rateData);
+    ThreadPool::getInstance().enqueue([data, this, symbol, timeframe]()
+                                      { data->run();
+                                        this->updateCache(this->data[symbol + "_" + timeframe]); });
 }
