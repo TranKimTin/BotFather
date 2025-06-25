@@ -14,6 +14,7 @@
 #include <sstream>
 #include <mutex>
 #include <cstdio>
+#include <memory>
 
 #include <websocketpp/config/asio_client.hpp>
 #include <websocketpp/client.hpp>

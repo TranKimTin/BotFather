@@ -6,7 +6,17 @@
 #include "ExprLexer.h"
 #include "ExprParser.h"
 #include "ExprVisitor.h"
+#include <ANTLRFileStream.h>
+#include <CommonTokenStream.h>
+using namespace antlr4;
 
+struct CachedParseTree {
+    std::unique_ptr<ANTLRInputStream> input;
+    std::unique_ptr<ExprLexer> lexer;
+    std::unique_ptr<CommonTokenStream> tokens;
+    std::unique_ptr<ExprParser> parser;
+    antlr4::tree::ParseTree* tree = nullptr;
+};
 class Expr : public ExprBaseVisitor
 {
 private:
@@ -49,6 +59,15 @@ public:
 
     any visitChange(ExprParser::ChangeContext *context) override;
     any visitChangeP(ExprParser::ChangePContext *context) override;
+    any visitAmpl(ExprParser::AmplContext *ctx) override;
+    any visitAmplP(ExprParser::AmplPContext *ctx) override;
+    any visitUpper_shadow(ExprParser::Upper_shadowContext *ctx) override;
+    any visitUpper_shadowP(ExprParser::Upper_shadowPContext *ctx) override;
+    any visitLower_shadow(ExprParser::Lower_shadowContext *ctx) override;
+    any visitLower_shadowP(ExprParser::Lower_shadowPContext *ctx) override;
+
+    // indicator
+    any visitRsi(ExprParser::RsiContext *ctx) override;
 
     // any visitIMinChange(ExprParser::IMinChangeContext *ctx) override;
     // any visitIMACD_signal(ExprParser::IMACD_signalContext *ctx) override;
@@ -56,7 +75,6 @@ public:
     // any visitIBullish_hammer(ExprParser::IBullish_hammerContext *ctx) override;
     // any visitIHour(ExprParser::IHourContext *ctx) override;
     // any visitIAvgAmpl(ExprParser::IAvgAmplContext *ctx) override;
-    // any visitILowerShadow(ExprParser::ILowerShadowContext *ctx) override;
     // any visitIMACD_histogram(ExprParser::IMACD_histogramContext *ctx) override;
     // any visitString(ExprParser::StringContext *ctx) override;
     // any visitISymbol(ExprParser::ISymbolContext *ctx) override;
@@ -73,7 +91,6 @@ public:
     // any visitIMACD_n_dinh(ExprParser::IMACD_n_dinhContext *ctx) override;
     // any visitIMinLow(ExprParser::IMinLowContext *ctx) override;
     // any visitIBroker(ExprParser::IBrokerContext *ctx) override;
-    // any visitIRSI(ExprParser::IRSIContext *ctx) override;
     // any visitIBB_mid(ExprParser::IBB_midContext *ctx) override;
     // any visitIMaxAmplP(ExprParser::IMaxAmplPContext *ctx) override;
     // any visitIMA(ExprParser::IMAContext *ctx) override;
@@ -82,20 +99,16 @@ public:
     // any visitIMaxOpen(ExprParser::IMaxOpenContext *ctx) override;
     // any visitIVolume24hInUSD(ExprParser::IVolume24hInUSDContext *ctx) override;
     // any visitIMaxChangeP(ExprParser::IMaxChangePContext *ctx) override;
-    // any visitILowerShadowP(ExprParser::ILowerShadowPContext *ctx) override;
     // any visitIMinAmplP(ExprParser::IMinAmplPContext *ctx) override;
-    // any visitIAmplP(ExprParser::IAmplPContext *ctx) override;
     // any visitIAvgClose(ExprParser::IAvgCloseContext *ctx) override;
     // any visitIMinChangeP(ExprParser::IMinChangePContext *ctx) override;
     // any visitIMaxClose(ExprParser::IMaxCloseContext *ctx) override;
-    // any visitIAmpl(ExprParser::IAmplContext *ctx) override;
     // any visitIMaxAmpl(ExprParser::IMaxAmplContext *ctx) override;
     // any visitIBullish_engulfing(ExprParser::IBullish_engulfingContext *ctx) override;
     // any visitIBB_up(ExprParser::IBB_upContext *ctx) override;
     // any visitIBullish(ExprParser::IBullishContext *ctx) override;
     // any visitIRSISlope(ExprParser::IRSISlopeContext *ctx) override;
     // any visitIAvgLow(ExprParser::IAvgLowContext *ctx) override;
-    // any visitIUpperShadowP(ExprParser::IUpperShadowPContext *ctx) override;
     // any visitIMaxChange(ExprParser::IMaxChangeContext *ctx) override;
     // any visitIBearish_engulfing(ExprParser::IBearish_engulfingContext *ctx) override;
     // any visitIMinOpen(ExprParser::IMinOpenContext *ctx) override;
@@ -107,20 +120,12 @@ public:
     // any visitITimeframe(ExprParser::ITimeframeContext *ctx) override;
     // any visitIDoji(ExprParser::IDojiContext *ctx) override;
     // any visitIMaxLow(ExprParser::IMaxLowContext *ctx) override;
-    // any visitIUpperShadow(ExprParser::IUpperShadowContext *ctx) override;
     // any visitBroker(ExprParser::BrokerContext *ctx) override;
     // any visitSymbol(ExprParser::SymbolContext *ctx) override;
     // any visitTimeframe(ExprParser::TimeframeContext *ctx) override;
     // any visitHour(ExprParser::HourContext *ctx) override;
     // any visitMinute(ExprParser::MinuteContext *ctx) override;
     // any visitVolume24h_in_usd(ExprParser::Volume24h_in_usdContext *ctx) override;
-    // any visitAmpl(ExprParser::AmplContext *ctx) override;
-    // any visitAmplP(ExprParser::AmplPContext *ctx) override;
-    // any visitUpper_shadow(ExprParser::Upper_shadowContext *ctx) override;
-    // any visitUpper_shadowP(ExprParser::Upper_shadowPContext *ctx) override;
-    // any visitLower_shadow(ExprParser::Lower_shadowContext *ctx) override;
-    // any visitLower_shadowP(ExprParser::Lower_shadowPContext *ctx) override;
-    // any visitRsi(ExprParser::RsiContext *ctx) override;
     // any visitRsi_slope(ExprParser::Rsi_slopeContext *ctx) override;
     // any visitMa(ExprParser::MaContext *ctx) override;
     // any visitEma(ExprParser::EmaContext *ctx) override;

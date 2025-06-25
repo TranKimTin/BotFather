@@ -96,6 +96,10 @@
         "valarray": "cpp",
         "cfenv": "cpp",
         "queue": "cpp",
-        "xstring": "cpp"
+        "xstring": "cpp",
+        "executor": "cpp",
+        "io_context": "cpp",
+        "netfwd": "cpp",
+        "timer": "cpp"
     }
 }

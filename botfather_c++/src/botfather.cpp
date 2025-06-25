@@ -6,34 +6,66 @@
 #include "socket_binance.h"
 #include "Redis.h"
 #include "util.h"
+#include "axios.h"
+#include "Timer.h"
 
 using namespace std;
 
 void test()
 {
-    vector<double> open = {1.0, 2.0, 3.0, 4.0, 5.0};
-    vector<double> high = {1.1, 2.1, 3.1, 4.1, 5.1};
-    vector<double> low = {0.9, 1.9, 2.9, 3.9, 4.9};
-    vector<double> close = {1.05, 2.05, 3.05, 4.05, 5.05};
-    vector<double> volume = {100, 200, 300, 400, 500};
-    vector<long long> startTime = {1622505600000, 1622509200000, 1622512800000, 1622516400000, 1622520000000};
     string broker = "binance";
     string symbol = "BTCUSDT";
     string timeframe = "1h";
 
-    string exprText = "change%(0)";
+    string url = "https://api.binance.com/api/v3/klines?symbol=" + symbol + "&interval=" + timeframe + "&limit=600";
+    string response = Axios::get(url);
+    json j = json::parse(response);
 
-    any result = calculateExpr(broker, symbol, timeframe, open.size(),
-                               open.data(), high.data(), low.data(), close.data(), volume.data(),
-                               startTime.data(), exprText);
+    vector<double> open, high, low, close, volume;
+    vector<long long> startTime;
 
-    if (result.has_value())
+    for (const auto &item : j)
     {
-        cout << "Result: " << any_cast<double>(result) << endl;
+        startTime.push_back(item[0].get<long long>());
+        open.push_back(stod(item[1].get<string>()));
+        high.push_back(stod(item[2].get<string>()));
+        low.push_back(stod(item[3].get<string>()));
+        close.push_back(stod(item[4].get<string>()));
+        volume.push_back(stod(item[5].get<string>()));
     }
-    else
+
+    startTime.pop_back();
+    open.pop_back();
+    high.pop_back();
+    low.pop_back();
+    close.pop_back();
+    volume.pop_back();
+
+    reverse(startTime.begin(), startTime.end());
+    reverse(open.begin(), open.end());
+    reverse(high.begin(), high.end());
+    reverse(low.begin(), low.end());
+    reverse(close.begin(), close.end());
+    reverse(volume.begin(), volume.end());
+
+    string exprText = "rsi(14,0)";
+
+    Timer timer("botfather runtime");
+
+    for (int i = 0; i < 200000; i++)
     {
-        cout << "No result" << endl;
+        any result = calculateExpr(broker, symbol, timeframe, open.size(),
+                                   open.data(), high.data(), low.data(), close.data(), volume.data(),
+                                   startTime.data(), exprText);
+        if (i % 1000 != 0) continue;
+        if (result.has_value())
+        {
+            cout << "Result: " << any_cast<double>(result) << endl;
+        }
+        else
+        {
+            cout << "No result" << endl;
+        }
     }
 }
 
