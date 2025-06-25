@@ -13,6 +13,7 @@
 #include <iomanip>
 #include <sstream>
 #include <mutex>
+#include <cstdio>
 
 #include <websocketpp/config/asio_client.hpp>
 #include <websocketpp/client.hpp>
