@@ -21,7 +21,7 @@ void test()
     string symbol = "BTCUSDT";
     string timeframe = "1h";
 
-    string exprText = "min(1,3) + max(2,6) + (abs(2 * -3) * 4)";
+    string exprText = "change%(0)";
 
     any result = calculateExpr(broker, symbol, timeframe, open.size(),
                                open.data(), high.data(), low.data(), close.data(), volume.data(),

@@ -125,9 +125,9 @@ any Expr::visitMAX(ExprParser::MAXContext *ctx)
     return l > r ? l : r;
 }
 
-any Expr::visitIOpen(ExprParser::IOpenContext *ctx)
+any Expr::visitOpen(ExprParser::OpenContext *ctx)
 {
-    auto args = ctx->open()->INT();
+    auto args = ctx->INT();
     int shift = args ? stoi(args->getText()) : 0;
     if (shift < 0 || shift >= length)
         return {};
@@ -135,9 +135,9 @@ any Expr::visitIOpen(ExprParser::IOpenContext *ctx)
     return open[shift];
 }
 
-any Expr::visitIHigh(ExprParser::IHighContext *ctx)
+any Expr::visitHigh(ExprParser::HighContext *ctx)
 {
-    auto args = ctx->high()->INT();
+    auto args = ctx->INT();
     int shift = args ? stoi(args->getText()) : 0;
     if (shift < 0 || shift >= length)
         return {};
@@ -145,9 +145,9 @@ any Expr::visitIHigh(ExprParser::IHighContext *ctx)
     return high[shift];
 }
 
-any Expr::visitILow(ExprParser::ILowContext *ctx)
+any Expr::visitLow(ExprParser::LowContext *ctx)
 {
-    auto args = ctx->low()->INT();
+    auto args = ctx->INT();
     int shift = args ? stoi(args->getText()) : 0;
     if (shift < 0 || shift >= length)
         return {};
@@ -155,9 +155,9 @@ any Expr::visitILow(ExprParser::ILowContext *ctx)
     return low[shift];
 }
 
-any Expr::visitIClose(ExprParser::ICloseContext *ctx)
+any Expr::visitClose(ExprParser::CloseContext *ctx)
 {
-    auto args = ctx->close()->INT();
+    auto args = ctx->INT();
     int shift = args ? stoi(args->getText()) : 0;
     if (shift < 0 || shift >= length)
         return {};
@@ -165,15 +165,45 @@ any Expr::visitIClose(ExprParser::ICloseContext *ctx)
     return close[shift];
 }
 
-any Expr::visitIVolume(ExprParser::IVolumeContext *ctx)
+any Expr::visitVolume(ExprParser::VolumeContext *ctx)
 {
-    auto args = ctx->volume()->INT();
+    auto args = ctx->INT();
     int shift = args ? stoi(args->getText()) : 0;
     if (shift < 0 || shift >= length)
         return {};
 
     return volume[shift];
 }
+
+any Expr::visitChange(ExprParser::ChangeContext *ctx)
+{
+    auto args = ctx->INT();
+    int shift = args ? stoi(args->getText()) : 0;
+    if (shift < 0 || shift >= length)
+        return {};
+
+    return close[shift] - open[shift];
+}
+
+any Expr::visitChangeP(ExprParser::ChangePContext *ctx)
+{
+    auto args = ctx->INT();
+    int shift = args ? stoi(args->getText()) : 0;
+    if (shift < 0 || shift >= length)
+        return {};
+
+    return (close[shift] - open[shift]) / open[shift] * 100.0;
+}
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+
+
+
 
 
 

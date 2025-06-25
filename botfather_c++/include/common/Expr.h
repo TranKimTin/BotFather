@@ -41,14 +41,14 @@ public:
     any visitMIN(ExprParser::MINContext *ctx) override;
     any visitMAX(ExprParser::MAXContext *ctx) override;
 
-    any visitIOpen(ExprParser::IOpenContext *ctx) override;
-    any visitIHigh(ExprParser::IHighContext *ctx) override;
-    any visitILow(ExprParser::ILowContext *ctx) override;
-    any visitIClose(ExprParser::ICloseContext *ctx) override;
-    any visitIVolume(ExprParser::IVolumeContext *ctx) override;
+    any visitOpen(ExprParser::OpenContext *ctx) override;
+    any visitHigh(ExprParser::HighContext *ctx) override;
+    any visitLow(ExprParser::LowContext *ctx) override;
+    any visitClose(ExprParser::CloseContext *ctx) override;
+    any visitVolume(ExprParser::VolumeContext *ctx) override;
 
-    // any visitChange(ExprParser::ChangeContext *ctx) override;
-    // any visitChangeP(ExprParser::ChangePContext *ctx) override;
+    any visitChange(ExprParser::ChangeContext *context) override;
+    any visitChangeP(ExprParser::ChangePContext *context) override;
 
     // any visitIMinChange(ExprParser::IMinChangeContext *ctx) override;
     // any visitIMACD_signal(ExprParser::IMACD_signalContext *ctx) override;
@@ -88,7 +88,6 @@ public:
     // any visitIAvgClose(ExprParser::IAvgCloseContext *ctx) override;
     // any visitIMinChangeP(ExprParser::IMinChangePContext *ctx) override;
     // any visitIMaxClose(ExprParser::IMaxCloseContext *ctx) override;
-    // any visitIChange(ExprParser::IChangeContext *ctx) override;
     // any visitIAmpl(ExprParser::IAmplContext *ctx) override;
     // any visitIMaxAmpl(ExprParser::IMaxAmplContext *ctx) override;
     // any visitIBullish_engulfing(ExprParser::IBullish_engulfingContext *ctx) override;
@@ -99,7 +98,6 @@ public:
     // any visitIUpperShadowP(ExprParser::IUpperShadowPContext *ctx) override;
     // any visitIMaxChange(ExprParser::IMaxChangeContext *ctx) override;
     // any visitIBearish_engulfing(ExprParser::IBearish_engulfingContext *ctx) override;
-    // any visitIChangeP(ExprParser::IChangePContext *ctx) override;
     // any visitIMinOpen(ExprParser::IMinOpenContext *ctx) override;
     // any visitIBearish_hammer(ExprParser::IBearish_hammerContext *ctx) override;
     // any visitIAvgOpen(ExprParser::IAvgOpenContext *ctx) override;
@@ -115,11 +113,6 @@ public:
     // any visitTimeframe(ExprParser::TimeframeContext *ctx) override;
     // any visitHour(ExprParser::HourContext *ctx) override;
     // any visitMinute(ExprParser::MinuteContext *ctx) override;
-    // any visitOpen(ExprParser::OpenContext *ctx) override;
-    // any visitHigh(ExprParser::HighContext *ctx) override;
-    // any visitLow(ExprParser::LowContext *ctx) override;
-    // any visitClose(ExprParser::CloseContext *ctx) override;
-    // any visitVolume(ExprParser::VolumeContext *ctx) override;
     // any visitVolume24h_in_usd(ExprParser::Volume24h_in_usdContext *ctx) override;
     // any visitAmpl(ExprParser::AmplContext *ctx) override;
     // any visitAmplP(ExprParser::AmplPContext *ctx) override;
