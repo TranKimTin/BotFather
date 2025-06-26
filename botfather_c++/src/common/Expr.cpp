@@ -372,6 +372,27 @@ any Expr::visitBb_lower(ExprParser::Bb_lowerContext *ctx)
     return iBB(period, stdDev, close + shift, length - shift).lower;
 }
 
+any Expr::visitMacd_n_dinh(ExprParser::Macd_n_dinhContext *ctx) {
+    int fastPeriod = stoi(ctx->INT(0)->getText());
+    int slowPeriod = stoi(ctx->INT(1)->getText());
+    int signalPeriod = stoi(ctx->INT(2)->getText());
+    int redDepth = stoi(ctx->INT(3)->getText());
+    int depth = stoi(ctx->INT(4)->getText());
+    int enableDivergence = stoi(ctx->INT(5)->getText());
+    double diffCandle0 = stod(ctx->number(0)->getText());
+    int shift = ctx->INT(6) ? stoi(ctx->INT(6)->getText()) : 0;
+    vector<double> diffPercents;
+    
+    for(int i=1; ctx->number(i); i++) {
+        diffPercents.push_back(stod(ctx->number(i)->getText()));
+    }
+
+    if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || redDepth < 0 || depth < 0 || enableDivergence < 0 || diffCandle0 < 0 || shift < 0 || shift >= length - slowPeriod)
+        return {};
+
+    return macd_n_dinh(fastPeriod, slowPeriod, signalPeriod, redDepth, depth, enableDivergence, diffCandle0, diffPercents, close + shift, open + shift, high + shift, length - shift);
+}
+
 //////////////////////////////////////////////////////////////////
 static std::unordered_map<std::string, CachedParseTree> parseCache;
 static mutex parseCacheMutex;

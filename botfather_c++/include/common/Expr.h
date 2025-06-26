@@ -78,6 +78,7 @@ public:
     any visitBb_upper(ExprParser::Bb_upperContext *ctx) override;
     any visitBb_middle(ExprParser::Bb_middleContext *ctx) override;
     any visitBb_lower(ExprParser::Bb_lowerContext *ctx) override;
+    any visitMacd_n_dinh(ExprParser::Macd_n_dinhContext *ctx) override;
 
     // any visitIMinChange(ExprParser::IMinChangeContext *ctx) override;
     // any visitIMinAmpl(ExprParser::IMinAmplContext *ctx) override;
@@ -94,7 +95,6 @@ public:
     // any visitIAvgAmplP(ExprParser::IAvgAmplPContext *ctx) override;
     // any visitIMinClose(ExprParser::IMinCloseContext *ctx) override;
     // any visitIMaxHigh(ExprParser::IMaxHighContext *ctx) override;
-    // any visitIMACD_n_dinh(ExprParser::IMACD_n_dinhContext *ctx) override;
     // any visitIMinLow(ExprParser::IMinLowContext *ctx) override;
     // any visitIBroker(ExprParser::IBrokerContext *ctx) override;
     // any visitIMaxAmplP(ExprParser::IMaxAmplPContext *ctx) override;
@@ -127,7 +127,6 @@ public:
     // any visitHour(ExprParser::HourContext *ctx) override;
     // any visitMinute(ExprParser::MinuteContext *ctx) override;
     // any visitVolume24h_in_usd(ExprParser::Volume24h_in_usdContext *ctx) override;
-    // any visitMacd_n_dinh(ExprParser::Macd_n_dinhContext *ctx) override;
     // any visitMacd_slope(ExprParser::Macd_slopeContext *ctx) override;
     // any visitBullish_engulfing(ExprParser::Bullish_engulfingContext *ctx) override;
     // any visitBearish_engulfing(ExprParser::Bearish_engulfingContext *ctx) override;

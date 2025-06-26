@@ -207,3 +207,284 @@ BB_Output iBB(int period, double stdDev, const double close[], int n)
 
     return {lower, mean, upper};
 }
+
+static vector<MACD_Output> iMACDs(int fastPeriod, int slowPeriod, int signalPeriod, const double close[], int n)
+{
+    n = min(n, MAX_N + slowPeriod);
+
+    if (n <= slowPeriod || fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0)
+        return {};
+
+    vector<MACD_Output> result;
+
+    double kFast = 2.0 / (fastPeriod + 1);
+    double kSlow = 2.0 / (slowPeriod + 1);
+    double kSignal = 2.0 / (signalPeriod + 1);
+
+    double emaFast = close[n - 1];
+    double emaSlow = close[n - 1];
+    double macd = 0.0;
+    double signalEMA = 0.0;
+
+    bool signalInitialized = false;
+
+    for (int i = n - 2; i >= 0; --i)
+    {
+        emaFast = (close[i] - emaFast) * kFast + emaFast;
+        emaSlow = (close[i] - emaSlow) * kSlow + emaSlow;
+
+        macd = emaFast - emaSlow;
+
+        if (!signalInitialized)
+        {
+            signalEMA = macd;
+            signalInitialized = true;
+        }
+        else
+        {
+            signalEMA = (macd - signalEMA) * kSignal + signalEMA;
+        }
+        double histogram = macd - signalEMA;
+        result.push_back({macd, signalEMA, histogram});
+    }
+
+    reverse(result.begin(), result.end());
+
+    return result;
+}
+
+int macd_n_dinh(int fastPeriod, int slowPeriod, int signalPeriod, int redDepth, int depth, int enableDivergence, double diffCandle0, vector<double> &diffPercents, const double close[], const double open[], const double high[], int length)
+{
+    vector<MACD_Output> values = iMACDs(fastPeriod, slowPeriod, signalPeriod, close, length);
+    int i = 0;
+    int cnt = 0;
+    int n = 0;
+    int indexMaxMACD = i, preIndexMaxMACD = i;
+    int indexMaxPrice = i, preIndexMaxPrice = i;
+
+    {
+        while (i < values.size() - 1)
+        {
+            if (values[i].macd <= 0)
+            {
+                break;
+            };
+            if (values[i].signal <= 0)
+            {
+                break;
+            };
+            if (values[i].histogram >= 0)
+                break;
+            if (values[i].macd > values[indexMaxMACD].macd)
+            {
+                indexMaxMACD = i;
+            }
+            if (high[i] > high[indexMaxPrice])
+            {
+                indexMaxPrice = i;
+            }
+
+            double topCandle = max(open[i], close[i]);
+
+            if (i != 0 && (topCandle - high[0]) / topCandle > diffCandle0 / 100)
+            {
+                return 0;
+            }
+
+            i++;
+        }
+
+        cnt = 0;
+        int check = 0;
+        while (i < values.size() - 1)
+        {
+            if (values[i].macd <= 0)
+            {
+                check = 3;
+                break;
+            }
+            if (values[i].signal <= 0)
+            {
+                check = 3;
+                break;
+            }
+            if (values[i].histogram < 0)
+                break;
+            if (values[i].macd > values[indexMaxMACD].macd)
+            {
+                indexMaxMACD = i;
+            }
+            if (high[i] > high[indexMaxPrice])
+            {
+                indexMaxPrice = i;
+            }
+
+            double topCandle = max(open[i], close[i]);
+
+            if (i != 0 && (topCandle - high[0]) / topCandle > diffCandle0 / 100)
+            {
+                return 0;
+            }
+
+            cnt++;
+            i++;
+        }
+        if (check == 3)
+        {
+            while (i < values.size() - 1)
+            {
+                if (values[i].histogram < 0)
+                    break;
+                cnt++;
+                if (values[i].macd > values[indexMaxMACD].macd)
+                {
+                    indexMaxMACD = i;
+                }
+                if (high[i] > high[indexMaxPrice])
+                {
+                    indexMaxPrice = i;
+                }
+
+                double topCandle = max(open[i], close[i]);
+
+                if (i != 0 && (topCandle - high[0]) / topCandle > diffCandle0 / 100)
+                {
+                    return 0;
+                }
+
+                i++;
+            }
+        }
+
+        n++;
+        if (cnt < depth)
+        {
+            n--;
+        }
+        if (check == 3)
+        {
+            return n;
+        }
+    }
+
+    preIndexMaxMACD = i;
+    preIndexMaxPrice = i;
+    for (; i < values.size() - 1; i++)
+    {
+        cnt = 0;
+        int cntRed = 0;
+        int check = 0;
+        while (i < values.size() - 1)
+        {
+            if (values[i].macd <= 0)
+            {
+                check = 1;
+                break;
+            };
+            if (values[i].signal <= 0)
+            {
+                check = 1;
+                break;
+            };
+            if (values[i].histogram >= 0)
+                break;
+            if (values[i].macd > values[preIndexMaxMACD].macd)
+            {
+                preIndexMaxMACD = i;
+            }
+            if (high[i] > high[preIndexMaxPrice])
+            {
+                preIndexMaxPrice = i;
+            }
+
+            cntRed++;
+            i++;
+        }
+
+        if (check == 1)
+        {
+            return n;
+        }
+        // if (check === 2) {
+        //     value = 0;
+        //     break;
+        // }
+
+        cnt = 0;
+        while (i < values.size() - 1)
+        {
+            if (values[i].macd <= 0)
+            {
+                check = 3;
+                break;
+            }
+            if (values[i].signal <= 0)
+            {
+                check = 3;
+                break;
+            }
+            if (values[i].histogram < 0)
+                break;
+            if (values[i].macd > values[preIndexMaxMACD].macd)
+            {
+                preIndexMaxMACD = i;
+            }
+            if (high[i] > high[preIndexMaxPrice])
+            {
+                preIndexMaxPrice = i;
+            }
+
+            cnt++;
+            i++;
+        }
+
+        if (check == 3)
+        {
+            while (i < values.size() - 1)
+            {
+                if (values[i].histogram < 0)
+                    break;
+                if (values[i].macd > values[preIndexMaxMACD].macd)
+                {
+                    preIndexMaxMACD = i;
+                }
+                if (high[i] > high[preIndexMaxPrice])
+                {
+                    preIndexMaxPrice = i;
+                }
+
+                cnt++;
+                i++;
+            }
+        }
+        // console.log({ enableDivergence, preIndexMaxMACD, indexMaxMACD, m1: values[preIndexMaxMACD], m2: values[indexMaxMACD], indexMaxPrice, preIndexMaxPrice, p: data[preIndexMaxPrice], p2: data[indexMaxPrice], diff: diffPercents[0] });
+
+        if (enableDivergence == 1 && values[preIndexMaxMACD].macd <= values[indexMaxMACD].macd)
+        {
+            return n;
+        }
+        if (high[indexMaxPrice] - high[preIndexMaxPrice] <= high[preIndexMaxPrice] * diffPercents[0] / 100)
+        {
+            return n;
+        }
+        if (diffPercents.size() > 1)
+            diffPercents.erase(diffPercents.begin());  
+        indexMaxMACD = preIndexMaxMACD;
+        indexMaxPrice = preIndexMaxPrice;
+
+        preIndexMaxMACD = i;
+        preIndexMaxPrice = i;
+
+        n++;
+        if (cnt < depth || cntRed < redDepth)
+        {
+            n--;
+        }
+
+        if (check == 3)
+        {
+            return n;
+        }
+    }
+    return n;
+}
