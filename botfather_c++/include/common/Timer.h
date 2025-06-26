@@ -13,8 +13,8 @@ public:
     {
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = end - start_;
-        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-        LOGI("[Timer] %s: %lld ms", name_.c_str(), ms);
+        long long ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+        LOGI("%s: %lld ms", name_.c_str(), ms);
     }
 
 private:

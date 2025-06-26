@@ -48,7 +48,7 @@ void test()
     reverse(close.begin(), close.end());
     reverse(volume.begin(), volume.end());
 
-    string exprText = "macd_slope(12, 26, 9, 5)";
+    string exprText = "min_ampl%(4, 20)";
 
     Timer timer("botfather runtime");
 

@@ -553,3 +553,95 @@ double macd_slope(int fastPeriod, int slowPeriod, int signalPeriod, const double
 
     return slope / M_PI * 180;
 }
+
+double iAvg(int period, const double close[], int n)
+{
+    if (period <= 0 || n < period)
+        return 0.0;
+
+    double sum = 0.0;
+    for (int i = 0; i < period; ++i)
+    {
+        sum += close[i];
+    }
+    return sum / period;
+}
+
+double iMin(int period, const double close[], int n)
+{
+    if (period <= 0 || n < period)
+        return 0.0;
+
+    double minVal = close[0];
+    for (int i = 1; i < period; ++i)
+    {
+        if (close[i] < minVal)
+            minVal = close[i];
+    }
+    return minVal;
+}
+
+double iMax(int period, const double close[], int n)
+{
+    if (period <= 0 || n < period)
+        return 0.0;
+
+    double maxVal = close[0];
+    for (int i = 1; i < period; ++i)
+    {
+        if (close[i] > maxVal)
+            maxVal = close[i];
+    }
+    return maxVal;
+}
+
+double iAvg(int period, int n, function<double(int)> f)
+{
+    if (period <= 0 || n < period)
+        return 0.0;
+
+    double sum = 0.0;
+    for (int i = 0; i < period; ++i)
+    {
+        sum += f(i);
+    }
+    return sum / period;
+}
+
+double iMin(int period, int n, function<double(int)> f)
+{
+    if (period <= 0 || n < period)
+        return 0.0;
+
+    double minVal = f(0);
+
+    for (int i = 1; i < period; ++i)
+    {
+        double transformed = f(i);
+        if (transformed < minVal)
+        {
+            minVal = transformed;
+        }
+    }
+
+    return minVal;
+}
+
+double iMax(int period, int n, function<double(int)> f)
+{
+    if (period <= 0 || n < period)
+        return 0.0;
+
+    double maxVal = f(0);
+
+    for (int i = 1; i < period; ++i)
+    {
+        double transformed = f(i);
+        if (transformed > maxVal)
+        {
+            maxVal = transformed;
+        }
+    }
+
+    return maxVal;
+}

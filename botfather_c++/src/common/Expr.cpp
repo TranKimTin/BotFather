@@ -372,7 +372,8 @@ any Expr::visitBb_lower(ExprParser::Bb_lowerContext *ctx)
     return iBB(period, stdDev, close + shift, length - shift).lower;
 }
 
-any Expr::visitMacd_n_dinh(ExprParser::Macd_n_dinhContext *ctx) {
+any Expr::visitMacd_n_dinh(ExprParser::Macd_n_dinhContext *ctx)
+{
     int fastPeriod = stoi(ctx->INT(0)->getText());
     int slowPeriod = stoi(ctx->INT(1)->getText());
     int signalPeriod = stoi(ctx->INT(2)->getText());
@@ -382,8 +383,9 @@ any Expr::visitMacd_n_dinh(ExprParser::Macd_n_dinhContext *ctx) {
     double diffCandle0 = stod(ctx->number(0)->getText());
     int shift = ctx->INT(6) ? stoi(ctx->INT(6)->getText()) : 0;
     vector<double> diffPercents;
-    
-    for(int i=1; ctx->number(i); i++) {
+
+    for (int i = 1; ctx->number(i); i++)
+    {
         diffPercents.push_back(stod(ctx->number(i)->getText()));
     }
 
@@ -393,7 +395,8 @@ any Expr::visitMacd_n_dinh(ExprParser::Macd_n_dinhContext *ctx) {
     return macd_n_dinh(fastPeriod, slowPeriod, signalPeriod, redDepth, depth, enableDivergence, diffCandle0, diffPercents, close + shift, open + shift, high + shift, length - shift);
 }
 
-any Expr::visitMacd_slope(ExprParser::Macd_slopeContext *ctx) {
+any Expr::visitMacd_slope(ExprParser::Macd_slopeContext *ctx)
+{
     int fastPeriod = stoi(ctx->INT(0)->getText());
     int slowPeriod = stoi(ctx->INT(1)->getText());
     int signalPeriod = stoi(ctx->INT(2)->getText());
@@ -403,6 +406,233 @@ any Expr::visitMacd_slope(ExprParser::Macd_slopeContext *ctx) {
         return {};
 
     return macd_slope(fastPeriod, slowPeriod, signalPeriod, close + shift, length - shift);
+}
+
+any Expr::visitAvg_open(ExprParser::Avg_openContext *ctx)
+{
+    int from = ctx->INT(0) ? stoi(ctx->INT(0)->getText()) : 0;
+    int to = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (from < 0 || to >= length)
+        return {};
+
+    int period = to - from + 1;
+
+    return iAvg(period, open + from, length - from);
+}
+
+any Expr::visitAvg_high(ExprParser::Avg_highContext *ctx)
+{
+    int from = ctx->INT(0) ? stoi(ctx->INT(0)->getText()) : 0;
+    int to = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (from < 0 || to >= length)
+        return {};
+
+    int period = to - from + 1;
+
+    return iAvg(period, high + from, length - from);
+}
+
+any Expr::visitAvg_low(ExprParser::Avg_lowContext *ctx)
+{
+    int from = ctx->INT(0) ? stoi(ctx->INT(0)->getText()) : 0;
+    int to = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (from < 0 || to >= length)
+        return {};
+
+    int period = to - from + 1;
+
+    return iAvg(period, low + from, length - from);
+}
+
+any Expr::visitAvg_close(ExprParser::Avg_closeContext *ctx)
+{
+    int from = ctx->INT(0) ? stoi(ctx->INT(0)->getText()) : 0;
+    int to = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (from < 0 || to >= length)
+        return {};
+
+    int period = to - from + 1;
+
+    return iAvg(period, close + from, length - from);
+}
+
+any Expr::visitAvg_ampl(ExprParser::Avg_amplContext *ctx)
+{
+    int from = ctx->INT(0) ? stoi(ctx->INT(0)->getText()) : 0;
+    int to = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (from < 0 || to >= length)
+        return {};
+
+    int period = to - from + 1;
+
+    return iAvg(period, length - from, [this, from](int i)
+                { return this->high[from + i] - this->low[from + i]; });
+}
+
+any Expr::visitAvg_amplP(ExprParser::Avg_amplPContext *ctx)
+{
+    int from = ctx->INT(0) ? stoi(ctx->INT(0)->getText()) : 0;
+    int to = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (from < 0 || to >= length)
+        return {};
+
+    int period = to - from + 1;
+
+    return iAvg(period, length - from, [this, from](int i)
+                { return (this->high[from + i] - this->low[from + i]) / this->open[from + i] * 100.0; });
+}
+
+any Expr::visitMin_open(ExprParser::Min_openContext *ctx)
+{
+    int from = ctx->INT(0) ? stoi(ctx->INT(0)->getText()) : 0;
+    int to = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (from < 0 || to >= length)
+        return {};
+
+    int period = to - from + 1;
+
+    return iMin(period, open + from, length - from);
+}
+
+any Expr::visitMin_high(ExprParser::Min_highContext *ctx)
+{
+    int from = ctx->INT(0) ? stoi(ctx->INT(0)->getText()) : 0;
+    int to = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (from < 0 || to >= length)
+        return {};
+
+    int period = to - from + 1;
+
+    return iMin(period, high + from, length - from);
+}
+any Expr::visitMin_low(ExprParser::Min_lowContext *ctx)
+{
+    int from = ctx->INT(0) ? stoi(ctx->INT(0)->getText()) : 0;
+    int to = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (from < 0 || to >= length)
+        return {};
+
+    int period = to - from + 1;
+
+    return iMin(period, low + from, length - from);
+}
+any Expr::visitMin_close(ExprParser::Min_closeContext *ctx)
+{
+    int from = ctx->INT(0) ? stoi(ctx->INT(0)->getText()) : 0;
+    int to = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (from < 0 || to >= length)
+        return {};
+
+    int period = to - from + 1;
+
+    return iMin(period, close + from, length - from);
+}
+
+any Expr::visitMin_change(ExprParser::Min_changeContext *ctx)
+{
+    int from = ctx->INT(0) ? stoi(ctx->INT(0)->getText()) : 0;
+    int to = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (from < 0 || to >= length)
+        return {};
+
+    int period = to - from + 1;
+
+    return iMin(period, length - from, [this, from](int i)
+                { return this->close[from + i] - this->open[from + i]; });
+}
+
+any Expr::visitMin_changeP(ExprParser::Min_changePContext *ctx)
+{
+    int from = ctx->INT(0) ? stoi(ctx->INT(0)->getText()) : 0;
+    int to = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (from < 0 || to >= length)
+        return {};
+
+    int period = to - from + 1;
+
+    return iMin(period, length - from, [this, from](int i)
+                { return (this->close[from + i] - this->open[from + i]) / this->open[from + i] * 100.0; });
+}
+
+any Expr::visitMin_ampl(ExprParser::Min_amplContext *ctx)
+{
+    int from = ctx->INT(0) ? stoi(ctx->INT(0)->getText()) : 0;
+    int to = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (from < 0 || to >= length)
+        return {};
+
+    int period = to - from + 1;
+
+    return iMin(period, length - from, [this, from](int i)
+                { return this->high[from + i] - this->low[from + i]; });
+}
+any Expr::visitMin_amplP(ExprParser::Min_amplPContext *ctx)
+{
+    int from = ctx->INT(0) ? stoi(ctx->INT(0)->getText()) : 0;
+    int to = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (from < 0 || to >= length)
+        return {};
+
+    int period = to - from + 1;
+
+    return iMin(period, length - from, [this, from](int i)
+                { return (this->high[from + i] - this->low[from + i]) / this->open[from + i] * 100.0; });
 }
 
 //////////////////////////////////////////////////////////////////

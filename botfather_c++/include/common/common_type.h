@@ -16,6 +16,8 @@
 #include <cstdio>
 #include <memory>
 #include <cmath>
+#include <functional>
+
 
 #include <websocketpp/config/asio_client.hpp>
 #include <websocketpp/client.hpp>
