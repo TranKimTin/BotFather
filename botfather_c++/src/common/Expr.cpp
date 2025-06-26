@@ -261,11 +261,115 @@ any Expr::visitRsi(ExprParser::RsiContext *ctx)
     if (period <= 0 || shift < 0 || shift >= length - period)
         return {};
 
-    double rsiValue = iRSI(period, close + shift, length - shift);
-    if (isnan(rsiValue))
+    return iRSI(period, close + shift, length - shift);
+}
+
+any Expr::visitRsi_slope(ExprParser::Rsi_slopeContext *ctx)
+{
+    int period = stoi(ctx->INT(0)->getText());
+    int shift = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+
+    if (period <= 0 || shift < 0 || shift >= length - period - 1)
         return {};
 
-    return rsiValue;
+    return iRSI_slope(period, close + shift, length - shift);
+}
+
+any Expr::visitMa(ExprParser::MaContext *ctx)
+{
+    int period = stoi(ctx->INT(0)->getText());
+    int shift = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+
+    if (period <= 0 || shift < 0 || shift >= length - period)
+        return {};
+
+    return iMA(period, close + shift, length - shift);
+}
+
+any Expr::visitEma(ExprParser::EmaContext *ctx)
+{
+    int period = stoi(ctx->INT(0)->getText());
+    int shift = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+
+    if (period <= 0 || shift < 0 || shift >= length - period)
+        return {};
+
+    return iEMA(period, close + shift, length - shift);
+}
+
+any Expr::visitMacd_value(ExprParser::Macd_valueContext *ctx)
+{
+    int fastPeriod = stoi(ctx->INT(0)->getText());
+    int slowPeriod = stoi(ctx->INT(1)->getText());
+    int signalPeriod = stoi(ctx->INT(2)->getText());
+    int shift = ctx->INT(3) ? stoi(ctx->INT(3)->getText()) : 0;
+
+    if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || shift < 0 || shift >= length - slowPeriod)
+        return {};
+
+    return iMACD(fastPeriod, slowPeriod, signalPeriod, close + shift, length - shift).macd;
+}
+
+any Expr::visitMacd_signal(ExprParser::Macd_signalContext *ctx)
+{
+    int fastPeriod = stoi(ctx->INT(0)->getText());
+    int slowPeriod = stoi(ctx->INT(1)->getText());
+    int signalPeriod = stoi(ctx->INT(2)->getText());
+    int shift = ctx->INT(3) ? stoi(ctx->INT(3)->getText()) : 0;
+
+    if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || shift < 0 || shift >= length - slowPeriod)
+        return {};
+
+    return iMACD(fastPeriod, slowPeriod, signalPeriod, close + shift, length - shift).signal;
+}
+
+any Expr::visitMacd_histogram(ExprParser::Macd_histogramContext *ctx)
+{
+    int fastPeriod = stoi(ctx->INT(0)->getText());
+    int slowPeriod = stoi(ctx->INT(1)->getText());
+    int signalPeriod = stoi(ctx->INT(2)->getText());
+    int shift = ctx->INT(3) ? stoi(ctx->INT(3)->getText()) : 0;
+
+    if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || shift < 0 || shift >= length - slowPeriod)
+        return {};
+
+    return iMACD(fastPeriod, slowPeriod, signalPeriod, close + shift, length - shift).histogram;
+}
+
+any Expr::visitBb_upper(ExprParser::Bb_upperContext *ctx)
+{
+    int period = stoi(ctx->INT(0)->getText());
+    double stdDev = stod(ctx->number()->getText());
+    int shift = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+
+    if (period <= 0 || stdDev <= 0 || shift < 0 || shift >= length - period)
+        return {};
+
+    return iBB(period, stdDev, close + shift, length - shift).upper;
+}
+
+any Expr::visitBb_middle(ExprParser::Bb_middleContext *ctx)
+{
+    int period = stoi(ctx->INT(0)->getText());
+    double stdDev = stod(ctx->number()->getText());
+    int shift = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+
+    if (period <= 0 || stdDev <= 0 || shift < 0 || shift >= length - period)
+        return {};
+
+    return iBB(period, stdDev, close + shift, length - shift).middle;
+}
+
+any Expr::visitBb_lower(ExprParser::Bb_lowerContext *ctx)
+{
+    int period = stoi(ctx->INT(0)->getText());
+    double stdDev = stod(ctx->number()->getText());
+    int shift = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+
+    if (period <= 0 || stdDev <= 0 || shift < 0 || shift >= length - period)
+        return {};
+
+    return iBB(period, stdDev, close + shift, length - shift).lower;
 }
 
 //////////////////////////////////////////////////////////////////

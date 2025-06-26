@@ -17,6 +17,7 @@ void test()
     string symbol = "BTCUSDT";
     string timeframe = "1h";
 
+
     string url = "https://api.binance.com/api/v3/klines?symbol=" + symbol + "&interval=" + timeframe + "&limit=600";
     string response = Axios::get(url);
     json j = json::parse(response);
@@ -48,7 +49,7 @@ void test()
     reverse(close.begin(), close.end());
     reverse(volume.begin(), volume.end());
 
-    string exprText = "rsi(14,0)";
+    string exprText = "bb_lower(20,2,2)";
 
     Timer timer("botfather runtime");
 
@@ -57,14 +58,14 @@ void test()
         any result = calculateExpr(broker, symbol, timeframe, open.size(),
                                    open.data(), high.data(), low.data(), close.data(), volume.data(),
                                    startTime.data(), exprText);
-        if (i % 1000 != 0) continue;
+        if (i % 10000 != 0) continue;
         if (result.has_value())
         {
-            cout << "Result: " << any_cast<double>(result) << endl;
+            LOGD("Result: %.3f", any_cast<double>(result));
         }
         else
         {
-            cout << "No result" << endl;
+            LOGE("No result");
         }
     }
 }

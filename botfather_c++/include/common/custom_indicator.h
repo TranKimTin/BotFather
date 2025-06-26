@@ -1,4 +1,21 @@
 #pragma one
 #include "common_type.h"
 
-double iRSI(int period, const double close[], int length);
+struct MACD_Output {
+    double macd;
+    double signal;
+    double histogram;
+};
+
+struct BB_Output {
+    double lower;
+    double middle;
+    double upper;
+};
+
+double iRSI(int period, const double close[], int n);
+double iRSI_slope(int period, const double close[], int n);
+double iMA(int period, const double close[], int n);
+double iEMA(int period, const double close[], int n);
+MACD_Output iMACD(int fastPeriod, int slowPeriod,int signalPeriod, const double close[], int n);
+BB_Output iBB(int period, double stdDev, const double close[], int n);
