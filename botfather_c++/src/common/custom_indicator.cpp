@@ -103,7 +103,7 @@ double iRSI_slope(int period, const double close[], int n)
     double wide = 3.0;
     double tan = diffRSI / wide;
     double slope = atan(tan);
-    return round(slope / M_PI * 180);
+    return slope / M_PI * 180;
 }
 
 double iMA(int period, const double close[], int n)
@@ -468,7 +468,7 @@ int macd_n_dinh(int fastPeriod, int slowPeriod, int signalPeriod, int redDepth, 
             return n;
         }
         if (diffPercents.size() > 1)
-            diffPercents.erase(diffPercents.begin());  
+            diffPercents.erase(diffPercents.begin());
         indexMaxMACD = preIndexMaxMACD;
         indexMaxPrice = preIndexMaxPrice;
 
@@ -487,4 +487,69 @@ int macd_n_dinh(int fastPeriod, int slowPeriod, int signalPeriod, int redDepth, 
         }
     }
     return n;
+}
+
+double macd_slope(int fastPeriod, int slowPeriod, int signalPeriod, const double close[], int n)
+{
+    n = min(n, MAX_N + slowPeriod);
+
+    if (n <= slowPeriod || fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0)
+        return 0;
+
+    double kFast = 2.0 / (fastPeriod + 1);
+    double kSlow = 2.0 / (slowPeriod + 1);
+    double kSignal = 2.0 / (signalPeriod + 1);
+
+    double emaFast = close[n - 1];
+    double emaSlow = close[n - 1];
+    double macd = 0.0;
+    double signalEMA = 0.0;
+
+    bool signalInitialized = false;
+
+    MACD_Output m0;
+    MACD_Output m1;
+    double sum0 = 0.0;
+    double sum1 = 0.0;
+
+    for (int i = n - 2; i >= 0; --i)
+    {
+        emaFast = (close[i] - emaFast) * kFast + emaFast;
+        emaSlow = (close[i] - emaSlow) * kSlow + emaSlow;
+
+        macd = emaFast - emaSlow;
+
+        if (!signalInitialized)
+        {
+            signalEMA = macd;
+            signalInitialized = true;
+        }
+        else
+        {
+            signalEMA = (macd - signalEMA) * kSignal + signalEMA;
+        }
+
+        if (i == 0)
+            m0 = {macd, signalEMA, macd - signalEMA};
+        if (i == 1)
+            m1 = {macd, signalEMA, macd - signalEMA};
+
+        if (i < slowPeriod)
+        {
+            sum0 += macd;
+        }
+        if (i > 0 && i <= slowPeriod)
+        {
+            sum1 += macd;
+        }
+    }
+    double ma0 = sum0 / slowPeriod;
+    double ma1 = sum1 / slowPeriod;
+
+    double diffMACD = m0.macd - m1.macd;
+    double diffMASignal = abs(ma0 - ma1);
+    double tan = diffMACD / diffMASignal;
+    double slope = atan(tan);
+
+    return slope / M_PI * 180;
 }

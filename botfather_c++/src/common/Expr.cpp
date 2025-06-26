@@ -393,6 +393,18 @@ any Expr::visitMacd_n_dinh(ExprParser::Macd_n_dinhContext *ctx) {
     return macd_n_dinh(fastPeriod, slowPeriod, signalPeriod, redDepth, depth, enableDivergence, diffCandle0, diffPercents, close + shift, open + shift, high + shift, length - shift);
 }
 
+any Expr::visitMacd_slope(ExprParser::Macd_slopeContext *ctx) {
+    int fastPeriod = stoi(ctx->INT(0)->getText());
+    int slowPeriod = stoi(ctx->INT(1)->getText());
+    int signalPeriod = stoi(ctx->INT(2)->getText());
+    int shift = ctx->INT(3) ? stoi(ctx->INT(3)->getText()) : 0;
+
+    if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || shift < 0 || shift >= length - slowPeriod - 1)
+        return {};
+
+    return macd_slope(fastPeriod, slowPeriod, signalPeriod, close + shift, length - shift);
+}
+
 //////////////////////////////////////////////////////////////////
 static std::unordered_map<std::string, CachedParseTree> parseCache;
 static mutex parseCacheMutex;

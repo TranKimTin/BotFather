@@ -48,7 +48,7 @@ void test()
     reverse(close.begin(), close.end());
     reverse(volume.begin(), volume.end());
 
-    string exprText = "macd_n_dinh(12, 26, 9, 15, 15, 0, 0.5, 0, 0)";
+    string exprText = "macd_slope(12, 26, 9, 5)";
 
     Timer timer("botfather runtime");
 
