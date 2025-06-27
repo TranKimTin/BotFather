@@ -1,4 +1,3 @@
-#include "common_type.h"
 #include <tbb/task_group.h>
 #include <chrono>
 #include <thread>
@@ -9,8 +8,7 @@
 #include "axios.h"
 #include "Timer.h"
 #include "MySQLConnector.h"
-
-using namespace std;
+#include "botfather.h"
 
 void test()
 {
@@ -94,13 +92,81 @@ void test()
     }
 }
 
+static Route getRoute(const json &j)
+{
+    // j: {"data":{"id":"1744877970451","value":"Start","type":"start"},"id":"1744877970451","next":[{"data":{"id":"1744877970452","value":"max_rsi(14, 70, 48) >= 80","type":"expr","unitVolume":"usd","unitEntry":"price","unitTP":"price","unitSL":"price","unitStop":"price","unitExpiredTime":"candle","expiredTime":"0"},"id":"1744877970452","next":[{"data":{"id":"1744877982563","value":"macd_n_dinh(12, 26, 9, 6, 8, 0, 2, 0, 5) >= 3","type":"expr","unitVolume":"usd","unitEntry":"price","unitTP":"price","unitSL":"price","unitStop":"price","unitExpiredTime":"candle","expiredTime":"0"},"id":"1744877982563","next":[{"data":{"id":"1744877970453","value":"ampl(1) >= avg_ampl(25, 0) * 1.8","type":"expr","unitVolume":"usd","unitEntry":"price","unitTP":"price","unitSL":"price","unitStop":"price","unitExpiredTime":"candle","expiredTime":"0"},"id":"1744877970453","next":[{"data":{"id":"1744877970454","value":"change(1) > 0","type":"expr","unitVolume":"usd","unitEntry":"price","unitTP":"price","unitSL":"price","unitStop":"price","unitExpiredTime":"candle","expiredTime":"0"},"id":"1744877970454","next":[{"data":{"id":"1744877970455","value":"change(0) < 0","type":"expr","unitVolume":"usd","unitEntry":"price","unitTP":"price","unitSL":"price","unitStop":"price","unitExpiredTime":"candle","expiredTime":"0"},"id":"1744877970455","next":[{"data":{"id":"1744877970456","value":"close(1) > max_high(100, 2)","type":"expr","unitVolume":"usd","unitEntry":"price","unitTP":"price","unitSL":"price","unitStop":"price","unitExpiredTime":"candle","expiredTime":"0"},"id":"1744877970456","next":[{"data":{"id":"1744877970457","value":"high(0) > max_high(100, 0)","type":"expr","unitVolume":"usd","unitEntry":"price","unitTP":"price","unitSL":"price","unitStop":"price","unitExpiredTime":"candle","expiredTime":"0"},"id":"1744877970457","next":[{"data":{"id":"1744877970458","value":"close(0) >= (open(1) + close(1))/2","type":"expr","unitVolume":"usd","unitEntry":"price","unitTP":"price","unitSL":"price","unitStop":"price","unitExpiredTime":"candle","expiredTime":"0"},"id":"1744877970458","next":[{"data":{"id":"1744877970459","value":"","type":"openSellLimit","unitVolume":"usd","unitEntry":"price","unitTP":"rr","unitSL":"price","unitStop":"price","unitExpiredTime":"candle","expiredTime":"1","volume":"5000","entry":"(close(0) + open(0))/2","sl":"high(0)","tp":"3.3","display":"Open SELL Limit. Volume=5000 (USD), Entry=(close(0) + open(0))/2 (USD), TP=3.3 (R), SL=high(0) (USD)"},"id":"1744877970459","next":[]}]}]}]}]}]}]}]}]}]}
+    Route route;
+
+    if (j.contains("id"))
+        route.id = j["id"].get<string>();
+    if (j["data"].contains("id"))
+        route.data.id = j["data"]["id"].get<string>();
+    if (j["data"].contains("value"))
+        route.data.value = j["data"]["value"].get<string>();
+    if (j["data"].contains("type"))
+        route.data.type = j["data"]["type"].get<string>();
+    if (j["data"].contains("unitEntry"))
+        route.data.unitEntry = j["data"]["unitEntry"].get<string>();
+    if (j["data"].contains("unitExpiredTime"))
+        route.data.unitExpiredTime = j["data"]["unitExpiredTime"].get<string>();
+    if (j["data"].contains("unitSL"))
+        route.data.unitSL = j["data"]["unitSL"].get<string>();
+    if (j["data"].contains("unitTP"))
+        route.data.unitTP = j["data"]["unitTP"].get<string>();
+    if (j["data"].contains("unitStop"))
+        route.data.unitStop = j["data"]["unitStop"].get<string>();
+    if (j["data"].contains("unitVolume"))
+        route.data.unitVolume = j["data"]["unitVolume"].get<string>();
+    if (j["data"].contains("expiredTime"))
+        route.data.expiredTime = j["data"]["expiredTime"].get<string>();
+    if (j["data"].contains("value"))
+        route.data.value = j["data"]["value"].get<string>();
+    if (j.contains("next"))
+    {
+        for (const auto &nextNode : j["next"])
+        {
+            route.next.push_back(getRoute(nextNode));
+        }
+    }
+
+    return route;
+}
+
+vector<shared_ptr<Bot>> getBotList()
+{
+    vector<shared_ptr<Bot>> botList;
+    auto &db = MySQLConnector::getInstance();
+    auto res = db.executeQuery("SELECT * FROM Bot");
+    while (res->next())
+    {
+        shared_ptr<Bot> bot = make_shared<Bot>();
+
+        bot->id = res->getInt("id");
+        bot->botName = res->getString("botName");
+        bot->idTelegram = split(res->getString("idTelegram"), ',');
+        bot->treeData = res->getString("treeData");
+        bot->userID = res->getInt("userID");
+        bot->symbolList = convertJsonStringArrayToVector(res->getString("symbolList"));
+        bot->timeframes = convertJsonStringArrayToVector(res->getString("timeframes"));
+
+        string routeString = res->getString("route");
+        json j = json::parse(routeString);
+        bot->route = getRoute(j);
+
+        botList.push_back(bot);
+    }
+    return botList;
+}
+
 void runApp()
 {
-    // map<string, string> env = readEnvFile();
+    map<string, string> env = readEnvFile();
 
-    // Redis::getInstance().connect(env["REDIS_SERVER"], stoi(env["REDIS_PORT"]), env["REDIS_PASSWORD"]);
+    Redis::getInstance().connect(env["REDIS_SERVER"], stoi(env["REDIS_PORT"]), env["REDIS_PASSWORD"]);
 
-    // SocketBinance binance(10);
+    vector<shared_ptr<Bot>> botList = getBotList();
 
-    test();
+    SocketBinance binance(10);
+
+    // test();
 }

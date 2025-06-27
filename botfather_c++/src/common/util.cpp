@@ -184,3 +184,22 @@ vector<string> split(const string &s, char delimiter)
 
     return tokens;
 }
+
+vector<string> convertJsonStringArrayToVector(string s)
+{
+    vector<string> result;
+
+    json j = json::parse(s);
+    for (const auto &item : j)
+    {
+        if (item.is_string())
+        {
+            result.push_back(item.get<string>());
+        }
+        else
+        {
+            LOGE("Invalid item in JSON array: %s", item.dump().c_str());
+        }
+    }
+    return result;
+}

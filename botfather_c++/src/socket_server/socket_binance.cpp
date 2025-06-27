@@ -6,6 +6,7 @@
 #include "Redis.h"
 #include "ThreadPool.h"
 #include "Worker.h"
+#include "MySQLConnector.h"
 
 static tbb::task_group task;
 
