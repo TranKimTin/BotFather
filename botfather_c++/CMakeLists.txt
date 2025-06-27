@@ -45,6 +45,7 @@ target_link_libraries(botfather
     pthread
     tbb
     -lhiredis
+    mysqlcppconn
     ${LIB_FILES}
 )
 

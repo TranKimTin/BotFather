@@ -13,5 +13,6 @@ sudo apt-get install ninja-build
 sudo apt install openjdk-11-jdk
 sudo apt install ccache
 sudo apt install libhiredis-dev
+sudo apt install libmysqlcppconn-dev
 
 sudo timedatectl set-timezone Asia/Ho_Chi_Minh

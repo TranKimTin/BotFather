@@ -2,6 +2,7 @@
 #include "common_type.h"
 #include "ta_libc.h"
 #include "util.h"
+#include "MySQLConnector.h"
 
 using namespace std;
 
@@ -16,6 +17,8 @@ void init()
         LOGE("init TA - Lib fail");
         throw "init TA - Lib fail";
     }
+
+    MySQLConnector::getInstance();
 }
 
 void destroy()

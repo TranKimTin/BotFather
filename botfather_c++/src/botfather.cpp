@@ -8,6 +8,7 @@
 #include "util.h"
 #include "axios.h"
 #include "Timer.h"
+#include "MySQLConnector.h"
 
 using namespace std;
 
@@ -52,7 +53,7 @@ void test()
 
     Timer timer("botfather runtime");
 
-    for (int i = 0; i < 200000; i++)
+    for (int i = 0; i < 1; i++)
     {
         any result = calculateExpr(exprText, broker, symbol, timeframe, open.size(),
                                    open.data(), high.data(), low.data(), close.data(), volume.data(),
@@ -82,6 +83,14 @@ void test()
         {
             LOGE("No result");
         }
+    }
+
+    auto &db = MySQLConnector::getInstance();
+    auto res = db.executeQuery("SELECT id, botName FROM Bot");
+    while (res->next())
+    {
+        std::cout << "ID: " << res->getInt("id")
+                  << ", Name: " << res->getString("botName") << std::endl;
     }
 }
 
