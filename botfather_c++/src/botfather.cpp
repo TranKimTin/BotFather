@@ -48,15 +48,15 @@ void test()
     reverse(close.begin(), close.end());
     reverse(volume.begin(), volume.end());
 
-    string exprText = "marsi(14, 5, 15)";
+    string exprText = "rsi(14,0)";
 
     Timer timer("botfather runtime");
 
     for (int i = 0; i < 200000; i++)
     {
-        any result = calculateExpr(broker, symbol, timeframe, open.size(),
+        any result = calculateExpr(exprText, broker, symbol, timeframe, open.size(),
                                    open.data(), high.data(), low.data(), close.data(), volume.data(),
-                                   startTime.data(), exprText);
+                                   startTime.data());
         if (i % 10000 != 0)
             continue;
         if (result.has_value())
@@ -73,7 +73,8 @@ void test()
             {
                 LOGD("Result: %s", any_cast<string>(result).c_str());
             }
-            else {
+            else
+            {
                 LOGE("Unknown result type");
             }
         }

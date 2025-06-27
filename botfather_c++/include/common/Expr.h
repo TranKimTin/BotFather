@@ -137,10 +137,12 @@ public:
     // any visitHour(ExprParser::HourContext *ctx) override;
     // any visitMinute(ExprParser::MinuteContext *ctx) override;
     // any visitVolume24h_in_usd(ExprParser::Volume24h_in_usdContext *ctx) override;
-
-    // any visitComparisonOp(ExprParser::ComparisonOpContext *ctx) override;
 };
 
-any calculateExpr(const string &broker, const string &symbol, const string &timeframe, int length,
+any calculateExpr(const string &inputText, const string &broker, const string &symbol, const string &timeframe, int length,
                   const double *open, const double *high, const double *low, const double *close,
-                  const double *volume, long long *startTime, const string &inputText);
+                  const double *volume, long long *startTime);
+
+string calculateSubExpr(string expr, const string &broker, const string &symbol, const string &timeframe, int length,
+                  const double *open, const double *high, const double *low, const double *close,
+                  const double *volume, long long *startTime);

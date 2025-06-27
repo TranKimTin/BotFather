@@ -824,9 +824,9 @@ CachedParseTree &getParseTree(const string &key)
     return parseCache[key];
 }
 
-any calculateExpr(const string &broker, const string &symbol, const string &timeframe, int length,
+any calculateExpr(const string &inputText, const string &broker, const string &symbol, const string &timeframe, int length,
                   const double *open, const double *high, const double *low, const double *close,
-                  const double *volume, long long *startTime, const string &inputText)
+                  const double *volume, long long *startTime)
 {
     const std::string key = toLowerCase(inputText);
     auto &entry = getParseTree(key);
@@ -843,4 +843,59 @@ any calculateExpr(const string &broker, const string &symbol, const string &time
     Expr expr(broker, symbol, timeframe, length, open, high, low, close, volume, startTime);
 
     return expr.visit(entry.tree);
+}
+
+string calculateSubExpr(string expr, const string &broker, const string &symbol, const string &timeframe, int length,
+                        const double *open, const double *high, const double *low, const double *close,
+                        const double *volume, long long *startTime)
+{
+    stack<string> st;
+    string s;
+    for (char i : expr)
+    {
+        if (i == '{')
+        {
+            st.push(s);
+            s = "";
+        }
+        else if (i == '}')
+        {
+            if (st.size() == 0 || s == "")
+            {
+                LOGE("Invalid expr %s", expr.c_str());
+                return "";
+            }
+            string lastS = st.top();
+            st.pop();
+            any result = calculateExpr(s, broker, symbol, timeframe, length, open, high, low, close, volume, startTime);
+            s = lastS + " ";
+            if (result.type() == typeid(double))
+            {
+                s += to_string(any_cast<double>(result));
+            }
+            else if (result.type() == typeid(int))
+            {
+                s += to_string(any_cast<int>(result));
+            }
+            else if (result.type() == typeid(string))
+            {
+                s += any_cast<string>(result);
+            }
+            else
+            {
+                LOGE("Invalid result type %s for expr %s", result.type().name(), expr.c_str());
+                return "";
+            }
+        }
+        else
+        {
+            s.push_back(i);
+        }
+    }
+    if (st.size() > 1)
+    {
+        LOGE("Invalid expr %s", expr.c_str());
+        return "";
+    }
+    return (st.size() == 0 ? "" : st.top()) + s;
 }
