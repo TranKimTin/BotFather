@@ -645,3 +645,137 @@ double iMax(int period, int n, function<double(int)> f)
 
     return maxVal;
 }
+
+double iMinRSI(int period, int k, const double close[], int n)
+{
+    n = min(n, MAX_N + period);
+
+    if (n <= period + k)
+        return 0.0;
+
+    double avgGain = 0.0, avgLoss = 0.0;
+    double minRSI = 100.0;
+
+    for (int i = n - 2; i >= n - 1 - period; --i)
+    {
+        double diff = close[i] - close[i + 1];
+        if (diff > 0)
+            avgGain += diff;
+        else
+            avgLoss -= diff;
+    }
+    avgGain /= period;
+    avgLoss /= period;
+
+    for (int i = n - 2 - period; i >= 0; --i)
+    {
+        double diff = close[i] - close[i + 1];
+        double gain = diff > 0 ? diff : 0.0;
+        double loss = diff < 0 ? -diff : 0.0;
+
+        avgGain = (avgGain * (period - 1) + gain) / period;
+        avgLoss = (avgLoss * (period - 1) + loss) / period;
+
+        if (i < k && avgLoss != 0.0)
+        {
+            double rs = avgGain / avgLoss;
+            minRSI = min(minRSI, 100.0 - (100.0 / (1.0 + rs)));
+        }
+    }
+
+    return minRSI;
+}
+
+double iMaxRSI(int period, int k, const double close[], int n)
+{
+    n = min(n, MAX_N + period);
+
+    if (n <= period + k)
+        return 0.0;
+
+    double avgGain = 0.0, avgLoss = 0.0;
+    double maxRSI = 0.0;
+
+    for (int i = n - 2; i >= n - 1 - period; --i)
+    {
+        double diff = close[i] - close[i + 1];
+        if (diff > 0)
+            avgGain += diff;
+        else
+            avgLoss -= diff;
+    }
+    avgGain /= period;
+    avgLoss /= period;
+
+    for (int i = n - 2 - period; i >= 0; --i)
+    {
+        double diff = close[i] - close[i + 1];
+        double gain = diff > 0 ? diff : 0.0;
+        double loss = diff < 0 ? -diff : 0.0;
+
+        avgGain = (avgGain * (period - 1) + gain) / period;
+        avgLoss = (avgLoss * (period - 1) + loss) / period;
+
+        if (i < k)
+        {
+            if (avgLoss != 0.0)
+            {
+                double rs = avgGain / avgLoss;
+                maxRSI = max(maxRSI, 100.0 - (100.0 / (1.0 + rs)));
+            }
+            else
+            {
+                maxRSI = 100;
+                break;
+            }
+        }
+    }
+
+    return maxRSI;
+}
+double iAvgRSI(int period, int k, const double close[], int n)
+{
+    n = min(n, MAX_N + period);
+
+    if (n <= period + k)
+        return 0.0;
+
+    double avgGain = 0.0, avgLoss = 0.0;
+    double sumRSI = 0.0;
+
+    for (int i = n - 2; i >= n - 1 - period; --i)
+    {
+        double diff = close[i] - close[i + 1];
+        if (diff > 0)
+            avgGain += diff;
+        else
+            avgLoss -= diff;
+    }
+    avgGain /= period;
+    avgLoss /= period;
+
+    for (int i = n - 2 - period; i >= 0; --i)
+    {
+        double diff = close[i] - close[i + 1];
+        double gain = diff > 0 ? diff : 0.0;
+        double loss = diff < 0 ? -diff : 0.0;
+
+        avgGain = (avgGain * (period - 1) + gain) / period;
+        avgLoss = (avgLoss * (period - 1) + loss) / period;
+
+        if (i < k)
+        {
+            if (avgLoss != 0.0)
+            {
+                double rs = avgGain / avgLoss;
+                sumRSI += 100.0 - (100.0 / (1.0 + rs));
+            }
+            else
+            {
+                sumRSI += 100.0;
+            }
+        }
+    }
+
+    return sumRSI / k;
+}

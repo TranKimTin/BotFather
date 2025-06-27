@@ -635,6 +635,185 @@ any Expr::visitMin_amplP(ExprParser::Min_amplPContext *ctx)
                 { return (this->high[from + i] - this->low[from + i]) / this->open[from + i] * 100.0; });
 }
 
+any Expr::visitMax_open(ExprParser::Max_openContext *ctx)
+{
+    int from = ctx->INT(0) ? stoi(ctx->INT(0)->getText()) : 0;
+    int to = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (from < 0 || to >= length)
+        return {};
+
+    int period = to - from + 1;
+
+    return iMax(period, open + from, length - from);
+}
+
+any Expr::visitMax_high(ExprParser::Max_highContext *ctx)
+{
+    int from = ctx->INT(0) ? stoi(ctx->INT(0)->getText()) : 0;
+    int to = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (from < 0 || to >= length)
+        return {};
+
+    int period = to - from + 1;
+
+    return iMax(period, high + from, length - from);
+}
+
+any Expr::visitMax_low(ExprParser::Max_lowContext *ctx)
+{
+    int from = ctx->INT(0) ? stoi(ctx->INT(0)->getText()) : 0;
+    int to = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (from < 0 || to >= length)
+        return {};
+
+    int period = to - from + 1;
+
+    return iMax(period, low + from, length - from);
+}
+
+any Expr::visitMax_close(ExprParser::Max_closeContext *ctx)
+{
+    int from = ctx->INT(0) ? stoi(ctx->INT(0)->getText()) : 0;
+    int to = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (from < 0 || to >= length)
+        return {};
+
+    int period = to - from + 1;
+
+    return iMax(period, close + from, length - from);
+}
+any Expr::visitMax_change(ExprParser::Max_changeContext *ctx)
+{
+    int from = ctx->INT(0) ? stoi(ctx->INT(0)->getText()) : 0;
+    int to = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (from < 0 || to >= length)
+        return {};
+
+    int period = to - from + 1;
+
+    return iMax(period, length - from, [this, from](int i)
+                { return this->close[from + i] - this->open[from + i]; });
+}
+
+any Expr::visitMax_changeP(ExprParser::Max_changePContext *ctx)
+{
+    int from = ctx->INT(0) ? stoi(ctx->INT(0)->getText()) : 0;
+    int to = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (from < 0 || to >= length)
+        return {};
+
+    int period = to - from + 1;
+
+    return iMax(period, length - from, [this, from](int i)
+                { return (this->close[from + i] - this->open[from + i]) / this->open[from + i] * 100.0; });
+}
+
+any Expr::visitMax_ampl(ExprParser::Max_amplContext *ctx)
+{
+    int from = ctx->INT(0) ? stoi(ctx->INT(0)->getText()) : 0;
+    int to = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (from < 0 || to >= length)
+        return {};
+
+    int period = to - from + 1;
+
+    return iMax(period, length - from, [this, from](int i)
+                { return this->high[from + i] - this->low[from + i]; });
+}
+
+any Expr::visitMax_amplP(ExprParser::Max_amplPContext *ctx)
+{
+    int from = ctx->INT(0) ? stoi(ctx->INT(0)->getText()) : 0;
+    int to = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (from < 0 || to >= length)
+        return {};
+
+    int period = to - from + 1;
+
+    return iMax(period, length - from, [this, from](int i)
+                { return (this->high[from + i] - this->low[from + i]) / this->open[from + i] * 100.0; });
+}
+
+any Expr::visitMin_rsi(ExprParser::Min_rsiContext *ctx)
+{
+    int period = ctx->INT(0) ? stoi(ctx->INT(0)->getText()) : 14;
+    int from = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+    int to = ctx->INT(2) ? stoi(ctx->INT(2)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (period <= 0 || from < 0 || to >= length - period)
+        return {};
+
+    int k = to - from + 1;
+    return iMinRSI(period, k, close + from, length - from);
+}
+
+any Expr::visitMax_rsi(ExprParser::Max_rsiContext *ctx)
+{
+    int period = ctx->INT(0) ? stoi(ctx->INT(0)->getText()) : 14;
+    int from = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+    int to = ctx->INT(2) ? stoi(ctx->INT(2)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (period <= 0 || from < 0 || to >= length - period)
+        return {};
+
+    int k = to - from + 1;
+    return iMaxRSI(period, k, close + from, length - from);
+}
+
+any Expr::visitMarsi(ExprParser::MarsiContext *ctx)
+{
+    int period = ctx->INT(0) ? stoi(ctx->INT(0)->getText()) : 14;
+    int from = ctx->INT(1) ? stoi(ctx->INT(1)->getText()) : 0;
+    int to = ctx->INT(2) ? stoi(ctx->INT(2)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (period <= 0 || from < 0 || to >= length - period)
+        return {};
+
+    int k = to - from + 1;
+    return iAvgRSI(period, k, close + from, length - from);
+}
+
 //////////////////////////////////////////////////////////////////
 static std::unordered_map<std::string, CachedParseTree> parseCache;
 static mutex parseCacheMutex;

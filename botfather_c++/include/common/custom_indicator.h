@@ -27,3 +27,6 @@ double iMax(int period, const double close[], int n);
 double iAvg(int period, int n, function<double(int)> f);
 double iMin(int period, int n, function<double(int)> f);
 double iMax(int period, int n, function<double(int)> f);
+double iMinRSI(int period, int k, const double close[], int n);
+double iMaxRSI(int period, int k, const double close[], int n);
+double iAvgRSI(int period, int k, const double close[], int n);

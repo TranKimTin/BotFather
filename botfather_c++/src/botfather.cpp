@@ -48,7 +48,7 @@ void test()
     reverse(close.begin(), close.end());
     reverse(volume.begin(), volume.end());
 
-    string exprText = "min_ampl%(4, 20)";
+    string exprText = "marsi(14, 5, 15)";
 
     Timer timer("botfather runtime");
 
