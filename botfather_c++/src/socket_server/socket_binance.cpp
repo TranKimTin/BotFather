@@ -10,6 +10,12 @@
 
 static tbb::task_group task;
 
+void SocketBinance::setBotList(shared_ptr<vector<shared_ptr<Bot>>> botList)
+{
+    LOGD("Set bot list with size: %d", (int)botList->size());
+    this->botList = botList;
+}
+
 void SocketBinance::on_message(connection_hdl, message_ptr msg)
 {
     const string message = msg->get_payload();
@@ -69,8 +75,6 @@ SocketBinance::SocketBinance(const int _BATCH_SIZE) : BATCH_SIZE(_BATCH_SIZE)
             data[key].interval = tf;
         }
     }
-
-    connectSocket();
 }
 
 void SocketBinance::onSocketConnected(connection_hdl hdl)

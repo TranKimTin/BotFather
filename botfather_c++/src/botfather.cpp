@@ -134,6 +134,7 @@ static Route getRoute(const json &j)
 
 vector<shared_ptr<Bot>> getBotList()
 {
+    Timer timer("getBotList");
     vector<shared_ptr<Bot>> botList;
     auto &db = MySQLConnector::getInstance();
     auto res = db.executeQuery("SELECT * FROM Bot");
@@ -146,8 +147,21 @@ vector<shared_ptr<Bot>> getBotList()
         bot->idTelegram = split(res->getString("idTelegram"), ',');
         bot->treeData = res->getString("treeData");
         bot->userID = res->getInt("userID");
-        bot->symbolList = convertJsonStringArrayToVector(res->getString("symbolList"));
         bot->timeframes = convertJsonStringArrayToVector(res->getString("timeframes"));
+
+        bot->symbolList.clear();
+        vector<string> symbolList = convertJsonStringArrayToVector(res->getString("symbolList"));
+        for (const string &symbol : symbolList)
+        {
+            Symbol s;
+            vector<string> parts = split(symbol, ':');
+
+            s.broker = parts[0];
+            s.symbol = parts[1];
+            s.symbolName = symbol;
+
+            bot->symbolList.push_back(s);
+        }
 
         string routeString = res->getString("route");
         json j = json::parse(routeString);
@@ -164,9 +178,14 @@ void runApp()
 
     Redis::getInstance().connect(env["REDIS_SERVER"], stoi(env["REDIS_PORT"]), env["REDIS_PASSWORD"]);
 
-    vector<shared_ptr<Bot>> botList = getBotList();
-
     SocketBinance binance(10);
+    thread t([&binance]()
+             { binance.connectSocket(); });
+
+    shared_ptr<vector<shared_ptr<Bot>>> botList = make_shared<vector<shared_ptr<Bot>>>(getBotList());
+    binance.setBotList(botList);
+
+    t.join();
 
     // test();
 }

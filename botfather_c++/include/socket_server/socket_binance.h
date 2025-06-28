@@ -12,6 +12,7 @@ protected:
     WebSocket ws;
     const int BATCH_SIZE;
     std::mutex mMutex;
+    shared_ptr<vector<shared_ptr<Bot>>> botList;
 
     void on_message(connection_hdl, message_ptr msg);
 
@@ -22,7 +23,6 @@ protected:
     RateData getOHLCVFromCache(const string &symbol, const string &timeframe);
     void updateCache(const RateData &rateData);
     vector<string> getSymbolList();
-    void connectSocket();
     void mergeData(RateData &rateData, const string &symbol, string &timeframe, string &currentTF, double open, double high, double low, double close, double volume, long long timestamp, bool isFinal, bool ignoreClose);
     void adjustData(RateData &rateData);
     bool isValidData(const RateData &rateData);
@@ -30,4 +30,7 @@ protected:
 
 public:
     SocketBinance(const int _BATCH_SIZE);
+    void setBotList(shared_ptr<vector<shared_ptr<Bot>>> botList);
+    void connectSocket();
+
 };

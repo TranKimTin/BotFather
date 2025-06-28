@@ -118,13 +118,19 @@ struct Route
     vector<Route> next;
 };
 
+struct Symbol{
+    string broker;
+    string symbol;
+    string symbolName;
+};
+
 struct Bot
 {
     int id;
     string botName;
     vector<string> idTelegram;
     Route route;
-    vector<string> symbolList;
+    vector<Symbol> symbolList;
     vector<string> timeframes;
     string treeData;
     int userID;
