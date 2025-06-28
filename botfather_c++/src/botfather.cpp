@@ -162,6 +162,11 @@ vector<shared_ptr<Bot>> getBotList()
 
             bot->symbolList.push_back(s);
         }
+        sort(bot->symbolList.begin(), bot->symbolList.end(),
+             [](const Symbol &a, const Symbol &b)
+             {
+                 return a.symbolName < b.symbolName;
+             });
 
         string routeString = res->getString("route");
         json j = json::parse(routeString);
