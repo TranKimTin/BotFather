@@ -418,8 +418,8 @@ void SocketBinance::mergeData(RateData &rateData, const string &symbol, string &
 
 void SocketBinance::onCloseCandle(const string &symbol, string &timeframe, RateData &rateData)
 {
-    // if (rateData.startTime.size() < 15)
-    //     return;
+    if (rateData.startTime.size() < 15)
+        return;
 
     vector<double> open(rateData.open.begin(), rateData.open.end());
     vector<double> high(rateData.high.begin(), rateData.high.end());
@@ -428,7 +428,7 @@ void SocketBinance::onCloseCandle(const string &symbol, string &timeframe, RateD
     vector<double> volume(rateData.volume.begin(), rateData.volume.end());
     vector<long long> startTime(rateData.startTime.begin(), rateData.startTime.end());
 
-    shared_ptr<Worker> data = std::make_shared<Worker>(broker, symbol, timeframe, move(open), move(high), move(low), move(close), move(volume), move(startTime));
+    shared_ptr<Worker> data = std::make_shared<Worker>(botList, broker, symbol, timeframe, move(open), move(high), move(low), move(close), move(volume), move(startTime));
 
     ThreadPool::getInstance().enqueue([data, this, symbol, timeframe]()
                                       { data->run();

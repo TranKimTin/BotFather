@@ -203,3 +203,26 @@ vector<string> convertJsonStringArrayToVector(string s)
     }
     return result;
 }
+
+string StringFormat(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+
+    // tạo buffer tạm lớn
+    vector<char> buffer(1024);
+    int needed = vsnprintf(buffer.data(), buffer.size(), format, args);
+    va_end(args);
+
+    if (needed < 0) return "";
+
+    if (static_cast<size_t>(needed) < buffer.size()) {
+        return string(buffer.data());
+    } else {
+        // nếu buffer chưa đủ lớn, cấp lại
+        buffer.resize(needed + 1);
+        va_start(args, format);
+        vsnprintf(buffer.data(), buffer.size(), format, args);
+        va_end(args);
+        return string(buffer.data());
+    }
+}
