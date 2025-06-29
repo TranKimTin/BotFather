@@ -392,7 +392,8 @@ any Expr::visitMacd_n_dinh(ExprParser::Macd_n_dinhContext *ctx)
     if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || redDepth < 0 || depth < 0 || enableDivergence < 0 || diffCandle0 < 0 || shift < 0 || shift >= length - slowPeriod)
         return {};
 
-    return macd_n_dinh(fastPeriod, slowPeriod, signalPeriod, redDepth, depth, enableDivergence, diffCandle0, diffPercents, close + shift, open + shift, high + shift, length - shift);
+    int result = macd_n_dinh(fastPeriod, slowPeriod, signalPeriod, redDepth, depth, enableDivergence, diffCandle0, diffPercents, close + shift, open + shift, high + shift, length - shift);
+    return (double) result;
 }
 
 any Expr::visitMacd_slope(ExprParser::Macd_slopeContext *ctx)
@@ -833,6 +834,7 @@ any calculateExpr(const string &inputText, const string &broker, const string &s
 
     if (!entry.tree)
     {
+        lock_guard<mutex> lock(parseCacheMutex);
         entry.input = std::make_unique<ANTLRInputStream>(key);
         entry.lexer = std::make_unique<ExprLexer>(entry.input.get());
         entry.tokens = std::make_unique<CommonTokenStream>(entry.lexer.get());

@@ -46,6 +46,6 @@ ThreadPool::~ThreadPool()
 
 ThreadPool &ThreadPool::getInstance()
 {
-    static ThreadPool instance(4);
+    static ThreadPool instance(2);
     return instance;
 }

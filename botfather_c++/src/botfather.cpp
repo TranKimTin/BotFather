@@ -183,7 +183,7 @@ void runApp()
 
     Redis::getInstance().connect(env["REDIS_SERVER"], stoi(env["REDIS_PORT"]), env["REDIS_PASSWORD"]);
 
-    SocketBinance binance(10);
+    SocketBinance binance(100);
     thread t([&binance]()
              { binance.connectSocket(); });
 

@@ -57,9 +57,9 @@ SocketBinance::SocketBinance(const int _BATCH_SIZE) : BATCH_SIZE(_BATCH_SIZE)
 {
     broker = "c_binance";
     timeframes = {"1m", "5m", "15m", "30m", "1h", "4h", "1d"};
-    // symbolList = getSymbolList();
-    symbolList.push_back("BTCUSDT");
-    symbolList.resize(1); // Chỉ lấy 1 symbol để test
+    symbolList = getSymbolList();
+    // symbolList.push_back("BTCUSDT");
+
     // for (const string &tf : timeframes)
     // {
     //     Redis::getInstance().clearList("c_binance_BTCUSDT_" + tf);
@@ -81,79 +81,82 @@ void SocketBinance::onSocketConnected(connection_hdl hdl)
 {
     LOGI("Socket %s connected", broker.c_str());
 
-    for (int i = 0; i < symbolList.size(); i += BATCH_SIZE)
-    {
-        vector<future<void>> futures;
-        int end = min(i + BATCH_SIZE, (int)symbolList.size());
-
-        for (int j = i; j < end; ++j)
+    thread t([this]()
+             {
+        for (int i = 0; i < symbolList.size(); i += BATCH_SIZE)
         {
-            string symbol = symbolList[j];
+            vector<future<void>> futures;
+            int end = min(i + BATCH_SIZE, (int)symbolList.size());
 
-            futures.emplace_back(std::async(std::launch::async, [this, symbol]()
-                                            {
-                for(int k=0; k<timeframes.size(); k++)
-                {
-                    string tf = timeframes[k];
-                    RateData rateData;
-                    if(tf == "1m")
+            for (int j = i; j < end; ++j)
+            {
+                string symbol = symbolList[j];
+
+                futures.emplace_back(std::async(std::launch::async, [this, symbol]()
+                                                {
+                    for(int k=0; k<timeframes.size(); k++)
                     {
-                        rateData = getOHLCV(symbol, tf, MAX_CANDLE);
-                    }
-                    else {
-                        rateData = getOHLCVFromCache(symbol, tf);
-                        if (rateData.startTime.empty()) {
+                        string tf = timeframes[k];
+                        RateData rateData;
+                        if(tf == "1m")
+                        {
                             rateData = getOHLCV(symbol, tf, MAX_CANDLE);
                         }
-                        else{
-                            for(int m = k-1; m >= 0; m--) {
-                                if(timeframeToNumberMinutes(tf) % timeframeToNumberMinutes(timeframes[m]) != 0){
-                                    continue;
-                                }
-                                RateData &smaller = data[symbol + "_" + timeframes[m]];
-                                int size = smaller.startTime.size();
-                                int l = 0;
-                                while(l < size && smaller.startTime[l] >= rateData.startTime[0]) {
-                                    l++;
-                                }
-                                l--;
-                                while(l >= 0){
-                                    long long startTime = smaller.startTime[l];
-                                    double open = smaller.open[l];
-                                    double high = smaller.high[l];
-                                    double low = smaller.low[l];
-                                    double close = smaller.close[l];
-                                    double volume = smaller.volume[l];
-                                    mergeData(rateData, symbol, tf, timeframes[m], open, high, low, close, volume, startTime, l > 0, true);
-                                    l--;
-                                }
-                            }
-                            adjustData(rateData);
-                            if (!isValidData(rateData)) {
-                                LOGE("Invalid data for %s %s", symbol.c_str(), tf.c_str());
+                        else {
+                            rateData = getOHLCVFromCache(symbol, tf);
+                            if (rateData.startTime.empty()) {
                                 rateData = getOHLCV(symbol, tf, MAX_CANDLE);
                             }
-                            else {
-                                LOGD("data valid %s %s", symbol.c_str(), tf.c_str());
+                            else{
+                                for(int m = k-1; m >= 0; m--) {
+                                    if(timeframeToNumberMinutes(tf) % timeframeToNumberMinutes(timeframes[m]) != 0){
+                                        continue;
+                                    }
+                                    RateData &smaller = data[symbol + "_" + timeframes[m]];
+                                    int size = smaller.startTime.size();
+                                    int l = 0;
+                                    while(l < size && smaller.startTime[l] >= rateData.startTime[0]) {
+                                        l++;
+                                    }
+                                    l--;
+                                    while(l >= 0){
+                                        long long startTime = smaller.startTime[l];
+                                        double open = smaller.open[l];
+                                        double high = smaller.high[l];
+                                        double low = smaller.low[l];
+                                        double close = smaller.close[l];
+                                        double volume = smaller.volume[l];
+                                        mergeData(rateData, symbol, tf, timeframes[m], open, high, low, close, volume, startTime, l > 0, true);
+                                        l--;
+                                    }
+                                }
+                                adjustData(rateData);
+                                if (!isValidData(rateData)) {
+                                    LOGE("Invalid data for %s %s", symbol.c_str(), tf.c_str());
+                                    rateData = getOHLCV(symbol, tf, MAX_CANDLE);
+                                }
                             }
                         }
-                    }
 
-                    
-                    string key = symbol + "_" + tf;
-                    data[key] = rateData;
-                    
-                    updateCache(rateData);
-                } }));
-        }
+                        
+                        string key = symbol + "_" + tf;
+                        data[key] = rateData;
+                        
+                        updateCache(rateData);
+                    } }));
+            }
 
-        // Chờ batch này xong
-        for (auto &f : futures)
-            f.get();
+            // Chờ batch này xong
+            for (auto &f : futures)
+                f.get();
+            
+            LOGD("Init %d / %d", end, (int) symbolList.size());
 
-        // (Tùy chọn) nghỉ một chút để tránh rate limit
-        SLEEP_FOR(5000);
-    }
+            // (Tùy chọn) nghỉ một chút để tránh rate limit
+            SLEEP_FOR(5000);
+    } });
+
+    t.detach();
 }
 
 bool SocketBinance::isValidData(const RateData &rateData)
@@ -214,15 +217,18 @@ void SocketBinance::connectSocket()
 
 vector<string> SocketBinance::getSymbolList()
 {
-    string url = "https://api.binance.com/api/v3/exchangeInfo";
+    string url = "https://api.binance.com/api/v1/exchangeInfo";
     string response = Axios::get(url);
     json j = json::parse(response);
     vector<string> symbols;
     for (const auto &s : j["symbols"])
     {
-        if (!endsWith(s["symbol"], "USDT"))
+        string symbol = s["symbol"];
+        string status = s["status"];
+
+        if (status != "TRADING" || !endsWith(symbol, "USDT") || symbol == "USDCUSDT" || symbol == "TUSDUSDT" || symbol == "DAIUSDT")
             continue;
-        symbols.push_back(s["symbol"]);
+        symbols.push_back(symbol);
     }
     return symbols;
 }
@@ -419,6 +425,9 @@ void SocketBinance::mergeData(RateData &rateData, const string &symbol, string &
 void SocketBinance::onCloseCandle(const string &symbol, string &timeframe, RateData &rateData)
 {
     if (rateData.startTime.size() < 15)
+        return;
+
+    if (!botList)
         return;
 
     vector<double> open(rateData.open.begin(), rateData.open.end());
