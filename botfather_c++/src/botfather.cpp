@@ -10,6 +10,8 @@
 #include "MySQLConnector.h"
 #include "botfather.h"
 
+// #define TEST
+
 void test()
 {
     string broker = "binance";
@@ -47,11 +49,11 @@ void test()
     reverse(close.begin(), close.end());
     reverse(volume.begin(), volume.end());
 
-    string exprText = "rsi(14,0)";
+    string exprText = "ampl(0) >= avg_ampl(50, 1) * 10";
 
     Timer timer("botfather runtime");
 
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < 200000; i++)
     {
         any result = calculateExpr(exprText, broker, symbol, timeframe, open.size(),
                                    open.data(), high.data(), low.data(), close.data(), volume.data(),
@@ -81,14 +83,6 @@ void test()
         {
             LOGE("No result");
         }
-    }
-
-    auto &db = MySQLConnector::getInstance();
-    auto res = db.executeQuery("SELECT id, botName FROM Bot");
-    while (res->next())
-    {
-        std::cout << "ID: " << res->getInt("id")
-                  << ", Name: " << res->getString("botName") << std::endl;
     }
 }
 
@@ -183,7 +177,8 @@ void runApp()
 
     Redis::getInstance().connect(env["REDIS_SERVER"], stoi(env["REDIS_PORT"]), env["REDIS_PASSWORD"]);
 
-    SocketBinance binance(100);
+    #ifndef TEST
+    SocketBinance binance(50);
     thread t([&binance]()
              { binance.connectSocket(); });
 
@@ -191,6 +186,8 @@ void runApp()
     binance.setBotList(botList);
 
     t.join();
-
-    // test();
+    #else
+    test();
+    LOGD("Done.");
+    #endif
 }

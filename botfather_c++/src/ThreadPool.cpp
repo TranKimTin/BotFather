@@ -49,3 +49,9 @@ ThreadPool &ThreadPool::getInstance()
     static ThreadPool instance(2);
     return instance;
 }
+
+ThreadPool &ThreadPool::getCacheInstance()
+{
+    static ThreadPool cacheInstance(2);
+    return cacheInstance;
+}

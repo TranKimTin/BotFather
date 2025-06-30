@@ -42,7 +42,7 @@ bool Redis::connect(const string &host, int port, const string &password)
     // Nếu có mật khẩu, thực hiện xác thực
     if (!password.empty())
     {
-        redisReply* reply = (redisReply*)redisCommand(context, "AUTH %s", password.c_str());
+        redisReply *reply = (redisReply *)redisCommand(context, "AUTH %s", password.c_str());
         if (reply->type == REDIS_REPLY_ERROR)
         {
             LOGE("Redis authentication failed: %s", reply->str);
@@ -90,6 +90,44 @@ bool Redis::pushBack(const string &key, const string &value)
     redisReply *reply = (redisReply *)redisCommand(context, "RPUSH %s %s", key.c_str(), value.c_str());
     if (!reply)
         return false;
+    freeReplyObject(reply);
+    return true;
+}
+
+bool Redis::pushBack(const string &key, const vector<string> &values)
+{
+    lock_guard<mutex> lock(mMutex);
+    if (!context || values.empty())
+        return false;
+
+    stringstream ss;
+    ss << "RPUSH " << key;
+    for (const auto &val : values)
+        ss << " " << val;
+
+    redisReply *reply = (redisReply *)redisCommand(context, ss.str().c_str());
+    if (!reply)
+        return false;
+
+    freeReplyObject(reply);
+    return true;
+}
+
+bool Redis::pushFront(const string &key, const vector<string> &values)
+{
+    lock_guard<mutex> lock(mMutex);
+    if (!context || values.empty())
+        return false;
+
+    stringstream ss;
+    ss << "LPUSH " << key;
+    for (const auto &val : values)
+        ss << " " << val;
+
+    redisReply *reply = (redisReply *)redisCommand(context, ss.str().c_str());
+    if (!reply)
+        return false;
+
     freeReplyObject(reply);
     return true;
 }

@@ -31,6 +31,10 @@ any Expr::visitInt(ExprParser::IntContext *ctx)
 any Expr::visitNegative(ExprParser::NegativeContext *ctx)
 {
     auto value = visit(ctx->expr());
+
+    if (!value.has_value())
+        return {};
+
     double v = any_cast<double>(value);
     return -v;
 }
@@ -45,6 +49,9 @@ any Expr::visitMulDiv(ExprParser::MulDivContext *ctx)
     auto left = visit(ctx->expr(0));
     auto right = visit(ctx->expr(1));
 
+    if (!left.has_value() || !right.has_value())
+        return {};
+
     double l = any_cast<double>(left);
     double r = any_cast<double>(right);
 
@@ -55,6 +62,9 @@ any Expr::visitAddSub(ExprParser::AddSubContext *ctx)
 {
     auto left = visit(ctx->expr(0));
     auto right = visit(ctx->expr(1));
+
+    if (!left.has_value() || !right.has_value())
+        return {};
 
     double l = any_cast<double>(left);
     double r = any_cast<double>(right);
@@ -67,10 +77,13 @@ any Expr::visitComparison(ExprParser::ComparisonContext *ctx)
     auto left = visit(ctx->expr(0));
     auto right = visit(ctx->expr(1));
 
+    if (!left.has_value() || !right.has_value())
+        return {};
+
     double l = any_cast<double>(left);
     double r = any_cast<double>(right);
 
-    string op = ctx->children[1]->getText();
+    string op = ctx->comparisonOp()->getText();
 
     if (op == "==")
         return l == r ? 1.0 : 0.0;
@@ -393,7 +406,7 @@ any Expr::visitMacd_n_dinh(ExprParser::Macd_n_dinhContext *ctx)
         return {};
 
     int result = macd_n_dinh(fastPeriod, slowPeriod, signalPeriod, redDepth, depth, enableDivergence, diffCandle0, diffPercents, close + shift, open + shift, high + shift, length - shift);
-    return (double) result;
+    return (double)result;
 }
 
 any Expr::visitMacd_slope(ExprParser::Macd_slopeContext *ctx)

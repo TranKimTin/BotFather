@@ -56,7 +56,7 @@ shared_ptr<boost::asio::ssl::context> SocketBinance::on_tls_init(connection_hdl)
 SocketBinance::SocketBinance(const int _BATCH_SIZE) : BATCH_SIZE(_BATCH_SIZE)
 {
     broker = "c_binance";
-    timeframes = {"1m", "5m", "15m", "30m", "1h", "4h", "1d"};
+    timeframes = {"1m", "5m", "15m", "30m"};
     symbolList = getSymbolList();
     // symbolList.push_back("BTCUSDT");
 
@@ -85,15 +85,16 @@ void SocketBinance::onSocketConnected(connection_hdl hdl)
              {
         for (int i = 0; i < symbolList.size(); i += BATCH_SIZE)
         {
-            vector<future<void>> futures;
+            vector<future<int>> futures;
             int end = min(i + BATCH_SIZE, (int)symbolList.size());
 
             for (int j = i; j < end; ++j)
             {
                 string symbol = symbolList[j];
 
-                futures.emplace_back(std::async(std::launch::async, [this, symbol]()
+                futures.emplace_back(async(launch::async, [this, symbol]()
                                                 {
+                    int cnt = 0;
                     for(int k=0; k<timeframes.size(); k++)
                     {
                         string tf = timeframes[k];
@@ -101,11 +102,15 @@ void SocketBinance::onSocketConnected(connection_hdl hdl)
                         if(tf == "1m")
                         {
                             rateData = getOHLCV(symbol, tf, MAX_CANDLE);
+                            cnt++;
                         }
                         else {
                             rateData = getOHLCVFromCache(symbol, tf);
                             if (rateData.startTime.empty()) {
                                 rateData = getOHLCV(symbol, tf, MAX_CANDLE);
+                                cnt++;
+                                string key = broker + "_" + symbol + "_" + tf;
+                                Redis::getInstance().clearList(key);
                             }
                             else{
                                 for(int m = k-1; m >= 0; m--) {
@@ -134,6 +139,9 @@ void SocketBinance::onSocketConnected(connection_hdl hdl)
                                 if (!isValidData(rateData)) {
                                     LOGE("Invalid data for %s %s", symbol.c_str(), tf.c_str());
                                     rateData = getOHLCV(symbol, tf, MAX_CANDLE);
+                                    cnt++;
+                                    string key = broker + "_" + symbol + "_" + tf;
+                                    Redis::getInstance().clearList(key);
                                 }
                             }
                         }
@@ -142,18 +150,26 @@ void SocketBinance::onSocketConnected(connection_hdl hdl)
                         string key = symbol + "_" + tf;
                         data[key] = rateData;
                         
-                        updateCache(rateData);
-                    } }));
+                        updateCache(data[key]);
+                    }
+                    return cnt;
+                 }));
             }
 
             // Chờ batch này xong
-            for (auto &f : futures)
-                f.get();
+            int cnt = 0;
+            for (auto &f : futures){
+                try {
+                    cnt += f.get();
+                } 
+                catch (const std::exception& e) {
+                    std::cout << "Init data error: " << e.what() << "\n";
+                }
+            }
             
-            LOGD("Init %d / %d", end, (int) symbolList.size());
+            LOGD("Init %d / %d. Get from cache %d times", end, (int) symbolList.size(), cnt);
 
-            // (Tùy chọn) nghỉ một chút để tránh rate limit
-            SLEEP_FOR(5000);
+            SLEEP_FOR(cnt * 5000 / 100);
     } });
 
     t.detach();
@@ -187,11 +203,11 @@ void SocketBinance::connectSocket()
     ws.init_asio();
     ws.start_perpetual(); // important
 
-    ws.set_message_handler(std::bind(&SocketBinance::on_message, this,
-                                     std::placeholders::_1,
-                                     std::placeholders::_2));
-    ws.set_tls_init_handler(std::bind(&SocketBinance::on_tls_init, this, std::placeholders::_1));
-    ws.set_open_handler(std::bind(&SocketBinance::onSocketConnected, this, std::placeholders::_1));
+    ws.set_message_handler(bind(&SocketBinance::on_message, this,
+                                placeholders::_1,
+                                placeholders::_2));
+    ws.set_tls_init_handler(bind(&SocketBinance::on_tls_init, this, placeholders::_1));
+    ws.set_open_handler(bind(&SocketBinance::onSocketConnected, this, placeholders::_1));
 
     string uri = "wss://stream.binance.com:9443/stream?streams=";
     for (int i = 0; i < symbolList.size(); i++)
@@ -293,6 +309,8 @@ RateData SocketBinance::getOHLCVFromCache(const string &symbol, const string &ti
 
 void SocketBinance::updateCache(const RateData &rateData)
 {
+    ThreadPool::getCacheInstance().enqueue([this, &rateData]()
+                                           {
     if (rateData.interval == "1m" || rateData.startTime.empty())
     {
         return;
@@ -306,7 +324,8 @@ void SocketBinance::updateCache(const RateData &rateData)
     int size = Redis::getInstance().size(key);
     if (size == 0)
     {
-        for (int i = rateData.startTime.size() - 1; i > 0; i--)
+        vector<string> v;
+        for (int i = 1; i < rateData.startTime.size(); ++i)
         {
             // item: startTime_open_high_low_close_volume
             string item = to_string(rateData.startTime[i]) + "_" +
@@ -315,16 +334,18 @@ void SocketBinance::updateCache(const RateData &rateData)
                           to_string(rateData.low[i]) + "_" +
                           to_string(rateData.close[i]) + "_" +
                           to_string(rateData.volume[i]);
-            if (!Redis::getInstance().pushFront(key, item))
-            {
-                LOGE("Failed to update cache for %s %s", symbol.c_str(), timeframe.c_str());
-                return;
-            };
+            v.push_back(item);
         }
-        LOGD("Update cache %s %s - %d items", symbol.c_str(), timeframe.c_str(), (int)rateData.startTime.size() - 1);
+        if (!Redis::getInstance().pushBack(key, v))
+        {
+            LOGE("Failed to update cache for %s %s", symbol.c_str(), timeframe.c_str());
+            return;
+        };
+        LOGD("Update cache %s %s - %d items", symbol.c_str(), timeframe.c_str(), (int)v.size());
     }
     else
     {
+        vector<string> v;
         long long lastTime = stoll(split(Redis::getInstance().front(key), '_')[0]);
         int i = 0;
         while (i < size && rateData.startTime[i] > lastTime)
@@ -332,7 +353,6 @@ void SocketBinance::updateCache(const RateData &rateData)
             i++;
         }
         i--;
-        int cnt = 0;
         while (i > 0)
         {
             // item: startTime_open_high_low_close_volume
@@ -342,22 +362,23 @@ void SocketBinance::updateCache(const RateData &rateData)
                           to_string(rateData.low[i]) + "_" +
                           to_string(rateData.close[i]) + "_" +
                           to_string(rateData.volume[i]);
-
-            if (!Redis::getInstance().pushFront(key, item))
+            v.push_back(item);
+            i--;
+        }
+        if (!v.empty())
+        {
+            if (!Redis::getInstance().pushFront(key, v))
             {
                 LOGE("Failed to update cache for %s %s", symbol.c_str(), timeframe.c_str());
                 return;
             }
-
-            cnt++;
-            i--;
+            LOGD("Update cache %s %s - %d items", symbol.c_str(), timeframe.c_str(), (int)v.size());
         }
-        LOGD("Update cache %s %s - %d items", symbol.c_str(), timeframe.c_str(), cnt);
     }
     while (Redis::getInstance().size(key) > MAX_CANDLE)
     {
         Redis::getInstance().popBack(key);
-    }
+    } });
 }
 
 void SocketBinance::adjustData(RateData &rateData)
@@ -437,7 +458,7 @@ void SocketBinance::onCloseCandle(const string &symbol, string &timeframe, RateD
     vector<double> volume(rateData.volume.begin(), rateData.volume.end());
     vector<long long> startTime(rateData.startTime.begin(), rateData.startTime.end());
 
-    shared_ptr<Worker> data = std::make_shared<Worker>(botList, broker, symbol, timeframe, move(open), move(high), move(low), move(close), move(volume), move(startTime));
+    shared_ptr<Worker> data = make_shared<Worker>(botList, broker, symbol, timeframe, move(open), move(high), move(low), move(close), move(volume), move(startTime));
 
     ThreadPool::getInstance().enqueue([data, this, symbol, timeframe]()
                                       { data->run();
