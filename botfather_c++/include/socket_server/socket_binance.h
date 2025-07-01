@@ -32,5 +32,4 @@ public:
     SocketBinance(const int _BATCH_SIZE);
     void setBotList(shared_ptr<vector<shared_ptr<Bot>>> botList);
     void connectSocket();
-
 };

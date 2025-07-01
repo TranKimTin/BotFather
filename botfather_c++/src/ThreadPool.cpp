@@ -52,6 +52,6 @@ ThreadPool &ThreadPool::getInstance()
 
 ThreadPool &ThreadPool::getCacheInstance()
 {
-    static ThreadPool cacheInstance(2);
+    static ThreadPool cacheInstance(1);
     return cacheInstance;
 }

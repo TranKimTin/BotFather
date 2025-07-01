@@ -7,6 +7,7 @@
 #include "ThreadPool.h"
 #include "Worker.h"
 #include "MySQLConnector.h"
+#include "Timer.h"
 
 static tbb::task_group task;
 
@@ -36,8 +37,9 @@ void SocketBinance::on_message(connection_hdl, message_ptr msg)
 
     for (auto tf : timeframes)
     {
-        string key = symbol + "_" + tf;
+        lock_guard<mutex> lock(mMutex);
 
+        string key = symbol + "_" + tf;
         RateData &rateData = data[key];
         if (rateData.startTime.empty())
             continue;
@@ -55,6 +57,8 @@ shared_ptr<boost::asio::ssl::context> SocketBinance::on_tls_init(connection_hdl)
 
 SocketBinance::SocketBinance(const int _BATCH_SIZE) : BATCH_SIZE(_BATCH_SIZE)
 {
+    lock_guard<mutex> lock(mMutex);
+
     broker = "c_binance";
     timeframes = {"1m", "5m", "15m", "30m"};
     symbolList = getSymbolList();
@@ -117,6 +121,8 @@ void SocketBinance::onSocketConnected(connection_hdl hdl)
                                     if(timeframeToNumberMinutes(tf) % timeframeToNumberMinutes(timeframes[m]) != 0){
                                         continue;
                                     }
+
+                                    lock_guard<mutex> lock(mMutex);
                                     RateData &smaller = data[symbol + "_" + timeframes[m]];
                                     int size = smaller.startTime.size();
                                     int l = 0;
@@ -148,9 +154,13 @@ void SocketBinance::onSocketConnected(connection_hdl hdl)
 
                         
                         string key = symbol + "_" + tf;
-                        data[key] = rateData;
+
+                        {
+                            lock_guard<mutex> lock(mMutex);
+                            data[key] = rateData;
+                            updateCache(data[key]);
+                        }
                         
-                        updateCache(data[key]);
                     }
                     return cnt;
                  }));
@@ -309,13 +319,13 @@ RateData SocketBinance::getOHLCVFromCache(const string &symbol, const string &ti
 
 void SocketBinance::updateCache(const RateData &rateData)
 {
-    ThreadPool::getCacheInstance().enqueue([this, &rateData]()
-                                           {
     if (rateData.interval == "1m" || rateData.startTime.empty())
     {
         return;
     }
 
+    ThreadPool::getCacheInstance().enqueue([this, rateData]()
+             {
     string symbol = rateData.symbol;
     string timeframe = rateData.interval;
 
@@ -379,6 +389,7 @@ void SocketBinance::updateCache(const RateData &rateData)
     {
         Redis::getInstance().popBack(key);
     } });
+
 }
 
 void SocketBinance::adjustData(RateData &rateData)
@@ -458,9 +469,9 @@ void SocketBinance::onCloseCandle(const string &symbol, string &timeframe, RateD
     vector<double> volume(rateData.volume.begin(), rateData.volume.end());
     vector<long long> startTime(rateData.startTime.begin(), rateData.startTime.end());
 
-    shared_ptr<Worker> data = make_shared<Worker>(botList, broker, symbol, timeframe, move(open), move(high), move(low), move(close), move(volume), move(startTime));
+    shared_ptr<Worker> worker = make_shared<Worker>(botList, broker, symbol, timeframe, move(open), move(high), move(low), move(close), move(volume), move(startTime));
 
-    ThreadPool::getInstance().enqueue([data, this, symbol, timeframe]()
-                                      { data->run();
-                                        this->updateCache(this->data[symbol + "_" + timeframe]); });
+    ThreadPool::getInstance().enqueue([worker, this, timeframe]()
+                                      { worker->run(); });
+    this->updateCache(this->data[symbol + "_" + timeframe]);
 }

@@ -15,4 +15,10 @@ sudo apt install ccache
 sudo apt install libhiredis-dev
 sudo apt install libmysqlcppconn-dev
 
+//install redis
+sudo apt install redis-server -y
+sudo nano /etc/redis/redis.conf
+ctrl W => requirepass ==> requirepass <redis pass>
+sudo systemctl restart redis
+
 sudo timedatectl set-timezone Asia/Ho_Chi_Minh

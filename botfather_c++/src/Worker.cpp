@@ -39,17 +39,17 @@ void Worker::run()
     for (const shared_ptr<Bot> &bot : *botList)
     {
         try
-        {
-            if (binarySearch(bot->symbolList, broker + ":" + symbol) == -1)
+        {            
+            if (binarySearch(bot->symbolList, "binance" + ":" + symbol) == -1)
             {
-                // continue;
+                continue;
             }
             if (find(bot->timeframes.begin(), bot->timeframes.end(), timeframe) == bot->timeframes.end())
             {
-                // continue;
+                continue;
             }
-            unordered_map<string, bool> visited;
-            dfs_handleLogic(bot->route, bot->id, visited);
+            visited.clear();
+            dfs_handleLogic(bot->route, bot->id);
         }
         catch (const exception &e)
         {
@@ -59,7 +59,7 @@ void Worker::run()
     }
 }
 
-void Worker::dfs_handleLogic(Route &route, int botID, unordered_map<string, bool> &visited)
+void Worker::dfs_handleLogic(Route &route, int botID)
 {
     if (visited[route.id])
     {
@@ -70,7 +70,7 @@ void Worker::dfs_handleLogic(Route &route, int botID, unordered_map<string, bool
     {
         for (Route &next : route.next)
         {
-            dfs_handleLogic(next, botID, visited);
+            dfs_handleLogic(next, botID);
         }
     }
 }
@@ -114,6 +114,10 @@ bool Worker::handleLogic(NodeData &node, int botID)
     }
     if (node.type == NODE_TYPE::TELEGRAM)
     {
+        string mess = calculateSubExpr(node.value, broker, symbol, timeframe, open.size(),
+                                       open.data(), high.data(), low.data(), close.data(), volume.data(),
+                                       startTime.data());
+        LOGD("Send telegram message: %s %s %s %s", broker.c_str(), symbol.c_str(), timeframe.c_str(), mess.c_str());
         return true;
     }
 

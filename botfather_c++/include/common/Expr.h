@@ -36,8 +36,11 @@ public:
     Expr(const string &broker, const string &symbol, const string &timeframe, int length,
          const double *open, const double *high, const double *low, const double *close, const double *volume,
          long long *startTime)
-        : broker(broker), symbol(symbol), timeframe(timeframe), length(length), open(open), high(high), low(low),
-          close(close), volume(volume), startTime(startTime) {}
+        : broker(broker), symbol(symbol), timeframe(timeframe), length(length), open(open), high(high), low(low), close(close), volume(volume), startTime(startTime)
+    {
+    }
+
+    // any visit(antlr4::tree::ParseTree *tree) override;
 
     any visitNumber(ExprParser::NumberContext *ctx) override;
     any visitFloat(ExprParser::FloatContext *ctx) override;
@@ -88,8 +91,8 @@ public:
     any visitAvg_close(ExprParser::Avg_closeContext *ctx) override;
     any visitAvg_ampl(ExprParser::Avg_amplContext *ctx) override;
     any visitAvg_amplP(ExprParser::Avg_amplPContext *ctx) override;
-    //avg_change 
-    //avg_changeP
+    // avg_change
+    // avg_changeP
 
     any visitMin_open(ExprParser::Min_openContext *ctx) override;
     any visitMin_high(ExprParser::Min_highContext *ctx) override;
@@ -144,5 +147,5 @@ any calculateExpr(const string &inputText, const string &broker, const string &s
                   const double *volume, long long *startTime);
 
 string calculateSubExpr(string expr, const string &broker, const string &symbol, const string &timeframe, int length,
-                  const double *open, const double *high, const double *low, const double *close,
-                  const double *volume, long long *startTime);
+                        const double *open, const double *high, const double *low, const double *close,
+                        const double *volume, long long *startTime);
