@@ -124,71 +124,80 @@ void SocketData::updateCache(const RateData &rateData)
         return;
     }
 
-    ThreadPool::getInstance().enqueue([this, rateData]()
-                                           {
-    string symbol = rateData.symbol;
-    string timeframe = rateData.interval;
+    ThreadPool::getInstance().enqueue([this, &rateData]()
+                                      {
+        string symbol = rateData.symbol;
+        string timeframe = rateData.interval;
 
-    string key = broker + "_" + symbol + "_" + timeframe;
+        string key = broker + "_" + symbol + "_" + timeframe;
 
-    int size = Redis::getInstance().size(key);
-    if (size == 0)
-    {
-        vector<string> v;
-        for (int i = 1; i < rateData.startTime.size(); ++i)
+        int size = Redis::getInstance().size(key);
+        if (size == 0)
         {
-            // item: startTime_open_high_low_close_volume
-            string item = to_string(rateData.startTime[i]) + "_" +
-                          to_string(rateData.open[i]) + "_" +
-                          to_string(rateData.high[i]) + "_" +
-                          to_string(rateData.low[i]) + "_" +
-                          to_string(rateData.close[i]) + "_" +
-                          to_string(rateData.volume[i]);
-            v.push_back(item);
-        }
-        if (!Redis::getInstance().pushBack(key, v))
-        {
-            LOGE("Failed to update cache for %s %s", symbol.c_str(), timeframe.c_str());
-            return;
-        };
-        LOGD("Update cache %s %s - %d items", symbol.c_str(), timeframe.c_str(), (int)v.size());
-    }
-    else
-    {
-        vector<string> v;
-        long long lastTime = stoll(split(Redis::getInstance().front(key), '_')[0]);
-        int i = 0;
-        while (i < size && rateData.startTime[i] > lastTime)
-        {
-            i++;
-        }
-        i--;
-        while (i > 0)
-        {
-            // item: startTime_open_high_low_close_volume
-            string item = to_string(rateData.startTime[i]) + "_" +
-                          to_string(rateData.open[i]) + "_" +
-                          to_string(rateData.high[i]) + "_" +
-                          to_string(rateData.low[i]) + "_" +
-                          to_string(rateData.close[i]) + "_" +
-                          to_string(rateData.volume[i]);
-            v.push_back(item);
-            i--;
-        }
-        if (!v.empty())
-        {
-            if (!Redis::getInstance().pushFront(key, v))
+            vector<string> v;
+            {
+                lock_guard<mutex> lock(this->mMutex);
+                for (int i = 1; i < rateData.startTime.size(); ++i)
+                {
+                    // item: startTime_open_high_low_close_volume
+                    string item = to_string(rateData.startTime[i]) + "_" +
+                                to_string(rateData.open[i]) + "_" +
+                                to_string(rateData.high[i]) + "_" +
+                                to_string(rateData.low[i]) + "_" +
+                                to_string(rateData.close[i]) + "_" +
+                                to_string(rateData.volume[i]);
+                    v.push_back(item);
+                }
+            }
+            
+            if (!Redis::getInstance().pushBack(key, v))
             {
                 LOGE("Failed to update cache for %s %s", symbol.c_str(), timeframe.c_str());
                 return;
-            }
+            };
             LOGD("Update cache %s %s - %d items", symbol.c_str(), timeframe.c_str(), (int)v.size());
         }
-    }
-    while (Redis::getInstance().size(key) > MAX_CANDLE)
-    {
-        Redis::getInstance().popBack(key);
-    } });
+        else
+        {
+            vector<string> v;
+            long long lastTime = stoll(split(Redis::getInstance().front(key), '_')[0]);
+            {
+                lock_guard<mutex> lock(this->mMutex);
+
+                int i = 0;
+                while (i < size && rateData.startTime[i] > lastTime)
+                {
+                    i++;
+                }
+                i--;
+                while (i > 0)
+                {
+                    // item: startTime_open_high_low_close_volume
+                    string item = to_string(rateData.startTime[i]) + "_" +
+                                to_string(rateData.open[i]) + "_" +
+                                to_string(rateData.high[i]) + "_" +
+                                to_string(rateData.low[i]) + "_" +
+                                to_string(rateData.close[i]) + "_" +
+                                to_string(rateData.volume[i]);
+                    v.push_back(item);
+                    i--;
+                }
+            }
+            
+            if (!v.empty())
+            {
+                if (!Redis::getInstance().pushFront(key, v))
+                {
+                    LOGE("Failed to update cache for %s %s", symbol.c_str(), timeframe.c_str());
+                    return;
+                }
+                LOGD("Update cache %s %s - %d items", symbol.c_str(), timeframe.c_str(), (int)v.size());
+            }
+        }
+        while (Redis::getInstance().size(key) > MAX_CANDLE)
+        {
+            Redis::getInstance().popBack(key);
+        } });
 }
 
 bool SocketData::isValidData(const RateData &rateData)
