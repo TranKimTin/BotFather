@@ -40,7 +40,7 @@ void Worker::run()
     {
         try
         {            
-            if (binarySearch(bot->symbolList, "binance:" + symbol) == -1)
+            if (binarySearch(bot->symbolList, "binance_future:" + symbol) == -1)
             {
                 continue;
             }

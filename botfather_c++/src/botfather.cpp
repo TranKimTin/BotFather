@@ -2,13 +2,14 @@
 #include <chrono>
 #include <thread>
 #include "expr.h"
-#include "socket_binance.h"
 #include "Redis.h"
 #include "util.h"
 #include "axios.h"
 #include "Timer.h"
 #include "MySQLConnector.h"
 #include "botfather.h"
+#include "socket_data.h"
+#include "socket_binance.h"
 
 // #define TEST
 
@@ -177,17 +178,31 @@ void runApp()
 
     Redis::getInstance().connect(env["REDIS_SERVER"], stoi(env["REDIS_PORT"]), env["REDIS_PASSWORD"]);
 
-    #ifndef TEST
-    SocketBinance binance(50);
-    thread t([&binance]()
-             { binance.connectSocket(); });
+#ifndef TEST
+    vector<SocketData *> exchanges;
+    vector<thread> threads;
+
+    exchanges.push_back(new SocketBinance(50));
+
+    for (SocketData *exchange : exchanges)
+    {
+        threads.emplace_back([exchange]()
+                             { exchange->init(); });
+    }
 
     shared_ptr<vector<shared_ptr<Bot>>> botList = make_shared<vector<shared_ptr<Bot>>>(getBotList());
-    binance.setBotList(botList);
+    for (SocketData *exchange : exchanges)
+    {
+        exchange->setBotList(botList);
+    }
 
-    t.join();
-    #else
+    for (auto &t : threads)
+    {
+        if (t.joinable())
+            t.join();
+    }
+#else
     test();
     LOGD("Done.");
-    #endif
+#endif
 }
