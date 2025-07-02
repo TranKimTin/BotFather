@@ -39,8 +39,8 @@ void Worker::run()
     for (const shared_ptr<Bot> &bot : *botList)
     {
         try
-        {            
-            if (binarySearch(bot->symbolList, "binance_future:" + symbol) == -1)
+        {
+            if (binarySearch(bot->symbolList, broker + ":" + symbol) == -1)
             {
                 continue;
             }

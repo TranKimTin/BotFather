@@ -44,7 +44,7 @@ void SocketBinance::on_message(connection_hdl, message_ptr msg)
 
 SocketBinance::SocketBinance(const int _BATCH_SIZE) : SocketData(_BATCH_SIZE)
 {
-    broker = "c_binance";
+    broker = "binance";
 }
 
 void SocketBinance::connectSocket()
