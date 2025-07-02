@@ -15,7 +15,6 @@ class ThreadPool
 {
 public:
     static ThreadPool& getInstance();
-    static ThreadPool& getCacheInstance();
     
     void enqueue(function<void()> task);
 

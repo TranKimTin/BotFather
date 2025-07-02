@@ -3,6 +3,9 @@
 #include "ThreadPool.h"
 #include "Worker.h"
 #include "Redis.h"
+#include <tbb/task_group.h>
+
+static tbb::task_group task;
 
 SocketData::SocketData(const int _BATCH_SIZE) : BATCH_SIZE(_BATCH_SIZE)
 {
@@ -46,8 +49,9 @@ void SocketData::onCloseCandle(const string &symbol, string &timeframe, RateData
 
     shared_ptr<Worker> worker = make_shared<Worker>(botList, broker, symbol, timeframe, move(open), move(high), move(low), move(close), move(volume), move(startTime));
 
-    ThreadPool::getInstance().enqueue([worker, this, timeframe]()
-                                      { worker->run(); });
+    task.run([worker, this, timeframe]()
+             { worker->run(); });
+
     this->updateCache(this->data[symbol + "_" + timeframe]);
 }
 
@@ -120,7 +124,7 @@ void SocketData::updateCache(const RateData &rateData)
         return;
     }
 
-    ThreadPool::getCacheInstance().enqueue([this, rateData]()
+    ThreadPool::getInstance().enqueue([this, rateData]()
                                            {
     string symbol = rateData.symbol;
     string timeframe = rateData.interval;

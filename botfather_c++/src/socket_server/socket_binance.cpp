@@ -1,7 +1,6 @@
 #include "socket_binance.h"
 #include "common_type.h"
 #include "axios.h"
-#include <tbb/task_group.h>
 #include "util.h"
 #include "Redis.h"
 #include "ThreadPool.h"
@@ -9,7 +8,10 @@
 #include "MySQLConnector.h"
 #include "Timer.h"
 
-static tbb::task_group task;
+SocketBinance::SocketBinance(const int _BATCH_SIZE) : SocketData(_BATCH_SIZE)
+{
+    broker = "binance";
+}
 
 void SocketBinance::on_message(connection_hdl, message_ptr msg)
 {
@@ -40,11 +42,6 @@ void SocketBinance::on_message(connection_hdl, message_ptr msg)
 
         mergeData(rateData, symbol, tf, interval, open, high, low, close, volume, startTime, isFinal, false);
     }
-}
-
-SocketBinance::SocketBinance(const int _BATCH_SIZE) : SocketData(_BATCH_SIZE)
-{
-    broker = "binance";
 }
 
 void SocketBinance::connectSocket()
