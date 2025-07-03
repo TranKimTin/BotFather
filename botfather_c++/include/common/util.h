@@ -13,4 +13,5 @@ string toTimeString(long long timestampMs);
 map<string, string> readEnvFile();
 vector<string> split(const string &s, char delimiter);
 vector<string> convertJsonStringArrayToVector(string s);
-string StringFormat(const char* format, ...);
+string StringFormat(const char *format, ...);
+string doubleToString(double value, int precision);

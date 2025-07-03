@@ -18,6 +18,7 @@
 #include <cmath>
 #include <functional>
 
+
 #include <websocketpp/config/asio_client.hpp>
 #include <websocketpp/client.hpp>
 #include <boost/asio/ssl/context.hpp>
@@ -99,7 +100,6 @@ struct NODE_TYPE
 
 struct NodeData
 {
-    string expiredTime;
     string id;
     string type;
     string unitEntry;
@@ -109,6 +109,12 @@ struct NodeData
     string unitTP;
     string unitVolume;
     string value;
+    string stop;
+    string entry;
+    string tp;
+    string sl;
+    string volume;
+    string expiredTime;
 };
 
 struct Route
@@ -118,7 +124,8 @@ struct Route
     vector<Route> next;
 };
 
-struct Symbol{
+struct Symbol
+{
     string broker;
     string symbol;
     string symbolName;

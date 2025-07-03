@@ -94,28 +94,42 @@ static Route getRoute(const json &j)
 
     if (j.contains("id"))
         route.id = j["id"].get<string>();
-    if (j["data"].contains("id"))
-        route.data.id = j["data"]["id"].get<string>();
-    if (j["data"].contains("value"))
-        route.data.value = j["data"]["value"].get<string>();
-    if (j["data"].contains("type"))
-        route.data.type = j["data"]["type"].get<string>();
-    if (j["data"].contains("unitEntry"))
-        route.data.unitEntry = j["data"]["unitEntry"].get<string>();
-    if (j["data"].contains("unitExpiredTime"))
-        route.data.unitExpiredTime = j["data"]["unitExpiredTime"].get<string>();
-    if (j["data"].contains("unitSL"))
-        route.data.unitSL = j["data"]["unitSL"].get<string>();
-    if (j["data"].contains("unitTP"))
-        route.data.unitTP = j["data"]["unitTP"].get<string>();
-    if (j["data"].contains("unitStop"))
-        route.data.unitStop = j["data"]["unitStop"].get<string>();
-    if (j["data"].contains("unitVolume"))
-        route.data.unitVolume = j["data"]["unitVolume"].get<string>();
-    if (j["data"].contains("expiredTime"))
-        route.data.expiredTime = j["data"]["expiredTime"].get<string>();
-    if (j["data"].contains("value"))
-        route.data.value = j["data"]["value"].get<string>();
+
+    if (j.contains("data"))
+    {
+        auto jData = j["data"];
+        if (jData.contains("id"))
+            route.data.id = jData["id"].get<string>();
+        if (jData.contains("type"))
+            route.data.type = jData["type"].get<string>();
+        if (jData.contains("unitEntry"))
+            route.data.unitEntry = jData["unitEntry"].get<string>();
+        if (jData.contains("unitExpiredTime"))
+            route.data.unitExpiredTime = jData["unitExpiredTime"].get<string>();
+        if (jData.contains("unitSL"))
+            route.data.unitSL = jData["unitSL"].get<string>();
+        if (jData.contains("unitTP"))
+            route.data.unitTP = jData["unitTP"].get<string>();
+        if (jData.contains("unitStop"))
+            route.data.unitStop = jData["unitStop"].get<string>();
+        if (jData.contains("unitVolume"))
+            route.data.unitVolume = jData["unitVolume"].get<string>();
+        if (jData.contains("expiredTime"))
+            route.data.expiredTime = jData["expiredTime"].get<string>();
+        if (jData.contains("value"))
+            route.data.value = jData["value"].get<string>();
+        if (jData.contains("stop"))
+            route.data.stop = jData["stop"].get<string>();
+        if (jData.contains("entry"))
+            route.data.entry = jData["entry"].get<string>();
+        if (jData.contains("tp"))
+            route.data.tp = jData["tp"].get<string>();
+        if (jData.contains("sl"))
+            route.data.sl = jData["sl"].get<string>();
+        if (jData.contains("volume"))
+            route.data.volume = jData["volume"].get<string>();
+    }
+
     if (j.contains("next"))
     {
         for (const auto &nextNode : j["next"])

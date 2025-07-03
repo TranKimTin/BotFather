@@ -226,3 +226,9 @@ string StringFormat(const char* format, ...) {
         return string(buffer.data());
     }
 }
+
+string doubleToString(double value, int precision) {
+    ostringstream oss;
+    oss << fixed << setprecision(precision) << value;
+    return oss.str();
+}
