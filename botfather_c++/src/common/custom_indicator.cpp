@@ -14,10 +14,8 @@ double iRSI(int period, const double close[], int n)
     for (int i = n - 2; i >= n - 1 - period; --i)
     {
         double diff = close[i] - close[i + 1];
-        if (diff > 0)
-            avgGain += diff;
-        else
-            avgLoss -= diff;
+        avgGain += diff > 0 ? diff : 0;
+        avgLoss += avgLoss < 0 : diff : 0;
     }
     avgGain /= period;
     avgLoss /= period;
@@ -50,10 +48,8 @@ double iRSI_slope(int period, const double close[], int n)
     for (int i = n - 2; i >= n - 1 - period; --i)
     {
         double diff = close[i] - close[i + 1];
-        if (diff > 0)
-            avgGain += diff;
-        else
-            avgLoss -= diff;
+        avgGain += diff > 0 ? diff : 0;
+        avgLoss += avgLoss < 0 : diff : 0;
     }
     avgGain /= period;
     avgLoss /= period;
@@ -163,14 +159,14 @@ MACD_Output iMACD(int fastPeriod, int slowPeriod, int signalPeriod, const double
 
         macd = emaFast - emaSlow;
 
-        if (!signalInitialized)
+        if (signalInitialized)
         {
-            signalEMA = macd;
-            signalInitialized = true;
+            signalEMA = (macd - signalEMA) * kSignal + signalEMA;
         }
         else
         {
-            signalEMA = (macd - signalEMA) * kSignal + signalEMA;
+            signalEMA = macd;
+            signalInitialized = true;
         }
     }
 
@@ -235,14 +231,14 @@ static vector<MACD_Output> iMACDs(int fastPeriod, int slowPeriod, int signalPeri
 
         macd = emaFast - emaSlow;
 
-        if (!signalInitialized)
+        if (signalInitialized)
         {
-            signalEMA = macd;
-            signalInitialized = true;
+            signalEMA = (macd - signalEMA) * kSignal + signalEMA;
         }
         else
         {
-            signalEMA = (macd - signalEMA) * kSignal + signalEMA;
+            signalEMA = macd;
+            signalInitialized = true;
         }
         double histogram = macd - signalEMA;
         result.push_back({macd, signalEMA, histogram});
@@ -521,12 +517,12 @@ double macd_slope(int fastPeriod, int slowPeriod, int signalPeriod, const double
 
         if (!signalInitialized)
         {
-            signalEMA = macd;
-            signalInitialized = true;
+            signalEMA = (macd - signalEMA) * kSignal + signalEMA;
         }
         else
         {
-            signalEMA = (macd - signalEMA) * kSignal + signalEMA;
+            signalEMA = macd;
+            signalInitialized = true;
         }
 
         if (i == 0)
@@ -575,8 +571,7 @@ double iMin(int period, const double close[], int n)
     double minVal = close[0];
     for (int i = 1; i < period; ++i)
     {
-        if (close[i] < minVal)
-            minVal = close[i];
+        minVal = min(minVal, close[i]);
     }
     return minVal;
 }
@@ -589,8 +584,7 @@ double iMax(int period, const double close[], int n)
     double maxVal = close[0];
     for (int i = 1; i < period; ++i)
     {
-        if (close[i] > maxVal)
-            maxVal = close[i];
+        maxVal = max(maxVal, close[i]);
     }
     return maxVal;
 }
@@ -617,11 +611,7 @@ double iMin(int period, int n, function<double(int)> f)
 
     for (int i = 1; i < period; ++i)
     {
-        double transformed = f(i);
-        if (transformed < minVal)
-        {
-            minVal = transformed;
-        }
+        minVal = min(minVal, f(i));
     }
 
     return minVal;
@@ -636,11 +626,7 @@ double iMax(int period, int n, function<double(int)> f)
 
     for (int i = 1; i < period; ++i)
     {
-        double transformed = f(i);
-        if (transformed > maxVal)
-        {
-            maxVal = transformed;
-        }
+        maxVal = max(maxVal, f(i));
     }
 
     return maxVal;
@@ -659,10 +645,8 @@ double iMinRSI(int period, int k, const double close[], int n)
     for (int i = n - 2; i >= n - 1 - period; --i)
     {
         double diff = close[i] - close[i + 1];
-        if (diff > 0)
-            avgGain += diff;
-        else
-            avgLoss -= diff;
+        avgGain += diff > 0 ? diff : 0;
+        avgLoss += avgLoss < 0 : diff : 0;
     }
     avgGain /= period;
     avgLoss /= period;
@@ -699,10 +683,8 @@ double iMaxRSI(int period, int k, const double close[], int n)
     for (int i = n - 2; i >= n - 1 - period; --i)
     {
         double diff = close[i] - close[i + 1];
-        if (diff > 0)
-            avgGain += diff;
-        else
-            avgLoss -= diff;
+        avgGain += diff > 0 ? diff : 0;
+        avgLoss += avgLoss < 0 : diff : 0;
     }
     avgGain /= period;
     avgLoss /= period;
@@ -746,10 +728,8 @@ double iAvgRSI(int period, int k, const double close[], int n)
     for (int i = n - 2; i >= n - 1 - period; --i)
     {
         double diff = close[i] - close[i + 1];
-        if (diff > 0)
-            avgGain += diff;
-        else
-            avgLoss -= diff;
+        avgGain += diff > 0 ? diff : 0;
+        avgLoss += avgLoss < 0 : diff : 0;
     }
     avgGain /= period;
     avgLoss /= period;
