@@ -1,5 +1,7 @@
 # trade
 
+JIRA: https://kimtintr.atlassian.net/jira/software/projects/BF/boards/1/backlog
+
 require install java 11 for antlr
 
 get chatid telegram:
