@@ -15,7 +15,7 @@ double iRSI(int period, const double close[], int n)
     {
         double diff = close[i] - close[i + 1];
         avgGain += diff > 0 ? diff : 0;
-        avgLoss += avgLoss < 0 : diff : 0;
+        avgLoss += avgLoss < 0 ? diff : 0;
     }
     avgGain /= period;
     avgLoss /= period;
@@ -49,7 +49,7 @@ double iRSI_slope(int period, const double close[], int n)
     {
         double diff = close[i] - close[i + 1];
         avgGain += diff > 0 ? diff : 0;
-        avgLoss += avgLoss < 0 : diff : 0;
+        avgLoss += avgLoss < 0 ? diff : 0;
     }
     avgGain /= period;
     avgLoss /= period;
@@ -646,7 +646,7 @@ double iMinRSI(int period, int k, const double close[], int n)
     {
         double diff = close[i] - close[i + 1];
         avgGain += diff > 0 ? diff : 0;
-        avgLoss += avgLoss < 0 : diff : 0;
+        avgLoss += avgLoss < 0 ? diff : 0;
     }
     avgGain /= period;
     avgLoss /= period;
@@ -684,7 +684,7 @@ double iMaxRSI(int period, int k, const double close[], int n)
     {
         double diff = close[i] - close[i + 1];
         avgGain += diff > 0 ? diff : 0;
-        avgLoss += avgLoss < 0 : diff : 0;
+        avgLoss += avgLoss < 0 ? diff : 0;
     }
     avgGain /= period;
     avgLoss /= period;
@@ -729,7 +729,7 @@ double iAvgRSI(int period, int k, const double close[], int n)
     {
         double diff = close[i] - close[i + 1];
         avgGain += diff > 0 ? diff : 0;
-        avgLoss += avgLoss < 0 : diff : 0;
+        avgLoss += avgLoss < 0 ? diff : 0;
     }
     avgGain /= period;
     avgLoss /= period;
