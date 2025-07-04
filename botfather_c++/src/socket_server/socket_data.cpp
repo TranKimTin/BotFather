@@ -9,7 +9,7 @@ static tbb::task_group task;
 
 SocketData::SocketData(const int _BATCH_SIZE) : BATCH_SIZE(_BATCH_SIZE)
 {
-    timeframes = {"1m", "5m", "15m", "30m"};
+    timeframes = {"1m", "5m", "15m", "30m", "1h", "4h", "1d"};
 }
 
 void SocketData::init()
@@ -155,7 +155,7 @@ void SocketData::updateCache(const RateData &rateData)
                 LOGE("Failed to update cache for %s %s", symbol.c_str(), timeframe.c_str());
                 return;
             };
-            LOGD("Update cache %s %s - %d items", symbol.c_str(), timeframe.c_str(), (int)v.size());
+            LOGD("Update cache %s %s %s - %d items",broker.c_str(), symbol.c_str(), timeframe.c_str(), (int)v.size());
         }
         else
         {
@@ -191,7 +191,7 @@ void SocketData::updateCache(const RateData &rateData)
                     LOGE("Failed to update cache for %s %s", symbol.c_str(), timeframe.c_str());
                     return;
                 }
-                LOGD("Update cache %s %s - %d items", symbol.c_str(), timeframe.c_str(), (int)v.size());
+                LOGD("Update cache %s %s %s - %d items", broker.c_str(), symbol.c_str(), timeframe.c_str(), (int)v.size());
             }
         }
         while (Redis::getInstance().size(key) > MAX_CANDLE)
@@ -244,7 +244,7 @@ RateData SocketData::getOHLCVFromCache(const string &symbol, const string &timef
         rateData.volume.push_back(stod(parts[5]));
     }
 
-    LOGD("Get OHLCV from cache %s %s - %d items", symbol.c_str(), timeframe.c_str(), (int)rateData.startTime.size());
+    LOGD("Get OHLCV from cache %s %s %s - %d items", broker.c_str(), symbol.c_str(), timeframe.c_str(), (int)rateData.startTime.size());
     return rateData;
 }
 
@@ -351,7 +351,7 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                 }
             }
             
-            LOGD("Init %d / %d. Get from cache %d times", end, (int) symbolList.size(), cnt);
+            LOGD("%s: Init %d / %d. Get from cache %d times", broker.c_str(), end, (int) symbolList.size(), cnt);
 
             SLEEP_FOR(cnt * 5000 / 100);
     } });
@@ -361,6 +361,6 @@ void SocketData::onSocketConnected(connection_hdl hdl)
 
 void SocketData::setBotList(shared_ptr<vector<shared_ptr<Bot>>> botList)
 {
-    LOGD("Set bot list with size: %d", (int)botList->size());
+    LOGD("%s: Set bot list with size: %d", broker.c_str(), (int)botList->size());
     this->botList = botList;
 }

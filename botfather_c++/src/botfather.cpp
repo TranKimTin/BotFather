@@ -10,6 +10,7 @@
 #include "botfather.h"
 #include "socket_data.h"
 #include "socket_binance.h"
+#include "socket_binance_future.h"
 
 // #define TEST
 
@@ -196,7 +197,8 @@ void runApp()
     vector<SocketData *> exchanges;
     vector<thread> threads;
 
-    exchanges.push_back(new SocketBinance(50));
+    exchanges.push_back(new SocketBinance(20));
+    exchanges.push_back(new SocketBinanceFuture(20));
 
     for (SocketData *exchange : exchanges)
     {

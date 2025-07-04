@@ -193,7 +193,7 @@ bool Worker::adjustParam(NodeData &node)
 
     double closePrice = close[0];
     double entry = stod(node.entry);
-    double stop = stod(node.stop);
+    double stop = node.stop.empty() ? 0 : stod(node.stop);
     // match entry immediately
     if (node.type == NODE_TYPE::BUY_LIMIT && closePrice <= entry)
     {

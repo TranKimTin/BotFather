@@ -31,6 +31,7 @@ string Axios::get(string url)
     }
     else
     {
+        LOGE("GET request failed: %s. url=%s", res ? res->reason.c_str() : "No response", url.c_str());
         throw std::runtime_error("GET request failed.");
     }
 }

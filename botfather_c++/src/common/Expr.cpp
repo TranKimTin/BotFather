@@ -836,7 +836,16 @@ static mutex parseCacheMutex;
 CachedParseTree &getParseTree(const string &key)
 {
     lock_guard<mutex> lock(parseCacheMutex);
-    return parseCache[key];
+    auto &entry = parseCache[key];
+    if (!entry.tree)
+    {
+        entry.input = std::make_unique<ANTLRInputStream>(key);
+        entry.lexer = std::make_unique<ExprLexer>(entry.input.get());
+        entry.tokens = std::make_unique<CommonTokenStream>(entry.lexer.get());
+        entry.parser = std::make_unique<ExprParser>(entry.tokens.get());
+        entry.tree = entry.parser->expr();
+    }
+    return entry;
 }
 
 any calculateExpr(const string &inputText, const string &broker, const string &symbol, const string &timeframe, int length,
@@ -845,16 +854,6 @@ any calculateExpr(const string &inputText, const string &broker, const string &s
 {
     const std::string key = toLowerCase(inputText);
     auto &entry = getParseTree(key);
-
-    if (!entry.tree)
-    {
-        lock_guard<mutex> lock(parseCacheMutex);
-        entry.input = std::make_unique<ANTLRInputStream>(key);
-        entry.lexer = std::make_unique<ExprLexer>(entry.input.get());
-        entry.tokens = std::make_unique<CommonTokenStream>(entry.lexer.get());
-        entry.parser = std::make_unique<ExprParser>(entry.tokens.get());
-        entry.tree = entry.parser->expr();
-    }
 
     Expr expr(broker, symbol, timeframe, length, open, high, low, close, volume, startTime);
 
