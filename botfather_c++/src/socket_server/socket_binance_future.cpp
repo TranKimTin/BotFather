@@ -1,12 +1,6 @@
 #include "socket_binance_future.h"
 #include "common_type.h"
-#include "axios.h"
 #include "util.h"
-#include "Redis.h"
-#include "ThreadPool.h"
-#include "Worker.h"
-#include "MySQLConnector.h"
-#include "Timer.h"
 
 SocketBinanceFuture::SocketBinanceFuture(const int _BATCH_SIZE) : SocketData(_BATCH_SIZE)
 {
@@ -84,46 +78,12 @@ void SocketBinanceFuture::connectSocket()
 
 vector<string> SocketBinanceFuture::getSymbolList()
 {
-    string url = "https://fapi.binance.com/fapi/v1/exchangeInfo";
-    string response = Axios::get(url);
-    json j = json::parse(response);
-    vector<string> symbols;
-    for (const auto &s : j["symbols"])
-    {
-        string symbol = s["symbol"].get<string>();
-        string status = s["status"].get<string>();
-
-        if (status != "TRADING" || !endsWith(symbol, "USDT") || symbol == "USDCUSDT" || symbol == "TUSDUSDT" || symbol == "DAIUSDT")
-            continue;
-        symbols.push_back(symbol);
-    }
-    return symbols;
+    return getBinanceFutureSymbolList();
 }
 
 RateData SocketBinanceFuture::getOHLCV(const string &symbol, const string &timeframe, int limit, long long since)
 {
-    string url = "https://fapi.binance.com/fapi/v1/klines?symbol=" + symbol + "&interval=" + timeframe + "&limit=" + to_string(limit);
-    if (since > 0)
-    {
-        url += "&startTime=" + to_string(since);
-    }
-    string response = Axios::get(url);
-    json j = json::parse(response);
-
-    RateData rateData;
-    rateData.symbol = symbol;
-    rateData.interval = timeframe;
-
-    for (const auto &item : j)
-    {
-        rateData.startTime.push_front(item[0].get<long long>());
-        rateData.open.push_front(stod(item[1].get<string>()));
-        rateData.high.push_front(stod(item[2].get<string>()));
-        rateData.low.push_front(stod(item[3].get<string>()));
-        rateData.close.push_front(stod(item[4].get<string>()));
-        rateData.volume.push_front(stod(item[5].get<string>()));
-    }
-
+    RateData rateData = getBinanceFuturetOHLCV(symbol, timeframe, limit, since);
     LOGD("Get OHLCV %s:%s %s - %d items", broker.c_str(), symbol.c_str(), timeframe.c_str(), (int)rateData.startTime.size());
     return rateData;
 }

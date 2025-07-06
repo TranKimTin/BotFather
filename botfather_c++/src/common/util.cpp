@@ -1,5 +1,6 @@
 #include "util.h"
 #include "fstream"
+#include "axios.h"
 
 string toLowerCase(string str)
 {
@@ -231,4 +232,156 @@ string doubleToString(double value, int precision) {
     ostringstream oss;
     oss << fixed << setprecision(precision) << value;
     return oss.str();
+}
+
+RateData getBinanceOHLCV(const string &symbol, const string &timeframe, int limit, long long since)
+{
+    string url = "https://api.binance.com/api/v3/klines?symbol=" + symbol + "&interval=" + timeframe + "&limit=" + to_string(limit);
+    if (since > 0)
+    {
+        url += "&startTime=" + to_string(since);
+    }
+    string response = Axios::get(url);
+    json j = json::parse(response);
+
+    RateData rateData;
+    rateData.symbol = symbol;
+    rateData.interval = timeframe;
+
+    for (const auto &item : j)
+    {
+        rateData.startTime.push_front(item[0].get<long long>());
+        rateData.open.push_front(stod(item[1].get<string>()));
+        rateData.high.push_front(stod(item[2].get<string>()));
+        rateData.low.push_front(stod(item[3].get<string>()));
+        rateData.close.push_front(stod(item[4].get<string>()));
+        rateData.volume.push_front(stod(item[5].get<string>()));
+    }
+
+    return rateData;
+}
+
+RateData getBinanceFuturetOHLCV(const string &symbol, const string &timeframe, int limit, long long since)
+{
+    string url = "https://fapi.binance.com/fapi/v1/klines?symbol=" + symbol + "&interval=" + timeframe + "&limit=" + to_string(limit);
+    if (since > 0)
+    {
+        url += "&startTime=" + to_string(since);
+    }
+    string response = Axios::get(url);
+    json j = json::parse(response);
+
+    RateData rateData;
+    rateData.symbol = symbol;
+    rateData.interval = timeframe;
+
+    for (const auto &item : j)
+    {
+        rateData.startTime.push_front(item[0].get<long long>());
+        rateData.open.push_front(stod(item[1].get<string>()));
+        rateData.high.push_front(stod(item[2].get<string>()));
+        rateData.low.push_front(stod(item[3].get<string>()));
+        rateData.close.push_front(stod(item[4].get<string>()));
+        rateData.volume.push_front(stod(item[5].get<string>()));
+    }
+
+    return rateData;
+}
+
+RateData getBybitFutureOHLCV(const string &symbol, const string &timeframe, int limit, long long since)
+{
+    string tf = timeframe;
+    if (timeframe == "1m" || timeframe == "3m" || timeframe == "5m" || timeframe == "15m" || timeframe == "30m")
+    {
+        tf.pop_back();
+    }
+    else if (timeframe == "1h" || timeframe == "2h" || timeframe == "4h" || timeframe == "6h" || timeframe == "8h" || timeframe == "12h")
+    {
+        tf.pop_back();
+        tf = to_string(stoi(tf) * 60);
+    }
+    else if (timeframe == "1d")
+    {
+        tf = "D";
+    }
+
+    string url = StringFormat("https://api.bybit.com/v5/market/kline?category=linear&symbol=%s&interval=%s&limit=%d", symbol.c_str(), tf.c_str(), limit);
+    if (since)
+        url += StringFormat("&start=%lld", since);
+
+    string response = Axios::get(url);
+    json j = json::parse(response);
+
+    RateData rateData;
+    rateData.symbol = symbol;
+    rateData.interval = timeframe;
+
+    auto list = j["result"]["list"];
+    for (const auto &item : list)
+    {
+        rateData.startTime.push_back(stoll(item[0].get<string>()));
+        rateData.open.push_back(stod(item[1].get<string>()));
+        rateData.high.push_back(stod(item[2].get<string>()));
+        rateData.low.push_back(stod(item[3].get<string>()));
+        rateData.close.push_back(stod(item[4].get<string>()));
+        rateData.volume.push_back(stod(item[5].get<string>()));
+    }
+
+    return rateData;
+}
+
+vector<string> getBinanceSymbolList()
+{
+    string url = "https://api.binance.com/api/v1/exchangeInfo";
+    string response = Axios::get(url);
+    json j = json::parse(response);
+    vector<string> symbols;
+    for (const auto &s : j["symbols"])
+    {
+        string symbol = s["symbol"].get<string>();
+        string status = s["status"].get<string>();
+
+        if (status != "TRADING" || !endsWith(symbol, "USDT") || symbol == "USDCUSDT" || symbol == "TUSDUSDT" || symbol == "DAIUSDT")
+            continue;
+        symbols.push_back(symbol);
+    }
+    return symbols;
+}
+
+vector<string> getBinanceFutureSymbolList()
+{
+    string url = "https://fapi.binance.com/fapi/v1/exchangeInfo";
+    string response = Axios::get(url);
+    json j = json::parse(response);
+    vector<string> symbols;
+    for (const auto &s : j["symbols"])
+    {
+        string symbol = s["symbol"].get<string>();
+        string status = s["status"].get<string>();
+
+        if (status != "TRADING" || !endsWith(symbol, "USDT") || symbol == "USDCUSDT" || symbol == "TUSDUSDT" || symbol == "DAIUSDT")
+            continue;
+        symbols.push_back(symbol);
+    }
+    return symbols;
+}
+
+vector<string> getBybitFutureSymbolList()
+{
+    string url = "https://api.bybit.com/v5/market/tickers?category=linear";
+    string response = Axios::get(url);
+    json j = json::parse(response);
+    vector<string> symbols;
+    auto list = j["result"]["list"];
+    for (const auto &s : list)
+    {
+        double volume24h = stod(s["volume24h"].get<string>());
+        string symbol = s["symbol"].get<string>();
+
+        if (volume24h <= 0 || !endsWith(symbol, "USDT") || symbol == "USDCUSDT" || symbol == "TUSDUSDT" || symbol == "DAIUSDT")
+            continue;
+
+        symbols.push_back(symbol);
+    }
+    return symbols;
 }

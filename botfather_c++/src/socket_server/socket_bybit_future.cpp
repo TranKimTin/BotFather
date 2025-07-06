@@ -1,12 +1,6 @@
 #include "socket_bybit_future.h"
 #include "common_type.h"
-#include "axios.h"
 #include "util.h"
-#include "Redis.h"
-#include "ThreadPool.h"
-#include "Worker.h"
-#include "MySQLConnector.h"
-#include "Timer.h"
 
 SocketBybitFuture::SocketBybitFuture(const int _BATCH_SIZE) : SocketData(_BATCH_SIZE)
 {
@@ -18,6 +12,11 @@ void SocketBybitFuture::on_message(connection_hdl, message_ptr msg)
     const string message = msg->get_payload();
     json j = json::parse(message);
     // "{\"topic\":\"kline.1.1000000BABYDOGEUSDT\",\"data\":[{\"start\":1751739720000,\"end\":1751739779999,\"interval\":\"1\",\"open\":\"0.0011086\",\"close\":\"0.00111\",\"high\":\"0.00111\",\"low\":\"0.001108\",\"volume\":\"3509500\",\"turnover\":\"3889.88484\",\"confirm\":false,\"timestamp\":1751739741199}],\"ts\":1751739741199,\"type\":\"snapshot\"}"
+
+    if (!j.contains("type") || !j.contains("topic") || !j.contains("data"))
+    {
+        return;
+    }
 
     string type = j["type"].get<string>();
     if (type != "snapshot")
@@ -112,64 +111,12 @@ void SocketBybitFuture::connectSocket()
 
 vector<string> SocketBybitFuture::getSymbolList()
 {
-    string url = "https://api.bybit.com/v5/market/tickers?category=linear";
-    string response = Axios::get(url);
-    json j = json::parse(response);
-    vector<string> symbols;
-    auto list = j["result"]["list"];
-    for (const auto &s : list)
-    {
-        double volume24h = stod(s["volume24h"].get<string>());
-        string symbol = s["symbol"].get<string>();
-
-        if (volume24h <= 0 || !endsWith(symbol, "USDT") || symbol == "USDCUSDT" || symbol == "TUSDUSDT" || symbol == "DAIUSDT")
-            continue;
-
-        symbols.push_back(symbol);
-    }
-    return symbols;
+    return getBybitFutureSymbolList();
 }
 
 RateData SocketBybitFuture::getOHLCV(const string &symbol, const string &timeframe, int limit, long long since)
 {
-    string tf = timeframe;
-    if (timeframe == "1m" || timeframe == "3m" || timeframe == "5m" || timeframe == "15m" || timeframe == "30m")
-    {
-        tf.pop_back();
-    }
-    else if (timeframe == "1h" || timeframe == "2h" || timeframe == "4h" || timeframe == "6h" || timeframe == "8h" || timeframe == "12h")
-    {
-        tf.pop_back();
-        tf = to_string(stoi(tf) * 60);
-    }
-    else if (timeframe == "1d")
-    {
-        tf = "D";
-    }
-
-    string url = StringFormat("https://api.bybit.com/v5/market/kline?category=linear&symbol=%s&interval=%s&limit=%d", symbol.c_str(), tf.c_str(), limit);
-    if (since)
-        url += StringFormat("&start=%lld", since);
-
-    string response = Axios::get(url);
-    json j = json::parse(response);
-
-    RateData rateData;
-    rateData.symbol = symbol;
-    rateData.interval = timeframe;
-
-    auto list = j["result"]["list"];
-    for (const auto &item : list)
-    {
-        rateData.startTime.push_back(stoll(item[0].get<string>()));
-        rateData.open.push_back(stod(item[1].get<string>()));
-        rateData.high.push_back(stod(item[2].get<string>()));
-        rateData.low.push_back(stod(item[3].get<string>()));
-        rateData.close.push_back(stod(item[4].get<string>()));
-        rateData.volume.push_back(stod(item[5].get<string>()));
-    }
-
+    RateData rateData = getBybitFutureOHLCV(symbol, timeframe, limit, since);
     LOGD("Get OHLCV %s:%s %s - %d items", broker.c_str(), symbol.c_str(), timeframe.c_str(), (int)rateData.startTime.size());
-
     return rateData;
 }
