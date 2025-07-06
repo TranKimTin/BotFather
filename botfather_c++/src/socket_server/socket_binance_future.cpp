@@ -90,8 +90,8 @@ vector<string> SocketBinanceFuture::getSymbolList()
     vector<string> symbols;
     for (const auto &s : j["symbols"])
     {
-        string symbol = s["symbol"];
-        string status = s["status"];
+        string symbol = s["symbol"].get<string>();
+        string status = s["status"].get<string>();
 
         if (status != "TRADING" || !endsWith(symbol, "USDT") || symbol == "USDCUSDT" || symbol == "TUSDUSDT" || symbol == "DAIUSDT")
             continue;
@@ -124,6 +124,6 @@ RateData SocketBinanceFuture::getOHLCV(const string &symbol, const string &timef
         rateData.volume.push_front(stod(item[5].get<string>()));
     }
 
-    LOGD("Get OHLCV %s %s - %d items", symbol.c_str(), timeframe.c_str(), (int)rateData.startTime.size());
+    LOGD("Get OHLCV %s:%s %s - %d items", broker.c_str(), symbol.c_str(), timeframe.c_str(), (int)rateData.startTime.size());
     return rateData;
 }
