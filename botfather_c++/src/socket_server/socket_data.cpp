@@ -353,7 +353,7 @@ void SocketData::onSocketConnected(connection_hdl hdl)
             
             LOGD("%s: Init %d / %d. Get from cache %d times", broker.c_str(), end, (int) symbolList.size(), cnt);
 
-            SLEEP_FOR(cnt * 5000 / 100);
+            SLEEP_FOR(cnt * 5000 / 100 + 100);
     } });
 
     t.detach();

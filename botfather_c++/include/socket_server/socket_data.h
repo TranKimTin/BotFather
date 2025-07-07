@@ -25,6 +25,7 @@ protected:
     virtual void on_message(connection_hdl, message_ptr msg) = 0;
     virtual vector<string> getSymbolList() = 0;
     virtual RateData getOHLCV(const string &symbol, const string &timeframe, int limit, long long since = 0) = 0;
+    // from since, get limit candle
 
 public:
     SocketData(const int _BATCH_SIZE);

@@ -11,7 +11,9 @@
 #include "socket_data.h"
 #include "socket_binance.h"
 #include "socket_binance_future.h"
+#include "socket_bybit.h"
 #include "socket_bybit_future.h"
+#include "socket_okx.h"
 
 // #define TEST
 
@@ -200,7 +202,9 @@ void runApp()
 
     exchanges.push_back(new SocketBinance(20));
     exchanges.push_back(new SocketBinanceFuture(20));
-    exchanges.push_back(new SocketBybitFuture(20));
+    exchanges.push_back(new SocketBybit(10));
+    exchanges.push_back(new SocketBybitFuture(10));
+    exchanges.push_back(new SocketOkx(5));
 
     for (SocketData *exchange : exchanges)
     {

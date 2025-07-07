@@ -19,7 +19,11 @@ string doubleToString(double value, int precision);
 RateData getBinanceOHLCV(const string &symbol, const string &timeframe, int limit, long long since = 0);
 RateData getBinanceFuturetOHLCV(const string &symbol, const string &timeframe, int limit, long long since = 0);
 RateData getBybitFutureOHLCV(const string &symbol, const string &timeframe, int limit, long long since = 0);
+RateData getBybitOHLCV(const string &symbol, const string &timeframe, int limit, long long since = 0);
+RateData getOkxOHLCV(const string &symbol, const string &timeframe, int limit, long long since = 0);
 
 vector<string> getBinanceSymbolList();
 vector<string> getBinanceFutureSymbolList();
 vector<string> getBybitFutureSymbolList();
+vector<string> getBybitSymbolList();
+vector<string> getOkxSymbolList();

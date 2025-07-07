@@ -205,7 +205,8 @@ vector<string> convertJsonStringArrayToVector(string s)
     return result;
 }
 
-string StringFormat(const char* format, ...) {
+string StringFormat(const char *format, ...)
+{
     va_list args;
     va_start(args, format);
 
@@ -214,11 +215,15 @@ string StringFormat(const char* format, ...) {
     int needed = vsnprintf(buffer.data(), buffer.size(), format, args);
     va_end(args);
 
-    if (needed < 0) return "";
+    if (needed < 0)
+        return "";
 
-    if (static_cast<size_t>(needed) < buffer.size()) {
+    if (static_cast<size_t>(needed) < buffer.size())
+    {
         return string(buffer.data());
-    } else {
+    }
+    else
+    {
         // nếu buffer chưa đủ lớn, cấp lại
         buffer.resize(needed + 1);
         va_start(args, format);
@@ -228,7 +233,8 @@ string StringFormat(const char* format, ...) {
     }
 }
 
-string doubleToString(double value, int precision) {
+string doubleToString(double value, int precision)
+{
     ostringstream oss;
     oss << fixed << setprecision(precision) << value;
     return oss.str();
@@ -330,6 +336,110 @@ RateData getBybitFutureOHLCV(const string &symbol, const string &timeframe, int 
     return rateData;
 }
 
+RateData getBybitOHLCV(const string &symbol, const string &timeframe, int limit, long long since)
+{
+    string tf = timeframe;
+    if (timeframe == "1m" || timeframe == "3m" || timeframe == "5m" || timeframe == "15m" || timeframe == "30m")
+    {
+        tf.pop_back();
+    }
+    else if (timeframe == "1h" || timeframe == "2h" || timeframe == "4h" || timeframe == "6h" || timeframe == "8h" || timeframe == "12h")
+    {
+        tf.pop_back();
+        tf = to_string(stoi(tf) * 60);
+    }
+    else if (timeframe == "1d")
+    {
+        tf = "D";
+    }
+
+    string url = StringFormat("https://api.bybit.com/v5/market/kline?category=spot&symbol=%s&interval=%s&limit=%d", symbol.c_str(), tf.c_str(), limit);
+    if (since)
+        url += StringFormat("&start=%lld", since);
+
+    string response = Axios::get(url);
+    json j = json::parse(response);
+
+    RateData rateData;
+    rateData.symbol = symbol;
+    rateData.interval = timeframe;
+
+    auto list = j["result"]["list"];
+    for (const auto &item : list)
+    {
+        rateData.startTime.push_back(stoll(item[0].get<string>()));
+        rateData.open.push_back(stod(item[1].get<string>()));
+        rateData.high.push_back(stod(item[2].get<string>()));
+        rateData.low.push_back(stod(item[3].get<string>()));
+        rateData.close.push_back(stod(item[4].get<string>()));
+        rateData.volume.push_back(stod(item[5].get<string>()));
+    }
+
+    return rateData;
+}
+
+RateData getOkxOHLCV(const string &symbol, const string &timeframe, int limit, long long since)
+{
+    // max limit: 300
+    string tf = timeframe;
+    if (timeframe == "1h" || timeframe == "2h" || timeframe == "4h")
+    {
+        tf.back() = 'H';
+    }
+    else if (timeframe == "6h" || timeframe == "8h" || timeframe == "12h")
+    {
+        tf.pop_back();
+        tf += "Hutc";
+    }
+    else if (timeframe == "1d")
+    {
+        tf.pop_back();
+        tf += "Dutc";
+    }
+    string url = "";
+    if (since)
+    {
+        url = StringFormat("https://www.okx.com/api/v5/market/history-candles?instId=%s&bar=%s&limit=%d&after=%lld", symbol.c_str(), tf.c_str(), limit, since + limit * timeframeToNumberMiliseconds(timeframe));
+    }
+    else
+    {
+        url = StringFormat("https://www.okx.com/api/v5/market/candles?instId=%s&bar=%s&limit=%d", symbol.c_str(), tf.c_str(), limit);
+    }
+
+    string response = Axios::get(url);
+    json j = json::parse(response);
+
+    RateData rateData;
+    rateData.symbol = symbol;
+    rateData.interval = timeframe;
+
+    auto list = j["data"];
+    for (const auto &item : list)
+    {
+        rateData.startTime.push_back(stoll(item[0].get<string>()));
+        rateData.open.push_back(stod(item[1].get<string>()));
+        rateData.high.push_back(stod(item[2].get<string>()));
+        rateData.low.push_back(stod(item[3].get<string>()));
+        rateData.close.push_back(stod(item[4].get<string>()));
+        rateData.volume.push_back(stod(item[5].get<string>()));
+    }
+
+    if (since)
+    {
+        while (!rateData.startTime.empty() > 0 && rateData.startTime.back() < since)
+        {
+            rateData.startTime.pop_back();
+            rateData.open.pop_back();
+            rateData.high.pop_back();
+            rateData.low.pop_back();
+            rateData.close.pop_back();
+            rateData.volume.pop_back();
+        }
+    }
+
+    return rateData;
+}
+
 vector<string> getBinanceSymbolList()
 {
     string url = "https://api.binance.com/api/v1/exchangeInfo";
@@ -379,6 +489,53 @@ vector<string> getBybitFutureSymbolList()
         string symbol = s["symbol"].get<string>();
 
         if (volume24h <= 0 || !endsWith(symbol, "USDT") || symbol == "USDCUSDT" || symbol == "TUSDUSDT" || symbol == "DAIUSDT")
+            continue;
+
+        symbols.push_back(symbol);
+    }
+    return symbols;
+}
+
+vector<string> getBybitSymbolList()
+{
+    string url = "https://api.bybit.com/v5/market/tickers?category=spot";
+    string response = Axios::get(url);
+    json j = json::parse(response);
+    vector<string> symbols;
+    auto list = j["result"]["list"];
+    for (const auto &s : list)
+    {
+        double volume24h = stod(s["volume24h"].get<string>());
+        string symbol = s["symbol"].get<string>();
+
+        if (volume24h <= 0 || !endsWith(symbol, "USDT") || symbol == "USDCUSDT" || symbol == "TUSDUSDT" || symbol == "DAIUSDT")
+            continue;
+
+        symbols.push_back(symbol);
+    }
+    return symbols;
+}
+
+vector<string> getOkxSymbolList()
+{
+    string url = "https://www.okx.com/api/v5/public/instruments?instType=SPOT";
+    string response = Axios::get(url);
+    json j = json::parse(response);
+    vector<string> symbols;
+    auto list = j["data"];
+    auto now = std::chrono::system_clock::now();
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                  now.time_since_epoch())
+                  .count();
+
+    for (const auto &s : list)
+    {
+        string quoteCcy = s["quoteCcy"].get<string>();
+        string baseCcy = s["baseCcy"].get<string>();
+        string symbol = s["instId"].get<string>();
+        long long listTime = stoll(s["listTime"].get<string>());
+
+        if (quoteCcy != "USDT" || baseCcy == "USDC" || baseCcy == "TUSD" || baseCcy == "BUSD" || baseCcy == "DAI" || listTime > ms)
             continue;
 
         symbols.push_back(symbol);
