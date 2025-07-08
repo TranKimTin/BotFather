@@ -16,7 +16,7 @@ A flexible, extensible C++ framework for building high-performance trading bots 
 
 ---
 
-### Requirements
+## 🖥️ Requirements
 
 - Linux or WSL (Windows Subsystem for Linux)
 - CMake ≥ 3.15
