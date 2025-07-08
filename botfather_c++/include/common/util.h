@@ -27,3 +27,9 @@ vector<string> getBinanceFutureSymbolList();
 vector<string> getBybitFutureSymbolList();
 vector<string> getBybitSymbolList();
 vector<string> getOkxSymbolList();
+
+unordered_map<string, Digit> getBinanceDigits();
+unordered_map<string, Digit> getBinanceFutureDigits();
+unordered_map<string, Digit> getBybitDigits();
+unordered_map<string, Digit> getBybitFutureDigits();
+unordered_map<string, Digit> getOkxDigits();

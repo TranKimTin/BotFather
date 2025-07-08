@@ -112,3 +112,8 @@ RateData SocketOkx::getOHLCV(const string &symbol, const string &timeframe, int 
     LOGD("Get OHLCV %s:%s %s - %d items", broker.c_str(), symbol.c_str(), timeframe.c_str(), (int)rateData.startTime.size());
     return rateData;
 }
+
+unordered_map<string, Digit> SocketOkx::getDigit()
+{
+    return getOkxDigits();
+}

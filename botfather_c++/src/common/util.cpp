@@ -542,3 +542,104 @@ vector<string> getOkxSymbolList()
     }
     return symbols;
 }
+
+unordered_map<string, Digit> getBinanceDigits()
+{
+    unordered_map<string, Digit> result;
+
+    string url = "https://api.binance.com/api/v1/exchangeInfo";
+    string response = Axios::get(url);
+    json j = json::parse(response);
+
+    json symbols = j["symbols"];
+    for (auto &s : symbols)
+    {
+        if (s["quoteAsset"].get<string>() != "USDT")
+            continue;
+
+        string symbol = s["symbol"].get<string>();
+        result[symbol].prices = s["baseAssetPrecision"].get<int>();
+        result[symbol].volume = s["quotePrecision"].get<int>();
+    }
+    return result;
+}
+
+unordered_map<string, Digit> getBinanceFutureDigits()
+{
+    unordered_map<string, Digit> result;
+
+    string url = "https://fapi.binance.com/fapi/v1/exchangeInfo";
+    string response = Axios::get(url);
+    json j = json::parse(response);
+
+    json symbols = j["symbols"];
+    for (auto &s : symbols)
+    {
+        if (s["quoteAsset"].get<string>() != "USDT")
+            continue;
+
+        string symbol = s["symbol"].get<string>();
+        result[symbol].prices = s["pricePrecision"].get<int>();
+        result[symbol].volume = s["quantityPrecision"].get<int>();
+    }
+    return result;
+}
+
+unordered_map<string, Digit> getBybitDigits()
+{
+    unordered_map<string, Digit> result;
+
+    string url = "https://api.bybit.com/v5/market/instruments-info?category=spot";
+    string response = Axios::get(url);
+    json j = json::parse(response);
+    auto list = j["result"]["list"];
+    for (const auto &s : list)
+    {
+        if (s["quoteCoin"].get<string>() != "USDT")
+            continue;
+
+        string symbol = s["symbol"].get<string>();
+        result[symbol].prices = (int)(-log10(stod(s["priceFilter"]["tickSize"].get<string>())));
+        result[symbol].volume = (int)(-log10(stod(s["lotSizeFilter"]["basePrecision"].get<string>())));
+    }
+
+    return result;
+}
+unordered_map<string, Digit> getBybitFutureDigits()
+{
+    unordered_map<string, Digit> result;
+
+    string url = "https://api.bybit.com/v5/market/instruments-info?category=linear&limit=1000";
+    string response = Axios::get(url);
+    json j = json::parse(response);
+    auto list = j["result"]["list"];
+    for (const auto &s : list)
+    {
+        if (s["quoteCoin"].get<string>() != "USDT")
+            continue;
+
+        string symbol = s["symbol"].get<string>();
+        result[symbol].prices = (int)(-log10(stod(s["priceFilter"]["tickSize"].get<string>())));
+        result[symbol].volume = (int)(-log10(stod(s["lotSizeFilter"]["qtyStep"].get<string>())));
+    }
+
+    return result;
+}
+unordered_map<string, Digit> getOkxDigits()
+{
+    unordered_map<string, Digit> result;
+    string url = "https://www.okx.com/api/v5/public/instruments?instType=SPOT";
+    string response = Axios::get(url);
+    json j = json::parse(response);
+    auto list = j["data"];
+    for (const auto &s : list)
+    {
+        if (s["quoteCcy"].get<string>() != "USDT")
+            continue;
+
+        string symbol = s["instId"].get<string>();
+        result[symbol].prices = (int)(-log10(stod(s["tickSz"].get<string>())));
+        result[symbol].volume = (int)(-log10(stod(s["lotSz"].get<string>())));
+    }
+    return result;
+}

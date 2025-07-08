@@ -53,6 +53,7 @@ void SocketBinanceFuture::connectSocket()
                                 placeholders::_2));
     ws.set_tls_init_handler(bind(&SocketBinanceFuture::on_tls_init, this, placeholders::_1));
     ws.set_open_handler(bind(&SocketBinanceFuture::onSocketConnected, this, placeholders::_1));
+    
 
     string uri = "wss://fstream.binance.com/stream?streams=";
     for (int i = 0; i < symbolList.size(); i++)
@@ -86,4 +87,9 @@ RateData SocketBinanceFuture::getOHLCV(const string &symbol, const string &timef
     RateData rateData = getBinanceFuturetOHLCV(symbol, timeframe, limit, since);
     LOGD("Get OHLCV %s:%s %s - %d items", broker.c_str(), symbol.c_str(), timeframe.c_str(), (int)rateData.startTime.size());
     return rateData;
+}
+
+unordered_map<string, Digit> SocketBinanceFuture::getDigit()
+{
+    return getBinanceFutureDigits();
 }

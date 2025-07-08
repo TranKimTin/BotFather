@@ -6,8 +6,8 @@
 
 static vector<string> orderTypes = {NODE_TYPE::BUY_MARKET, NODE_TYPE::BUY_LIMIT, NODE_TYPE::BUY_STOP_MARKET, NODE_TYPE::BUY_STOP_LIMIT, NODE_TYPE::SELL_MARKET, NODE_TYPE::SELL_LIMIT, NODE_TYPE::SELL_STOP_MARKET, NODE_TYPE::SELL_STOP_LIMIT};
 
-Worker::Worker(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime)
-    : botList(botList), broker(move(broker)), symbol(move(symbol)), timeframe(move(timeframe)), open(move(open)), high(move(high)), low(move(low)), close(move(close)), volume(move(volume)), startTime(move(startTime)), precision(5) {};
+Worker::Worker(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, Digit digit)
+    : botList(botList), broker(move(broker)), symbol(move(symbol)), timeframe(move(timeframe)), open(move(open)), high(move(high)), low(move(low)), close(move(close)), volume(move(volume)), startTime(move(startTime)), digit(digit) {};
 
 static int binarySearch(const vector<Symbol> &symbolList, const string &symbol)
 {
@@ -111,7 +111,7 @@ bool Worker::adjustParam(NodeData &node)
             return false;
         }
 
-        node.stop = doubleToString(any_cast<double>(result), precision);
+        node.stop = doubleToString(any_cast<double>(result), digit.prices);
     }
     else if (node.type == NODE_TYPE::SELL_STOP_MARKET || node.type == NODE_TYPE::SELL_STOP_LIMIT)
     {
@@ -132,7 +132,7 @@ bool Worker::adjustParam(NodeData &node)
             return false;
         }
 
-        node.stop = doubleToString(any_cast<double>(result), precision);
+        node.stop = doubleToString(any_cast<double>(result), digit.prices);
     }
     else
     {
@@ -159,7 +159,7 @@ bool Worker::adjustParam(NodeData &node)
             return false;
         }
 
-        node.entry = doubleToString(any_cast<double>(result), precision);
+        node.entry = doubleToString(any_cast<double>(result), digit.prices);
     }
     else if (node.type == NODE_TYPE::SELL_LIMIT || node.type == NODE_TYPE::SELL_STOP_LIMIT)
     {
@@ -180,7 +180,7 @@ bool Worker::adjustParam(NodeData &node)
             return false;
         }
 
-        node.entry = doubleToString(any_cast<double>(result), precision);
+        node.entry = doubleToString(any_cast<double>(result), digit.prices);
     }
     else if (node.type == NODE_TYPE::BUY_STOP_MARKET || node.type == NODE_TYPE::SELL_STOP_MARKET)
     {
@@ -188,7 +188,7 @@ bool Worker::adjustParam(NodeData &node)
     }
     else if (node.type == NODE_TYPE::BUY_MARKET || node.type == NODE_TYPE::SELL_MARKET)
     {
-        node.entry = doubleToString(close[0], precision);
+        node.entry = doubleToString(close[0], digit.prices);
     }
 
     double closePrice = close[0];
@@ -197,19 +197,19 @@ bool Worker::adjustParam(NodeData &node)
     // match entry immediately
     if (node.type == NODE_TYPE::BUY_LIMIT && closePrice <= entry)
     {
-        node.entry = doubleToString(closePrice, precision);
+        node.entry = doubleToString(closePrice, digit.prices);
     }
     else if (node.type == NODE_TYPE::BUY_STOP_LIMIT && closePrice <= entry && closePrice >= stop)
     {
-        node.entry = doubleToString(closePrice, precision);
+        node.entry = doubleToString(closePrice, digit.prices);
     }
     else if (node.type == NODE_TYPE::SELL_LIMIT && closePrice >= entry)
     {
-        node.entry = doubleToString(closePrice, precision);
+        node.entry = doubleToString(closePrice, digit.prices);
     }
     else if (node.type == NODE_TYPE::SELL_STOP_LIMIT && closePrice >= entry && closePrice <= stop)
     {
-        node.entry = doubleToString(closePrice, precision);
+        node.entry = doubleToString(closePrice, digit.prices);
     }
 
     // sl
@@ -232,7 +232,7 @@ bool Worker::adjustParam(NodeData &node)
             return false;
         }
 
-        node.sl = doubleToString(any_cast<double>(result), precision);
+        node.sl = doubleToString(any_cast<double>(result), digit.prices);
     }
     else if (node.type == NODE_TYPE::SELL_MARKET || node.type == NODE_TYPE::SELL_LIMIT || node.type == NODE_TYPE::SELL_STOP_MARKET || node.type == NODE_TYPE::SELL_STOP_LIMIT)
     {
@@ -253,7 +253,7 @@ bool Worker::adjustParam(NodeData &node)
             return false;
         }
 
-        node.sl = doubleToString(any_cast<double>(result), precision);
+        node.sl = doubleToString(any_cast<double>(result), digit.prices);
     }
     else
     {
@@ -284,7 +284,7 @@ bool Worker::adjustParam(NodeData &node)
             return false;
         }
 
-        node.tp = doubleToString(any_cast<double>(result), precision);
+        node.tp = doubleToString(any_cast<double>(result), digit.prices);
     }
     else if (node.type == NODE_TYPE::SELL_MARKET || node.type == NODE_TYPE::SELL_LIMIT || node.type == NODE_TYPE::SELL_STOP_MARKET || node.type == NODE_TYPE::SELL_STOP_LIMIT)
     {
@@ -309,7 +309,7 @@ bool Worker::adjustParam(NodeData &node)
             return false;
         }
 
-        node.tp = doubleToString(any_cast<double>(result), precision);
+        node.tp = doubleToString(any_cast<double>(result), digit.prices);
     }
     else
     {
@@ -336,7 +336,7 @@ bool Worker::adjustParam(NodeData &node)
             return false;
         }
 
-        node.volume = doubleToString(any_cast<double>(result), precision);
+        node.volume = doubleToString(any_cast<double>(result), digit.volume);
     }
     else
     {
@@ -367,7 +367,7 @@ bool Worker::adjustParam(NodeData &node)
             return false;
         }
 
-        node.expiredTime = doubleToString(any_cast<double>(result), precision);
+        node.expiredTime = to_string((long long)any_cast<double>(result));
     }
     else
     {

@@ -142,3 +142,8 @@ struct Bot
     string treeData;
     int userID;
 };
+
+struct Digit{
+    int volume;
+    int prices;
+};

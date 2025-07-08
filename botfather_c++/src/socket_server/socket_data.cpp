@@ -14,10 +14,10 @@ SocketData::SocketData(const int _BATCH_SIZE) : BATCH_SIZE(_BATCH_SIZE)
 
 void SocketData::init()
 {
-    symbolList = getSymbolList();
-
     {
         lock_guard<mutex> lock(mMutex);
+        symbolList = getSymbolList();
+        digits = getDigit();
         for (string &symbol : symbolList)
         {
             for (string &tf : timeframes)
@@ -48,7 +48,13 @@ void SocketData::onCloseCandle(const string &symbol, string &timeframe, RateData
     vector<double> volume(rateData.volume.begin(), rateData.volume.end());
     vector<long long> startTime(rateData.startTime.begin(), rateData.startTime.end());
 
-    shared_ptr<Worker> worker = make_shared<Worker>(botList, broker, symbol, timeframe, move(open), move(high), move(low), move(close), move(volume), move(startTime));
+    if (digits.find(symbol) == digits.end())
+    {
+        LOGE("No digit found for symbol %s:%s", broker.c_str(), symbol.c_str());
+        throw "No digit found for symbol " + symbol;
+    }
+
+    shared_ptr<Worker> worker = make_shared<Worker>(botList, broker, symbol, timeframe, move(open), move(high), move(low), move(close), move(volume), move(startTime), digits[symbol]);
 
     task.run([worker, this, timeframe]()
              { worker->run(); });

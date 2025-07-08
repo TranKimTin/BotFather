@@ -120,3 +120,7 @@ RateData SocketBybitFuture::getOHLCV(const string &symbol, const string &timefra
     LOGD("Get OHLCV %s:%s %s - %d items", broker.c_str(), symbol.c_str(), timeframe.c_str(), (int)rateData.startTime.size());
     return rateData;
 }
+
+unordered_map<string, Digit> SocketBybitFuture::getDigit() {
+    return getBybitFutureDigits();
+}
