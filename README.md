@@ -24,6 +24,7 @@ A flexible, extensible C++ framework for building high-performance trading bots 
 - MySQL >= 8
 - NodeJS >= 8
 - Redis >= 5
+- OpenJDK >= 11
 
 
 ## 📦 Installation
