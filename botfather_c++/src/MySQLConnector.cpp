@@ -12,7 +12,7 @@ MySQLConnector::MySQLConnector()
         string username = env["MYSQL_USER"];
         string password = env["MYSQL_PASSWORD"];
         string database = env["MYSQL_DATABASE"];
-        
+
         conn = unique_ptr<sql::Connection>(
             driver->connect(host, username, password));
         conn->setSchema(database);
@@ -41,16 +41,28 @@ sql::Connection *MySQLConnector::getConnection()
     return conn.get();
 }
 
-unique_ptr<sql::ResultSet> MySQLConnector::executeQuery(const string &query)
+unique_ptr<sql::ResultSet> MySQLConnector::executeQuery(const string &query, const vector<string> &params)
 {
     lock_guard<mutex> lock(connMutex);
-    unique_ptr<sql::Statement> stmt(conn->createStatement());
-    return unique_ptr<sql::ResultSet>(stmt->executeQuery(query));
+    unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement(query));
+
+    for (size_t i = 0; i < params.size(); ++i)
+    {
+        pstmt->setString(static_cast<int>(i + 1), params[i]);
+    }
+
+    return unique_ptr<sql::ResultSet>(pstmt->executeQuery());
 }
 
-int MySQLConnector::executeUpdate(const string &query)
+int MySQLConnector::executeUpdate(const string &query, const vector<string> &params)
 {
     lock_guard<mutex> lock(connMutex);
-    unique_ptr<sql::Statement> stmt(conn->createStatement());
-    return stmt->executeUpdate(query);
+    unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement(query));
+
+    for (size_t i = 0; i < params.size(); ++i)
+    {
+        pstmt->setString(static_cast<int>(i + 1), params[i]);
+    }
+
+    return pstmt->executeUpdate();
 }

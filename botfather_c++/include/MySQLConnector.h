@@ -14,8 +14,8 @@ public:
     static MySQLConnector& getInstance();
 
     sql::Connection* getConnection();
-    unique_ptr<sql::ResultSet> executeQuery(const string& query);
-    int executeUpdate(const string& query);
+    unique_ptr<sql::ResultSet> executeQuery(const string& query, const vector<string> &params);
+    int executeUpdate(const string& query, const vector<string> &params);
 
 private:
     MySQLConnector();  // constructor private

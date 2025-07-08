@@ -14,6 +14,7 @@ protected:
     shared_ptr<vector<shared_ptr<Bot>>> botList;
     shared_ptr<boost::asio::ssl::context> on_tls_init(connection_hdl);
 
+
     virtual void onSocketConnected(connection_hdl hdl);
     void onCloseCandle(const string &symbol, string &timeframe, RateData &data);
     void adjustData(RateData &rateData);

@@ -29,6 +29,7 @@ void SocketData::init()
             }
         }
     }
+
     connectSocket();
 }
 
@@ -346,8 +347,8 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                 try {
                     cnt += f.get();
                 } 
-                catch (const std::exception& e) {
-                    std::cout << "Init data error: " << e.what() << "\n";
+                catch (const exception& e) {
+                    cout << "Init data error: " << e.what() << "\n";
                 }
             }
             
