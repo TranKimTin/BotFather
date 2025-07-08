@@ -80,8 +80,8 @@ REDIS_PORT=                # Redis port (e.g: 6379)
 ## ⚙️ Build and Run
 
 ```bash
-$ git clone https://github.com/TranKimTin/trade.git
-$ cd trade
+$ git clone https://github.com/TranKimTin/BotFather.git
+$ cd BotFather
 $ cd front-end
 $ npm install
 $ cd ..
