@@ -95,6 +95,6 @@ Author: **Tran Kim Tin**
 GitHub: [@TranKimTin](https://github.com/TranKimTin)  
 Email: kimtin.tr@gmail.com  
 Facebook: [https://www.facebook.com/kimtin.tr](https://www.facebook.com/kimtin.tr)
-Telegram: [https://t.me/tk_tin](https//t.me/tk_tin)
+Telegram: [https://t.me/tk_tin](https://t.me/tk_tin)
 
 Feel free to open an issue or pull request for any bug report or feature request.
