@@ -142,20 +142,19 @@ void setBotList(string botName)
     else
     {
         auto list = make_shared<vector<shared_ptr<Bot>>>(getBotList(botName));
-        for (auto it = botList->begin(); it != botList->end(); ++it)
-        {
-            if ((*it)->botName == botName)
-            {
-                botList->erase(it);
-                break;
-            }
-        }
-        for (auto it : *list)
-        {
-            botList->push_back(it);
-        }
+
+        // Xóa tất cả bot cùng tên (nếu có nhiều hơn 1)
+        botList->erase(remove_if(botList->begin(), botList->end(),
+                                      [&](const shared_ptr<Bot> &bot)
+                                      {
+                                          return bot->botName == botName;
+                                      }),
+                       botList->end());
+
+        // Thêm các bot mới vào
+        botList->insert(botList->end(), list->begin(), list->end());
     }
-    
+
     for (SocketData *exchange : exchanges)
     {
         exchange->setBotList(botList);
