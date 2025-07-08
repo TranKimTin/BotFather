@@ -14,8 +14,13 @@ protected:
     shared_ptr<vector<shared_ptr<Bot>>> botList;
     shared_ptr<boost::asio::ssl::context> on_tls_init(connection_hdl);
     unordered_map<string, Digit> digits;
+    bool firstConnection;
+    string uri;
 
     virtual void onSocketConnected(connection_hdl hdl);
+    void reconnectSocket();
+    void onSocketClosed(connection_hdl hdl);
+
     void onCloseCandle(const string &symbol, string &timeframe, RateData &data);
     void adjustData(RateData &rateData);
     void updateCache(const RateData &rateData);
@@ -27,7 +32,6 @@ protected:
     virtual vector<string> getSymbolList() = 0;
     virtual unordered_map<string, Digit> getDigit() = 0;
     virtual RateData getOHLCV(const string &symbol, const string &timeframe, int limit, long long since = 0) = 0; // from since, get limit candle
-    
 
 public:
     SocketData(const int _BATCH_SIZE);

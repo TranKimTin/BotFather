@@ -7,7 +7,7 @@
 
 static tbb::task_group task;
 
-SocketData::SocketData(const int _BATCH_SIZE) : BATCH_SIZE(_BATCH_SIZE)
+SocketData::SocketData(const int _BATCH_SIZE) : BATCH_SIZE(_BATCH_SIZE), firstConnection(true)
 {
     timeframes = {"1m", "5m", "15m", "30m", "1h", "4h", "1d"};
 }
@@ -264,10 +264,13 @@ shared_ptr<boost::asio::ssl::context> SocketData::on_tls_init(connection_hdl)
 
 void SocketData::onSocketConnected(connection_hdl hdl)
 {
-    LOGI("Socket %s connected", broker.c_str());
+    if (firstConnection)
+    {
+        firstConnection = false;
+        LOGI("Socket %s connected", broker.c_str());
 
-    thread t([this]()
-             {
+        thread t([this]()
+                 {
         for (int i = 0; i < symbolList.size(); i += BATCH_SIZE)
         {
             vector<future<int>> futures;
@@ -361,9 +364,36 @@ void SocketData::onSocketConnected(connection_hdl hdl)
             LOGD("%s: Init %d / %d. Get from cache %d times", broker.c_str(), end, (int) symbolList.size(), cnt);
 
             SLEEP_FOR(cnt * 5000 / 100 + 100);
-    } });
+        } });
 
-    t.detach();
+        t.detach();
+    }
+    else
+    {
+        LOGI("Socket %s reconnected", broker.c_str());
+    }
+}
+
+void SocketData::reconnectSocket()
+{
+    websocketpp::lib::error_code ec;
+    WebSocket::connection_ptr con = ws.get_connection(uri, ec);
+    if (ec)
+    {
+        LOGE("Socket %s connect error: %s. uri=%s", broker.c_str(), ec.message().c_str(), uri.c_str());
+        SLEEP_FOR(3000);
+        reconnectSocket();
+        return;
+    }
+
+    ws.connect(con);
+}
+
+void SocketData::onSocketClosed(connection_hdl hdl)
+{
+    LOGE("Socket %s closed.", broker.c_str());
+    SLEEP_FOR(1000);
+    reconnectSocket();
 }
 
 void SocketData::setBotList(shared_ptr<vector<shared_ptr<Bot>>> botList)

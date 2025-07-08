@@ -53,8 +53,10 @@ void SocketBinance::connectSocket()
                                 placeholders::_2));
     ws.set_tls_init_handler(bind(&SocketBinance::on_tls_init, this, placeholders::_1));
     ws.set_open_handler(bind(&SocketBinance::onSocketConnected, this, placeholders::_1));
+    ws.set_close_handler(bind(&SocketBinance::onSocketClosed, this, std::placeholders::_1));
+    ws.set_fail_handler(bind(&SocketBinance::onSocketClosed, this, std::placeholders::_1));
 
-    string uri = "wss://stream.binance.com:9443/stream?streams=";
+    uri = "wss://stream.binance.com:9443/stream?streams=";
     for (int i = 0; i < symbolList.size(); i++)
     {
         uri += (toLowerCase(symbolList[i]) + "@kline_1m");
@@ -64,15 +66,7 @@ void SocketBinance::connectSocket()
         }
     }
 
-    websocketpp::lib::error_code ec;
-    WebSocket::connection_ptr con = ws.get_connection(uri, ec);
-    if (ec)
-    {
-        LOGE("Socket %s connect error: %s", broker.c_str(), ec.message().c_str());
-        return;
-    }
-
-    ws.connect(con);
+    reconnectSocket();
     ws.run();
 }
 

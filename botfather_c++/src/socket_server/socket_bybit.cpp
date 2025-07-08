@@ -94,18 +94,12 @@ void SocketBybit::connectSocket()
                                 placeholders::_2));
     ws.set_tls_init_handler(bind(&SocketBybit::on_tls_init, this, placeholders::_1));
     ws.set_open_handler(bind(&SocketBybit::onSocketConnected, this, placeholders::_1));
+    ws.set_close_handler(bind(&SocketBybit::onSocketClosed, this, std::placeholders::_1));
+    ws.set_fail_handler(bind(&SocketBybit::onSocketClosed, this, std::placeholders::_1));
 
-    string uri = "wss://stream.bybit.com/v5/public/spot";
+    uri = "wss://stream.bybit.com/v5/public/spot";
 
-    websocketpp::lib::error_code ec;
-    WebSocket::connection_ptr con = ws.get_connection(uri, ec);
-    if (ec)
-    {
-        LOGE("Socket %s connect error: %s", broker.c_str(), ec.message().c_str());
-        return;
-    }
-
-    ws.connect(con);
+    reconnectSocket();
     ws.run();
 }
 

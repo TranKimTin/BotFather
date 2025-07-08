@@ -86,18 +86,12 @@ void SocketOkx::connectSocket()
                                 placeholders::_2));
     ws.set_tls_init_handler(bind(&SocketOkx::on_tls_init, this, placeholders::_1));
     ws.set_open_handler(bind(&SocketOkx::onSocketConnected, this, placeholders::_1));
+    ws.set_close_handler(bind(&SocketOkx::onSocketClosed, this, std::placeholders::_1));
+    ws.set_fail_handler(bind(&SocketOkx::onSocketClosed, this, std::placeholders::_1));
 
-    string uri = "wss://ws.okx.com:8443/ws/v5/business";
+    uri = "wss://ws.okx.com:8443/ws/v5/business";
 
-    websocketpp::lib::error_code ec;
-    WebSocket::connection_ptr con = ws.get_connection(uri, ec);
-    if (ec)
-    {
-        LOGE("Socket %s connect error: %s", broker.c_str(), ec.message().c_str());
-        return;
-    }
-
-    ws.connect(con);
+    reconnectSocket();
     ws.run();
 }
 
