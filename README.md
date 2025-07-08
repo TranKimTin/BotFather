@@ -1,17 +1,90 @@
-# trade
+# 🧠 Trade Bot Framework
 
-JIRA: https://kimtintr.atlassian.net/jira/software/projects/BF/boards/1/backlog
+A flexible, extensible C++ framework for building high-performance trading bots across multiple crypto exchanges (Binance, Bybit, OKX, etc.).
 
-require install java 11 for antlr
+![License: MIT-NC](https://img.shields.io/badge/license-MIT--NC-blue.svg)
 
-get chatid telegram:
-https://api.telegram.org/bot<YourBOTToken>/getUpdates
+---
 
-check disk 
-du -h --max-depth=1
-sudo rm /var/lib/apport/coredump/*
+## 🚀 Features
+
+- Connect to multiple exchanges: Binance Futures, Bybit, OKX Spot...
+- Real-time market data via WebSocket
+- Automated trading strategies
+- Dynamic bot management by symbol
+- Send notification via telegram
+
+---
+
+### Requirements
+
+- Linux or WSL (Windows Subsystem for Linux)
+- CMake ≥ 3.15
+- g++ ≥ 9
+- MySQL >= 8
+- NodeJS >= 8
+- Redis >= 5
 
 
-fix out of heap memory
-pm2 start botFather.js --node-args="--max-old-space-size=32768" --log-date-format "YYYY.MM.DD HH:mm:ss.SSS Z"
-pm2 start arbitrageSpotFuture.js --log-date-format "YYYY.MM.DD HH:mm:ss.SSS Z"
+## 📦 Installation
+
+```bash
+$ sudo apt-get update
+$ sudo apt-get install -y \
+    gdb \
+    build-essential \
+    libssl-dev \
+    libboost-all-dev \
+    libwebsocketpp-dev \
+    libboost-system-dev \
+    libboost-thread-dev \
+    nlohmann-json3-dev \
+    libtbb-dev \
+    cmake \
+    ninja-build \
+    openjdk-11-jdk \
+    ccache \
+    libhiredis-dev \
+    libmysqlcppconn-dev \
+    redis-server
+
+# Set timezone (optional)
+$ sudo timedatectl set-timezone Asia/Ho_Chi_Minh
+```
+
+## 📂 Environment Variables
+
+Create a `.env` file in the project root with the following keys:
+
+```env
+TELEGRAM_TOKEN=            # Telegram bot token for notifications
+API_KEY=                   # Exchange API key
+SECRET_KEY=                # Exchange secret key
+
+MYSQL_HOST=                # MySQL server hostname (e.g., 127.0.0.1)
+MYSQL_USER=                # MySQL username
+MYSQL_PASSWORD=            # MySQL password
+MYSQL_DATABASE=            # MySQL database name
+
+HOST_WEB_SERVER=           # Internal web server
+
+JWT_SECRET_KEY=            # Secret key for JWT auth
+JWT_ALGORITHM=             # JWT algorithm, e.g., HS256
+
+REDIS_USERNAME=            # Redis username (if enabled)
+REDIS_PASSWORD=            # Redis password
+REDIS_SERVER=              # Redis host (e.g., 127.0.0.1)
+REDIS_PORT=                # Redis port (e.g: 6379)
+```
+
+## ⚙️ Build and Run
+
+```bash
+$ git clone https://github.com/TranKimTin/trade.git
+$ cd trade
+$ cd front-end
+$ npm install
+$ cd ..
+$ npm install 
+$ npm run build
+```
