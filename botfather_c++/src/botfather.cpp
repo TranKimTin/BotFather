@@ -186,10 +186,10 @@ void runApp()
 #ifndef TEST
 
     exchanges.push_back(new SocketBinance(20));
-    // exchanges.push_back(new SocketBinanceFuture(20));
-    // exchanges.push_back(new SocketBybit(10));
-    // exchanges.push_back(new SocketBybitFuture(10));
-    // exchanges.push_back(new SocketOkx(5));
+    exchanges.push_back(new SocketBinanceFuture(20));
+    exchanges.push_back(new SocketBybit(10));
+    exchanges.push_back(new SocketBybitFuture(10));
+    exchanges.push_back(new SocketOkx(5));
 
     for (SocketData *exchange : exchanges)
     {

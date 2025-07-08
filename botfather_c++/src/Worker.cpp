@@ -436,7 +436,7 @@ bool Worker::handleLogic(NodeData &node, int botID)
     if (node.type == NODE_TYPE::TELEGRAM)
     {
         string mess = calculateSub(node.value);
-        LOGD("Send telegram message: %s %s %s %s", broker.c_str(), symbol.c_str(), timeframe.c_str(), mess.c_str());
+        LOGI("Send telegram message: %s %s %s %s", broker.c_str(), symbol.c_str(), timeframe.c_str(), mess.c_str());
         return true;
     }
 
