@@ -2,11 +2,11 @@
 #include <chrono>
 #include <thread>
 #include "expr.h"
-#include "Redis.h"
+#include "redis.h"
 #include "util.h"
 #include "axios.h"
 #include "Timer.h"
-#include "MySQLConnector.h"
+#include "mysql_connector.h"
 #include "botfather.h"
 #include "socket_data.h"
 #include "socket_binance.h"

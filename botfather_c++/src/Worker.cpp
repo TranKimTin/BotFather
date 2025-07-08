@@ -1,4 +1,4 @@
-#include "Worker.h"
+#include "worker.h"
 #include "custom_indicator.h"
 #include "util.h"
 #include "Timer.h"

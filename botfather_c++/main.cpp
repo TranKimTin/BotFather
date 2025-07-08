@@ -2,7 +2,7 @@
 #include "common_type.h"
 #include "ta_libc.h"
 #include "util.h"
-#include "MySQLConnector.h"
+#include "mysql_connector.h"
 
 using namespace std;
 

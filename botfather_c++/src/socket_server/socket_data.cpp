@@ -1,8 +1,8 @@
 #include "socket_data.h"
 #include "util.h"
-#include "ThreadPool.h"
-#include "Worker.h"
-#include "Redis.h"
+#include "thread_pool.h"
+#include "worker.h"
+#include "redis.h"
 #include <tbb/task_group.h>
 
 static tbb::task_group task;
