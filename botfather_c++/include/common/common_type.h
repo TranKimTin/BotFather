@@ -18,7 +18,6 @@
 #include <cmath>
 #include <functional>
 
-
 #include <websocketpp/config/asio_client.hpp>
 #include <websocketpp/client.hpp>
 #include <boost/asio/ssl/context.hpp>
@@ -40,14 +39,21 @@ inline string current_timestamp()
     return oss.str();
 }
 
+inline string current_thread_id()
+{
+    ostringstream oss;
+    oss << this_thread::get_id();
+    return oss.str();
+}
+
 #ifndef DEBUG
 #define LOGD(mess, ...)
 #else
-#define LOGD(mess, ...) printf("[%s] [DEBUG] %s " mess "\n", current_timestamp().c_str(), __func__, ##__VA_ARGS__);
+#define LOGD(mess, ...) printf("[%s] [%s] [DEBUG] [%s] " mess "\n", current_thread_id().c_str(), current_timestamp().c_str(), __func__, ##__VA_ARGS__);
 #endif
 
-#define LOGI(mess, ...) printf("[%s] [INFO] %s " mess "\n", current_timestamp().c_str(), __func__, ##__VA_ARGS__);
-#define LOGE(mess, ...) fprintf(stderr, "[%s] [ERROR] %s " mess "\n", current_timestamp().c_str(), __func__, ##__VA_ARGS__);
+#define LOGI(mess, ...) printf("[%s] [%s] [INFO] [%s] " mess "\n", current_thread_id().c_str(), current_timestamp().c_str(), __func__, ##__VA_ARGS__);
+#define LOGE(mess, ...) fprintf(stderr, "[%s] [%s] [ERROR] [%s] " mess "\n", current_thread_id().c_str(), current_timestamp().c_str(), __func__, ##__VA_ARGS__);
 
 #define SLEEP_FOR(ms) this_thread::sleep_for(chrono::milliseconds(ms))
 
@@ -98,6 +104,16 @@ struct NODE_TYPE
     inline static const string CLOSE_ALL_POSITION = "closeAllPosition";
 };
 
+struct ORDER_STATUS
+{
+    inline static const string OPENED = "Mở lệnh";
+    inline static const string MATCH_STOP = "Khớp stop";
+    inline static const string MATCH_ENTRY = "Khớp entry";
+    inline static const string MATCH_TP = "Khớp TP";
+    inline static const string MATCH_SL = "Khớp SL";
+    inline static const string CANCELED = "Đã hủy";
+};
+
 struct NodeData
 {
     string id;
@@ -143,7 +159,8 @@ struct Bot
     int userID;
 };
 
-struct Digit{
+struct Digit
+{
     int volume;
     int prices;
 };

@@ -16,6 +16,7 @@ MySQLConnector::MySQLConnector()
         conn = unique_ptr<sql::Connection>(
             driver->connect(host, username, password));
         conn->setSchema(database);
+        LOGI("MySQL connection established to %s as %s", host.c_str(), username.c_str());
     }
     catch (sql::SQLException &e)
     {
@@ -57,12 +58,26 @@ unique_ptr<sql::ResultSet> MySQLConnector::executeQuery(const string &query, con
 int MySQLConnector::executeUpdate(const string &query, const vector<string> &params)
 {
     lock_guard<mutex> lock(connMutex);
-    unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement(query));
-
-    for (size_t i = 0; i < params.size(); ++i)
+    try
     {
-        pstmt->setString(static_cast<int>(i + 1), params[i]);
-    }
+        unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement(query));
 
-    return pstmt->executeUpdate();
+        for (size_t i = 0; i < params.size(); ++i)
+        {
+            pstmt->setString(static_cast<int>(i + 1), params[i]);
+        }
+
+        return pstmt->executeUpdate();
+    }
+    catch (sql::SQLException &e)
+    {
+        LOGE("MySQL update failed: %s", e.what());
+        LOGE("Query: %s", query.c_str());
+        for (int i = 0; i < params.size(); ++i)
+        {
+            string param = params[i];
+            LOGE("Param %d: %s", i, param.c_str());
+        }
+        return -1; // Indicate failure
+    }
 }

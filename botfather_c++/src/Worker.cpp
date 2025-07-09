@@ -3,6 +3,7 @@
 #include "util.h"
 #include "Timer.h"
 #include "expr.h"
+#include "mysql_connector.h"
 
 static vector<string> orderTypes = {NODE_TYPE::BUY_MARKET, NODE_TYPE::BUY_LIMIT, NODE_TYPE::BUY_STOP_MARKET, NODE_TYPE::BUY_STOP_LIMIT, NODE_TYPE::SELL_MARKET, NODE_TYPE::SELL_LIMIT, NODE_TYPE::SELL_STOP_MARKET, NODE_TYPE::SELL_STOP_LIMIT};
 
@@ -452,6 +453,19 @@ bool Worker::handleLogic(NodeData &node, int botID)
              botID, node.type.c_str(), broker.c_str(), symbol.c_str(), timeframe.c_str(),
              node.entry.c_str(), node.stop.c_str(), node.tp.c_str(), node.sl.c_str(),
              node.volume.c_str(), node.expiredTime.c_str());
+
+        auto &db = MySQLConnector::getInstance();
+        string mysql_query = "INSERT INTO Orders(symbol,broker,timeframe,orderType,volume,stop,entry,tp,sl,status,createdTime,expiredTime,botID) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        vector<string> args = {
+            symbol, broker, timeframe, node.type, node.volume, node.stop,
+            node.entry, node.tp, node.sl, ORDER_STATUS::OPENED,
+            toTimeString(nextTime(startTime[0], timeframe)), node.expiredTime, to_string(botID)};
+
+        if (db.executeUpdate(mysql_query, args) <= 0)
+        {
+            LOGE("Failed to insert order into database");
+            return false;
+        }
 
         return true;
     }

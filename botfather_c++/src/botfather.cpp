@@ -23,6 +23,11 @@ shared_ptr<vector<shared_ptr<Bot>>> botList;
 // #define TEST
 void test()
 {
+    auto list = getBinanceSymbolList();
+    for (const auto &symbol : list)
+    {
+        LOGI("Symbol: %s", symbol.c_str());
+    }
 }
 
 static Route getRoute(const json &j)
