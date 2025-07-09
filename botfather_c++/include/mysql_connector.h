@@ -1,4 +1,5 @@
 #pragma once
+#include "common_type.h"
 #include <memory>
 #include <mutex>
 #include <mysql_driver.h>
@@ -9,21 +10,23 @@
 
 using namespace std;
 
-class MySQLConnector {
+class MySQLConnector
+{
 public:
-    static MySQLConnector& getInstance();
+    static MySQLConnector &getInstance();
 
-    sql::Connection* getConnection();
-    unique_ptr<sql::ResultSet> executeQuery(const string& query, const vector<string> &params);
-    int executeUpdate(const string& query, const vector<string> &params);
+    sql::Connection *getConnection();
+    unique_ptr<sql::ResultSet> executeQuery(const string &query, const vector<any> &params);
+    int executeUpdate(const string &query, const vector<any> &params);
 
 private:
-    MySQLConnector();  // constructor private
+    MySQLConnector(); // constructor private
     ~MySQLConnector();
-    MySQLConnector(const MySQLConnector&) = delete;
-    MySQLConnector& operator=(const MySQLConnector&) = delete;
+    MySQLConnector(const MySQLConnector &) = delete;
+    MySQLConnector &operator=(const MySQLConnector &) = delete;
+    void bindParams(sql::PreparedStatement *stmt, const vector<any> &params);
 
-    sql::mysql::MySQL_Driver* driver;
+    sql::mysql::MySQL_Driver *driver;
     unique_ptr<sql::Connection> conn;
     mutex connMutex;
 };

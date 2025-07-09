@@ -162,7 +162,7 @@ void SocketData::updateCache(const RateData &rateData)
                 LOGE("Failed to update cache for %s %s", symbol.c_str(), timeframe.c_str());
                 return;
             };
-            LOGD("Update cache %s %s %s - %d items",broker.c_str(), symbol.c_str(), timeframe.c_str(), (int)v.size());
+            // LOGD("Update cache %s %s %s - %d items",broker.c_str(), symbol.c_str(), timeframe.c_str(), (int)v.size());
         }
         else
         {
@@ -198,7 +198,7 @@ void SocketData::updateCache(const RateData &rateData)
                     LOGE("Failed to update cache for %s %s", symbol.c_str(), timeframe.c_str());
                     return;
                 }
-                LOGD("Update cache %s %s %s - %d items", broker.c_str(), symbol.c_str(), timeframe.c_str(), (int)v.size());
+                // LOGD("Update cache %s %s %s - %d items", broker.c_str(), symbol.c_str(), timeframe.c_str(), (int)v.size());
             }
         }
         while (Redis::getInstance().size(key) > MAX_CANDLE)
@@ -251,7 +251,7 @@ RateData SocketData::getOHLCVFromCache(const string &symbol, const string &timef
         rateData.volume.push_back(stod(parts[5]));
     }
 
-    LOGD("Get OHLCV from cache %s %s %s - %d items", broker.c_str(), symbol.c_str(), timeframe.c_str(), (int)rateData.startTime.size());
+    // LOGD("Get OHLCV from cache %s %s %s - %d items", broker.c_str(), symbol.c_str(), timeframe.c_str(), (int)rateData.startTime.size());
     return rateData;
 }
 

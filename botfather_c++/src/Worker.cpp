@@ -456,10 +456,39 @@ bool Worker::handleLogic(NodeData &node, int botID)
 
         auto &db = MySQLConnector::getInstance();
         string mysql_query = "INSERT INTO Orders(symbol,broker,timeframe,orderType,volume,stop,entry,tp,sl,status,createdTime,expiredTime,botID) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)";
-        vector<string> args = {
-            symbol, broker, timeframe, node.type, node.volume, node.stop,
-            node.entry, node.tp, node.sl, ORDER_STATUS::OPENED,
-            toTimeString(nextTime(startTime[0], timeframe)), node.expiredTime, to_string(botID)};
+        vector<any> args;
+        //  {
+        //     symbol, broker, timeframe, node.type, stod(node.volume), stod(node.stop),
+        //     node.entry, node.tp, node.sl, ORDER_STATUS::OPENED,
+        //     toTimeString(nextTime(startTime[0], timeframe)), node.expiredTime, to_string(botID)};
+
+        args.push_back(symbol);
+        args.push_back(broker);
+        args.push_back(timeframe);
+        args.push_back(node.type);
+        args.push_back(stod(node.volume));
+        if (node.stop.empty())
+        {
+            args.push_back(NULL);
+        }
+        else
+        {
+            args.push_back(stod(node.stop));
+        }
+        args.push_back(stod(node.entry));
+        args.push_back(stod(node.tp));
+        args.push_back(stod(node.sl));
+        args.push_back(ORDER_STATUS::OPENED);
+        args.push_back(nextTime(startTime[0], timeframe));
+        if (node.expiredTime.empty() || node.expiredTime == "0")
+        {
+            args.push_back(NULL);
+        }
+        else
+        {
+            args.push_back(stod(node.expiredTime));
+        }
+        args.push_back(botID);
 
         if (db.executeUpdate(mysql_query, args) <= 0)
         {

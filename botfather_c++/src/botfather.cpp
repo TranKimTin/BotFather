@@ -90,7 +90,7 @@ vector<shared_ptr<Bot>> getBotList(string botName)
     vector<shared_ptr<Bot>> botList;
     auto &db = MySQLConnector::getInstance();
     string mysql_query = "SELECT * FROM Bot";
-    vector<string> args;
+    vector<any> args;
 
     if (botName != "")
     {

@@ -78,7 +78,7 @@ vector<string> SocketBinance::getSymbolList()
 RateData SocketBinance::getOHLCV(const string &symbol, const string &timeframe, int limit, long long since)
 {
     RateData rateData = getBinanceOHLCV(symbol, timeframe, limit, since);
-    LOGD("Get OHLCV %s:%s %s - %d items", broker.c_str(), symbol.c_str(), timeframe.c_str(), (int)rateData.startTime.size());
+    // LOGD("Get OHLCV %s:%s %s - %d items", broker.c_str(), symbol.c_str(), timeframe.c_str(), (int)rateData.startTime.size());
     return rateData;
 }
 
