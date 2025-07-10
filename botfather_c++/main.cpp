@@ -3,6 +3,7 @@
 #include "ta_libc.h"
 #include "util.h"
 #include "mysql_connector.h"
+#include "telegram.h"
 
 using namespace std;
 
@@ -15,10 +16,11 @@ void init()
     if (retCode != TA_SUCCESS)
     {
         LOGE("init TA - Lib fail");
-        throw "init TA - Lib fail";
+        throw runtime_error("Failed to initialize TA-Lib");
     }
 
     MySQLConnector::getInstance();
+    Telegram::getInstance();
 }
 
 void destroy()

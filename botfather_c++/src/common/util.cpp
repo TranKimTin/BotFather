@@ -11,6 +11,14 @@ string toLowerCase(string str)
     return str;
 }
 
+string trim(const string& s)
+{
+    auto start = find_if_not(s.begin(), s.end(), ::isspace);
+    auto end = find_if_not(s.rbegin(), s.rend(), ::isspace).base();
+
+    return (start < end) ? string(start, end) : "";
+}
+
 bool endsWith(const string &str, const string &suffix)
 {
     if (suffix.size() > str.size())
@@ -140,10 +148,17 @@ string toTimeString(long long timestampMs)
     return oss.str();
 }
 
-map<string, string> readEnvFile()
+long long getCurrentTime()
+{
+    auto now = chrono::system_clock::now();
+    auto duration = now.time_since_epoch();
+    return chrono::duration_cast<chrono::milliseconds>(duration).count();
+}
+
+unordered_map<string, string> readEnvFile()
 {
     ifstream file(".env");
-    map<string, string> envMap;
+    unordered_map<string, string> envMap;
     string line;
 
     while (getline(file, line))
@@ -524,10 +539,7 @@ vector<string> getOkxSymbolList()
     json j = json::parse(response);
     vector<string> symbols;
     auto list = j["data"];
-    auto now = std::chrono::system_clock::now();
-    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-                  now.time_since_epoch())
-                  .count();
+    auto now = getCurrentTime();
 
     for (const auto &s : list)
     {
@@ -536,7 +548,7 @@ vector<string> getOkxSymbolList()
         string symbol = s["instId"].get<string>();
         long long listTime = stoll(s["listTime"].get<string>());
 
-        if (quoteCcy != "USDT" || baseCcy == "USDC" || baseCcy == "TUSD" || baseCcy == "BUSD" || baseCcy == "DAI" || listTime > ms)
+        if (quoteCcy != "USDT" || baseCcy == "USDC" || baseCcy == "TUSD" || baseCcy == "BUSD" || baseCcy == "DAI" || listTime > now)
             continue;
 
         symbols.push_back(symbol);

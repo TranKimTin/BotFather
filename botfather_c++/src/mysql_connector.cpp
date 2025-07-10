@@ -5,7 +5,7 @@ MySQLConnector::MySQLConnector()
 {
     try
     {
-        map<string, string> env = readEnvFile();
+        unordered_map<string, string> env = readEnvFile();
 
         driver = sql::mysql::get_mysql_driver_instance();
         string host = "tcp://" + env["MYSQL_HOST"] + ":3306";
@@ -50,27 +50,27 @@ void MySQLConnector::bindParams(sql::PreparedStatement *stmt, const vector<any> 
         const any &val = params[i];
 
         if (val.type() == typeid(int))
-            stmt->setInt(idx, std::any_cast<int>(val));
+            stmt->setInt(idx, any_cast<int>(val));
         else if (val.type() == typeid(int64_t))
-            stmt->setInt64(idx, std::any_cast<int64_t>(val));
+            stmt->setInt64(idx, any_cast<int64_t>(val));
         else if (val.type() == typeid(long long))
-            stmt->setInt64(idx, std::any_cast<long long>(val));
+            stmt->setInt64(idx, any_cast<long long>(val));
         else if (val.type() == typeid(float))
-            stmt->setDouble(idx, static_cast<double>(std::any_cast<float>(val)));
+            stmt->setDouble(idx, static_cast<double>(any_cast<float>(val)));
         else if (val.type() == typeid(double))
-            stmt->setDouble(idx, std::any_cast<double>(val));
+            stmt->setDouble(idx, any_cast<double>(val));
         else if (val.type() == typeid(bool))
-            stmt->setBoolean(idx, std::any_cast<bool>(val));
-        else if (val.type() == typeid(std::string))
-            stmt->setString(idx, std::any_cast<std::string>(val));
+            stmt->setBoolean(idx, any_cast<bool>(val));
+        else if (val.type() == typeid(string))
+            stmt->setString(idx, any_cast<string>(val));
         else if (val.type() == typeid(const char *))
-            stmt->setString(idx, std::any_cast<const char *>(val));
+            stmt->setString(idx, any_cast<const char *>(val));
         else if (val.type() == typeid(nullptr_t))
             stmt->setNull(idx, sql::DataType::UNKNOWN);
         else
         {
-            throw std::runtime_error(
-                "Unsupported parameter type at index " + std::to_string(i) +
+            throw runtime_error(
+                "Unsupported parameter type at index " + to_string(i) +
                 " (type: " + val.type().name() + ")");
         }
     }

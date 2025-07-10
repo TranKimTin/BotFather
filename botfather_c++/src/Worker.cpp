@@ -4,6 +4,7 @@
 #include "Timer.h"
 #include "expr.h"
 #include "mysql_connector.h"
+#include "telegram.h"
 
 static vector<string> orderTypes = {NODE_TYPE::BUY_MARKET, NODE_TYPE::BUY_LIMIT, NODE_TYPE::BUY_STOP_MARKET, NODE_TYPE::BUY_STOP_LIMIT, NODE_TYPE::SELL_MARKET, NODE_TYPE::SELL_LIMIT, NODE_TYPE::SELL_STOP_MARKET, NODE_TYPE::SELL_STOP_LIMIT};
 
@@ -50,7 +51,7 @@ void Worker::run()
                 continue;
             }
             visited.clear();
-            dfs_handleLogic(bot->route, bot->id);
+            dfs_handleLogic(bot->route, *bot);
         }
         catch (const exception &e)
         {
@@ -60,18 +61,18 @@ void Worker::run()
     }
 }
 
-void Worker::dfs_handleLogic(Route &route, int botID)
+void Worker::dfs_handleLogic(Route &route, Bot &bot)
 {
     if (visited[route.id])
     {
         return;
     }
     visited[route.id] = true;
-    if (handleLogic(route.data, botID))
+    if (handleLogic(route.data, bot))
     {
         for (Route &next : route.next)
         {
-            dfs_handleLogic(next, botID);
+            dfs_handleLogic(next, bot);
         }
     }
 }
@@ -397,8 +398,9 @@ bool Worker::adjustParam(NodeData &node)
     return true;
 }
 
-bool Worker::handleLogic(NodeData &nodeData, int botID)
+bool Worker::handleLogic(NodeData &nodeData, Bot &bot)
 {
+    int botID = bot.id;
     if (nodeData.type == NODE_TYPE::START)
         return true;
 
@@ -436,8 +438,34 @@ bool Worker::handleLogic(NodeData &nodeData, int botID)
     }
     if (nodeData.type == NODE_TYPE::TELEGRAM)
     {
-        string mess = calculateSub(nodeData.value);
-        LOGI("Send telegram message: %s %s %s %s", broker.c_str(), symbol.c_str(), timeframe.c_str(), mess.c_str());
+        string content = calculateSub(nodeData.value);
+
+        unordered_map<string, string> emoji = {
+            {"binance", "🥇🥇🥇"},
+            {"bybit", ""},
+            {"okx", "🏁🏁🏁"},
+            {"binance_future", "🥇🥇🥇"},
+            {"bybit_future", ""}};
+
+        unordered_map<string, string> url = {
+            {"binance", "https://www.binance.com/en/trade/" + symbol + "?_from=markets&type=spot"},
+            {"bybit", "https://www.bybit.com/vi-VN/trade/spot/" + symbol.substr(0, symbol.find("USDT")) + "/USDT"},
+            {"okx", "https://www.okx.com/vi/trade-spot/" + symbol},
+            {"binance_future", "https://www.binance.com/en/futures/" + symbol + "?_from=markets"},
+            {"bybit_future", "https://www.bybit.com/trade/usdt/" + symbol}};
+
+        string mess = emoji[broker];
+        mess += StringFormat("\n<a href='%s'><b>%s</b></a>", url[broker].c_str(), symbol.c_str());
+        mess += StringFormat("\n%s", broker.c_str());
+        mess += StringFormat("\n%s %s", timeframe.c_str(), toTimeString(startTime[0]).c_str());
+        mess += StringFormat("\n%s", content.c_str());
+
+        for (const string &id : bot.idTelegram)
+        {
+            if (id.empty())
+                continue;
+            Telegram::getInstance().sendMessage(mess, id);
+        }
         return true;
     }
 

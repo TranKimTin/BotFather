@@ -1,13 +1,8 @@
-#include <tbb/task_group.h>
-#include <chrono>
-#include <thread>
-#include "expr.h"
-#include "redis.h"
-#include "util.h"
-#include "axios.h"
-#include "Timer.h"
-#include "mysql_connector.h"
 #include "botfather.h"
+#include "redis.h"
+#include "Timer.h"
+#include "util.h"
+#include "mysql_connector.h"
 #include "socket_data.h"
 #include "socket_binance.h"
 #include "socket_binance_future.h"
@@ -21,14 +16,28 @@ vector<thread> threads;
 shared_ptr<vector<shared_ptr<Bot>>> botList;
 
 // #define TEST
+
+#ifdef TEST
+#include "telegram.h"
 void test()
 {
-    auto list = getBinanceSymbolList();
-    for (const auto &symbol : list)
-    {
-        LOGI("Symbol: %s", symbol.c_str());
-    }
+    string botID = "1833284254";
+    Telegram::getInstance().sendMessage("Hello BotFather! " + toTimeString(getCurrentTime()), botID);
+    Telegram::getInstance().sendMessage("Hello BotFather! " + toTimeString(getCurrentTime()), botID);
+    Telegram::getInstance().sendMessage("Hello BotFather! " + toTimeString(getCurrentTime()), botID);
+
+    SLEEP_FOR(2000);
+
+    Telegram::getInstance().sendMessage("Hello BotFather! " + toTimeString(getCurrentTime()), botID);
+    Telegram::getInstance().sendMessage("Hello BotFather! " + toTimeString(getCurrentTime()), botID);
+    Telegram::getInstance().sendMessage("Hello BotFather! " + toTimeString(getCurrentTime()), botID);
+    SLEEP_FOR(200);
+    Telegram::getInstance().sendMessage("Hello BotFather! " + toTimeString(getCurrentTime()), botID);
+    Telegram::getInstance().sendMessage("Hello BotFather! " + toTimeString(getCurrentTime()), botID);
+    Telegram::getInstance().sendMessage("Hello BotFather! " + toTimeString(getCurrentTime()), botID);
+    SLEEP_FOR(5000);
 }
+#endif
 
 static Route getRoute(const json &j)
 {
@@ -105,10 +114,15 @@ vector<shared_ptr<Bot>> getBotList(string botName)
 
         bot->id = res->getInt("id");
         bot->botName = res->getString("botName");
-        bot->idTelegram = split(res->getString("idTelegram"), ',');
         bot->treeData = res->getString("treeData");
         bot->userID = res->getInt("userID");
         bot->timeframes = convertJsonStringArrayToVector(res->getString("timeframes"));
+        bot->idTelegram = split(res->getString("idTelegram"), ',');
+
+        for (string &id : bot->idTelegram)
+        {
+            id = trim(id);
+        }
 
         bot->symbolList.clear();
         vector<string> symbolList = convertJsonStringArrayToVector(res->getString("symbolList"));
@@ -150,10 +164,10 @@ void setBotList(string botName)
 
         // Xóa tất cả bot cùng tên (nếu có nhiều hơn 1)
         botList->erase(remove_if(botList->begin(), botList->end(),
-                                      [&](const shared_ptr<Bot> &bot)
-                                      {
-                                          return bot->botName == botName;
-                                      }),
+                                 [&](const shared_ptr<Bot> &bot)
+                                 {
+                                     return bot->botName == botName;
+                                 }),
                        botList->end());
 
         // Thêm các bot mới vào
@@ -184,7 +198,7 @@ void sio_on_message(string const &event, sio::message::ptr const &data, bool isA
 
 void runApp()
 {
-    map<string, string> env = readEnvFile();
+    unordered_map<string, string> env = readEnvFile();
 
     Redis::getInstance().connect(env["REDIS_SERVER"], stoi(env["REDIS_PORT"]), env["REDIS_PASSWORD"]);
 
