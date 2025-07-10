@@ -36,7 +36,7 @@ static int binarySearch(const vector<Symbol> &symbolList, const string &symbol)
 
 void Worker::run()
 {
-    Timer timer(StringFormat("onCloseCandle %s %s %s", broker.c_str(), symbol.c_str(), timeframe.c_str()));
+    // Timer timer(StringFormat("onCloseCandle %s %s %s", broker.c_str(), symbol.c_str(), timeframe.c_str()));
     for (const shared_ptr<Bot> &bot : *botList)
     {
         try
@@ -397,14 +397,14 @@ bool Worker::adjustParam(NodeData &node)
     return true;
 }
 
-bool Worker::handleLogic(NodeData &node, int botID)
+bool Worker::handleLogic(NodeData &nodeData, int botID)
 {
-    if (node.type == NODE_TYPE::START)
+    if (nodeData.type == NODE_TYPE::START)
         return true;
 
-    if (node.type == NODE_TYPE::EXPR)
+    if (nodeData.type == NODE_TYPE::EXPR)
     {
-        any result = calculateExpr(node.value, broker, symbol, timeframe, open.size(),
+        any result = calculateExpr(nodeData.value, broker, symbol, timeframe, open.size(),
                                    open.data(), high.data(), low.data(), close.data(), volume.data(),
                                    startTime.data());
 
@@ -434,14 +434,15 @@ bool Worker::handleLogic(NodeData &node, int botID)
             return false;
         }
     }
-    if (node.type == NODE_TYPE::TELEGRAM)
+    if (nodeData.type == NODE_TYPE::TELEGRAM)
     {
-        string mess = calculateSub(node.value);
+        string mess = calculateSub(nodeData.value);
         LOGI("Send telegram message: %s %s %s %s", broker.c_str(), symbol.c_str(), timeframe.c_str(), mess.c_str());
         return true;
     }
 
     // new order
+    NodeData node = nodeData;
     if (!adjustParam(node))
     {
         return false;

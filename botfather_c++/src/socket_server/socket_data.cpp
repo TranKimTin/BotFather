@@ -17,6 +17,15 @@ void SocketData::init()
     {
         lock_guard<mutex> lock(mMutex);
         symbolList = getSymbolList();
+        // if (broker == "okx")
+        // {
+        //     symbolList = {"BTC-USDT"};
+        // }
+        // else
+        // {
+        //     symbolList = {"BTCUSDT"};
+        // }
+
         digits = getDigit();
         for (string &symbol : symbolList)
         {

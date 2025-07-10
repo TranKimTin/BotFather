@@ -860,7 +860,7 @@ any calculateExpr(const string &inputText, const string &broker, const string &s
     return expr.visit(entry.tree);
 }
 
-string calculateSubExpr(string expr, const string &broker, const string &symbol, const string &timeframe, int length,
+string calculateSubExpr(string &expr, const string &broker, const string &symbol, const string &timeframe, int length,
                         const double *open, const double *high, const double *low, const double *close,
                         const double *volume, long long *startTime)
 {
