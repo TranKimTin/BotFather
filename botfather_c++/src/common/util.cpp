@@ -487,8 +487,9 @@ vector<string> getBybitFutureSymbolList()
     {
         double volume24h = stod(s["volume24h"].get<string>());
         string symbol = s["symbol"].get<string>();
+        string curPreListingPhase = s["curPreListingPhase"].get<string>();
 
-        if (volume24h <= 0 || !endsWith(symbol, "USDT") || symbol == "USDCUSDT" || symbol == "TUSDUSDT" || symbol == "DAIUSDT")
+        if (volume24h <= 0 || !endsWith(symbol, "USDT") || symbol == "USDCUSDT" || symbol == "TUSDUSDT" || symbol == "DAIUSDT" || curPreListingPhase == "ContinuousTrading")
             continue;
 
         symbols.push_back(symbol);
