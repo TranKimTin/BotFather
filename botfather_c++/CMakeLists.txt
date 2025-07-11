@@ -30,6 +30,8 @@ endif()
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(OpenSSL REQUIRED)
 
+set(ANTLR4_DIR "${CMAKE_SOURCE_DIR}/lib/antlr4")
+
 file(GLOB_RECURSE SOURCES "src/*.cpp" "include/*.cpp")
 list(APPEND SOURCES "main.cpp")
 
@@ -46,6 +48,7 @@ target_link_libraries(botfather
     -lhiredis
     mysqlcppconn
     ${LIB_FILES}
+    ${ANTLR4_DIR}/lib/libantlr4-runtime.so
 )
 
 file(GLOB_RECURSE HEADER_DIRS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
@@ -63,6 +66,7 @@ message(STATUS "EXTERNAL_INCLUDE=${EXTERNAL_INCLUDE}")
 target_include_directories(botfather PRIVATE
     ${INCLUDE_DIRS}
     ${EXTERNAL_INCLUDE}
+    ${ANTLR4_DIR}/include/antlr4-runtime
 )
 
 set_target_properties(botfather PROPERTIES

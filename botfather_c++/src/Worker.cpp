@@ -37,7 +37,7 @@ static int binarySearch(const vector<Symbol> &symbolList, const string &symbol)
 
 void Worker::run()
 {
-    // Timer timer(StringFormat("onCloseCandle %s %s %s", broker.c_str(), symbol.c_str(), timeframe.c_str()));
+    Timer timer(StringFormat("onCloseCandle %s %s %s", broker.c_str(), symbol.c_str(), timeframe.c_str()));
     for (const shared_ptr<Bot> &bot : *botList)
     {
         try
