@@ -39,9 +39,6 @@ list(APPEND SOURCES "main.cpp")
 
 add_executable(botfather ${SOURCES})
 
-file(GLOB LIB_FILES "${CMAKE_SOURCE_DIR}/lib/*.so*")
-message(STATUS "LIB_FILES=${LIB_FILES}")
-
 message(STATUS "ANTLR4_LIB=${ANTLR4_LIB}")
 
 target_link_libraries(botfather
@@ -53,7 +50,6 @@ target_link_libraries(botfather
     -lhiredis
     mysqlcppconn
     ${ANTLR4_LIB}
-    ${LIB_FILES}
     ${SIOCLIENT_LIB}
     ${SIOCLIENT_TLS_LIB}
 )
@@ -67,14 +63,10 @@ endforeach()
 list(REMOVE_DUPLICATES INCLUDE_DIRS)
 message(STATUS "INCLUDE_DIRS=${INCLUDE_DIRS}")
 
-file(GLOB EXTERNAL_INCLUDE "${CMAKE_SOURCE_DIR}/external_include/*")
-message(STATUS "EXTERNAL_INCLUDE=${EXTERNAL_INCLUDE}")
-
 set(LOCAL_INCLUDE_PATHS "/usr/local/include")
 
 target_include_directories(botfather PRIVATE
     ${INCLUDE_DIRS}
-    ${EXTERNAL_INCLUDE}
     ${LOCAL_INCLUDE_PATHS}
     ${LOCAL_INCLUDE_PATHS}/antlr4-runtime
 )
