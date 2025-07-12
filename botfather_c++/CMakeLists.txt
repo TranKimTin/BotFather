@@ -64,13 +64,12 @@ message(STATUS "INCLUDE_DIRS=${INCLUDE_DIRS}")
 file(GLOB EXTERNAL_INCLUDE "${CMAKE_SOURCE_DIR}/external_include/*")
 message(STATUS "EXTERNAL_INCLUDE=${EXTERNAL_INCLUDE}")
 
-file(GLOB LOCAL_INCLUDE_PATHS "/usr/local/include/*")
-message(STATUS "LOCAL_INCLUDE_PATHS=${LOCAL_INCLUDE_PATHS}")
+set(LOCAL_INCLUDE_PATHS "/usr/local/include")
 
 target_include_directories(botfather PRIVATE
     ${INCLUDE_DIRS}
     ${EXTERNAL_INCLUDE}
-    ${LOCAL_INCLUDE_PATHS}
+    ${LOCAL_INCLUDE_PATHS}/antlr4-runtime
 )
 
 set_target_properties(botfather PROPERTIES
