@@ -14,7 +14,7 @@ cmake -S antlr4/runtime/Cpp -B antlr4/runtime/Cpp/build \
   -DCMAKE_CXX_FLAGS_RELEASE="-Ofast -march=native -flto -funroll-loops -DNDEBUG" \
   -DCMAKE_EXE_LINKER_FLAGS_RELEASE="-flto"
 
-cmake --build antlr4/runtime/Cpp/build --parallel $(nproc)
+cmake --build antlr4/runtime/Cpp/build -- -j $(nproc)
 cmake --install antlr4/runtime/Cpp/build
 echo "✅ ANTLR4 build and installation complete."
 
@@ -35,7 +35,7 @@ cmake -S socket.io-client-cpp -B socket.io-client-cpp/build \
   -DCMAKE_EXE_LINKER_FLAGS_RELEASE="-flto"
 
 echo "✅ socket.io-client-cpp build and installation complete."
-cmake --build socket.io-client-cpp/build --parallel $(nproc)
+cmake --build socket.io-client-cpp/build -- -j $(nproc)
 cmake --install socket.io-client-cpp/build
 
 echo ""
