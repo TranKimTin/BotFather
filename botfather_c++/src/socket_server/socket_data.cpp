@@ -116,7 +116,7 @@ void SocketData::mergeData(RateData &rateData, const string &symbol, string &tim
     }
     else
     {
-        LOGI("Merge data fail %s %s %s", symbol.c_str(), timeframe.c_str(), currentTF.c_str());
+        LOGI("Merge data fail %s:%s %s %s", broker.c_str(), symbol.c_str(), timeframe.c_str(), currentTF.c_str());
     }
 }
 
@@ -168,7 +168,7 @@ void SocketData::updateCache(const RateData &rateData)
             
             if (!Redis::getInstance().pushBack(key, v))
             {
-                LOGE("Failed to update cache for %s %s", symbol.c_str(), timeframe.c_str());
+                LOGE("Failed to update cache for %s:%s %s",broker.c_str(), symbol.c_str(), timeframe.c_str());
                 return;
             };
             // LOGD("Update cache %s %s %s - %d items",broker.c_str(), symbol.c_str(), timeframe.c_str(), (int)v.size());
@@ -204,7 +204,7 @@ void SocketData::updateCache(const RateData &rateData)
             {
                 if (!Redis::getInstance().pushFront(key, v))
                 {
-                    LOGE("Failed to update cache for %s %s", symbol.c_str(), timeframe.c_str());
+                    LOGE("Failed to update cache for %s:%s %s",broker.c_str(),  symbol.c_str(), timeframe.c_str());
                     return;
                 }
                 // LOGD("Update cache %s %s %s - %d items", broker.c_str(), symbol.c_str(), timeframe.c_str(), (int)v.size());
@@ -336,7 +336,7 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                                 }
                                 adjustData(rateData);
                                 if (!isValidData(rateData)) {
-                                    LOGE("Invalid data for %s %s", symbol.c_str(), tf.c_str());
+                                    LOGE("Invalid data for %s:%s %s", broker.c_str(), symbol.c_str(), tf.c_str());
                                     rateData = getOHLCV(symbol, tf, MAX_CANDLE);
                                     cnt++;
                                     string key = broker + "_" + symbol + "_" + tf;
