@@ -29,16 +29,17 @@ endif()
 #include lib
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(OpenSSL REQUIRED)
-
-set(ANTLR4_DIR "${CMAKE_SOURCE_DIR}/lib/antlr4")
-
+find_library(ANTLR4_LIB antlr4-runtime REQUIRED)
 file(GLOB_RECURSE SOURCES "src/*.cpp" "include/*.cpp")
 list(APPEND SOURCES "main.cpp")
 
 add_executable(botfather ${SOURCES})
 
 file(GLOB LIB_FILES "${CMAKE_SOURCE_DIR}/lib/*.so*")
-message(STATUS "lib=${LIB_FILES}")
+message(STATUS "LIB_FILES=${LIB_FILES}")
+
+message(STATUS "ANTLR4_LIB=${ANTLR4_LIB}")
+
 target_link_libraries(botfather
     Boost::system
     OpenSSL::SSL
@@ -47,8 +48,8 @@ target_link_libraries(botfather
     tbb
     -lhiredis
     mysqlcppconn
+    ${ANTLR4_LIB}
     ${LIB_FILES}
-    ${ANTLR4_DIR}/lib/libantlr4-runtime.so
 )
 
 file(GLOB_RECURSE HEADER_DIRS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
@@ -63,10 +64,13 @@ message(STATUS "INCLUDE_DIRS=${INCLUDE_DIRS}")
 file(GLOB EXTERNAL_INCLUDE "${CMAKE_SOURCE_DIR}/external_include/*")
 message(STATUS "EXTERNAL_INCLUDE=${EXTERNAL_INCLUDE}")
 
+file(GLOB LOCAL_INCLUDE_PATHS "/usr/local/include/*")
+message(STATUS "LOCAL_INCLUDE_PATHS=${LOCAL_INCLUDE_PATHS}")
+
 target_include_directories(botfather PRIVATE
     ${INCLUDE_DIRS}
     ${EXTERNAL_INCLUDE}
-    ${ANTLR4_DIR}/include/antlr4-runtime
+    ${LOCAL_INCLUDE_PATHS}
 )
 
 set_target_properties(botfather PROPERTIES
