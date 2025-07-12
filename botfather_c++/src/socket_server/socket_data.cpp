@@ -318,11 +318,16 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                                     lock_guard<mutex> lock(mMutex);
                                     RateData &smaller = data[symbol + "_" + timeframes[m]];
                                     int size = smaller.startTime.size();
+                                    if(size == 0 || smaller.startTime.back() > rateData.startTime[0]) {
+                                        rateData = getOHLCV(symbol, tf, MAX_CANDLE);
+                                        cnt++;
+                                        break;
+                                    }
+
                                     int l = 0;
-                                    while(l < size && smaller.startTime[l] >= rateData.startTime[0]) {
+                                    while(l < size && smaller.startTime[l] > rateData.startTime[0]) {
                                         l++;
                                     }
-                                    l--;
                                     while(l >= 0){
                                         long long startTime = smaller.startTime[l];
                                         double open = smaller.open[l];
