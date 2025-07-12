@@ -43,7 +43,21 @@ function isValidRates(rates: Array<RateData>): boolean {
 
 async function getOHLCV(broker: string, symbol: string, timeframe: string, limit: number, since?: number): Promise<Array<RateData>> {
     const key = `${broker}_${symbol}_${timeframe}`;
-    const data: Array<RateData> = (await redis.getArray(key)).map(item => JSON.parse(item));
+    const data: Array<RateData> = (await redis.getArray(key)).map(item => {
+        // item: startTime_open_high_low_close_volume
+        const rate = item.split('_');
+        return {
+            symbol: symbol,
+            interval: timeframe,
+            startTime: parseInt(rate[0]),
+            open: parseFloat(rate[1]),
+            high: parseFloat(rate[2]),
+            low: parseFloat(rate[3]),
+            close: parseFloat(rate[4]),
+            volume: parseFloat(rate[5]),
+            isFinal: true
+        };
+    });
 
     if (isValidRates(data)) {
         while (since && data.length > 0 && data.at(-1)!.startTime < since) {

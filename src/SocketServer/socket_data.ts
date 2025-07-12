@@ -174,7 +174,22 @@ export class SocketData {
         res.fromCache = false;
         const key = `${this.broker}_${symbol}_${timeframe}`;
 
-        const rates: Array<RateData> = (await redis.getArray(key)).map(item => JSON.parse(item));
+        const rates: Array<RateData> = (await redis.getArray(key)).map(item => {
+            // item: startTime_open_high_low_close_volume
+            const rate = item.split('_');
+            return {
+                symbol: symbol,
+                interval: timeframe,
+                startTime: parseInt(rate[0]),
+                open: parseFloat(rate[1]),
+                high: parseFloat(rate[2]),
+                low: parseFloat(rate[3]),
+                close: parseFloat(rate[4]),
+                volume: parseFloat(rate[5]),
+                isFinal: true
+            };
+        });
+
         for (const item of rates) {
             item.isFinal = true;
             item.cached = true;
@@ -220,7 +235,7 @@ export class SocketData {
                 if (!rate.cached) {
                     rate.cached = true;
                     cnt++;
-                    await redis.pushFront(key, JSON.stringify(rate));
+                    await redis.pushFront(key, `${rate.startTime}_${rate.open}_${rate.high}_${rate.low}_${rate.close}_${rate.volume}`);
                 }
             }
             let cntRemove = 0;
