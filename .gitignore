@@ -152,3 +152,4 @@ js/temp.txt
 /botfather_c++/src/common/generated
 /build
 /botfather_c++/lib/antlr4
+/botfather_c++/lib/socket.io-client-cpp
