@@ -47,6 +47,8 @@ $ sudo apt-get install -y \
     ccache \
     libhiredis-dev \
     libmysqlcppconn-dev \
+    rapidjson-dev \
+    libasio-dev \
     redis-server
 
 # Set timezone (optional)

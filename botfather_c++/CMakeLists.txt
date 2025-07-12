@@ -29,7 +29,11 @@ endif()
 #include lib
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(OpenSSL REQUIRED)
+
 find_library(ANTLR4_LIB antlr4-runtime REQUIRED)
+find_library(SIOCLIENT_LIB sioclient REQUIRED)
+find_library(SIOCLIENT_TLS_LIB sioclient_tls REQUIRED)
+
 file(GLOB_RECURSE SOURCES "src/*.cpp" "include/*.cpp")
 list(APPEND SOURCES "main.cpp")
 
@@ -50,6 +54,8 @@ target_link_libraries(botfather
     mysqlcppconn
     ${ANTLR4_LIB}
     ${LIB_FILES}
+    ${SIOCLIENT_LIB}
+    ${SIOCLIENT_TLS_LIB}
 )
 
 file(GLOB_RECURSE HEADER_DIRS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
@@ -69,6 +75,7 @@ set(LOCAL_INCLUDE_PATHS "/usr/local/include")
 target_include_directories(botfather PRIVATE
     ${INCLUDE_DIRS}
     ${EXTERNAL_INCLUDE}
+    ${LOCAL_INCLUDE_PATHS}
     ${LOCAL_INCLUDE_PATHS}/antlr4-runtime
 )
 
