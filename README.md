@@ -18,7 +18,7 @@ A flexible, extensible C++ framework for building high-performance trading bots 
 
 ## 🖥️ Requirements
 
-- Linux or WSL 2
+- Ubuntu 24.04+ or WSL 2 (Ubuntu 24.04+)
 - CMake ≥ 3.15
 - g++ ≥ 9
 - MySQL >= 8
