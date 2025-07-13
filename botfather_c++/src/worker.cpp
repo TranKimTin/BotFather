@@ -1,7 +1,7 @@
 #include "worker.h"
 #include "custom_indicator.h"
 #include "util.h"
-#include "Timer.h"
+#include "timer.h"
 #include "expr.h"
 #include "mysql_connector.h"
 #include "telegram.h"

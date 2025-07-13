@@ -1,7 +1,7 @@
 #include "expr.h"
 #include "util.h"
 #include "custom_indicator.h"
-#include "Timer.h"
+#include "timer.h"
 
 any Expr::visitNumber(ExprParser::NumberContext *ctx)
 {
