@@ -127,6 +127,60 @@ $ cd ..
 $ sudo sh build.sh
 ```
 
+## Setup nginx
+
+```bash
+$ sudo apt-get install nginx -y
+
+# Check status
+$ sudo systemctl status nginx
+
+# Forward port
+$ sudo nano /etc/nginx/sites-available/domain.configserver 
+# Change 
+{
+    listen 80;
+    server_name yourdomain.com;
+
+    location / {
+        proxy_pass http://localhost:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+server {
+    listen 80;
+    server_name www.yourdomain.com;
+
+    location / {
+        proxy_pass http://localhost:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+# for https
+server {
+    listen 443;
+    server_name www.yourdomain.com;
+
+    location / {
+        proxy_pass http://localhost:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+$ sudo ln -s /etc/nginx/sites-available/domain.config /etc/nginx/sites-enabled/domain.config
+$ sudo service nginx configtest
+$ sudo service nginx restart
+```
+
 ## 📬 Contact
 
 Author: **Tran Kim Tin**  
