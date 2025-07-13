@@ -34,7 +34,7 @@ find_library(ANTLR4_LIB antlr4-runtime REQUIRED)
 find_library(SIOCLIENT_LIB sioclient REQUIRED)
 find_library(SIOCLIENT_TLS_LIB sioclient_tls REQUIRED)
 
-file(GLOB_RECURSE SOURCES "src/*.cpp" "include/*.cpp")
+file(GLOB_RECURSE SOURCES "src/*.cpp" "include/common/generated/*.cpp")
 list(APPEND SOURCES "main.cpp")
 
 add_executable(botfather ${SOURCES})
