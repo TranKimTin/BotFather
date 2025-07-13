@@ -1,14 +1,17 @@
 #pragma once
 #include "common_type.h"
 
-class Axios
-{
+class Axios {
 public:
-    static string get(string url);
-    static string post(string url, const string &body, const string &content_type = "application/json");
-    static string put(string url, const string &body, const string &content_type = "application/json");
-    static string del(string url);
-
-private:
-    static string request(const string &method, const string &url, const string &body, const string &content_type = "");
+    static std::string get(const std::string &url);
+    static std::string post(const std::string &url,
+                            const std::string &body,
+                            const std::string &contentType,
+                            const std::vector<std::string> &headers = {});
+    static std::string put(const std::string &url,
+                           const std::string &body,
+                           const std::string &contentType,
+                           const std::vector<std::string> &headers = {});
+    static std::string del(const std::string &url,
+                           const std::vector<std::string> &headers = {});
 };

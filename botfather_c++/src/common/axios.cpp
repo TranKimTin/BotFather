@@ -3,79 +3,101 @@
 
 using namespace std;
 
-string Axios::get(string url)
-{
-    return request("GET", url, "");
-}
-
-string Axios::post(string url, const string &body, const string &content_type)
-{
-    return request("POST", url, body, content_type);
-}
-
-string Axios::put(string url, const string &body, const string &content_type)
-{
-    return request("PUT", url, body, content_type);
-}
-
-string Axios::del(string url)
-{
-    return request("DELETE", url, "");
-}
-
-string Axios::request(const string &method, const string &url, const string &body, const string &content_type)
+static void parseUrl(const string &url, string &host, string &path)
 {
     const string https_prefix = "https://";
     if (url.find(https_prefix) != 0)
-    {
         throw invalid_argument("Only HTTPS URLs are supported.");
-    }
 
     string host_and_path = url.substr(https_prefix.size());
     size_t slash_pos = host_and_path.find('/');
     if (slash_pos == string::npos)
-    {
         throw invalid_argument("Invalid URL format.");
-    }
 
-    string host = host_and_path.substr(0, slash_pos);
-    string path = "/" + host_and_path.substr(slash_pos + 1);
+    host = host_and_path.substr(0, slash_pos);
+    path = "/" + host_and_path.substr(slash_pos + 1);
+}
+
+static httplib::Headers convertHeaders(const vector<string> &headerStrings)
+{
+    httplib::Headers headers;
+    for (const auto &line : headerStrings)
+    {
+        auto pos = line.find(':');
+        if (pos != string::npos)
+        {
+            string key = line.substr(0, pos);
+            string value = line.substr(pos + 1);
+            while (!value.empty() && value[0] == ' ')
+                value.erase(0, 1);
+            headers.emplace(key, value);
+        }
+    }
+    return headers;
+}
+
+string Axios::get(const string &url)
+{
+    string host, path;
+    parseUrl(url, host, path);
 
     httplib::SSLClient cli(host, 443);
     cli.set_follow_location(true);
 
-    httplib::Result res;
-
-    if (method == "GET")
-    {
-        res = cli.Get(path.c_str());
-    }
-    else if (method == "POST")
-    {
-        res = cli.Post(path.c_str(), body, content_type);
-    }
-    else if (method == "PUT")
-    {
-        res = cli.Put(path.c_str(), body, content_type);
-    }
-    else if (method == "DELETE")
-    {
-        res = cli.Delete(path.c_str());
-    }
-    else
-    {
-        throw invalid_argument("Unsupported HTTP method: " + method);
-    }
-
-    if (res && res->status >= 200 && res->status < 300)
-    {
+    auto res = cli.Get(path.c_str());
+    if (res && res->status == 200)
         return res->body;
-    }
-    else
-    {
-        LOGE("%s request failed: %s. url=%s", method.c_str(),
-             res ? res->reason.c_str() : "No response",
-             url.c_str());
-        throw runtime_error(method + " request failed.");
-    }
+
+    LOGE("[request] GET request failed: %s. url=%s", res ? res->reason.c_str() : "No response", url.c_str());
+    throw runtime_error("GET request failed.");
+}
+
+string Axios::post(const string &url, const string &body,
+                   const string &contentType, const vector<string> &headers)
+{
+    string host, path;
+    parseUrl(url, host, path);
+
+    httplib::SSLClient cli(host, 443);
+    cli.set_follow_location(true);
+
+    auto res = cli.Post(path.c_str(), convertHeaders(headers), body, contentType.c_str());
+    if (res && res->status == 200)
+        return res->body;
+
+    LOGE("[request] POST request failed: reason: %s. body: %s. url=%s", res ? res->reason.c_str() : "No response", url.c_str(), res ? res->body.c_str() : "");
+    throw runtime_error("POST request failed.");
+}
+
+string Axios::put(const string &url, const string &body,
+                  const string &contentType, const vector<string> &headers)
+{
+    string host, path;
+    parseUrl(url, host, path);
+
+    httplib::SSLClient cli(host, 443);
+    cli.set_follow_location(true);
+
+    auto res = cli.Put(path.c_str(), convertHeaders(headers), body, contentType.c_str());
+    if (res && res->status == 200)
+        return res->body;
+
+    LOGE("[request] PUT request failed: %s. url=%s", res ? res->reason.c_str() : "No response", url.c_str());
+    throw runtime_error("PUT request failed.");
+}
+
+string Axios::del(const string &url, const vector<string> &headers)
+{
+    string host, path;
+    parseUrl(url, host, path);
+
+    httplib::SSLClient cli(host, 443);
+    cli.set_follow_location(true);
+
+    auto res = cli.Delete(path.c_str(), convertHeaders(headers));
+    if (res && res->status == 200)
+        return res->body;
+
+    LOGE("[request] DELETE request failed: %s. url=%s", res ? res->reason.c_str() : "No response", url.c_str());
+    throw runtime_error("DELETE request failed.");
 }
