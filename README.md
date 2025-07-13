@@ -138,7 +138,7 @@ $ sudo apt-get install nginx -y
 $ sudo systemctl status nginx
 
 # Forward port
-$ sudo nano /etc/nginx/sites-available/domain.configserver 
+$ sudo nano /etc/nginx/sites-available/domain.config
 # Change 
 {
     listen 80;
