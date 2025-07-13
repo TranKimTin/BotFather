@@ -432,7 +432,7 @@ bool Worker::handleLogic(NodeData &nodeData, Bot &bot)
         }
         else
         {
-            LOGE("No result");
+            LOGE("No result. expr=%s", nodeData.value.c_str());
             return false;
         }
     }
