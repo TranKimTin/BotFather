@@ -7,6 +7,7 @@ import { Server } from "socket.io";
 import http from 'http';
 import { CustomRequest } from '../common/Interface';
 import routes from './routes';
+import Telegram from '../common/telegram';
 
 const app = express();
 const server = http.createServer(app);
@@ -61,3 +62,5 @@ server.listen(port, () => {
                     HTTP server is listening at: ${"localhost"}:${port}
         `);
 });
+
+const telegram = new Telegram(undefined, undefined, true);
