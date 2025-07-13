@@ -75,6 +75,8 @@ mysql> exit;
 # Allow remote access (optional)
 $ sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
 nano> replace "bind-address = 127.0.0.1" to "bind-address = 0.0.0.0"
+nano> change binlog_expire_logs_seconds, slow_query_log, general_log if you need
+
 $ mysql -u root -p
 mysql> CREATE USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'your_strong_password';
 mysql> ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'your_strong_password';
