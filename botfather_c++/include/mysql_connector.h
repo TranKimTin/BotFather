@@ -15,18 +15,24 @@ class MySQLConnector
 public:
     static MySQLConnector &getInstance();
 
-    sql::Connection *getConnection();
+    std::shared_ptr<sql::Connection> acquireConnection();
+    void releaseConnection(std::shared_ptr<sql::Connection> conn);
+
     unique_ptr<sql::ResultSet> executeQuery(const string &query, const vector<any> &params);
     int executeUpdate(const string &query, const vector<any> &params);
-
-private:
-    MySQLConnector(); // constructor private
-    ~MySQLConnector();
-    MySQLConnector(const MySQLConnector &) = delete;
-    MySQLConnector &operator=(const MySQLConnector &) = delete;
     void bindParams(sql::PreparedStatement *stmt, const vector<any> &params);
 
-    sql::mysql::MySQL_Driver *driver;
-    unique_ptr<sql::Connection> conn;
-    mutex connMutex;
+private:
+    MySQLConnector();
+    ~MySQLConnector();
+
+    void initializePool(int size);
+
+    sql::Driver *driver;
+    string host, username, password, database;
+
+    queue<std::shared_ptr<sql::Connection>> pool;
+    mutex poolMutex;
+    condition_variable poolCond;
+    int poolSize = 10;
 };

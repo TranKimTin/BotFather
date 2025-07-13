@@ -5,29 +5,26 @@ MySQLConnector::MySQLConnector()
 {
     try
     {
-        unordered_map<string, string> env = readEnvFile();
-
+        auto env = readEnvFile();
         driver = sql::mysql::get_mysql_driver_instance();
-        string host = "tcp://" + env["MYSQL_HOST"] + ":3306";
-        string username = env["MYSQL_USER"];
-        string password = env["MYSQL_PASSWORD"];
-        string database = env["MYSQL_DATABASE"];
+        host = "tcp://" + env["MYSQL_HOST"] + ":3306";
+        username = env["MYSQL_USER"];
+        password = env["MYSQL_PASSWORD"];
+        database = env["MYSQL_DATABASE"];
 
-        conn = unique_ptr<sql::Connection>(
-            driver->connect(host, username, password));
-        conn->setSchema(database);
-        LOGI("MySQL connection established to %s as %s", host.c_str(), username.c_str());
+        initializePool(poolSize);
+
+        LOGI("MySQL connection pool initialized with %d connections", poolSize);
     }
     catch (sql::SQLException &e)
     {
-        LOGE("MySQL connection failed: %s", e.what());
+        LOGE("MySQL pool init failed: %s", e.what());
     }
 }
 
 MySQLConnector::~MySQLConnector()
 {
-    if (conn)
-        conn->close();
+    // Connections sẽ tự huỷ nhờ shared_ptr
 }
 
 MySQLConnector &MySQLConnector::getInstance()
@@ -36,10 +33,35 @@ MySQLConnector &MySQLConnector::getInstance()
     return instance;
 }
 
-sql::Connection *MySQLConnector::getConnection()
+void MySQLConnector::initializePool(int size)
 {
-    lock_guard<mutex> lock(connMutex);
-    return conn.get();
+    for (int i = 0; i < size; ++i)
+    {
+        auto conn = shared_ptr<sql::Connection>(
+            driver->connect(host, username, password));
+        conn->setSchema(database);
+        pool.push(conn);
+    }
+}
+
+shared_ptr<sql::Connection> MySQLConnector::acquireConnection()
+{
+    unique_lock<mutex> lock(poolMutex);
+    poolCond.wait(lock, [this]
+                  { return !pool.empty(); });
+
+    auto conn = pool.front();
+    pool.pop();
+    return conn;
+}
+
+void MySQLConnector::releaseConnection(shared_ptr<sql::Connection> conn)
+{
+    {
+        lock_guard<mutex> lock(poolMutex);
+        pool.push(conn);
+    }
+    poolCond.notify_one();
 }
 
 void MySQLConnector::bindParams(sql::PreparedStatement *stmt, const vector<any> &params)
@@ -68,38 +90,34 @@ void MySQLConnector::bindParams(sql::PreparedStatement *stmt, const vector<any> 
         else if (val.type() == typeid(nullptr_t))
             stmt->setNull(idx, sql::DataType::UNKNOWN);
         else
-        {
-            throw runtime_error(
-                "Unsupported parameter type at index " + to_string(i) +
-                " (type: " + val.type().name() + ")");
-        }
+            throw runtime_error("Unsupported parameter type at index " + to_string(i) + " (type: " + val.type().name() + ")");
     }
 }
 
 unique_ptr<sql::ResultSet> MySQLConnector::executeQuery(const string &query, const vector<any> &params)
 {
-    lock_guard<mutex> lock(connMutex);
+    auto conn = acquireConnection();
     unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement(query));
-
     bindParams(pstmt.get(), params);
-
-    return unique_ptr<sql::ResultSet>(pstmt->executeQuery());
+    auto result = unique_ptr<sql::ResultSet>(pstmt->executeQuery());
+    releaseConnection(conn);
+    return result;
 }
 
 int MySQLConnector::executeUpdate(const string &query, const vector<any> &params)
 {
-    lock_guard<mutex> lock(connMutex);
     try
     {
+        auto conn = acquireConnection();
         unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement(query));
-
         bindParams(pstmt.get(), params);
-
-        return pstmt->executeUpdate();
+        int affected = pstmt->executeUpdate();
+        releaseConnection(conn);
+        return affected;
     }
     catch (sql::SQLException &e)
     {
         LOGE("MySQL update failed: %s", e.what());
-        return -1; // Indicate failure
+        return -1;
     }
 }
