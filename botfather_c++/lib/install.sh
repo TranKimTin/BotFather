@@ -1,6 +1,12 @@
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_PATH="$0"
+case "$SCRIPT_PATH" in
+  /*) ;;
+  *) SCRIPT_PATH="$(pwd)/$SCRIPT_PATH" ;;
+esac
+
+SCRIPT_DIR=$(dirname "$SCRIPT_PATH")
 cd "$SCRIPT_DIR"
 
 echo "========== Cloning and building ANTLR4 =========="
