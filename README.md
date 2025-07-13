@@ -93,6 +93,8 @@ $ npm install
 $ npm run build
 $ cd botfather_c++/lib
 $ sudo sh install.sh
+$ cd ..
+$ sudo sh build.sh
 ```
 
 ## 📬 Contact
