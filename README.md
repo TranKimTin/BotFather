@@ -49,12 +49,42 @@ $ sudo apt-get install -y \
     libhiredis-dev \
     libmysqlcppconn-dev \
     rapidjson-dev \
-    libasio-dev \
-    redis-server
+    libasio-dev
 
 # Set timezone (optional)
 $ sudo timedatectl set-timezone Asia/Ho_Chi_Minh
 ```
+
+## 📦 Setup local database (optional)
+
+```bash
+# Install redis
+$ sudo apt install redis-server -y
+
+# Set redis password
+$ sudo sed -i "s/^# *requirepass .*$/requirepass yourPasswordHere/" /etc/redis/redis.conf
+$ sudo systemctl restart redis
+
+# Install mysql
+$ sudo apt install mysql-server -y
+$ sudo mysql
+mysql> ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'your_strong_password';
+mysql> FLUSH PRIVILEGES;
+mysql> exit;
+
+# Allow remote access (optional)
+$ sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
+nano> replace "bind-address = 127.0.0.1" to "bind-address = 0.0.0.0"
+$ mysql -u root -p
+mysql> CREATE USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'your_strong_password';
+mysql> ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'your_strong_password';
+mysql> GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+mysql> FLUSH PRIVILEGES;
+mysql> exit;
+
+# Restart mysql
+$ sudo systemctl restart mysql
+``
 
 ## 📂 Environment Variables
 
