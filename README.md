@@ -22,7 +22,8 @@ A flexible, extensible C++ framework for building high-performance trading bots 
 - CMake ≥ 3.15
 - g++ ≥ 9
 - MySQL >= 8
-- NodeJS >= 8
+- NodeJS >= 18
+- TypeScript >=5
 - Redis >= 5
 - OpenJDK >= 11
 
