@@ -432,7 +432,7 @@ bool Worker::handleLogic(NodeData &nodeData, Bot &bot)
         }
         else
         {
-            LOGE("No result. expr=%s", nodeData.value.c_str());
+            LOGE("No result. symbol: %s:%s, timeframe: %s, expr=%s", broker.c_str(), symbol(), timeframe.c_str(), nodeData.value.c_str());
             return false;
         }
     }
