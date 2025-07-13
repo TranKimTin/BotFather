@@ -1,5 +1,8 @@
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
 echo "========== Cloning and building ANTLR4 =========="
 if [ ! -d "antlr4" ]; then
   echo "Cloning ANTLR4..."

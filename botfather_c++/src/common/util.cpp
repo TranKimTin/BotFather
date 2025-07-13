@@ -11,7 +11,7 @@ string toLowerCase(string str)
     return str;
 }
 
-string trim(const string& s)
+string trim(const string &s)
 {
     auto start = find_if_not(s.begin(), s.end(), ::isspace);
     auto end = find_if_not(s.rbegin(), s.rend(), ::isspace).base();
@@ -157,7 +157,26 @@ long long getCurrentTime()
 
 unordered_map<string, string> readEnvFile()
 {
-    ifstream file(".env");
+    char exePath[PATH_MAX];
+    ssize_t len = readlink("/proc/self/exe", exePath, sizeof(exePath) - 1);
+    if (len == -1)
+    {
+        LOGE("readlink failed");
+        throw "readlink failed";
+    }
+    exePath[len] = '\0';
+
+    filesystem::path exeDir = filesystem::path(exePath).parent_path();
+    filesystem::path envPath = exeDir / ".." / ".." / ".env";
+    envPath = envPath.lexically_normal();
+
+    ifstream file(envPath);
+    if (!file)
+    {
+        cerr << ".env not found: " << envPath << endl;
+        throw runtime_error(".env not found");
+    }
+
     unordered_map<string, string> envMap;
     string line;
 
