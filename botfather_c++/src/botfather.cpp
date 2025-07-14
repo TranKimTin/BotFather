@@ -27,9 +27,14 @@ void test()
 
     const string API_KEY = env["API_KEY"];
     const string SECRET_KEY = env["SECRET_KEY"];
-    
+
     BinanceFuture binance(API_KEY, SECRET_KEY);
-    binance.sellLimit("BTCUSDT", "0.01", "130000", "100000", "100000");
+    binance.buyMarket("BTCUSDT", "0.01", "119100", "118900");
+
+    while (true)
+    {
+        SLEEP_FOR(1000);
+    }
 }
 #endif
 

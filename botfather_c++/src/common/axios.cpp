@@ -36,7 +36,7 @@ static httplib::Headers convertHeaders(const vector<string> &headerStrings)
     return headers;
 }
 
-string Axios::get(const string &url)
+string Axios::get(const string &url, const vector<string> &headers)
 {
     string host, path;
     parseUrl(url, host, path);
@@ -44,7 +44,9 @@ string Axios::get(const string &url)
     httplib::SSLClient cli(host, 443);
     cli.set_follow_location(true);
 
-    auto res = cli.Get(path.c_str());
+    httplib::Headers header = convertHeaders(headers);
+
+    auto res = cli.Get(path.c_str(), header);
     if (res && res->status == 200)
         return res->body;
 

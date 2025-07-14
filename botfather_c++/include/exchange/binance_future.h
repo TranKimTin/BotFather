@@ -8,17 +8,12 @@ class BinanceFuture : public IExchange
 public:
     BinanceFuture(const string &apiKey, const string &secretKey);
 
-    string buyMarket(const string &symbol, string quantity,
-                     string takeProfit = "", string stopLoss = "") override;
-
-    string sellMarket(const string &symbol, string quantity,
-                      string takeProfit = "", string stopLoss = "") override;
-
-    string buyLimit(const string &symbol, string quantity, string price,
-                    string takeProfit = "", string stopLoss = "") override;
-
-    string sellLimit(const string &symbol, string quantity, string price,
-                     string takeProfit = "", string stopLoss = "") override;
+    string buyMarket(const string &symbol, string quantity, string takeProfit = "", string stopLoss = "") override;
+    string sellMarket(const string &symbol, string quantity, string takeProfit = "", string stopLoss = "") override;
+    string buyLimit(const string &symbol, string quantity, string price, string takeProfit = "", string stopLoss = "") override;
+    string sellLimit(const string &symbol, string quantity, string price, string takeProfit = "", string stopLoss = "") override;
+    string getOrderStatus(const string &symbol, const string &orderId) override;
+    string cancelOrderByClientId(const string &symbol, const string &clientOrderId) override;
 
 private:
     string apiKey;
@@ -29,7 +24,6 @@ private:
     string sendOrder(const map<string, string> &params);
     string buildQuery(const map<string, string> &params);
     string sign(const string &query);
-    string cancelOrderByClientId(const string &symbol, const string &clientOrderId);
 
     string sendTPorSL(const string &symbol,
                       const string &side,

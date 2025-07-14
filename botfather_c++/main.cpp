@@ -3,6 +3,7 @@
 #include "util.h"
 #include "mysql_connector.h"
 #include "telegram.h"
+#include "order_monitor.h"
 
 using namespace std;
 
@@ -10,6 +11,7 @@ void init()
 {
     MySQLConnector::getInstance();
     Telegram::getInstance();
+    startOrderMonitor();
 }
 
 void destroy()
