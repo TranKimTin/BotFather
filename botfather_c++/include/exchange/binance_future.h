@@ -23,10 +23,13 @@ public:
 private:
     string apiKey;
     string secretKey;
+    // string BASE_URL = "https://fapi.binance.com";
+    string BASE_URL = "https://testnet.binancefuture.com";
 
     string sendOrder(const map<string, string> &params);
     string buildQuery(const map<string, string> &params);
     string sign(const string &query);
+    string cancelOrderByClientId(const string &symbol, const string &clientOrderId);
 
     string sendTPorSL(const string &symbol,
                       const string &side,

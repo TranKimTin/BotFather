@@ -10,19 +10,52 @@ BinanceFuture::BinanceFuture(const string &apiKey, const string &secretKey)
 string BinanceFuture::buyMarket(const string &symbol, string quantity,
                                 string takeProfit, string stopLoss)
 {
+    string clientOrderId = StringFormat("BF_BM_%s_%lld", symbol.c_str(), getCurrentTime());
     map<string, string> params = {
         {"recvWindow", "5000"},
         {"symbol", symbol},
         {"side", "BUY"},
         {"type", "MARKET"},
         {"quantity", quantity},
+        {"newClientOrderId", clientOrderId},
         {"timestamp", to_string(getCurrentTime())}};
 
     string res = sendOrder(params);
+    if (res == "")
+        return res;
+
+    string tpID;
+
     if (!takeProfit.empty())
-        sendTPorSL(symbol, "SELL", "TAKE_PROFIT_MARKET", quantity, takeProfit);
+    {
+        string resTP = sendTPorSL(symbol, "SELL", "TAKE_PROFIT_MARKET", quantity, takeProfit);
+        if (resTP == "")
+        {
+            LOGI("Place TP error. Close position");
+            return sellMarket(symbol, quantity, "", "");
+        }
+        else
+        {
+            json j = json::parse(resTP);
+            tpID = j["clientOrderId"].get<string>();
+            LOGI("TP order id: %s", tpID.c_str());
+        }
+    }
     if (!stopLoss.empty())
-        sendTPorSL(symbol, "SELL", "STOP_MARKET", quantity, stopLoss);
+    {
+        string resSL = sendTPorSL(symbol, "SELL", "STOP_MARKET", quantity, stopLoss);
+        if (resSL == "")
+        {
+            LOGI("Place SL error");
+            if (!tpID.empty())
+            {
+                LOGI("Cancel TP order %s", tpID.c_str());
+                cancelOrderByClientId(symbol, tpID);
+            }
+            LOGI("Close position");
+            return sellMarket(symbol, quantity, "", "");
+        }
+    }
     return res;
 }
 
@@ -38,16 +71,47 @@ string BinanceFuture::sellMarket(const string &symbol, string quantity,
         {"timestamp", to_string(getCurrentTime())}};
 
     string res = sendOrder(params);
+    if (res == "")
+        return res;
+
+    string tpID;
     if (!takeProfit.empty())
-        sendTPorSL(symbol, "BUY", "TAKE_PROFIT_MARKET", quantity, takeProfit);
+    {
+        string resTP = sendTPorSL(symbol, "BUY", "TAKE_PROFIT_MARKET", quantity, takeProfit);
+        if (resTP == "")
+        {
+            LOGI("Place TP error. Close position");
+            return buyMarket(symbol, quantity, "", "");
+        }
+        else
+        {
+            json j = json::parse(resTP);
+            tpID = j["clientOrderId"].get<string>();
+            LOGI("TP order id: %s", tpID.c_str());
+        }
+    }
     if (!stopLoss.empty())
-        sendTPorSL(symbol, "BUY", "STOP_MARKET", quantity, stopLoss);
+    {
+        string resSL = sendTPorSL(symbol, "BUY", "STOP_MARKET", quantity, stopLoss);
+        if (resSL == "")
+        {
+            LOGI("Place SL error");
+            if (!tpID.empty())
+            {
+                LOGI("Cancel TP order %s", tpID.c_str());
+                cancelOrderByClientId(symbol, tpID);
+            }
+            LOGI("Close position");
+            return buyMarket(symbol, quantity, "", "");
+        }
+    }
     return res;
 }
 
 string BinanceFuture::buyLimit(const string &symbol, string quantity, string price,
                                string takeProfit, string stopLoss)
 {
+    string clientOrderId = StringFormat("BF_BL_%s_%lld", symbol.c_str(), getCurrentTime());
     map<string, string> params = {
         {"recvWindow", "5000"},
         {"symbol", symbol},
@@ -56,19 +120,67 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
         {"quantity", quantity},
         {"price", price},
         {"timeInForce", "GTC"},
+        {"newClientOrderId", clientOrderId},
         {"timestamp", to_string(getCurrentTime())}};
 
     string res = sendOrder(params);
+    if (res == "")
+        return res;
+
+    string tpID;
+
     if (!takeProfit.empty())
-        sendTPorSL(symbol, "SELL", "TAKE_PROFIT_MARKET", quantity, takeProfit);
+    {
+        string resTP = sendTPorSL(symbol, "SELL", "TAKE_PROFIT_MARKET", quantity, takeProfit);
+        if (resTP == "")
+        {
+            LOGI("Place TP error. Close position");
+            string resCancel = cancelOrderByClientId(symbol, clientOrderId);
+            if (resCancel == "")
+            {
+                LOGI("Cancel order %s error", clientOrderId.c_str());
+                LOGI("Close position");
+                return sellMarket(symbol, quantity, "", "");
+            }
+            return resTP;
+        }
+        else
+        {
+            json j = json::parse(resTP);
+            tpID = j["clientOrderId"].get<string>();
+            LOGI("TP order id: %s", tpID.c_str());
+        }
+    }
+
     if (!stopLoss.empty())
-        sendTPorSL(symbol, "SELL", "STOP_MARKET", quantity, stopLoss);
+    {
+        string resSL = sendTPorSL(symbol, "SELL", "STOP_MARKET", quantity, stopLoss);
+        if (resSL == "")
+        {
+            LOGI("Place SL error");
+            if (!tpID.empty())
+            {
+                LOGI("Cancel TP order %s", tpID.c_str());
+                cancelOrderByClientId(symbol, tpID);
+            }
+
+            LOGI("Close position");
+            string resCancel = cancelOrderByClientId(symbol, clientOrderId);
+            if (resCancel == "")
+            {
+                LOGI("Cancel order %s error", clientOrderId.c_str());
+                return sellMarket(symbol, quantity, "", "");
+            }
+        }
+    }
+
     return res;
 }
 
 string BinanceFuture::sellLimit(const string &symbol, string quantity, string price,
                                 string takeProfit, string stopLoss)
 {
+    string clientOrderId = StringFormat("BF_SL_%s_%lld", symbol.c_str(), getCurrentTime());
     map<string, string> params = {
         {"recvWindow", "5000"},
         {"symbol", symbol},
@@ -77,27 +189,79 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
         {"quantity", quantity},
         {"price", price},
         {"timeInForce", "GTC"},
+        {"newClientOrderId", clientOrderId},
         {"timestamp", to_string(getCurrentTime())}};
 
     string res = sendOrder(params);
+    if (res == "")
+        return res;
+
+    string tpID;
+
     if (!takeProfit.empty())
-        sendTPorSL(symbol, "BUY", "TAKE_PROFIT_MARKET", quantity, takeProfit);
+    {
+        string resTP = sendTPorSL(symbol, "BUY", "TAKE_PROFIT_MARKET", quantity, takeProfit);
+        if (resTP == "")
+        {
+            LOGI("Place TP error. Close position");
+            string resCancel = cancelOrderByClientId(symbol, clientOrderId);
+            if (resCancel == "")
+            {
+                LOGI("Cancel order %s error", clientOrderId.c_str());
+                LOGI("Close position");
+                return buyMarket(symbol, quantity, "", "");
+            }
+            return resTP;
+        }
+        else
+        {
+            json j = json::parse(resTP);
+            tpID = j["clientOrderId"].get<string>();
+            LOGI("TP order id: %s", tpID.c_str());
+        }
+    }
+
     if (!stopLoss.empty())
-        sendTPorSL(symbol, "BUY", "STOP_MARKET", quantity, stopLoss);
+    {
+        string resSL = sendTPorSL(symbol, "BUY", "STOP_MARKET", quantity, stopLoss);
+        if (resSL == "")
+        {
+            LOGI("Place SL error");
+            if (!tpID.empty())
+            {
+                LOGI("Cancel TP order %s", tpID.c_str());
+                cancelOrderByClientId(symbol, tpID);
+            }
+
+            LOGI("Close position");
+            string resCancel = cancelOrderByClientId(symbol, clientOrderId);
+            if (resCancel == "")
+            {
+                LOGI("Cancel order %s error", clientOrderId.c_str());
+                return buyMarket(symbol, quantity, "", "");
+            }
+        }
+    }
     return res;
 }
 
 string BinanceFuture::sendTPorSL(const string &symbol, const string &side,
                                  const string &type, string quantity, string triggerPrice)
 {
+    string clientOrderId = (type == "TAKE_PROFIT_MARKET")
+                               ? StringFormat("BF_TP_%s_%lld", symbol.c_str(), getCurrentTime())
+                               : StringFormat("BF_SL_%s_%lld", symbol.c_str(), getCurrentTime());
+
     map<string, string> params = {
         {"recvWindow", "5000"},
         {"symbol", symbol},
         {"side", side},
         {"type", type},
         {"stopPrice", triggerPrice},
-        {"closePosition", "true"},
+        {"closePosition", "false"},
+        {"reduceOnly", "true"},
         {"quantity", quantity},
+        {"newClientOrderId", clientOrderId},
         {"timestamp", to_string(getCurrentTime())}};
     return sendOrder(params);
 }
@@ -108,10 +272,20 @@ string BinanceFuture::sendOrder(const map<string, string> &params)
     string signature = sign(query);
     query += "&signature=" + signature;
 
-    // string url = "https://fapi.binance.com/fapi/v1/order?" + query;
-    string url = "https://testnet.binancefuture.com/fapi/v1/order?" + query;
+    string url = StringFormat("%s/fapi/v1/order?%s", BASE_URL.c_str(), query.c_str());
 
-    return Axios::post(url, "", "application/json", {"X-MBX-APIKEY: " + apiKey});
+    try
+    {
+        LOGI("Sending order to Binance Future: %s", url.c_str());
+        string res = Axios::post(url, "", "application/json", {"X-MBX-APIKEY: " + apiKey});
+        LOGI("Response from Binance Future: %s", res.c_str());
+        return res;
+    }
+    catch (const exception &e)
+    {
+        LOGE("Error sending order to Binance Future: %s", e.what());
+        return "";
+    }
 }
 
 string BinanceFuture::buildQuery(const map<string, string> &params)
@@ -140,4 +314,31 @@ string BinanceFuture::sign(const string &query)
     for (int i = 0; i < 32; ++i)
         oss << hex << setw(2) << setfill('0') << (int)digest[i];
     return oss.str();
+}
+
+string BinanceFuture::cancelOrderByClientId(const string &symbol, const string &clientOrderId)
+{
+    map<string, string> params = {
+        {"symbol", symbol},
+        {"origClientOrderId", clientOrderId},
+        {"timestamp", to_string(getCurrentTime())}};
+
+    string query = buildQuery(params);
+    string signature = sign(query);
+    query += "&signature=" + signature;
+
+    string url = StringFormat("%s/fapi/v1/order?%s", BASE_URL.c_str(), query.c_str());
+
+    try
+    {
+        LOGI("Cancelling order by client ID on Binance Future: %s", url.c_str());
+        string res = Axios::del(url, {"X-MBX-APIKEY: " + apiKey});
+        LOGI("Response from Binance Future: %s", res.c_str());
+        return res;
+    }
+    catch (const exception &e)
+    {
+        LOGE("Error cancelling order by client ID on Binance Future: %s", e.what());
+        return "";
+    }
 }
