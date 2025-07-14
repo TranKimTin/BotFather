@@ -15,27 +15,21 @@ vector<SocketData *> exchanges;
 vector<thread> threads;
 shared_ptr<vector<shared_ptr<Bot>>> botList;
 
-// #define TEST
+#define TEST
 
 #ifdef TEST
 #include "telegram.h"
+#include "binance_future.h"
+
 void test()
 {
-    string botID = "1833284254";
-    Telegram::getInstance().sendMessage("Hello BotFather! " + toTimeString(getCurrentTime()), botID);
-    Telegram::getInstance().sendMessage("Hello BotFather! " + toTimeString(getCurrentTime()), botID);
-    Telegram::getInstance().sendMessage("Hello BotFather! " + toTimeString(getCurrentTime()), botID);
+    auto env = readEnvFile();
 
-    SLEEP_FOR(2000);
-
-    Telegram::getInstance().sendMessage("Hello BotFather! " + toTimeString(getCurrentTime()), botID);
-    Telegram::getInstance().sendMessage("Hello BotFather! " + toTimeString(getCurrentTime()), botID);
-    Telegram::getInstance().sendMessage("Hello BotFather! " + toTimeString(getCurrentTime()), botID);
-    SLEEP_FOR(200);
-    Telegram::getInstance().sendMessage("Hello BotFather! " + toTimeString(getCurrentTime()), botID);
-    Telegram::getInstance().sendMessage("Hello BotFather! " + toTimeString(getCurrentTime()), botID);
-    Telegram::getInstance().sendMessage("Hello BotFather! " + toTimeString(getCurrentTime()), botID);
-    SLEEP_FOR(5000);
+    const string API_KEY = env["API_KEY"];
+    const string SECRET_KEY = env["SECRET_KEY"];
+    
+    BinanceFuture binance(API_KEY, SECRET_KEY);
+    binance.sellLimit("BTCUSDT", "0.01", "130000", "100000", "100000");
 }
 #endif
 

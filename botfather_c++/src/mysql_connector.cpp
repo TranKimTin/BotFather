@@ -18,7 +18,8 @@ MySQLConnector::MySQLConnector()
     }
     catch (sql::SQLException &e)
     {
-        LOGE("MySQL pool init failed: %s", e.what());
+        LOGE("MySQL pool init failed: %s (SQLState: %s, ErrorCode: %d)",
+             e.what(), e.getSQLStateCStr(), e.getErrorCode());
     }
 }
 
@@ -37,10 +38,16 @@ void MySQLConnector::initializePool(int size)
 {
     for (int i = 0; i < size; ++i)
     {
-        auto conn = shared_ptr<sql::Connection>(
-            driver->connect(host, username, password));
-        conn->setSchema(database);
-        pool.push(conn);
+        sql::Connection *rawConn = driver->connect(host, username, password);
+
+        // ⚠️ Enable automatic reconnect
+        rawConn->setClientOption("OPT_CONNECT_TIMEOUT", "10");
+        rawConn->setClientOption("OPT_READ_TIMEOUT", "20");
+        rawConn->setClientOption("OPT_WRITE_TIMEOUT", "20");
+        rawConn->setClientOption("OPT_RECONNECT", "true");
+
+        rawConn->setSchema(database);
+        pool.push(shared_ptr<sql::Connection>(rawConn));
     }
 }
 
@@ -97,6 +104,16 @@ void MySQLConnector::bindParams(sql::PreparedStatement *stmt, const vector<any> 
 unique_ptr<sql::ResultSet> MySQLConnector::executeQuery(const string &query, const vector<any> &params)
 {
     auto conn = acquireConnection();
+    if (!conn->isValid())
+    {
+        conn.reset(driver->connect(host, username, password));
+        conn->setClientOption("OPT_CONNECT_TIMEOUT", "10");
+        conn->setClientOption("OPT_READ_TIMEOUT", "20");
+        conn->setClientOption("OPT_WRITE_TIMEOUT", "20");
+        conn->setClientOption("OPT_RECONNECT", "true");
+        conn->setSchema(database);
+    }
+
     unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement(query));
     bindParams(pstmt.get(), params);
     auto result = unique_ptr<sql::ResultSet>(pstmt->executeQuery());
@@ -109,6 +126,16 @@ int MySQLConnector::executeUpdate(const string &query, const vector<any> &params
     try
     {
         auto conn = acquireConnection();
+        if (!conn->isValid())
+        {
+            conn.reset(driver->connect(host, username, password));
+            conn->setClientOption("OPT_CONNECT_TIMEOUT", "10");
+            conn->setClientOption("OPT_READ_TIMEOUT", "20");
+            conn->setClientOption("OPT_WRITE_TIMEOUT", "20");
+            conn->setClientOption("OPT_RECONNECT", "true");
+            conn->setSchema(database);
+        }
+
         unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement(query));
         bindParams(pstmt.get(), params);
         int affected = pstmt->executeUpdate();
@@ -117,7 +144,8 @@ int MySQLConnector::executeUpdate(const string &query, const vector<any> &params
     }
     catch (sql::SQLException &e)
     {
-        LOGE("MySQL update failed: %s", e.what());
+        LOGE("MySQL error: %s (SQLState: %s, ErrorCode: %d)",
+             e.what(), e.getSQLStateCStr(), e.getErrorCode());
         return -1;
     }
 }
