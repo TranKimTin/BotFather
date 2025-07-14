@@ -23,8 +23,8 @@ public:
 private:
     string apiKey;
     string secretKey;
-    // string BASE_URL = "https://fapi.binance.com";
-    string BASE_URL = "https://testnet.binancefuture.com";
+    string BASE_URL = "https://fapi.binance.com";
+    // string BASE_URL = "https://testnet.binancefuture.com";
 
     string sendOrder(const map<string, string> &params);
     string buildQuery(const map<string, string> &params);
