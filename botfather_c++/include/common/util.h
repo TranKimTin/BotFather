@@ -3,7 +3,7 @@
 // string
 string toLowerCase(string str);
 string trim(const string& s);
-bool endsWith(const std::string &str, const std::string &suffix);
+bool endsWith(const string &str, const string &suffix);
 bool checkFinal(const string &tf, long long startTime, string &currentTF);
 long long getStartTime(const string &tf, long long currentTime);
 int timeframeToNumberMinutes(const string &tf);
@@ -35,3 +35,9 @@ unordered_map<string, Digit> getBinanceFutureDigits();
 unordered_map<string, Digit> getBybitDigits();
 unordered_map<string, Digit> getBybitFutureDigits();
 unordered_map<string, Digit> getOkxDigits();
+
+string base64Encode(const unsigned char *data, int len);
+vector<unsigned char> base64Decode(const string &input);
+string encryptAES(const string &plaintext, const string &key, const string &iv);
+string decryptAES(const string &ciphertext, const string &key, const string &iv);
+string generateRandomIV();

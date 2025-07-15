@@ -358,8 +358,7 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
     return res;
 }
 
-string BinanceFuture::sendTPorSL(const string &symbol, const string &side,
-                                 const string &type, string quantity, string triggerPrice)
+string BinanceFuture::sendTPorSL(const string &symbol, const string &side, const string &type, string quantity, string triggerPrice)
 {
     string clientOrderId = (type == "TAKE_PROFIT_MARKET")
                                ? StringFormat("BFTP%s%lld", symbol.c_str(), getCurrentTime())

@@ -15,7 +15,7 @@ vector<SocketData *> exchanges;
 vector<thread> threads;
 shared_ptr<vector<shared_ptr<Bot>>> botList;
 
-// #define TEST
+#define TEST
 
 #ifdef TEST
 #include "telegram.h"
@@ -28,8 +28,10 @@ void test()
     const string API_KEY = env["API_KEY"];
     const string SECRET_KEY = env["SECRET_KEY"];
 
-    BinanceFuture binance(API_KEY, SECRET_KEY);
-    binance.buyMarket("BTCUSDT", "0.01", "119100", "118900");
+    LOGD("SECRET_KEY: %s", SECRET_KEY.c_str());
+
+    shared_ptr<BinanceFuture> exchange = make_shared<BinanceFuture>(API_KEY, SECRET_KEY);
+    exchange->buyLimit("BTCUSDT", "0.01", "100000", "101000", "99000");
 
     while (true)
     {
@@ -117,6 +119,9 @@ vector<shared_ptr<Bot>> getBotList(string botName)
         bot->userID = res->getInt("userID");
         bot->timeframes = convertJsonStringArrayToVector(res->getString("timeframes"));
         bot->idTelegram = split(res->getString("idTelegram"), ',');
+        bot->apiKey = res->isNull("apiKey") ? "" : res->getString("apiKey");
+        bot->secretKey = res->isNull("secretKey") ? "" : res->getString("secretKey");
+        bot->iv = res->isNull("iv") ? "" : res->getString("iv");
 
         for (string &id : bot->idTelegram)
         {
