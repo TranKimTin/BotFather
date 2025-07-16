@@ -7,7 +7,7 @@
 static void checkOrderStatus()
 {
     auto &db = MySQLConnector::getInstance();
-    string query = "SELECT id, symbol, tpID, slID FROM RealOrders";
+    string query = "SELECT id, symbol, entryID, tpID, slID FROM RealOrders";
     auto res = db.executeQuery(query, {});
     if (!res)
     {
@@ -22,37 +22,47 @@ static void checkOrderStatus()
     while (res->next())
     {
         int id = res->getInt("id");
+        string entryID = res->getString("entryID");
         string tpID = res->getString("tpID");
         string slID = res->getString("slID");
         string symbol = res->getString("symbol");
 
+        string entryStatus = exchange->getOrderStatus(symbol, entryID);
         string tpStatus = exchange->getOrderStatus(symbol, tpID);
         string slStatus = exchange->getOrderStatus(symbol, slID);
 
-        if (tpStatus.empty() || slStatus.empty())
+        if (entryStatus.empty() || tpStatus.empty() || slStatus.empty())
         {
-            LOGE("Failed to get order status for tpID: %s, slID: %s", tpID.c_str(), slID.c_str());
+            LOGE("Failed to get order status for entryID: %s, tpID: %s, slID: %s", entryID.c_str(), tpID.c_str(), slID.c_str());
             continue;
         }
 
+        json entryJson = json::parse(entryStatus);
         json tpJson = json::parse(tpStatus);
         json slJson = json::parse(slStatus);
 
+        entryStatus = entryJson["status"].get<string>();
         tpStatus = tpJson["status"].get<string>();
         slStatus = slJson["status"].get<string>();
 
-        if (tpStatus != "NEW" && slStatus == "NEW")
+        if (entryStatus == "CANCELED" || tpStatus != "NEW" || slStatus != "NEW")
         {
-            LOGI("TP order %s is filled, cancel SL order %s", tpID.c_str(), slID.c_str());
-            exchange->cancelOrderByClientId(symbol, slID);
-        }
-        else if (tpStatus == "NEW" && slStatus != "NEW")
-        {
-            LOGI("SL order %s is filled, cancel TP order %s", slID.c_str(), tpID.c_str());
-            exchange->cancelOrderByClientId(symbol, tpID);
+            LOGI("Cancel order. entryID=%s(%s), tpID=%s(%s), slID=%s(%s)", entryID.c_str(), entryStatus.c_str(), tpID.c_str(), tpStatus.c_str(), slID.c_str(), slStatus.c_str());
+            if (entryStatus == "NEW")
+            {
+                exchange->cancelOrderByClientId(symbol, entryID);
+            }
+            if (tpStatus == "NEW")
+            {
+                exchange->cancelOrderByClientId(symbol, tpID);
+            }
+            if (slStatus == "NEW")
+            {
+                exchange->cancelOrderByClientId(symbol, slID);
+            }
         }
 
-        if (tpStatus != "NEW" || slStatus != "NEW")
+        if (entryStatus != "NEW" && tpStatus != "NEW" || slStatus != "NEW")
         {
             LOGI("Order %d is completed, deleting from database", id);
             db.executeUpdate("DELETE FROM RealOrders WHERE id = ?", {id});

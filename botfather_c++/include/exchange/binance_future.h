@@ -25,5 +25,7 @@ private:
     string buildQuery(const map<string, string> &params);
     string sign(const string &query);
 
-    string sendTPorSL(const string &symbol, const string &side, const string &type, string quantity, string triggerPrice);
+    string sendTPorSL(const string &symbol, const string &side, const string &type, string quantity, string stopPrice, string limitPrice = "");
+    string placeBuyMarketTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId, string &resEntry);
+    string placeSellMarketTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId, string &resEntry);
 };
