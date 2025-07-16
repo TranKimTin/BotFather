@@ -159,6 +159,9 @@ struct Bot
     vector<string> timeframes;
     string treeData;
     int userID;
+    string apiKey;
+    string secretKey;
+    string iv;
 };
 
 struct Digit

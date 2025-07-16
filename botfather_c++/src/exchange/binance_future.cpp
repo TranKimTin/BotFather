@@ -25,6 +25,11 @@ string BinanceFuture::buyMarket(const string &symbol, string quantity,
     if (res == "")
         return res;
 
+    return placeBuyMarketTPSL(symbol, quantity, takeProfit, stopLoss, clientOrderId, res);
+}
+
+string BinanceFuture::placeBuyMarketTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId, string &resEntry)
+{
     string tpID;
 
     if (!takeProfit.empty())
@@ -84,11 +89,10 @@ string BinanceFuture::buyMarket(const string &symbol, string quantity,
             LOGI("Insert order to database success %s %s %s", clientOrderId.c_str(), tpID.c_str(), slID.c_str());
         }
     }
-    return res;
+    return resEntry;
 }
 
-string BinanceFuture::sellMarket(const string &symbol, string quantity,
-                                 string takeProfit, string stopLoss)
+string BinanceFuture::sellMarket(const string &symbol, string quantity, string takeProfit, string stopLoss)
 {
     string clientOrderId = StringFormat("BFSM%s%lld", symbol.c_str(), getCurrentTime());
     map<string, string> params = {
@@ -104,6 +108,11 @@ string BinanceFuture::sellMarket(const string &symbol, string quantity,
     if (res == "")
         return res;
 
+    return placeSellMarketTPSL(symbol, quantity, takeProfit, stopLoss, clientOrderId, res);
+}
+
+string BinanceFuture::placeSellMarketTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId, string &resEntry)
+{
     string tpID;
     if (!takeProfit.empty())
     {
@@ -163,11 +172,10 @@ string BinanceFuture::sellMarket(const string &symbol, string quantity,
             LOGI("Insert order to database success %s %s %s", clientOrderId.c_str(), tpID.c_str(), slID.c_str());
         }
     }
-    return res;
+    return resEntry;
 }
 
-string BinanceFuture::buyLimit(const string &symbol, string quantity, string price,
-                               string takeProfit, string stopLoss)
+string BinanceFuture::buyLimit(const string &symbol, string quantity, string price, string takeProfit, string stopLoss)
 {
     string clientOrderId = StringFormat("BFBL%s%lld", symbol.c_str(), getCurrentTime());
     map<string, string> params = {
@@ -185,11 +193,22 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
     if (res == "")
         return res;
 
+    string resEntry = getOrderStatus(symbol, clientOrderId);
+    if (resEntry.empty())
+        return resEntry;
+
+    json entryJson = json::parse(resEntry);
+    string entryStatus = entryJson["status"].get<string>();
+    if (entryStatus != "NEW")
+    {
+        LOGI("Entry match immediately");
+    }
+
     string tpID;
 
     if (!takeProfit.empty())
     {
-        string resTP = sendTPorSL(symbol, "SELL", "TAKE_PROFIT_MARKET", quantity, takeProfit);
+        string resTP = sendTPorSL(symbol, "SELL", "STOP", quantity, price, takeProfit);
         if (resTP == "")
         {
             LOGI("Place TP error. Close position");
@@ -282,11 +301,23 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
     if (res == "")
         return res;
 
+    string resEntry = getOrderStatus(symbol, clientOrderId);
+    if (resEntry.empty())
+        return resEntry;
+
+    json entryJson = json::parse(resEntry);
+    string entryStatus = entryJson["status"].get<string>();
+    if (entryStatus != "NEW")
+    {
+        LOGI("Entry match immediately");
+        return placeSellMarketTPSL(symbol, quantity, takeProfit, stopLoss, clientOrderId, resEntry);
+    }
+
     string tpID;
 
     if (!takeProfit.empty())
     {
-        string resTP = sendTPorSL(symbol, "BUY", "TAKE_PROFIT_MARKET", quantity, takeProfit);
+        string resTP = sendTPorSL(symbol, "BUY", "STOP", quantity, price, takeProfit);
         if (resTP == "")
         {
             LOGI("Place TP error. Close position");
@@ -358,10 +389,9 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
     return res;
 }
 
-string BinanceFuture::sendTPorSL(const string &symbol, const string &side,
-                                 const string &type, string quantity, string triggerPrice)
+string BinanceFuture::sendTPorSL(const string &symbol, const string &side, const string &type, string quantity, string stopPrice, string limitPrice)
 {
-    string clientOrderId = (type == "TAKE_PROFIT_MARKET")
+    string clientOrderId = (type == "TAKE_PROFIT_MARKET" || type == "STOP")
                                ? StringFormat("BFTP%s%lld", symbol.c_str(), getCurrentTime())
                                : StringFormat("BFSL%s%lld", symbol.c_str(), getCurrentTime());
 
@@ -370,12 +400,17 @@ string BinanceFuture::sendTPorSL(const string &symbol, const string &side,
         {"symbol", symbol},
         {"side", side},
         {"type", type},
-        {"stopPrice", triggerPrice},
+        {"stopPrice", stopPrice},
         {"closePosition", "false"},
         {"reduceOnly", "true"},
         {"quantity", quantity},
         {"newClientOrderId", clientOrderId},
         {"timestamp", to_string(getCurrentTime())}};
+
+    if (type == "STOP")
+    {
+        params["price"] = limitPrice;
+    }
     return sendOrder(params);
 }
 
