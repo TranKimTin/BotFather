@@ -202,6 +202,7 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
     if (entryStatus != "NEW")
     {
         LOGI("Entry match immediately");
+        return placeBuyMarketTPSL(symbol, quantity, takeProfit, stopLoss, clientOrderId, resEntry);
     }
 
     string tpID;
@@ -282,8 +283,7 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
     return res;
 }
 
-string BinanceFuture::sellLimit(const string &symbol, string quantity, string price,
-                                string takeProfit, string stopLoss)
+string BinanceFuture::sellLimit(const string &symbol, string quantity, string price, string takeProfit, string stopLoss)
 {
     string clientOrderId = StringFormat("BFSL%s%lld", symbol.c_str(), getCurrentTime());
     map<string, string> params = {
