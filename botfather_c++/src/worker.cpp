@@ -508,7 +508,7 @@ bool Worker::handleLogic(NodeData &nodeData, Bot &bot)
             {
                 if (compareStringNumber(node.tp, node.entry) > 0 && compareStringNumber(node.sl, node.entry) < 0)
                 {
-                    exchange->buyLimit(symbol, node.volume, node.entry, node.tp, node.sl);
+                    exchange->buyLimit(symbol, node.volume, node.entry, node.tp, node.sl, node.expiredTime);
                 }
                 else
                 {
@@ -530,7 +530,7 @@ bool Worker::handleLogic(NodeData &nodeData, Bot &bot)
             {
                 if (compareStringNumber(node.tp, node.entry) < 0 && compareStringNumber(node.sl, node.entry) > 0)
                 {
-                    exchange->sellLimit(symbol, node.volume, node.entry, node.tp, node.sl);
+                    exchange->sellLimit(symbol, node.volume, node.entry, node.tp, node.sl, node.expiredTime);
                 }
                 else
                 {

@@ -22,6 +22,7 @@
 
 #include <websocketpp/config/asio_client.hpp>
 #include <websocketpp/client.hpp>
+#include <boost/interprocess/sync/interprocess_semaphore.hpp>
 #include <boost/asio/ssl/context.hpp>
 #include <boost/asio/ssl.hpp>
 #include <nlohmann/json.hpp>

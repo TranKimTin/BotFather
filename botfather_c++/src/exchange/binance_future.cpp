@@ -175,7 +175,7 @@ string BinanceFuture::placeSellMarketTPSL(const string &symbol, string &quantity
     return resEntry;
 }
 
-string BinanceFuture::buyLimit(const string &symbol, string quantity, string price, string takeProfit, string stopLoss)
+string BinanceFuture::buyLimit(const string &symbol, string quantity, string price, string takeProfit, string stopLoss, string expiredTime)
 {
     string clientOrderId = StringFormat("BFBL%s%lld", symbol.c_str(), getCurrentTime());
     map<string, string> params = {
@@ -188,6 +188,12 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
         {"timeInForce", "GTC"},
         {"newClientOrderId", clientOrderId},
         {"timestamp", to_string(getCurrentTime())}};
+
+    if (!expiredTime.empty() && expiredTime != "0")
+    {
+        params["timeInForce"] = "GTD";
+        params["goodTillDate"] = expiredTime;
+    }
 
     string res = sendOrder(params);
     if (res == "")
@@ -283,7 +289,7 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
     return res;
 }
 
-string BinanceFuture::sellLimit(const string &symbol, string quantity, string price, string takeProfit, string stopLoss)
+string BinanceFuture::sellLimit(const string &symbol, string quantity, string price, string takeProfit, string stopLoss, string expiredTime)
 {
     string clientOrderId = StringFormat("BFSL%s%lld", symbol.c_str(), getCurrentTime());
     map<string, string> params = {
@@ -296,6 +302,12 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
         {"timeInForce", "GTC"},
         {"newClientOrderId", clientOrderId},
         {"timestamp", to_string(getCurrentTime())}};
+
+    if (!expiredTime.empty() && expiredTime != "0")
+    {
+        params["timeInForce"] = "GTD";
+        params["goodTillDate"] = expiredTime;
+    }
 
     string res = sendOrder(params);
     if (res == "")

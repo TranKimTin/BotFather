@@ -10,8 +10,8 @@ public:
 
     string buyMarket(const string &symbol, string quantity, string takeProfit = "", string stopLoss = "") override;
     string sellMarket(const string &symbol, string quantity, string takeProfit = "", string stopLoss = "") override;
-    string buyLimit(const string &symbol, string quantity, string price, string takeProfit = "", string stopLoss = "") override;
-    string sellLimit(const string &symbol, string quantity, string price, string takeProfit = "", string stopLoss = "") override;
+    string buyLimit(const string &symbol, string quantity, string price, string takeProfit = "", string stopLoss = "", string expiredTime = "") override;
+    string sellLimit(const string &symbol, string quantity, string price, string takeProfit = "", string stopLoss = "", string expiredTime = "") override;
     string getOrderStatus(const string &symbol, const string &orderId) override;
     string cancelOrderByClientId(const string &symbol, const string &clientOrderId) override;
 
