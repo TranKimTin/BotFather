@@ -19,6 +19,11 @@ static void checkOrderStatus()
     const string SECRET_KEY = env["SECRET_KEY"];
     shared_ptr<IExchange> exchange = make_shared<BinanceFuture>(API_KEY, SECRET_KEY);
 
+    const int MAX_THREAD = 10;
+    mutex dbMutex;
+    boost::interprocess::interprocess_semaphore semaphore(MAX_THREAD);
+    vector<thread> threads;
+
     while (res->next())
     {
         int id = res->getInt("id");
@@ -27,45 +32,64 @@ static void checkOrderStatus()
         string slID = res->getString("slID");
         string symbol = res->getString("symbol");
 
-        string entryStatus = exchange->getOrderStatus(symbol, entryID);
-        string tpStatus = exchange->getOrderStatus(symbol, tpID);
-        string slStatus = exchange->getOrderStatus(symbol, slID);
-
-        if (entryStatus.empty() || tpStatus.empty() || slStatus.empty())
-        {
-            LOGE("Failed to get order status for entryID: %s, tpID: %s, slID: %s", entryID.c_str(), tpID.c_str(), slID.c_str());
-            continue;
-        }
-
-        json entryJson = json::parse(entryStatus);
-        json tpJson = json::parse(tpStatus);
-        json slJson = json::parse(slStatus);
-
-        entryStatus = entryJson["status"].get<string>();
-        tpStatus = tpJson["status"].get<string>();
-        slStatus = slJson["status"].get<string>();
-
-        if (entryStatus == "CANCELED" || tpStatus != "NEW" || slStatus != "NEW")
-        {
-            LOGI("Cancel order. entryID=%s(%s), tpID=%s(%s), slID=%s(%s)", entryID.c_str(), entryStatus.c_str(), tpID.c_str(), tpStatus.c_str(), slID.c_str(), slStatus.c_str());
-            if (entryStatus == "NEW")
+        semaphore.wait();
+        threads.emplace_back([=, &db, &exchange, &semaphore, &dbMutex]()
+                             {
+            try
             {
-                exchange->cancelOrderByClientId(symbol, entryID);
-            }
-            if (tpStatus == "NEW")
-            {
-                exchange->cancelOrderByClientId(symbol, tpID);
-            }
-            if (slStatus == "NEW")
-            {
-                exchange->cancelOrderByClientId(symbol, slID);
-            }
-        }
+                string entryStatus = exchange->getOrderStatus(symbol, entryID);
+                string tpStatus = exchange->getOrderStatus(symbol, tpID);
+                string slStatus = exchange->getOrderStatus(symbol, slID);
 
-        if (entryStatus != "NEW" && tpStatus != "NEW" || slStatus != "NEW")
+                if (entryStatus.empty() || tpStatus.empty() || slStatus.empty())
+                {
+                    LOGE("Failed to get order status for entryID: %s, tpID: %s, slID: %s", entryID.c_str(), tpID.c_str(), slID.c_str());
+                    return;
+                }
+
+                json entryJson = json::parse(entryStatus);
+                json tpJson = json::parse(tpStatus);
+                json slJson = json::parse(slStatus);
+
+                entryStatus = entryJson["status"].get<string>();
+                tpStatus = tpJson["status"].get<string>();
+                slStatus = slJson["status"].get<string>();
+
+                if (entryStatus == "CANCELED" || tpStatus != "NEW" || slStatus != "NEW")
+                {
+                    LOGI("Cancel order. entryID=%s(%s), tpID=%s(%s), slID=%s(%s)", entryID.c_str(), entryStatus.c_str(), tpID.c_str(), tpStatus.c_str(), slID.c_str(), slStatus.c_str());
+                    if (entryStatus == "NEW")
+                    {
+                        exchange->cancelOrderByClientId(symbol, entryID);
+                    }
+                    if (tpStatus == "NEW")
+                    {
+                        exchange->cancelOrderByClientId(symbol, tpID);
+                    }
+                    if (slStatus == "NEW")
+                    {
+                        exchange->cancelOrderByClientId(symbol, slID);
+                    }
+                }
+
+                if (entryStatus != "NEW" && tpStatus != "NEW" || slStatus != "NEW")
+                {
+                    LOGI("Order %d is completed. entryID: %s, tpID: %s, slID: %s", id, entryID.c_str(), tpID.c_str(), slID.c_str());
+                    db.executeUpdate("DELETE FROM RealOrders WHERE id = ?", {id});
+                }
+            }
+            catch (const exception err)
+            {
+                LOGE("Exception in thread: %s", err.what());
+            }
+             semaphore.post(); });
+    }
+
+    for (auto &t : threads)
+    {
+        if (t.joinable())
         {
-            LOGI("Order %d is completed, deleting from database", id);
-            db.executeUpdate("DELETE FROM RealOrders WHERE id = ?", {id});
+            t.join();
         }
     }
 }
@@ -75,7 +99,7 @@ static void run()
     while (true)
     {
         checkOrderStatus();
-        SLEEP_FOR(10000); // Sleep for 10 seconds
+        SLEEP_FOR(10000);
     }
 }
 

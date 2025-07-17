@@ -31,7 +31,7 @@ void test()
     LOGD("SECRET_KEY: %s", SECRET_KEY.c_str());
 
     shared_ptr<BinanceFuture> exchange = make_shared<BinanceFuture>(API_KEY, SECRET_KEY);
-    exchange->buyLimit("BTCUSDT", "0.01", "100000", "101000", "99000");
+    exchange->buyLimit("BTCUSDT", "0.01", "100000", "101000", "99000", to_string(getCurrentTime() + 60000 * 15));
 
     while (true)
     {
