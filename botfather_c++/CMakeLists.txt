@@ -23,7 +23,11 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
     message(STATUS "Build type: Release")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast -flto -funroll-loops -march=native -DNDEBUG")
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
 
+option(DEBUG_LOG "Enable debug mode" OFF)
+if(DEBUG_LOG)
+    add_definitions(-DDEBUG_LOG)
 endif()
 
 #include lib

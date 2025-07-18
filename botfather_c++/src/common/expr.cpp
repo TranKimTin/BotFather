@@ -29,6 +29,11 @@ any Expr::visitInt(ExprParser::IntContext *ctx)
     return stod(ctx->INT()->getText());
 }
 
+any Expr::visitString(ExprParser::StringContext *ctx)
+{
+    return ctx->STRING()->getText();
+}
+
 any Expr::visitNegative(ExprParser::NegativeContext *ctx)
 {
     auto value = visit(ctx->expr());
@@ -827,6 +832,146 @@ any Expr::visitMarsi(ExprParser::MarsiContext *ctx)
 
     int k = to - from + 1;
     return iAvgRSI(period, k, close + from, length - from);
+}
+
+any Expr::visitHour(ExprParser::HourContext *ctx)
+{
+    long long timestamp_ms = startTime[0];
+    long long seconds = timestamp_ms / 1000;
+    long long seconds_in_day = seconds % 86400;
+
+    int hour = seconds_in_day / 3600;
+
+    return hour;
+}
+
+any Expr::visitMinute(ExprParser::MinuteContext *ctx)
+{
+    long long timestamp_ms = startTime[0];
+    long long seconds = timestamp_ms / 1000;
+    long long seconds_in_day = seconds % 86400;
+
+    int hour = seconds_in_day / 3600;
+    int minute = (seconds_in_day % 3600) / 60;
+
+    return minute;
+}
+
+any Expr::visitBullish_engulfing(ExprParser::Bullish_engulfingContext *ctx)
+{
+    auto args = ctx->INT();
+    int shift = args ? stoi(args->getText()) : 0;
+
+    if (shift + 1 >= length)
+    {
+        return {};
+    }
+
+    // Nến trước phải là nến đỏ (giảm)
+    if (close[shift + 1] >= open[shift + 1])
+        return 0.0;
+
+    // Nến hiện tại phải là nến xanh (tăng)
+    if (close[shift] <= open[shift])
+        return 0.0;
+
+    // Thân nến hiện tại phải bao trùm thân nến trước
+    return (open[shift] < close[shift + 1] && close[shift] > open[shift + 1]) ? 1.0 : 0.0;
+}
+any Expr::visitBearish_engulfing(ExprParser::Bearish_engulfingContext *ctx)
+{
+    auto args = ctx->INT();
+    int shift = args ? stoi(args->getText()) : 0;
+
+    if (shift + 1 >= length)
+    {
+        return {};
+    }
+
+    // Nến trước phải là nến xanh (tăng)
+    if (close[shift + 1] <= open[shift + 1])
+        return 0.0;
+
+    // Nến hiện tại phải là nến đỏ (giảm)
+    if (close[shift] >= open[shift])
+        return 0.0;
+
+    // Thân nến hiện tại phải bao trùm thân nến trước
+    return (open[shift] > close[shift + 1] && close[shift] < open[shift + 1]) ? 1.0 : 0.0;
+}
+
+any Expr::visitBullish_hammer(ExprParser::Bullish_hammerContext *ctx)
+{
+    auto args = ctx->INT();
+    int shift = args ? stoi(args->getText()) : 0;
+
+    if (shift >= length)
+        return {};
+
+    double o = open[shift], c = close[shift], h = high[shift], l = low[shift];
+
+    // phải xuất hiện ở cuối xu hướng giảm (đáy của 10 nến gần nhất)
+    double minLow = iMin(10, low + shift, length - shift);
+    if (l > minLow)
+        return {};
+
+    double body = abs(c - o);
+    double lowerWick = min(o, c) - l;
+    double upperWick = h - max(o, c);
+
+    // Tránh chia cho 0
+    if (body == 0)
+        body = 0.0001;
+
+    // bóng dưới ≥ 2 * thân và bóng trên nhỏ
+    return (lowerWick >= 2 * body && upperWick <= body) ? 1.0 : 0.0;
+}
+
+any Expr::visitBearish_hammer(ExprParser::Bearish_hammerContext *ctx)
+{
+    auto args = ctx->INT();
+    int shift = args ? stoi(args->getText()) : 0;
+
+    if (shift >= length)
+        return {};
+
+    double o = open[shift], c = close[shift], h = high[shift], l = low[shift];
+
+    // phải xuất hiện ở cuối xu hướng tăng (đỉnh của 10 nến gần nhất)
+    double maxHigh = iMax(10, high + shift, length - shift);
+    if (h < maxHigh)
+        return {};
+
+    double body = abs(c - o);
+    double lowerWick = min(o, c) - l;
+    double upperWick = h - max(o, c);
+
+    // Tránh chia cho 0
+    if (body == 0)
+        body = 0.0001;
+
+    // bóng dưới ≥ 2 * thân và bóng trên nhỏ
+    return (lowerWick >= 2 * body && upperWick <= body) ? 1.0 : 0.0;
+}
+
+any Expr::visitDoji(ExprParser::DojiContext *ctx)
+{
+    auto args = ctx->INT();
+    int shift = args ? stoi(args->getText()) : 0;
+
+    if (shift >= length)
+        return {};
+
+    double o = open[shift], c = close[shift], h = high[shift], l = low[shift];
+    double range = h - l;
+    double body = abs(c - o);
+
+    // tránh chia 0 nếu range quá nhỏ
+    if (range == 0)
+        return 0.0;
+
+    // thân nhỏ hơn 10% tổng chiều dài nến => doji
+    return (body / range <= 0.1) ? 1.0 : 0.0;
 }
 
 //////////////////////////////////////////////////////////////////

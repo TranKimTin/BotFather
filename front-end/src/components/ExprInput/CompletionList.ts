@@ -44,41 +44,6 @@ export default [
     },
     {
         type: 'function',
-        label: 'broker',
-        detail: '()',
-        apply: 'broker()',
-        boost: 0,
-        info: ` - Tên sàn hiện tại
-                Ví dụ:
-                + broker() = 'binance'
-                + broker() = 'binance_future'
-                `
-    },
-    {
-        type: 'function',
-        label: 'symbol',
-        detail: '()',
-        apply: 'symbol()',
-        boost: 0,
-        info: ` - Tên cặp token hiện tại
-                Ví dụ:
-                + symbol() = 'BTCUSDT'
-                `
-    },
-    {
-        type: 'function',
-        label: 'timeframe',
-        detail: '()',
-        apply: 'timeframe()',
-        boost: 0,
-        info: ` - Khung thời gian hiện tại
-                - Giá trị: '1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'
-                Ví dụ:
-                + timeframe() = '15m'
-                `
-    },
-    {
-        type: 'function',
         label: 'hour',
         detail: '()',
         apply: 'hour()',
@@ -161,18 +126,6 @@ export default [
                 + volume(0) : Khối lượng giao dịch nến 0
                 + volume(1) : Khối lượng giao dịch nến 1
                 + volume(0) * close(0): Khối lượng giao dịch tính theo USDT
-                `
-    },
-    {
-        type: 'function',
-        label: 'volume24h_in_usd',
-        detail: '()',
-        apply: 'volume24h_in_usd()',
-        boost: 0,
-        info: ` - Khối lượng giao dịch trong 24h gần nhất
-                - Đơn vị: token
-                Ví dụ:
-                + volume24h_in_usd()
                 `
     },
     {
@@ -438,20 +391,6 @@ export default [
     },
     {
         type: 'function',
-        label: 'rsi_phan_ki',
-        detail: '(period,...)',
-        apply: 'rsi_phan_ki(0, 0, 0, 0 0, 0, 0)',
-        boost: 0,
-        info: ` - Chỉ báo tự bịa ra, thỏa mãn các điều kiện sau:
-                - downtrend
-                - rsi đáy sau cao hơn đáy trước
-                - giá sau thấp hơn giá trước
-                - tạo đủ numberOfPeaks đáy thỏa mãn
-                - rsi <= 30
-                `
-    },
-    {
-        type: 'function',
         label: 'macd_n_dinh',
         detail: '(fast, slow, signal,...)',
         apply: 'macd_n_dinh(12, 26, 9, 15, 15, 0, 0.5, 0, 0)',
@@ -533,36 +472,6 @@ export default [
     },
     {
         type: 'function',
-        label: 'bullish',
-        detail: '(i)',
-        apply: 'bullish(0)',
-        boost: 0,
-        info: ` - Có xuất hiện một trong các mô hình nến bullish tại nến thứ i không?
-                - Xuất hiện: trả về 1
-                - Không xuất hiện: trả về 0
-                - Các mô hình nến bullish: BullishEngulfingPattern, DownsideTasukiGap, BullishHarami, BullishHaramiCross, MorningDojiStar, MorningStar, BullishMarubozu, PiercingLine, ThreeWhiteSoldiers, BullishHammerStick, BullishInvertedHammerStick, HammerPattern, HammerPatternUnconfirmed, TweezerBottom
-                Ví dụ:
-                + bullish(0) = 1: xuất hiện một trong các mô hình nến bullish tại nến 0
-                + bullish(1) = 0: không xuất hiện một trong các mô hình nến bullish tại nến 1
-                `
-    },
-    {
-        type: 'function',
-        label: 'bearish',
-        detail: '(i)',
-        apply: 'bearish(0)',
-        boost: 0,
-        info: ` - Có xuất hiện một trong các mô hình nến bearish tại nến thứ i không?
-                - Xuất hiện: trả về 1
-                - Không xuất hiện: trả về 0
-                - Các mô hình nến bearish: BearishEngulfingPattern, BearishHarami, BearishHaramiCross, EveningDojiStar, EveningStar, BearishMarubozu, ThreeBlackCrows, BearishHammerStick, BearishInvertedHammerStick, HangingMan, HangingManUnconfirmed, ShootingStar, ShootingStarUnconfirmed, TweezerTop
-                Ví dụ:
-                + bearish(0) = 1: xuất hiện một trong các mô hình nến bearish tại nến 0
-                + bearish(1) = 0: không xuất hiện một trong các mô hình nến bearish tại nến 1
-                `
-    },
-    {
-        type: 'function',
         label: 'marsi',
         detail: '(period, from, to)',
         apply: 'marsi(14, 14, 0)',
@@ -574,20 +483,6 @@ export default [
                 + marsi(14, 20, 0): trung bình rsi(14) từ nến 0 đến 20
                 + marsi(14, 15, 10): trung bình rsi(14) nến 10 đến 15
                 + marsi(14, 10, 15): trung bình rsi(14) nến 10 đến 15
-                `
-    },
-    {
-        type: 'function',
-        label: 'bull_bear_list',
-        detail: '(i)',
-        apply: 'bull_bear_list(0)',
-        boost: 0,
-        info: ` - Danh sách các mô hình nến bullish, bearish xuất hiện tại nến thứ i
-                - Dùng khi muốn gửi danh sách về telegram để theo dõi, không có tác dụng đặt điều kiện
-                - Các mô hình nến bullish: BullishEngulfingPattern, DownsideTasukiGap, BullishHarami, BullishHaramiCross, MorningDojiStar, MorningStar, BullishMarubozu, PiercingLine, ThreeWhiteSoldiers, BullishHammerStick, BullishInvertedHammerStick, HammerPattern, HammerPatternUnconfirmed, TweezerBottom
-                - Các mô hình nến bearish: BearishEngulfingPattern, BearishHarami, BearishHaramiCross, EveningDojiStar, EveningStar, BearishMarubozu, ThreeBlackCrows, BearishHammerStick, BearishInvertedHammerStick, HangingMan, HangingManUnconfirmed, ShootingStar, ShootingStarUnconfirmed, TweezerTop
-                Ví dụ:
-                + telegram: các mô hình nến bullish, bearish xuất hiện tại nến 0: {bull_bear_list(0)}
                 `
     },
     {
@@ -608,324 +503,300 @@ export default [
         type: 'function',
         label: 'avg_open',
         detail: '(from, to)',
-        apply: 'avg_open(10, 0)',
+        apply: 'avg_open(0, 10)',
         boost: 0,
         info: ` - Giá mở trung bình trong từ nến from đến nến to
                 Ví dụ:
-                + avg_open(10, 0): Giá mở trung bình từ nến 0 đến nến 10
+                + avg_open(0, 10): Giá mở trung bình từ nến 0 đến nến 10
                 + avg_open(15, 20): Giá mở trung bình từ nến 15 đến nến 20
-                + avg_open(20, 15): Giá mở trung bình từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'avg_high',
         detail: '(from, to)',
-        apply: 'avg_high(10, 0)',
+        apply: 'avg_high(0, 10)',
         boost: 0,
         info: ` - Giá đỉnh trung bình trong từ nến from đến nến to
                 Ví dụ:
-                + avg_high(10, 0): Giá đỉnh trung bình từ nến 0 đến nến 10
+                + avg_high(0, 10): Giá đỉnh trung bình từ nến 0 đến nến 10
                 + avg_high(15, 20): Giá đỉnh trung bình từ nến 15 đến nến 20
-                + avg_high(20, 15): Giá đỉnh trung bình từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'avg_low',
         detail: '(from, to)',
-        apply: 'avg_low(10, 0)',
+        apply: 'avg_low(0, 10)',
         boost: 0,
         info: ` - Giá đáy trung bình trong từ nến from đến nến to
                 Ví dụ:
-                + avg_low(10, 0): Giá đáy trung bình từ nến 0 đến nến 10
+                + avg_low(0, 10): Giá đáy trung bình từ nến 0 đến nến 10
                 + avg_low(15, 20): Giá đáy trung bình từ nến 15 đến nến 20
-                + avg_low(20, 15): Giá đáy trung bình từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'avg_close',
         detail: '(from, to)',
-        apply: 'avg_close(10, 0)',
+        apply: 'avg_close(0, 10)',
         boost: 0,
         info: ` - Giá đóng trung bình trong từ nến from đến nến to
                 Ví dụ:
-                + avg_close(10, 0): Giá đóng trung bình từ nến 0 đến nến 10
+                + avg_close(0, 10): Giá đóng trung bình từ nến 0 đến nến 10
                 + avg_close(15, 20): Giá đóng trung bình từ nến 15 đến nến 20
-                + avg_close(20, 15): Giá đóng trung bình từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'avg_ampl',
         detail: '(from, to)',
-        apply: 'avg_ampl(10, 0)',
+        apply: 'avg_ampl(0, 10)',
         boost: 0,
         info: ` - Biên độ trung bình trong từ nến from đến nến to
                 - Đơn vị: USDT
                 Ví dụ:
-                + avg_ampl(10, 0): Biên độ trung bình từ nến 0 đến nến 10
+                + avg_ampl(0, 10): Biên độ trung bình từ nến 0 đến nến 10
                 + avg_ampl(15, 20): Biên độ trung bình từ nến 15 đến nến 20
-                + avg_ampl(20, 15): Biên độ trung bình từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'avg_ampl%',
         detail: '(from, to)',
-        apply: 'avg_ampl%(10, 0)',
+        apply: 'avg_ampl%(0, 10)',
         boost: 0,
         info: ` - Biên độ trung bình trong từ nến from đến nến to
                 - Đơn vị: %
                 Ví dụ:
-                + avg_ampl(10, 0): Biên độ trung bình từ nến 0 đến nến 10
+                + avg_ampl(0, 10): Biên độ trung bình từ nến 0 đến nến 10
                 + avg_ampl(15, 20): Biên độ trung bình từ nến 15 đến nến 20
-                + avg_ampl(20, 15): Biên độ trung bình từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'max_open',
         detail: '(from, to)',
-        apply: 'max_open(10, 0)',
+        apply: 'max_open(0, 10)',
         boost: 0,
         info: ` - Giá mở cao nhất từ nến from đến nến to
                 Ví dụ:
-                + max_open(10, 0): Giá mở cao nhất từ nến 0 đến 10
+                + max_open(0, 10): Giá mở cao nhất từ nến 0 đến 10
                 + max_open(15, 20): Giá mở cao nhất từ nến 15 đến nến 20
-                + max_open(20, 15): Giá mở cao nhất từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'max_high',
         detail: '(from, to)',
-        apply: 'max_high(10, 0)',
+        apply: 'max_high(0, 10)',
         boost: 0,
         info: ` - Giá đỉnh cao nhất từ nến from đến nến to
                 Ví dụ:
-                + max_high(10, 0): Giá đỉnh cao nhất từ nến 0 đến 10
+                + max_high(0, 10): Giá đỉnh cao nhất từ nến 0 đến 10
                 + max_high(15, 20): Giá đỉnh cao nhất từ nến 15 đến nến 20
-                + max_high(20, 15): Giá đỉnh cao nhất từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'max_low',
         detail: '(from, to)',
-        apply: 'max_low(10, 0)',
+        apply: 'max_low(0, 10)',
         boost: 0,
         info: ` - Giá đáy cao nhất từ nến from đến nến to
                 Ví dụ:
-                + max_low(10, 0): Giá đáy cao nhất từ nến 0 đến 10
+                + max_low(0, 10): Giá đáy cao nhất từ nến 0 đến 10
                 + max_low(15, 20): Giá đáy cao nhất từ nến 15 đến nến 20
-                + max_low(20, 15): Giá đáy cao nhất từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'max_close',
         detail: '(from, to)',
-        apply: 'max_close(10, 0)',
+        apply: 'max_close(0, 10)',
         boost: 0,
         info: ` - Giá đóng cao nhất từ nến from đến nến to
                 Ví dụ:
-                + max_close(10, 0): Giá đóng cao nhất từ nến 0 đến 10
+                + max_close(0, 10): Giá đóng cao nhất từ nến 0 đến 10
                 + max_close(15, 20): Giá đóng cao nhất từ nến 15 đến nến 20
-                + max_close(20, 15): Giá đóng cao nhất từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'min_open',
         detail: '(from, to)',
-        apply: 'min_open(10, 0)',
+        apply: 'min_open(0, 10)',
         boost: 0,
         info: ` - Giá mở thấp nhất từ nến from đến nến to
                 Ví dụ:
-                + min_open(10, 0): Giá mở thấp nhất từ nến 0 đến nến 10
-                + min_open(15, 20): Giá mở thấp nhất 15 đến nến 20
-                + min_open(20, 15): Giá mở thấp nhất 15 đến nến 20
+                + min_open(0, 10): Giá mở thấp nhất từ nến 0 đến nến 10
+                + min_open(15, 20): Giá mở thấp nhất từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'min_high',
         detail: '(from, to)',
-        apply: 'min_high(10, 0)',
+        apply: 'min_high(0, 10)',
         boost: 0,
         info: ` - Giá đỉnh thấp nhất từ nến from đến nến to
                 Ví dụ:
-                + min_high(10, 0): Giá đỉnh thấp nhất từ nến 0 đến nến 10
-                + min_high(15, 20): Giá đỉnh thấp nhất 15 đến nến 20
-                + min_high(20, 15): Giá đỉnh thấp nhất 15 đến nến 20
+                + min_high(0, 10): Giá đỉnh thấp nhất từ nến 0 đến nến 10
+                + min_high(15, 20): Giá đỉnh thấp nhất từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'min_low',
         detail: '(from, to)',
-        apply: 'min_low(10, 0)',
+        apply: 'min_low(0, 10)',
         boost: 0,
         info: ` - Giá đáy thấp nhất từ nến from đến nến to
                 Ví dụ:
-                + min_low(10, 0): Giá đáy thấp nhất từ nến 0 đến nến 10
-                + min_low(15, 20): Giá đáy thấp nhất 15 đến nến 20
-                + min_low(20, 15): Giá đáy thấp nhất 15 đến nến 20
+                + min_low(0, 10): Giá đáy thấp nhất từ nến 0 đến nến 10
+                + min_low(15, 20): Giá đáy thấp nhất từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'min_close',
         detail: '(from, to)',
-        apply: 'min_close(10, 0)',
+        apply: 'min_close(0, 10)',
         boost: 0,
         info: ` - Giá đóng thấp nhất từ nến from đến nến to
                 Ví dụ:
-                + min_close(10, 0): Giá đóng thấp nhất từ nến 0 đến nến 10
-                + min_close(15, 20): Giá đóng thấp nhất 15 đến nến 20
-                + min_close(20, 15): Giá đóng thấp nhất 15 đến nến 20
+                + min_close(0, 10): Giá đóng thấp nhất từ nến 0 đến nến 10
+                + min_close(15, 20): Giá đóng thấp nhất từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'min_rsi',
         detail: '(period, from, to)',
-        apply: 'min_rsi(14, 10, 0)',
+        apply: 'min_rsi(14, 0, 10)',
         boost: 0,
         info: ` - rsi thấp nhất từ nến from đến nến to
                 - period: số nến để tính chỉ báo rsi
                 Ví dụ:
-                + min_rsi(14, 10, 0): rsi thấp nhất từ nến 0 đến nến 10
+                + min_rsi(14, 0, 10): rsi thấp nhất từ nến 0 đến nến 10
                 + min_rsi(14, 15, 20): rsi thấp nhất từ nến 15 đến nến 20
-                + min_rsi(14, 20, 15): rsi thấp nhất từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'max_rsi',
         detail: '(period, from, to)',
-        apply: 'max_rsi(14, 10, 0)',
+        apply: 'max_rsi(14, 0, 10)',
         boost: 0,
         info: ` - rsi cao nhất từ nến from đến nến to
                 - period: số nến để tính chỉ báo rsi
                 Ví dụ:
-                + max_rsi(14, 10, 0): rsi cao nhất từ nến 0 đến nến 10
+                + max_rsi(14, 0, 10): rsi cao nhất từ nến 0 đến nến 10
                 + max_rsi(14, 15, 20): rsi cao nhất từ nến 15 đến nến 20
-                + max_rsi(14, 20, 15): rsi cao nhất từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'min_change',
         detail: '(from, to)',
-        apply: 'min_change(10, 0)',
+        apply: 'min_change(0, 10)',
         boost: 0,
         info: ` - Thay đổi giá thấp nhất từ nến from đến nến to
                 - Đơn vị: USDT
                 Ví dụ:
-                + min_change(10, 0): Thay đổi giá thấp nhất 0 đến nến 10
+                + min_change(0, 10): Thay đổi giá thấp nhất 0 đến nến 10
                 + min_change(15, 20): Thay đổi giá thấp từ nến 15 đến nến 20
-                + min_change(20, 15): Thay đổi giá thấp từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'max_change',
         detail: '(from, to)',
-        apply: 'max_change(10, 0)',
+        apply: 'max_change(0, 10)',
         boost: 0,
         info: ` - Thay đổi giá cao nhất từ nến from đến nến to
                 - Đơn vị: USDT
                 Ví dụ:
-                + max_change(10, 0): Thay đổi giá cao nhất 0 đến nến 10
+                + max_change(0, 10): Thay đổi giá cao nhất 0 đến nến 10
                 + max_change(15, 20): Thay đổi giá cao từ nến 15 đến nến 20
-                + max_change(20, 15): Thay đổi giá cao từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'min_change%',
         detail: '(from, to)',
-        apply: 'min_change%(10, 0)',
+        apply: 'min_change%(0, 10)',
         boost: 0,
         info: ` - Thay đổi giá thấp nhất từ nến from đến nến to
                 - Đơn vị: %
                 Ví dụ:
-                + min_change(10, 0): Thay đổi giá thấp nhất 0 đến nến 10
+                + min_change(0, 10): Thay đổi giá thấp nhất 0 đến nến 10
                 + min_change(15, 20): Thay đổi giá thấp từ nến 15 đến nến 20
-                + min_change(20, 15): Thay đổi giá thấp từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'max_change%',
         detail: '(from, to)',
-        apply: 'max_change%(10, 0)',
+        apply: 'max_change%(0, 10)',
         boost: 0,
         info: ` - Thay đổi giá cao nhất từ nến from đến nến to
                 - Đơn vị: %
                 Ví dụ:
-                + max_change(10, 0): Thay đổi giá cao nhất 0 đến nến 10
+                + max_change(0, 10): Thay đổi giá cao nhất 0 đến nến 10
                 + max_change(15, 20): Thay đổi giá cao từ nến 15 đến nến 20
-                + max_change(20, 15): Thay đổi giá cao từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'min_ampl',
         detail: '(from, to)',
-        apply: 'min_ampl(10, 0)',
+        apply: 'min_ampl(0, 10)',
         boost: 0,
         info: ` - Biên độ giá thấp nhất từ nến from đến nến to
                 - Đơn vị: USDT
                 Ví dụ:
-                + min_ampl(10, 0): Biên độ giá thấp nhất từ nến 0 đến nến 10
+                + min_ampl(0, 10): Biên độ giá thấp nhất từ nến 0 đến nến 10
                 + min_ampl(15, 20): Biên độ giá thấp nhất từ nến 15 đến nến 20
-                + min_ampl(20, 15): Biên độ giá thấp nhất từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'max_ampl',
         detail: '(from, to)',
-        apply: 'max_ampl(10, 0)',
+        apply: 'max_ampl(0, 10)',
         boost: 0,
         info: ` - Biên độ giá cao nhất từ nến from đến nến to
                 - Đơn vị: USDT
                 Ví dụ:
-                + max_ampl(10, 0): Biên độ giá cao nhất từ nến 0 đến nến 10
+                + max_ampl(0, 10): Biên độ giá cao nhất từ nến 0 đến nến 10
                 + max_ampl(15, 20): Biên độ giá cao nhất từ nến 15 đến nến 20
-                + max_ampl(20, 15): Biên độ giá cao nhất từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'min_ampl%',
         detail: '(from, to)',
-        apply: 'min_ampl%(10, 0)',
+        apply: 'min_ampl%(0, 10)',
         boost: 0,
         info: ` - Biên độ giá thấp nhất từ nến from đến nến to
                 - Đơn vị: %
                 Ví dụ:
-                + min_ampl(10, 0): Biên độ giá thấp nhất từ nến 0 đến nến 10
+                + min_ampl(0, 10): Biên độ giá thấp nhất từ nến 0 đến nến 10
                 + min_ampl(15, 20): Biên độ giá thấp nhất từ nến 15 đến nến 20
-                + min_ampl(20, 15): Biên độ giá thấp nhất từ nến 15 đến nến 20
                 `
     },
     {
         type: 'function',
         label: 'max_ampl%',
         detail: '(from, to)',
-        apply: 'max_ampl%(10, 0)',
+        apply: 'max_ampl%(0, 10)',
         boost: 0,
         info: ` - Biên độ giá cao nhất từ nến from đến nến to
                 - Đơn vị: %
                 Ví dụ:
-                + max_ampl(10, 0): Biên độ giá cao nhất từ nến 0 đến nến 10
+                + max_ampl(0, 10): Biên độ giá cao nhất từ nến 0 đến nến 10
                 + max_ampl(15, 20): Biên độ giá cao nhất từ nến 15 đến nến 20
-                + max_ampl(20, 15): Biên độ giá cao nhất từ nến 15 đến nến 20
                 `
     },
 ];

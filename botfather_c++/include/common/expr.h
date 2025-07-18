@@ -45,6 +45,7 @@ public:
     any visitNumber(ExprParser::NumberContext *ctx) override;
     any visitFloat(ExprParser::FloatContext *ctx) override;
     any visitInt(ExprParser::IntContext *ctx) override;
+    any visitString(ExprParser::StringContext *ctx) override;
     any visitNegative(ExprParser::NegativeContext *ctx) override;
     any visitPositive(ExprParser::PositiveContext *ctx) override;
     any visitMulDiv(ExprParser::MulDivContext *ctx) override;
@@ -91,8 +92,6 @@ public:
     any visitAvg_close(ExprParser::Avg_closeContext *ctx) override;
     any visitAvg_ampl(ExprParser::Avg_amplContext *ctx) override;
     any visitAvg_amplP(ExprParser::Avg_amplPContext *ctx) override;
-    // avg_change
-    // avg_changeP
 
     any visitMin_open(ExprParser::Min_openContext *ctx) override;
     any visitMin_high(ExprParser::Min_highContext *ctx) override;
@@ -116,30 +115,15 @@ public:
     any visitMax_rsi(ExprParser::Max_rsiContext *ctx) override;
     any visitMarsi(ExprParser::MarsiContext *ctx) override;
 
-    // candlestick
-    // any visitBullish_engulfing(ExprParser::Bullish_engulfingContext *ctx) override;
-    // any visitBearish_engulfing(ExprParser::Bearish_engulfingContext *ctx) override;
-    // any visitBullish_hammer(ExprParser::Bullish_hammerContext *ctx) override;
-    // any visitBearish_hammer(ExprParser::Bearish_hammerContext *ctx) override;
-    // any visitBullish(ExprParser::BullishContext *ctx) override;
-    // any visitBearish(ExprParser::BearishContext *ctx) override;
-    // any visitBull_bear_list(ExprParser::Bull_bear_listContext *ctx) override;
-    // any visitDoji(ExprParser::DojiContext *ctx) override;
+    any visitHour(ExprParser::HourContext *ctx) override;
+    any visitMinute(ExprParser::MinuteContext *ctx) override;
 
-    // any visitIHour(ExprParser::IHourContext *ctx) override;
-    // any visitString(ExprParser::StringContext *ctx) override;
-    // any visitISymbol(ExprParser::ISymbolContext *ctx) override;
-    // any visitIBullBearList(ExprParser::IBullBearListContext *ctx) override;
-    // any visitIMinute(ExprParser::IMinuteContext *ctx) override;
-    // any visitIBroker(ExprParser::IBrokerContext *ctx) override;
-    // any visitIVolume24hInUSD(ExprParser::IVolume24hInUSDContext *ctx) override;
-    // any visitITimeframe(ExprParser::ITimeframeContext *ctx) override;
-    // any visitBroker(ExprParser::BrokerContext *ctx) override;
-    // any visitSymbol(ExprParser::SymbolContext *ctx) override;
-    // any visitTimeframe(ExprParser::TimeframeContext *ctx) override;
-    // any visitHour(ExprParser::HourContext *ctx) override;
-    // any visitMinute(ExprParser::MinuteContext *ctx) override;
-    // any visitVolume24h_in_usd(ExprParser::Volume24h_in_usdContext *ctx) override;
+    // candlestick
+    any visitBullish_engulfing(ExprParser::Bullish_engulfingContext *ctx) override;
+    any visitBearish_engulfing(ExprParser::Bearish_engulfingContext *ctx) override;
+    any visitBullish_hammer(ExprParser::Bullish_hammerContext *ctx) override;
+    any visitBearish_hammer(ExprParser::Bearish_hammerContext *ctx) override;
+    any visitDoji(ExprParser::DojiContext *ctx) override;
 };
 
 any calculateExpr(const string &inputText, const string &broker, const string &symbol, const string &timeframe, int length,
