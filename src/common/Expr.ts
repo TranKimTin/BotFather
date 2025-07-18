@@ -1,7 +1,7 @@
 import * as antlr from "antlr4ng";
 import { BaseErrorListener, CharStream, CommonTokenStream, RecognitionException, Recognizer, Token } from 'antlr4ng';
 import { ExprLexer } from './generated/ExprLexer';
-import { ABSContext, AddSubContext, AmplContext, AmplPContext, Avg_amplContext, Avg_amplPContext, Avg_closeContext, Avg_highContext, Avg_lowContext, Avg_openContext, Bb_lowerContext, Bb_middleContext, Bb_upperContext, Bearish_engulfingContext, Bearish_hammerContext, BearishContext, BrokerContext, Bull_bear_listContext, Bullish_engulfingContext, Bullish_hammerContext, BullishContext, ChangeContext, ChangePContext, CloseContext, ComparisonContext, DojiContext, EmaContext, ExprContext, ExprParser, FloatContext, HighContext, HourContext, IAvgOpenContext, IntContext, IRSIContext, LowContext, Lower_shadowContext, Lower_shadowPContext, Macd_histogramContext, Macd_n_dinhContext, Macd_signalContext, Macd_slopeContext, Macd_valueContext, MaContext, MarsiContext, Max_amplContext, Max_amplPContext, Max_changeContext, Max_changePContext, Max_closeContext, Max_highContext, Max_lowContext, Max_openContext, Max_rsiContext, MAXContext, Min_amplContext, Min_amplPContext, Min_changeContext, Min_changePContext, Min_closeContext, Min_highContext, Min_lowContext, Min_openContext, Min_rsiContext, MINContext, MinuteContext, MulDivContext, NegativeContext, NumberContext, OpenContext, ParensContext, PositiveContext, Rsi_slopeContext, RsiContext, StringContext, SymbolContext, TimeframeContext, Upper_shadowContext, Upper_shadowPContext, Volume24h_in_usdContext, VolumeContext } from './generated/ExprParser';
+import { ABSContext, AddSubContext, AmplContext, AmplPContext, Avg_amplContext, Avg_amplPContext, Avg_closeContext, Avg_highContext, Avg_lowContext, Avg_openContext, Bb_lowerContext, Bb_middleContext, Bb_upperContext, Bearish_engulfingContext, Bearish_hammerContext, Bullish_engulfingContext, Bullish_hammerContext, ChangeContext, ChangePContext, CloseContext, ComparisonContext, DojiContext, EmaContext, ExprContext, ExprParser, FloatContext, HighContext, HourContext, IAvgOpenContext, IntContext, IRSIContext, LowContext, Lower_shadowContext, Lower_shadowPContext, Macd_histogramContext, Macd_n_dinhContext, Macd_signalContext, Macd_slopeContext, Macd_valueContext, MaContext, MarsiContext, Max_amplContext, Max_amplPContext, Max_changeContext, Max_changePContext, Max_closeContext, Max_highContext, Max_lowContext, Max_openContext, Max_rsiContext, MAXContext, Min_amplContext, Min_amplPContext, Min_changeContext, Min_changePContext, Min_closeContext, Min_highContext, Min_lowContext, Min_openContext, Min_rsiContext, MINContext, MinuteContext, MulDivContext, NegativeContext, NumberContext, OpenContext, ParensContext, PositiveContext, Rsi_slopeContext, RsiContext, StringContext, Upper_shadowContext, Upper_shadowPContext, VolumeContext } from './generated/ExprParser';
 import { ExprVisitor } from './generated/ExprVisitor';
 import * as util from '../common/util';
 import moment from "moment";
@@ -166,18 +166,6 @@ export class Expr extends ExprVisitor<any> {
         return Math.max(...parmas);
     };
 
-    visitBroker = (ctx: BrokerContext) => {
-        return this.broker;
-    };
-
-    visitSymbol = (ctx: SymbolContext) => {
-        return this.symbol;
-    };
-
-    visitTimeframe = (ctx: TimeframeContext) => {
-        return this.timeframe;
-    };
-
     visitHour = (ctx: HourContext) => {
         return parseInt(moment.utc(this.data[0].startTime).format('HH'), 10);
     };
@@ -219,17 +207,6 @@ export class Expr extends ExprVisitor<any> {
         if (shift >= this.data.length) throw `volume out of range. length = ${this.data.length}`;
 
         return this.data[shift].volume;
-    };
-
-    visitVolume24h_in_usd = (ctx: Volume24h_in_usdContext) => {
-        let volume: number = 0;
-        for (let i = 0; i < this.data.length; i++) {
-            volume += this.data[i].volume * this.data[i].close;
-            if ((this.data[i].startTime - this.data[0].startTime) / (60 * 60 * 1000) >= 24) {
-                break;
-            }
-        }
-        return volume;
     };
 
     visitChange = (ctx: ChangeContext) => {
@@ -652,20 +629,6 @@ export class Expr extends ExprVisitor<any> {
         return util.isBearishHammer(this.data[shift]) ? 1 : 0;
     };
 
-    visitBullish = (ctx: BullishContext) => {
-        const shift = parseInt(ctx.INT()?.getText() || "0", 10);
-        if (shift > this.data.length - 5) return 0;
-
-        return util.isBullish(this.data, shift) ? 1 : 0;
-    };
-
-    visitBearish = (ctx: BearishContext) => {
-        const shift = parseInt(ctx.INT()?.getText() || "0", 10);
-        if (shift > this.data.length - 5) return 0;
-
-        return util.isBearish(this.data, shift) ? 1 : 0;
-    };
-
     visitMarsi = (ctx: MarsiContext) => {
         const periodRSI = parseInt(ctx.INT(0)?.getText() || "0", 10);
         const from = parseInt(ctx.INT(1)?.getText() || "0", 10);
@@ -678,14 +641,6 @@ export class Expr extends ExprVisitor<any> {
         if (shift >= avgRsis.length) throw `avg_rsi out of range. length = ${avgRsis.length}`;
 
         return avgRsis[shift];
-    };
-
-    visitBull_bear_list = (ctx: Bull_bear_listContext) => {
-        const shift = parseInt(ctx.INT()?.getText() || "0", 10);
-        if (shift > this.data.length - 5) return 0;
-
-        const list = util.listBullBear(this.data, shift);
-        return list.join(',');
     };
 
     visitDoji = (ctx: DojiContext) => {

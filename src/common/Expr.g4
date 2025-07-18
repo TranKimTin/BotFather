@@ -13,9 +13,6 @@ expr
     | INT                       # Int
     | FLOAT                     # Float
     | STRING                    # String
-    | broker                    # iBroker
-    | symbol                    # iSymbol
-    | timeframe                 # iTimeframe
     | hour                      # iHour
     | minute                    # iMinute
     | open                      # iOpen
@@ -23,7 +20,6 @@ expr
     | low                       # iLow
     | close                     # iClose
     | volume                    # iVolume
-    | volume24h_in_usd          # iVolume24hInUSD
     | change                    # iChange
     | changeP                   # iChangeP
     | ampl                      # iAmpl
@@ -48,10 +44,7 @@ expr
     | bearish_engulfing         # iBearish_engulfing
     | bullish_hammer            # iBullish_hammer
     | bearish_hammer            # iBearish_hammer
-    | bullish                   # iBullish
-    | bearish                   # iBearish
     | marsi                     # iMARSI
-    | bull_bear_list            # iBullBearList
     | doji                      # iDoji
     | avg_open                  # iAvgOpen
     | avg_high                  # iAvgHigh
@@ -79,9 +72,6 @@ expr
     | max_amplP                 # iMaxAmplP
     ;
 
-broker: 'broker' '(' ')';
-symbol: 'symbol' '(' ')';
-timeframe: 'timeframe' '(' ')';
 hour: 'hour' '(' ')';
 minute: 'minute' '(' ')';
 open: 'open' '(' INT? ')';
@@ -89,7 +79,6 @@ high: 'high' '(' INT? ')';
 low: 'low' '(' INT? ')';
 close: 'close' '(' INT? ')';
 volume: 'volume' '(' INT? ')';
-volume24h_in_usd: 'volume24h_in_usd' '(' ')';
 change: 'change' '(' INT? ')';
 changeP: 'change%' '(' INT? ')';
 ampl: 'ampl' '(' INT? ')';
@@ -114,10 +103,7 @@ bullish_engulfing: 'bullish_engulfing' '(' INT? ')';
 bearish_engulfing: 'bearish_engulfing' '(' INT? ')';
 bullish_hammer: 'bullish_hammer' '(' INT? ')';
 bearish_hammer: 'bearish_hammer' '(' INT? ')';
-bullish: 'bullish' '(' INT? ')';
-bearish: 'bearish' '(' INT? ')';
 marsi: 'marsi' '(' INT ',' INT (',' INT)? ')';
-bull_bear_list: 'bull_bear_list' '(' INT? ')';
 doji: 'doji' '(' INT? ')';
 avg_open: 'avg_open' '(' INT (',' INT)? ')';
 avg_high: 'avg_high' '(' INT (',' INT)? ')';

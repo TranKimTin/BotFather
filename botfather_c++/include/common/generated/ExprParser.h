@@ -24,28 +24,26 @@ public:
     T__56 = 57, T__57 = 58, T__58 = 59, T__59 = 60, T__60 = 61, T__61 = 62, 
     T__62 = 63, T__63 = 64, T__64 = 65, T__65 = 66, T__66 = 67, T__67 = 68, 
     T__68 = 69, T__69 = 70, T__70 = 71, T__71 = 72, T__72 = 73, T__73 = 74, 
-    T__74 = 75, T__75 = 76, T__76 = 77, T__77 = 78, T__78 = 79, T__79 = 80, 
-    INT = 81, FLOAT = 82, STRING = 83, WS = 84
+    T__74 = 75, INT = 76, FLOAT = 77, STRING = 78, WS = 79
   };
 
   enum {
-    RuleExpr = 0, RuleBroker = 1, RuleSymbol = 2, RuleTimeframe = 3, RuleHour = 4, 
-    RuleMinute = 5, RuleOpen = 6, RuleHigh = 7, RuleLow = 8, RuleClose = 9, 
-    RuleVolume = 10, RuleVolume24h_in_usd = 11, RuleChange = 12, RuleChangeP = 13, 
-    RuleAmpl = 14, RuleAmplP = 15, RuleUpper_shadow = 16, RuleUpper_shadowP = 17, 
-    RuleLower_shadow = 18, RuleLower_shadowP = 19, RuleRsi = 20, RuleRsi_slope = 21, 
-    RuleMa = 22, RuleEma = 23, RuleMacd_value = 24, RuleMacd_signal = 25, 
-    RuleMacd_histogram = 26, RuleBb_upper = 27, RuleBb_middle = 28, RuleBb_lower = 29, 
-    RuleMacd_n_dinh = 30, RuleMacd_slope = 31, RuleBullish_engulfing = 32, 
-    RuleBearish_engulfing = 33, RuleBullish_hammer = 34, RuleBearish_hammer = 35, 
-    RuleBullish = 36, RuleBearish = 37, RuleMarsi = 38, RuleBull_bear_list = 39, 
-    RuleDoji = 40, RuleAvg_open = 41, RuleAvg_high = 42, RuleAvg_low = 43, 
-    RuleAvg_close = 44, RuleAvg_ampl = 45, RuleAvg_amplP = 46, RuleMax_open = 47, 
-    RuleMax_high = 48, RuleMax_low = 49, RuleMax_close = 50, RuleMin_open = 51, 
-    RuleMin_high = 52, RuleMin_low = 53, RuleMin_close = 54, RuleMin_rsi = 55, 
-    RuleMax_rsi = 56, RuleMin_change = 57, RuleMax_change = 58, RuleMin_changeP = 59, 
-    RuleMax_changeP = 60, RuleMin_ampl = 61, RuleMax_ampl = 62, RuleMin_amplP = 63, 
-    RuleMax_amplP = 64, RuleComparisonOp = 65, RuleNumber = 66
+    RuleExpr = 0, RuleHour = 1, RuleMinute = 2, RuleOpen = 3, RuleHigh = 4, 
+    RuleLow = 5, RuleClose = 6, RuleVolume = 7, RuleChange = 8, RuleChangeP = 9, 
+    RuleAmpl = 10, RuleAmplP = 11, RuleUpper_shadow = 12, RuleUpper_shadowP = 13, 
+    RuleLower_shadow = 14, RuleLower_shadowP = 15, RuleRsi = 16, RuleRsi_slope = 17, 
+    RuleMa = 18, RuleEma = 19, RuleMacd_value = 20, RuleMacd_signal = 21, 
+    RuleMacd_histogram = 22, RuleBb_upper = 23, RuleBb_middle = 24, RuleBb_lower = 25, 
+    RuleMacd_n_dinh = 26, RuleMacd_slope = 27, RuleBullish_engulfing = 28, 
+    RuleBearish_engulfing = 29, RuleBullish_hammer = 30, RuleBearish_hammer = 31, 
+    RuleBullish = 32, RuleBearish = 33, RuleMarsi = 34, RuleDoji = 35, RuleAvg_open = 36, 
+    RuleAvg_high = 37, RuleAvg_low = 38, RuleAvg_close = 39, RuleAvg_ampl = 40, 
+    RuleAvg_amplP = 41, RuleMax_open = 42, RuleMax_high = 43, RuleMax_low = 44, 
+    RuleMax_close = 45, RuleMin_open = 46, RuleMin_high = 47, RuleMin_low = 48, 
+    RuleMin_close = 49, RuleMin_rsi = 50, RuleMax_rsi = 51, RuleMin_change = 52, 
+    RuleMax_change = 53, RuleMin_changeP = 54, RuleMax_changeP = 55, RuleMin_ampl = 56, 
+    RuleMax_ampl = 57, RuleMin_amplP = 58, RuleMax_amplP = 59, RuleComparisonOp = 60, 
+    RuleNumber = 61
   };
 
   explicit ExprParser(antlr4::TokenStream *input);
@@ -66,9 +64,6 @@ public:
 
 
   class ExprContext;
-  class BrokerContext;
-  class SymbolContext;
-  class TimeframeContext;
   class HourContext;
   class MinuteContext;
   class OpenContext;
@@ -76,7 +71,6 @@ public:
   class LowContext;
   class CloseContext;
   class VolumeContext;
-  class Volume24h_in_usdContext;
   class ChangeContext;
   class ChangePContext;
   class AmplContext;
@@ -104,7 +98,6 @@ public:
   class BullishContext;
   class BearishContext;
   class MarsiContext;
-  class Bull_bear_listContext;
   class DojiContext;
   class Avg_openContext;
   class Avg_highContext;
@@ -236,24 +229,6 @@ public:
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
-  class  ISymbolContext : public ExprContext {
-  public:
-    ISymbolContext(ExprContext *ctx);
-
-    SymbolContext *symbol();
-
-    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-  };
-
-  class  IBullBearListContext : public ExprContext {
-  public:
-    IBullBearListContext(ExprContext *ctx);
-
-    Bull_bear_listContext *bull_bear_list();
-
-    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-  };
-
   class  IAvgHighContext : public ExprContext {
   public:
     IAvgHighContext(ExprContext *ctx);
@@ -380,15 +355,6 @@ public:
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
-  class  IBrokerContext : public ExprContext {
-  public:
-    IBrokerContext(ExprContext *ctx);
-
-    BrokerContext *broker();
-
-    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-  };
-
   class  IRSIContext : public ExprContext {
   public:
     IRSIContext(ExprContext *ctx);
@@ -495,15 +461,6 @@ public:
 
     std::vector<ExprContext *> expr();
     ExprContext* expr(size_t i);
-
-    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-  };
-
-  class  IVolume24hInUSDContext : public ExprContext {
-  public:
-    IVolume24hInUSDContext(ExprContext *ctx);
-
-    Volume24h_in_usdContext *volume24h_in_usd();
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
@@ -800,15 +757,6 @@ public:
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
-  class  ITimeframeContext : public ExprContext {
-  public:
-    ITimeframeContext(ExprContext *ctx);
-
-    TimeframeContext *timeframe();
-
-    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-  };
-
   class  IDojiContext : public ExprContext {
   public:
     IDojiContext(ExprContext *ctx);
@@ -838,42 +786,6 @@ public:
 
   ExprContext* expr();
   ExprContext* expr(int precedence);
-  class  BrokerContext : public antlr4::ParserRuleContext {
-  public:
-    BrokerContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-
-
-    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  BrokerContext* broker();
-
-  class  SymbolContext : public antlr4::ParserRuleContext {
-  public:
-    SymbolContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-
-
-    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  SymbolContext* symbol();
-
-  class  TimeframeContext : public antlr4::ParserRuleContext {
-  public:
-    TimeframeContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-
-
-    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  TimeframeContext* timeframe();
-
   class  HourContext : public antlr4::ParserRuleContext {
   public:
     HourContext(antlr4::ParserRuleContext *parent, size_t invokingState);
@@ -962,18 +874,6 @@ public:
   };
 
   VolumeContext* volume();
-
-  class  Volume24h_in_usdContext : public antlr4::ParserRuleContext {
-  public:
-    Volume24h_in_usdContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-
-
-    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  Volume24h_in_usdContext* volume24h_in_usd();
 
   class  ChangeContext : public antlr4::ParserRuleContext {
   public:
@@ -1343,19 +1243,6 @@ public:
   };
 
   MarsiContext* marsi();
-
-  class  Bull_bear_listContext : public antlr4::ParserRuleContext {
-  public:
-    Bull_bear_listContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-    antlr4::tree::TerminalNode *INT();
-
-
-    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  Bull_bear_listContext* bull_bear_list();
 
   class  DojiContext : public antlr4::ParserRuleContext {
   public:
