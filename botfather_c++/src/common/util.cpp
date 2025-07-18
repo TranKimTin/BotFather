@@ -1,6 +1,10 @@
 #include "util.h"
 #include "fstream"
 #include "axios.h"
+#include <openssl/evp.h>
+#include <openssl/rand.h>
+#include <openssl/bio.h>
+#include <openssl/buffer.h>
 
 string toLowerCase(string str)
 {
@@ -674,4 +678,129 @@ unordered_map<string, Digit> getOkxDigits()
         result[symbol].volume = (int)(-log10(stod(s["lotSz"].get<string>())));
     }
     return result;
+}
+
+string base64Encode(const unsigned char *data, int len)
+{
+    BIO *bio, *b64;
+    BUF_MEM *bufferPtr;
+
+    b64 = BIO_new(BIO_f_base64());
+    bio = BIO_new(BIO_s_mem());
+    b64 = BIO_push(b64, bio);
+
+    BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL); // No newline
+    BIO_write(b64, data, len);
+    BIO_flush(b64);
+    BIO_get_mem_ptr(b64, &bufferPtr);
+
+    string result(bufferPtr->data, bufferPtr->length);
+    BIO_free_all(b64);
+    return result;
+}
+
+vector<unsigned char> base64Decode(const string &input)
+{
+    BIO *bio, *b64;
+    int len = input.size();
+    vector<unsigned char> buffer(len);
+
+    b64 = BIO_new(BIO_f_base64());
+    bio = BIO_new_mem_buf(input.data(), len);
+    bio = BIO_push(b64, bio);
+
+    BIO_set_flags(bio, BIO_FLAGS_BASE64_NO_NL); // No newline
+    int decodedLen = BIO_read(bio, buffer.data(), len);
+    buffer.resize(decodedLen);
+    BIO_free_all(bio);
+
+    return buffer;
+}
+
+// Encrypt AES-256-CBC → base64
+string encryptAES(const string &plaintext, const string &key, const string &iv)
+{
+    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+    if (!ctx)
+        throw runtime_error("Failed to create context");
+
+    if (EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr,
+                           (const unsigned char *)key.data(),
+                           (const unsigned char *)iv.data()) != 1)
+    {
+        EVP_CIPHER_CTX_free(ctx);
+        throw runtime_error("EncryptInit failed");
+    }
+
+    vector<unsigned char> ciphertext(plaintext.size() + EVP_MAX_BLOCK_LENGTH);
+    int len = 0, totalLen = 0;
+
+    if (EVP_EncryptUpdate(ctx, ciphertext.data(), &len,
+                          (const unsigned char *)plaintext.data(), plaintext.size()) != 1)
+    {
+        EVP_CIPHER_CTX_free(ctx);
+        throw runtime_error("EncryptUpdate failed");
+    }
+    totalLen += len;
+
+    if (EVP_EncryptFinal_ex(ctx, ciphertext.data() + totalLen, &len) != 1)
+    {
+        EVP_CIPHER_CTX_free(ctx);
+        throw runtime_error("EncryptFinal failed");
+    }
+    totalLen += len;
+    ciphertext.resize(totalLen);
+
+    EVP_CIPHER_CTX_free(ctx);
+    return base64Encode(ciphertext.data(), ciphertext.size());
+}
+
+// Decrypt AES-256-CBC ← base64
+string decryptAES(const string &ciphertextBase64, const string &key, const string &iv)
+{
+    vector<unsigned char> ciphertext = base64Decode(ciphertextBase64);
+    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+    if (!ctx)
+        throw runtime_error("Failed to create context");
+
+    if (EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr,
+                           (const unsigned char *)key.data(),
+                           (const unsigned char *)iv.data()) != 1)
+    {
+        EVP_CIPHER_CTX_free(ctx);
+        throw runtime_error("DecryptInit failed");
+    }
+
+    vector<unsigned char> plaintext(ciphertext.size());
+    int len = 0, totalLen = 0;
+
+    if (EVP_DecryptUpdate(ctx, plaintext.data(), &len,
+                          ciphertext.data(), ciphertext.size()) != 1)
+    {
+        EVP_CIPHER_CTX_free(ctx);
+        throw runtime_error("DecryptUpdate failed");
+    }
+    totalLen += len;
+
+    if (EVP_DecryptFinal_ex(ctx, plaintext.data() + totalLen, &len) != 1)
+    {
+        EVP_CIPHER_CTX_free(ctx);
+        throw runtime_error("DecryptFinal failed (invalid padding or key/iv)");
+    }
+    totalLen += len;
+    plaintext.resize(totalLen);
+
+    EVP_CIPHER_CTX_free(ctx);
+    return string((char *)plaintext.data(), plaintext.size());
+}
+
+string generateRandomIV()
+{
+    const size_t size = 16; // AES block size is 16 bytes
+    unsigned char iv[32];
+    RAND_bytes(iv, size);
+    ostringstream oss;
+    for (size_t i = 0; i < size; ++i)
+        oss << hex << setw(2) << setfill('0') << (int)iv[i];
+    return oss.str();
 }

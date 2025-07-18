@@ -5,6 +5,8 @@
 #include "expr.h"
 #include "mysql_connector.h"
 #include "telegram.h"
+#include "exchange.h"
+#include "binance_future.h"
 
 static vector<string> orderTypes = {NODE_TYPE::BUY_MARKET, NODE_TYPE::BUY_LIMIT, NODE_TYPE::BUY_STOP_MARKET, NODE_TYPE::BUY_STOP_LIMIT, NODE_TYPE::SELL_MARKET, NODE_TYPE::SELL_LIMIT, NODE_TYPE::SELL_STOP_MARKET, NODE_TYPE::SELL_STOP_LIMIT};
 
@@ -432,7 +434,7 @@ bool Worker::handleLogic(NodeData &nodeData, Bot &bot)
         }
         else
         {
-            LOGE("No result. symbol: %s:%s, timeframe: %s, expr=%s", broker.c_str(), symbol.c_str(), timeframe.c_str(), nodeData.value.c_str());
+            LOGD("No result. symbol: %s:%s, timeframe: %s, expr=%s", broker.c_str(), symbol.c_str(), timeframe.c_str(), nodeData.value.c_str());
             return false;
         }
     }
@@ -483,6 +485,60 @@ bool Worker::handleLogic(NodeData &nodeData, Bot &bot)
              node.entry.c_str(), node.stop.c_str(), node.tp.c_str(), node.sl.c_str(),
              node.volume.c_str(), node.expiredTime.c_str());
 
+        if (broker == "binance_future" && !bot.apiKey.empty() && !bot.secretKey.empty() && !bot.iv.empty())
+        {
+            unordered_map<string, string> env = readEnvFile();
+            string encrypKey = env["ENCRYP_KEY"];
+            string apiKey = decryptAES(bot.apiKey, encrypKey, bot.iv);
+            string secretKey = decryptAES(bot.secretKey, encrypKey, bot.iv);
+            shared_ptr<BinanceFuture> exchange = make_shared<BinanceFuture>(apiKey, secretKey);
+
+            if (node.type == NODE_TYPE::BUY_MARKET)
+            {
+                if (compareStringNumber(node.tp, node.entry) > 0 && compareStringNumber(node.sl, node.entry) < 0)
+                {
+                    exchange->buyMarket(symbol, node.volume, node.tp, node.sl);
+                }
+                else
+                {
+                    LOGE("Invalid TP or SL for BUY_MARKET order. TP: %s, SL: %s, Entry: %s", node.tp.c_str(), node.sl.c_str(), node.entry.c_str());
+                }
+            }
+            else if (node.type == NODE_TYPE::BUY_LIMIT)
+            {
+                if (compareStringNumber(node.tp, node.entry) > 0 && compareStringNumber(node.sl, node.entry) < 0)
+                {
+                    exchange->buyLimit(symbol, node.volume, node.entry, node.tp, node.sl, node.expiredTime);
+                }
+                else
+                {
+                    LOGE("Invalid TP or SL for BUY_LIMIT order. TP: %s, SL: %s, Entry: %s", node.tp.c_str(), node.sl.c_str(), node.entry.c_str());
+                }
+            }
+            else if (node.type == NODE_TYPE::SELL_MARKET)
+            {
+                if (compareStringNumber(node.tp, node.entry) < 0 && compareStringNumber(node.sl, node.entry) > 0)
+                {
+                    exchange->sellMarket(symbol, node.volume, node.tp, node.sl);
+                }
+                else
+                {
+                    LOGE("Invalid TP or SL for SELL_MARKET order. TP: %s, SL: %s, Entry: %s", node.tp.c_str(), node.sl.c_str(), node.entry.c_str());
+                }
+            }
+            else if (node.type == NODE_TYPE::SELL_LIMIT)
+            {
+                if (compareStringNumber(node.tp, node.entry) < 0 && compareStringNumber(node.sl, node.entry) > 0)
+                {
+                    exchange->sellLimit(symbol, node.volume, node.entry, node.tp, node.sl, node.expiredTime);
+                }
+                else
+                {
+                    LOGE("Invalid TP or SL for SELL_LIMIT order. TP: %s, SL: %s, Entry: %s", node.tp.c_str(), node.sl.c_str(), node.entry.c_str());
+                }
+            }
+        }
+
         auto &db = MySQLConnector::getInstance();
         string mysql_query = "INSERT INTO Orders(symbol,broker,timeframe,orderType,volume,stop,entry,tp,sl,status,createdTime,expiredTime,botID) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)";
         vector<any> args;
@@ -527,6 +583,14 @@ bool Worker::handleLogic(NodeData &nodeData, Bot &bot)
 
         return true;
     }
-
     return false;
+}
+
+int Worker::compareStringNumber(const string &a, const string &b)
+{
+    double A = stod(a);
+    double B = stod(b);
+    if (a == b)
+        return 0;
+    return a < b ? -1 : 1;
 }

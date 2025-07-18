@@ -8,32 +8,24 @@ class BinanceFuture : public IExchange
 public:
     BinanceFuture(const string &apiKey, const string &secretKey);
 
-    string buyMarket(const string &symbol, string quantity,
-                     string takeProfit = "", string stopLoss = "") override;
-
-    string sellMarket(const string &symbol, string quantity,
-                      string takeProfit = "", string stopLoss = "") override;
-
-    string buyLimit(const string &symbol, string quantity, string price,
-                    string takeProfit = "", string stopLoss = "") override;
-
-    string sellLimit(const string &symbol, string quantity, string price,
-                     string takeProfit = "", string stopLoss = "") override;
+    string buyMarket(const string &symbol, string quantity, string takeProfit = "", string stopLoss = "") override;
+    string sellMarket(const string &symbol, string quantity, string takeProfit = "", string stopLoss = "") override;
+    string buyLimit(const string &symbol, string quantity, string price, string takeProfit = "", string stopLoss = "", string expiredTime = "") override;
+    string sellLimit(const string &symbol, string quantity, string price, string takeProfit = "", string stopLoss = "", string expiredTime = "") override;
+    string getOrderStatus(const string &symbol, const string &orderId) override;
+    string cancelOrderByClientId(const string &symbol, const string &clientOrderId) override;
 
 private:
     string apiKey;
     string secretKey;
-    string BASE_URL = "https://fapi.binance.com";
-    // string BASE_URL = "https://testnet.binancefuture.com";
+    // string BASE_URL = "https://fapi.binance.com";
+    string BASE_URL = "https://testnet.binancefuture.com";
 
     string sendOrder(const map<string, string> &params);
     string buildQuery(const map<string, string> &params);
     string sign(const string &query);
-    string cancelOrderByClientId(const string &symbol, const string &clientOrderId);
 
-    string sendTPorSL(const string &symbol,
-                      const string &side,
-                      const string &type,
-                      string quantity,
-                      string triggerPrice);
+    string sendTPorSL(const string &symbol, const string &side, const string &type, string quantity, string stopPrice, string limitPrice = "");
+    string placeBuyMarketTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId, string &resEntry);
+    string placeSellMarketTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId, string &resEntry);
 };

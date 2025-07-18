@@ -39,10 +39,6 @@ public:
 
     virtual std::any visitString(ExprParser::StringContext *context) = 0;
 
-    virtual std::any visitISymbol(ExprParser::ISymbolContext *context) = 0;
-
-    virtual std::any visitIBullBearList(ExprParser::IBullBearListContext *context) = 0;
-
     virtual std::any visitIAvgHigh(ExprParser::IAvgHighContext *context) = 0;
 
     virtual std::any visitIMinRSI(ExprParser::IMinRSIContext *context) = 0;
@@ -71,8 +67,6 @@ public:
 
     virtual std::any visitIMinLow(ExprParser::IMinLowContext *context) = 0;
 
-    virtual std::any visitIBroker(ExprParser::IBrokerContext *context) = 0;
-
     virtual std::any visitIRSI(ExprParser::IRSIContext *context) = 0;
 
     virtual std::any visitIBB_mid(ExprParser::IBB_midContext *context) = 0;
@@ -96,8 +90,6 @@ public:
     virtual std::any visitIMaxOpen(ExprParser::IMaxOpenContext *context) = 0;
 
     virtual std::any visitMAX(ExprParser::MAXContext *context) = 0;
-
-    virtual std::any visitIVolume24hInUSD(ExprParser::IVolume24hInUSDContext *context) = 0;
 
     virtual std::any visitMulDiv(ExprParser::MulDivContext *context) = 0;
 
@@ -163,19 +155,11 @@ public:
 
     virtual std::any visitPositive(ExprParser::PositiveContext *context) = 0;
 
-    virtual std::any visitITimeframe(ExprParser::ITimeframeContext *context) = 0;
-
     virtual std::any visitIDoji(ExprParser::IDojiContext *context) = 0;
 
     virtual std::any visitIMaxLow(ExprParser::IMaxLowContext *context) = 0;
 
     virtual std::any visitIUpperShadow(ExprParser::IUpperShadowContext *context) = 0;
-
-    virtual std::any visitBroker(ExprParser::BrokerContext *context) = 0;
-
-    virtual std::any visitSymbol(ExprParser::SymbolContext *context) = 0;
-
-    virtual std::any visitTimeframe(ExprParser::TimeframeContext *context) = 0;
 
     virtual std::any visitHour(ExprParser::HourContext *context) = 0;
 
@@ -190,8 +174,6 @@ public:
     virtual std::any visitClose(ExprParser::CloseContext *context) = 0;
 
     virtual std::any visitVolume(ExprParser::VolumeContext *context) = 0;
-
-    virtual std::any visitVolume24h_in_usd(ExprParser::Volume24h_in_usdContext *context) = 0;
 
     virtual std::any visitChange(ExprParser::ChangeContext *context) = 0;
 
@@ -246,8 +228,6 @@ public:
     virtual std::any visitBearish(ExprParser::BearishContext *context) = 0;
 
     virtual std::any visitMarsi(ExprParser::MarsiContext *context) = 0;
-
-    virtual std::any visitBull_bear_list(ExprParser::Bull_bear_listContext *context) = 0;
 
     virtual std::any visitDoji(ExprParser::DojiContext *context) = 0;
 

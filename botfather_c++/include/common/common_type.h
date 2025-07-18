@@ -22,13 +22,14 @@
 
 #include <websocketpp/config/asio_client.hpp>
 #include <websocketpp/client.hpp>
+#include <boost/interprocess/sync/interprocess_semaphore.hpp>
 #include <boost/asio/ssl/context.hpp>
 #include <boost/asio/ssl.hpp>
 #include <nlohmann/json.hpp>
 
 using namespace std;
 
-#define DEBUG 1
+// #define DEBUG_LOG 1
 
 inline string current_timestamp()
 {
@@ -48,7 +49,7 @@ inline string current_thread_id()
     return oss.str();
 }
 
-#ifndef DEBUG
+#ifndef DEBUG_LOG
 #define LOGD(mess, ...)
 #else
 #define LOGD(mess, ...) printf("[%s] [%s] [DEBUG] [%s] " mess "\n", current_thread_id().c_str(), current_timestamp().c_str(), __func__, ##__VA_ARGS__);
@@ -159,6 +160,9 @@ struct Bot
     vector<string> timeframes;
     string treeData;
     int userID;
+    string apiKey;
+    string secretKey;
+    string iv;
 };
 
 struct Digit

@@ -55,14 +55,6 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitISymbol(ExprParser::ISymbolContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitIBullBearList(ExprParser::IBullBearListContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual std::any visitIAvgHigh(ExprParser::IAvgHighContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -119,10 +111,6 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitIBroker(ExprParser::IBrokerContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual std::any visitIRSI(ExprParser::IRSIContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -168,10 +156,6 @@ public:
   }
 
   virtual std::any visitMAX(ExprParser::MAXContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitIVolume24hInUSD(ExprParser::IVolume24hInUSDContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -303,10 +287,6 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitITimeframe(ExprParser::ITimeframeContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual std::any visitIDoji(ExprParser::IDojiContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -316,18 +296,6 @@ public:
   }
 
   virtual std::any visitIUpperShadow(ExprParser::IUpperShadowContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitBroker(ExprParser::BrokerContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitSymbol(ExprParser::SymbolContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitTimeframe(ExprParser::TimeframeContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -356,10 +324,6 @@ public:
   }
 
   virtual std::any visitVolume(ExprParser::VolumeContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitVolume24h_in_usd(ExprParser::Volume24h_in_usdContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -468,10 +432,6 @@ public:
   }
 
   virtual std::any visitMarsi(ExprParser::MarsiContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitBull_bear_list(ExprParser::Bull_bear_listContext *ctx) override {
     return visitChildren(ctx);
   }
 

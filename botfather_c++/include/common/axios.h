@@ -3,7 +3,7 @@
 
 class Axios {
 public:
-    static std::string get(const std::string &url);
+    static std::string get(const std::string &url, const vector<string> &headers = {});
     static std::string post(const std::string &url,
                             const std::string &body,
                             const std::string &contentType,
