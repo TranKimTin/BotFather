@@ -39,7 +39,7 @@ static int binarySearch(const vector<Symbol> &symbolList, const string &symbol)
 
 void Worker::run()
 {
-    Timer timer(StringFormat("onCloseCandle %s %s %s", broker.c_str(), symbol.c_str(), timeframe.c_str()));
+    Timer timer(StringFormat("onCloseCandle {} {} {}", broker, symbol, timeframe));
     for (const shared_ptr<Bot> &bot : *botList)
     {
         try
@@ -57,7 +57,7 @@ void Worker::run()
         }
         catch (const exception &e)
         {
-            LOGE("Error in bot %s: %s", bot->botName.c_str(), e.what());
+            LOGE("Error in bot {}: {}", bot->botName, e.what());
             continue;
         }
     }
@@ -105,13 +105,13 @@ bool Worker::adjustParam(NodeData &node)
         expr = calculateSub(expr);
         if (node.unitStop == UNIT::PERCENT)
         {
-            expr = StringFormat("close() * (100 + abs(%s)) / 100", expr.c_str());
+            expr = StringFormat("close() * (100 + abs({})) / 100", expr);
         }
 
         any result = calculate(expr);
         if (!result.has_value() || result.type() != typeid(double))
         {
-            LOGE("Calculate stop error. expr=%s", node.stop.c_str());
+            LOGE("Calculate stop error. expr={}", node.stop);
             return false;
         }
 
@@ -126,13 +126,13 @@ bool Worker::adjustParam(NodeData &node)
         expr = calculateSub(expr);
         if (node.unitStop == UNIT::PERCENT)
         {
-            expr = StringFormat("close() * (100 - abs(%s)) / 100", expr.c_str());
+            expr = StringFormat("close() * (100 - abs({})) / 100", expr);
         }
 
         any result = calculate(expr);
         if (!result.has_value() || result.type() != typeid(double))
         {
-            LOGE("Calculate stop error. expr=%s", node.stop.c_str());
+            LOGE("Calculate stop error. expr={}", node.stop);
             return false;
         }
 
@@ -153,13 +153,13 @@ bool Worker::adjustParam(NodeData &node)
         expr = calculateSub(expr);
         if (node.unitEntry == UNIT::PERCENT)
         {
-            expr = StringFormat("close() * (100 - abs(%s)) / 100", expr.c_str());
+            expr = StringFormat("close() * (100 - abs({})) / 100", expr);
         }
 
         any result = calculate(expr);
         if (!result.has_value() || result.type() != typeid(double))
         {
-            LOGE("Calculate entry error. expr=%s", node.entry.c_str());
+            LOGE("Calculate entry error. expr={}", node.entry);
             return false;
         }
 
@@ -174,13 +174,13 @@ bool Worker::adjustParam(NodeData &node)
         expr = calculateSub(expr);
         if (node.unitEntry == UNIT::PERCENT)
         {
-            expr = StringFormat("close() * (100 + abs(%s)) / 100", expr.c_str());
+            expr = StringFormat("close() * (100 + abs({})) / 100", expr);
         }
 
         any result = calculate(expr);
         if (!result.has_value() || result.type() != typeid(double))
         {
-            LOGE("Calculate entry error. expr=%s", node.entry.c_str());
+            LOGE("Calculate entry error. expr={}", node.entry);
             return false;
         }
 
@@ -226,13 +226,13 @@ bool Worker::adjustParam(NodeData &node)
         expr = calculateSub(expr);
         if (node.unitSL == UNIT::PERCENT)
         {
-            expr = StringFormat("(%s) * (100 - abs(%s)) / 100", node.entry.c_str(), expr.c_str());
+            expr = StringFormat("({}) * (100 - abs({})) / 100", node.entry, expr);
         }
 
         any result = calculate(expr);
         if (!result.has_value() || result.type() != typeid(double))
         {
-            LOGE("Calculate SL error. expr=%s", node.sl.c_str());
+            LOGE("Calculate SL error. expr={}", node.sl);
             return false;
         }
 
@@ -247,13 +247,13 @@ bool Worker::adjustParam(NodeData &node)
         expr = calculateSub(expr);
         if (node.unitSL == UNIT::PERCENT)
         {
-            expr = StringFormat("(%s) * (100 + abs(%s)) / 100", node.entry.c_str(), expr.c_str());
+            expr = StringFormat("({}) * (100 + abs({})) / 100", node.entry, expr);
         }
 
         any result = calculate(expr);
         if (!result.has_value() || result.type() != typeid(double))
         {
-            LOGE("Calculate SL error. expr=%s", node.sl.c_str());
+            LOGE("Calculate SL error. expr={}", node.sl);
             return false;
         }
 
@@ -274,17 +274,17 @@ bool Worker::adjustParam(NodeData &node)
         expr = calculateSub(expr);
         if (node.unitTP == UNIT::PERCENT)
         {
-            expr = StringFormat("(%s) * (100 + abs(%s)) / 100", node.entry.c_str(), expr.c_str());
+            expr = StringFormat("({}) * (100 + abs({})) / 100", node.entry, expr);
         }
         else if (node.unitTP == UNIT::RR)
         {
-            expr = StringFormat("(%s + abs(%s - %s) * abs(%s))", node.entry.c_str(), node.entry.c_str(), node.sl.c_str(), expr.c_str());
+            expr = StringFormat("({} + abs({} - {}) * abs({}))", node.entry, node.entry, node.sl, expr);
         }
 
         any result = calculate(expr);
         if (!result.has_value() || result.type() != typeid(double))
         {
-            LOGE("Calculate TP error. expr=%s", node.tp.c_str());
+            LOGE("Calculate TP error. expr={}", node.tp);
             return false;
         }
 
@@ -299,17 +299,17 @@ bool Worker::adjustParam(NodeData &node)
         expr = calculateSub(expr);
         if (node.unitTP == UNIT::PERCENT)
         {
-            expr = StringFormat("(%s) * (100 - abs(%s)) / 100", node.entry.c_str(), expr.c_str());
+            expr = StringFormat("({}) * (100 - abs({})) / 100", node.entry, expr);
         }
         else if (node.unitTP == UNIT::RR)
         {
-            expr = StringFormat("(%s - abs(%s - %s) * abs(%s))", node.entry.c_str(), node.entry.c_str(), node.sl.c_str(), expr.c_str());
+            expr = StringFormat("({} - abs({} - {}) * abs({}))", node.entry, node.entry, node.sl, expr);
         }
 
         any result = calculate(expr);
         if (!result.has_value() || result.type() != typeid(double))
         {
-            LOGE("Calculate TP error. expr=%s", node.tp.c_str());
+            LOGE("Calculate TP error. expr={}", node.tp);
             return false;
         }
 
@@ -330,13 +330,13 @@ bool Worker::adjustParam(NodeData &node)
         expr = calculateSub(expr);
         if (node.unitVolume == UNIT::USD)
         {
-            expr = StringFormat("(%s) / %s", expr.c_str(), node.entry.c_str());
+            expr = StringFormat("({}) / {}", expr, node.entry);
         }
 
         any result = calculate(expr);
         if (!result.has_value() || result.type() != typeid(double))
         {
-            LOGE("Calculate volume error. expr=%s", node.volume.c_str());
+            LOGE("Calculate volume error. expr={}", node.volume);
             return false;
         }
 
@@ -357,17 +357,17 @@ bool Worker::adjustParam(NodeData &node)
         expr = calculateSub(expr);
         if (node.unitExpiredTime == UNIT::MINUTE)
         {
-            expr = StringFormat("((%s) * 60000) + %lld", expr.c_str(), nextTime(startTime[0], timeframe));
+            expr = StringFormat("(({}) * 60000) + {}", expr, nextTime(startTime[0], timeframe));
         }
         else if (node.unitExpiredTime == UNIT::CANDLE)
         {
-            expr = StringFormat("((%s) * 60000 * %d) + %lld", expr.c_str(), timeframeToNumberMinutes(timeframe), nextTime(startTime[0], timeframe));
+            expr = StringFormat("(({}) * 60000 * {}) + {}", expr, timeframeToNumberMinutes(timeframe), nextTime(startTime[0], timeframe));
         }
 
         any result = calculate(expr);
         if (!result.has_value() || result.type() != typeid(double))
         {
-            LOGE("Calculate expiredTime error. expr=%s", node.expiredTime.c_str());
+            LOGE("Calculate expiredTime error. expr={}", node.expiredTime);
             return false;
         }
 
@@ -434,7 +434,7 @@ bool Worker::handleLogic(NodeData &nodeData, Bot &bot)
         }
         else
         {
-            LOGD("No result. symbol: %s:%s, timeframe: %s, expr=%s", broker.c_str(), symbol.c_str(), timeframe.c_str(), nodeData.value.c_str());
+            LOGD("No result. symbol: {}:{}, timeframe: {}, expr={}", broker, symbol, timeframe, nodeData.value);
             return false;
         }
     }
@@ -457,10 +457,10 @@ bool Worker::handleLogic(NodeData &nodeData, Bot &bot)
             {"bybit_future", "https://www.bybit.com/trade/usdt/" + symbol}};
 
         string mess = emoji[broker];
-        mess += StringFormat("\n<a href='%s'><b>%s</b></a>", url[broker].c_str(), symbol.c_str());
-        mess += StringFormat("\n%s", broker.c_str());
-        mess += StringFormat("\n%s %s", timeframe.c_str(), toTimeString(startTime[0]).c_str());
-        mess += StringFormat("\n%s", content.c_str());
+        mess += StringFormat("\n<a href='{}'><b>{}</b></a>", url[broker], symbol);
+        mess += StringFormat("\n{}", broker);
+        mess += StringFormat("\n{} {}", timeframe, toTimeString(startTime[0]));
+        mess += StringFormat("\n{}", content);
 
         for (const string &id : bot.idTelegram)
         {
@@ -480,10 +480,10 @@ bool Worker::handleLogic(NodeData &nodeData, Bot &bot)
 
     if (find(orderTypes.begin(), orderTypes.end(), node.type) != orderTypes.end())
     {
-        LOGI("New order - BotID: %d, Type: %s, Broker: %s, Symbol: %s, Timeframe: %s, Entry: %s, Stop: %s, TP: %s, SL: %s, Volume: %s, ExpiredTime: %s",
-             botID, node.type.c_str(), broker.c_str(), symbol.c_str(), timeframe.c_str(),
-             node.entry.c_str(), node.stop.c_str(), node.tp.c_str(), node.sl.c_str(),
-             node.volume.c_str(), node.expiredTime.c_str());
+        LOGI("New order - BotID: {}, Type: {}, Broker: {}, Symbol: {}, Timeframe: {}, Entry: {}, Stop: {}, TP: {}, SL: {}, Volume: {}, ExpiredTime: {}",
+             botID, node.type, broker, symbol, timeframe,
+             node.entry, node.stop, node.tp, node.sl,
+             node.volume, node.expiredTime);
 
         if (broker == "binance_future" && !bot.apiKey.empty() && !bot.secretKey.empty() && !bot.iv.empty())
         {
@@ -501,7 +501,7 @@ bool Worker::handleLogic(NodeData &nodeData, Bot &bot)
                 }
                 else
                 {
-                    LOGE("Invalid TP or SL for BUY_MARKET order. TP: %s, SL: %s, Entry: %s", node.tp.c_str(), node.sl.c_str(), node.entry.c_str());
+                    LOGE("Invalid TP or SL for BUY_MARKET order. TP: {}, SL: {}, Entry: {}", node.tp, node.sl, node.entry);
                 }
             }
             else if (node.type == NODE_TYPE::BUY_LIMIT)
@@ -512,7 +512,7 @@ bool Worker::handleLogic(NodeData &nodeData, Bot &bot)
                 }
                 else
                 {
-                    LOGE("Invalid TP or SL for BUY_LIMIT order. TP: %s, SL: %s, Entry: %s", node.tp.c_str(), node.sl.c_str(), node.entry.c_str());
+                    LOGE("Invalid TP or SL for BUY_LIMIT order. TP: {}, SL: {}, Entry: {}", node.tp, node.sl, node.entry);
                 }
             }
             else if (node.type == NODE_TYPE::SELL_MARKET)
@@ -523,7 +523,7 @@ bool Worker::handleLogic(NodeData &nodeData, Bot &bot)
                 }
                 else
                 {
-                    LOGE("Invalid TP or SL for SELL_MARKET order. TP: %s, SL: %s, Entry: %s", node.tp.c_str(), node.sl.c_str(), node.entry.c_str());
+                    LOGE("Invalid TP or SL for SELL_MARKET order. TP: {}, SL: {}, Entry: {}", node.tp, node.sl, node.entry);
                 }
             }
             else if (node.type == NODE_TYPE::SELL_LIMIT)
@@ -534,7 +534,7 @@ bool Worker::handleLogic(NodeData &nodeData, Bot &bot)
                 }
                 else
                 {
-                    LOGE("Invalid TP or SL for SELL_LIMIT order. TP: %s, SL: %s, Entry: %s", node.tp.c_str(), node.sl.c_str(), node.entry.c_str());
+                    LOGE("Invalid TP or SL for SELL_LIMIT order. TP: {}, SL: {}, Entry: {}", node.tp, node.sl, node.entry);
                 }
             }
         }

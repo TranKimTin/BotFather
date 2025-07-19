@@ -21,7 +21,7 @@ void SocketBybitFuture::on_message(connection_hdl, message_ptr msg)
     string type = j["type"].get<string>();
     if (type != "snapshot")
     {
-        LOGE("Invalid message type: %s", type.c_str());
+        LOGE("Invalid message type: {}", type);
         return;
     }
 
@@ -81,7 +81,7 @@ void SocketBybitFuture::onSocketConnected(connection_hdl hdl)
 
 void SocketBybitFuture::connectSocket()
 {
-    LOGI("socket %s init %lu symbols", broker.c_str(), symbolList.size());
+    LOGI("socket {} init {} symbols", broker, symbolList.size());
 
     ws.set_access_channels(websocketpp::log::alevel::none);
     ws.clear_access_channels(websocketpp::log::alevel::all);
@@ -111,7 +111,7 @@ vector<string> SocketBybitFuture::getSymbolList()
 RateData SocketBybitFuture::getOHLCV(const string &symbol, const string &timeframe, int limit, long long since)
 {
     RateData rateData = getBybitFutureOHLCV(symbol, timeframe, limit, since);
-    LOGD("Get OHLCV %s:%s %s - %d items", broker.c_str(), symbol.c_str(), timeframe.c_str(), (int)rateData.startTime.size());
+    LOGD("Get OHLCV {}:{} {} - {} items", broker, symbol, timeframe, (int)rateData.startTime.size());
     return rateData;
 }
 

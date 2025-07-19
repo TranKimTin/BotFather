@@ -14,11 +14,11 @@ MySQLConnector::MySQLConnector()
 
         initializePool(poolSize);
 
-        LOGI("MySQL connection pool initialized with %d connections", poolSize);
+        LOGI("MySQL connection pool initialized with {} connections", poolSize);
     }
     catch (sql::SQLException &e)
     {
-        LOGE("MySQL pool init failed: %s (SQLState: %s, ErrorCode: %d)",
+        LOGE("MySQL pool init failed: {} (SQLState: {}, ErrorCode: {})",
              e.what(), e.getSQLStateCStr(), e.getErrorCode());
     }
 }
@@ -144,7 +144,7 @@ int MySQLConnector::executeUpdate(const string &query, const vector<any> &params
     }
     catch (sql::SQLException &e)
     {
-        LOGE("MySQL error: %s (SQLState: %s, ErrorCode: %d)",
+        LOGE("MySQL error: {} (SQLState: {}, ErrorCode: {})",
              e.what(), e.getSQLStateCStr(), e.getErrorCode());
         return -1;
     }

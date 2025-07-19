@@ -237,38 +237,10 @@ vector<string> convertJsonStringArrayToVector(string s)
         }
         else
         {
-            LOGE("Invalid item in JSON array: %s", item.dump().c_str());
+            LOGE("Invalid item in JSON array: {}", item.dump());
         }
     }
     return result;
-}
-
-string StringFormat(const char *format, ...)
-{
-    va_list args;
-    va_start(args, format);
-
-    // tạo buffer tạm lớn
-    vector<char> buffer(1024);
-    int needed = vsnprintf(buffer.data(), buffer.size(), format, args);
-    va_end(args);
-
-    if (needed < 0)
-        return "";
-
-    if (static_cast<size_t>(needed) < buffer.size())
-    {
-        return string(buffer.data());
-    }
-    else
-    {
-        // nếu buffer chưa đủ lớn, cấp lại
-        buffer.resize(needed + 1);
-        va_start(args, format);
-        vsnprintf(buffer.data(), buffer.size(), format, args);
-        va_end(args);
-        return string(buffer.data());
-    }
 }
 
 string doubleToString(double value, int precision)
@@ -349,9 +321,9 @@ RateData getBybitFutureOHLCV(const string &symbol, const string &timeframe, int 
         tf = "D";
     }
 
-    string url = StringFormat("https://api.bybit.com/v5/market/kline?category=linear&symbol=%s&interval=%s&limit=%d", symbol.c_str(), tf.c_str(), limit);
+    string url = StringFormat("https://api.bybit.com/v5/market/kline?category=linear&symbol={}&interval={}&limit={}", symbol, tf, limit);
     if (since)
-        url += StringFormat("&start=%lld", since);
+        url += StringFormat("&start={}", since);
 
     string response = Axios::get(url);
     json j = json::parse(response);
@@ -391,9 +363,9 @@ RateData getBybitOHLCV(const string &symbol, const string &timeframe, int limit,
         tf = "D";
     }
 
-    string url = StringFormat("https://api.bybit.com/v5/market/kline?category=spot&symbol=%s&interval=%s&limit=%d", symbol.c_str(), tf.c_str(), limit);
+    string url = StringFormat("https://api.bybit.com/v5/market/kline?category=spot&symbol={}&interval={}&limit={}", symbol, tf, limit);
     if (since)
-        url += StringFormat("&start=%lld", since);
+        url += StringFormat("&start={}", since);
 
     string response = Axios::get(url);
     json j = json::parse(response);
@@ -437,11 +409,11 @@ RateData getOkxOHLCV(const string &symbol, const string &timeframe, int limit, l
     string url = "";
     if (since)
     {
-        url = StringFormat("https://www.okx.com/api/v5/market/history-candles?instId=%s&bar=%s&limit=%d&after=%lld", symbol.c_str(), tf.c_str(), limit, since + limit * timeframeToNumberMiliseconds(timeframe));
+        url = StringFormat("https://www.okx.com/api/v5/market/history-candles?instId={}&bar={}&limit={}&after={}", symbol, tf, limit, since + limit * timeframeToNumberMiliseconds(timeframe));
     }
     else
     {
-        url = StringFormat("https://www.okx.com/api/v5/market/candles?instId=%s&bar=%s&limit=%d", symbol.c_str(), tf.c_str(), limit);
+        url = StringFormat("https://www.okx.com/api/v5/market/candles?instId={}&bar={}&limit=%d", symbol, tf, limit);
     }
 
     string response = Axios::get(url);

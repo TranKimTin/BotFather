@@ -11,7 +11,7 @@ BinanceFuture::BinanceFuture(const string &apiKey, const string &secretKey)
 string BinanceFuture::buyMarket(const string &symbol, string quantity,
                                 string takeProfit, string stopLoss)
 {
-    string clientOrderId = StringFormat("BFBM%s%lld", symbol.c_str(), getCurrentTime());
+    string clientOrderId = StringFormat("BFBM{}{}", symbol, getCurrentTime());
     map<string, string> params = {
         {"recvWindow", "5000"},
         {"symbol", symbol},
@@ -44,7 +44,7 @@ string BinanceFuture::placeBuyMarketTPSL(const string &symbol, string &quantity,
         {
             json j = json::parse(resTP);
             tpID = j["clientOrderId"].get<string>();
-            LOGI("TP order id: %s", tpID.c_str());
+            LOGI("TP order id: {}", tpID);
         }
     }
     string slID;
@@ -56,7 +56,7 @@ string BinanceFuture::placeBuyMarketTPSL(const string &symbol, string &quantity,
             LOGI("Place SL error");
             if (!tpID.empty())
             {
-                LOGI("Cancel TP order %s", tpID.c_str());
+                LOGI("Cancel TP order {}", tpID);
                 cancelOrderByClientId(symbol, tpID);
             }
             LOGI("Close position");
@@ -66,7 +66,7 @@ string BinanceFuture::placeBuyMarketTPSL(const string &symbol, string &quantity,
         {
             json j = json::parse(resSL);
             slID = j["clientOrderId"].get<string>();
-            LOGI("SL order id: %s", slID.c_str());
+            LOGI("SL order id: {}", slID);
         }
     }
     if (!tpID.empty() && !slID.empty())
@@ -86,7 +86,7 @@ string BinanceFuture::placeBuyMarketTPSL(const string &symbol, string &quantity,
         }
         else
         {
-            LOGI("Insert order to database success %s %s %s", clientOrderId.c_str(), tpID.c_str(), slID.c_str());
+            LOGI("Insert order to database success {} {} {}", clientOrderId, tpID, slID);
         }
     }
     return resEntry;
@@ -94,7 +94,7 @@ string BinanceFuture::placeBuyMarketTPSL(const string &symbol, string &quantity,
 
 string BinanceFuture::sellMarket(const string &symbol, string quantity, string takeProfit, string stopLoss)
 {
-    string clientOrderId = StringFormat("BFSM%s%lld", symbol.c_str(), getCurrentTime());
+    string clientOrderId = StringFormat("BFSM{}{}", symbol, getCurrentTime());
     map<string, string> params = {
         {"recvWindow", "5000"},
         {"symbol", symbol},
@@ -126,7 +126,7 @@ string BinanceFuture::placeSellMarketTPSL(const string &symbol, string &quantity
         {
             json j = json::parse(resTP);
             tpID = j["clientOrderId"].get<string>();
-            LOGI("TP order id: %s", tpID.c_str());
+            LOGI("TP order id: {}", tpID);
         }
     }
 
@@ -139,7 +139,7 @@ string BinanceFuture::placeSellMarketTPSL(const string &symbol, string &quantity
             LOGI("Place SL error");
             if (!tpID.empty())
             {
-                LOGI("Cancel TP order %s", tpID.c_str());
+                LOGI("Cancel TP order {}", tpID);
                 cancelOrderByClientId(symbol, tpID);
             }
             LOGI("Close position");
@@ -149,7 +149,7 @@ string BinanceFuture::placeSellMarketTPSL(const string &symbol, string &quantity
         {
             json j = json::parse(resSL);
             slID = j["clientOrderId"].get<string>();
-            LOGI("SL order id: %s", slID.c_str());
+            LOGI("SL order id: {}", slID);
         }
     }
     if (!tpID.empty() && !slID.empty())
@@ -169,7 +169,7 @@ string BinanceFuture::placeSellMarketTPSL(const string &symbol, string &quantity
         }
         else
         {
-            LOGI("Insert order to database success %s %s %s", clientOrderId.c_str(), tpID.c_str(), slID.c_str());
+            LOGI("Insert order to database success {} {} {}", clientOrderId, tpID, slID);
         }
     }
     return resEntry;
@@ -177,7 +177,7 @@ string BinanceFuture::placeSellMarketTPSL(const string &symbol, string &quantity
 
 string BinanceFuture::buyLimit(const string &symbol, string quantity, string price, string takeProfit, string stopLoss, string expiredTime)
 {
-    string clientOrderId = StringFormat("BFBL%s%lld", symbol.c_str(), getCurrentTime());
+    string clientOrderId = StringFormat("BFBL{}{}", symbol, getCurrentTime());
     map<string, string> params = {
         {"recvWindow", "5000"},
         {"symbol", symbol},
@@ -222,7 +222,7 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
             string resCancel = cancelOrderByClientId(symbol, clientOrderId);
             if (resCancel == "")
             {
-                LOGI("Cancel order %s error", clientOrderId.c_str());
+                LOGI("Cancel order {} error", clientOrderId);
                 LOGI("Close position");
                 return sellMarket(symbol, quantity, "", "");
             }
@@ -232,7 +232,7 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
         {
             json j = json::parse(resTP);
             tpID = j["clientOrderId"].get<string>();
-            LOGI("TP order id: %s", tpID.c_str());
+            LOGI("TP order id: {}", tpID);
         }
     }
 
@@ -245,7 +245,7 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
             LOGI("Place SL error");
             if (!tpID.empty())
             {
-                LOGI("Cancel TP order %s", tpID.c_str());
+                LOGI("Cancel TP order {}", tpID);
                 cancelOrderByClientId(symbol, tpID);
             }
 
@@ -253,7 +253,7 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
             string resCancel = cancelOrderByClientId(symbol, clientOrderId);
             if (resCancel == "")
             {
-                LOGI("Cancel order %s error", clientOrderId.c_str());
+                LOGI("Cancel order {} error", clientOrderId);
                 return sellMarket(symbol, quantity, "", "");
             }
         }
@@ -261,7 +261,7 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
         {
             json j = json::parse(resSL);
             slID = j["clientOrderId"].get<string>();
-            LOGI("SL order id: %s", slID.c_str());
+            LOGI("SL order id: {}", slID);
         }
     }
 
@@ -282,7 +282,7 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
         }
         else
         {
-            LOGI("Insert order to database success %s %s %s", clientOrderId.c_str(), tpID.c_str(), slID.c_str());
+            LOGI("Insert order to database success {} {} {}", clientOrderId, tpID, slID);
         }
     }
 
@@ -291,7 +291,7 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
 
 string BinanceFuture::sellLimit(const string &symbol, string quantity, string price, string takeProfit, string stopLoss, string expiredTime)
 {
-    string clientOrderId = StringFormat("BFSL%s%lld", symbol.c_str(), getCurrentTime());
+    string clientOrderId = StringFormat("BFSL{}{}", symbol, getCurrentTime());
     map<string, string> params = {
         {"recvWindow", "5000"},
         {"symbol", symbol},
@@ -336,7 +336,7 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
             string resCancel = cancelOrderByClientId(symbol, clientOrderId);
             if (resCancel == "")
             {
-                LOGI("Cancel order %s error", clientOrderId.c_str());
+                LOGI("Cancel order {} error", clientOrderId);
                 LOGI("Close position");
                 return buyMarket(symbol, quantity, "", "");
             }
@@ -346,7 +346,7 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
         {
             json j = json::parse(resTP);
             tpID = j["clientOrderId"].get<string>();
-            LOGI("TP order id: %s", tpID.c_str());
+            LOGI("TP order id: {}", tpID);
         }
     }
 
@@ -359,7 +359,7 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
             LOGI("Place SL error");
             if (!tpID.empty())
             {
-                LOGI("Cancel TP order %s", tpID.c_str());
+                LOGI("Cancel TP order {}", tpID);
                 cancelOrderByClientId(symbol, tpID);
             }
 
@@ -367,7 +367,7 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
             string resCancel = cancelOrderByClientId(symbol, clientOrderId);
             if (resCancel == "")
             {
-                LOGI("Cancel order %s error", clientOrderId.c_str());
+                LOGI("Cancel order {} error", clientOrderId);
                 return buyMarket(symbol, quantity, "", "");
             }
         }
@@ -375,7 +375,7 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
         {
             json j = json::parse(resSL);
             slID = j["clientOrderId"].get<string>();
-            LOGI("SL order id: %s", slID.c_str());
+            LOGI("SL order id: {}", slID);
         }
     }
     if (!tpID.empty() && !slID.empty())
@@ -395,7 +395,7 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
         }
         else
         {
-            LOGI("Insert order to database success %s %s %s", clientOrderId.c_str(), tpID.c_str(), slID.c_str());
+            LOGI("Insert order to database success {} {} {}", clientOrderId, tpID, slID);
         }
     }
     return res;
@@ -404,8 +404,8 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
 string BinanceFuture::sendTPorSL(const string &symbol, const string &side, const string &type, string quantity, string stopPrice, string limitPrice)
 {
     string clientOrderId = (type == "TAKE_PROFIT_MARKET" || type == "STOP")
-                               ? StringFormat("BFTP%s%lld", symbol.c_str(), getCurrentTime())
-                               : StringFormat("BFSL%s%lld", symbol.c_str(), getCurrentTime());
+                               ? StringFormat("BFTP{}{}", symbol, getCurrentTime())
+                               : StringFormat("BFSL{}{}", symbol, getCurrentTime());
 
     map<string, string> params = {
         {"recvWindow", "5000"},
@@ -432,18 +432,18 @@ string BinanceFuture::sendOrder(const map<string, string> &params)
     string signature = sign(query);
     query += "&signature=" + signature;
 
-    string url = StringFormat("%s/fapi/v1/order?%s", BASE_URL.c_str(), query.c_str());
+    string url = StringFormat("{}/fapi/v1/order?{}", BASE_URL, query);
 
     try
     {
-        LOGI("Sending order to Binance Future: %s", url.c_str());
+        LOGI("Sending order to Binance Future: {}", url);
         string res = Axios::post(url, "", "application/json", {"X-MBX-APIKEY: " + apiKey});
-        LOGI("Response from Binance Future: %s", res.c_str());
+        LOGI("Response from Binance Future: {}", res);
         return res;
     }
     catch (const exception &e)
     {
-        LOGE("Error sending order to Binance Future: %s", e.what());
+        LOGE("Error sending order to Binance Future: {}", e.what());
         return "";
     }
 }
@@ -487,18 +487,18 @@ string BinanceFuture::cancelOrderByClientId(const string &symbol, const string &
     string signature = sign(query);
     query += "&signature=" + signature;
 
-    string url = StringFormat("%s/fapi/v1/order?%s", BASE_URL.c_str(), query.c_str());
+    string url = StringFormat("{}/fapi/v1/order?{}", BASE_URL, query);
 
     try
     {
-        LOGI("Cancelling order by client ID on Binance Future: %s", url.c_str());
+        LOGI("Cancelling order by client ID on Binance Future: {}", url);
         string res = Axios::del(url, {"X-MBX-APIKEY: " + apiKey});
-        LOGI("Response from Binance Future: %s", res.c_str());
+        LOGI("Response from Binance Future: {}", res);
         return res;
     }
     catch (const exception &e)
     {
-        LOGE("Error cancelling order by client ID on Binance Future: %s", e.what());
+        LOGE("Error cancelling order by client ID on Binance Future: {}", e.what());
         return "";
     }
 }
@@ -514,7 +514,7 @@ string BinanceFuture::getOrderStatus(const string &symbol, const string &orderId
     string signature = sign(query);
     query += "&signature=" + signature;
 
-    string url = StringFormat("%s/fapi/v1/order?%s", BASE_URL.c_str(), query.c_str());
+    string url = StringFormat("{}/fapi/v1/order?{}", BASE_URL, query);
 
     try
     {
@@ -523,7 +523,7 @@ string BinanceFuture::getOrderStatus(const string &symbol, const string &orderId
     }
     catch (const exception &e)
     {
-        LOGE("Error getting order status from Binance Future: %s", e.what());
+        LOGE("Error getting order status from Binance Future: {}", e.what());
         return "";
     }
 }

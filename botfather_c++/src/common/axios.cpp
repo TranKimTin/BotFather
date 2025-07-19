@@ -50,7 +50,7 @@ string Axios::get(const string &url, const vector<string> &headers)
     if (res && res->status == 200)
         return res->body;
 
-    LOGE("[request] GET request failed: %s. body=%s, url=%s", res ? res->reason.c_str() : "No response", res ? res->body.c_str() : "", url.c_str());
+    LOGE("[request] GET request failed: {}. body={}, url={}", res ? res->reason : "No response", res ? res->body : "", url);
     throw runtime_error("GET request failed.");
 }
 
@@ -67,7 +67,7 @@ string Axios::post(const string &url, const string &body,
     if (res && res->status == 200)
         return res->body;
 
-    LOGE("[request] POST request failed: reason: %s. body: %s. url=%s", res ? res->reason.c_str() : "No response", res ? res->body.c_str() : "", url.c_str());
+    LOGE("[request] POST request failed: reason: {}. body: {}. url={}", res ? res->reason : "No response", res ? res->body : "", url);
     throw runtime_error("POST request failed.");
 }
 
@@ -84,7 +84,7 @@ string Axios::put(const string &url, const string &body,
     if (res && res->status == 200)
         return res->body;
 
-    LOGE("[request] PUT request failed: %s. url=%s", res ? res->reason.c_str() : "No response", url.c_str());
+    LOGE("[request] PUT request failed: {}. url={}", res ? res->reason : "No response", url);
     throw runtime_error("PUT request failed.");
 }
 
@@ -100,6 +100,6 @@ string Axios::del(const string &url, const vector<string> &headers)
     if (res && res->status == 200)
         return res->body;
 
-    LOGE("[request] DELETE request failed: %s. body=%s, url=%s", res ? res->reason.c_str() : "No response", res ? res->body.c_str() : "", url.c_str());
+    LOGE("[request] DELETE request failed: {}. body={}, url={}", res ? res->reason : "No response", res ? res->body : "", url);
     throw runtime_error("DELETE request failed.");
 }

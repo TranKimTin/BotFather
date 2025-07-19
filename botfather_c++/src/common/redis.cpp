@@ -28,7 +28,7 @@ bool Redis::connect(const string &host, int port, const string &password)
     {
         if (context)
         {
-            LOGE("Redis error: %s", context->errstr);
+            LOGE("Redis error: {}", context->errstr);
             redisFree(context);
             context = nullptr;
         }
@@ -45,7 +45,7 @@ bool Redis::connect(const string &host, int port, const string &password)
         redisReply *reply = (redisReply *)redisCommand(context, "AUTH %s", password.c_str());
         if (reply->type == REDIS_REPLY_ERROR)
         {
-            LOGE("Redis authentication failed: %s", reply->str);
+            LOGE("Redis authentication failed: {}", reply->str);
             freeReplyObject(reply);
             redisFree(context);
             context = nullptr;
@@ -54,7 +54,7 @@ bool Redis::connect(const string &host, int port, const string &password)
         freeReplyObject(reply);
     }
 
-    LOGI("Redis connected to %s:%d", host.c_str(), port);
+    LOGI("Redis connected to {}:{}", host, port);
     return true;
 }
 

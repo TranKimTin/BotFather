@@ -1022,7 +1022,7 @@ string calculateSubExpr(string &expr, const string &broker, const string &symbol
         {
             if (st.size() == 0 || s == "")
             {
-                LOGE("Invalid expr %s", expr.c_str());
+                LOGE("Invalid expr {}", expr);
                 return "";
             }
             string lastS = st.top();
@@ -1043,7 +1043,7 @@ string calculateSubExpr(string &expr, const string &broker, const string &symbol
             }
             else
             {
-                LOGE("Invalid result type %s for expr %s", result.type().name(), expr.c_str());
+                LOGE("Invalid result type {} for expr {}", result.type().name(), expr);
                 return "";
             }
         }
@@ -1054,7 +1054,7 @@ string calculateSubExpr(string &expr, const string &broker, const string &symbol
     }
     if (st.size() > 1)
     {
-        LOGE("Invalid expr %s", expr.c_str());
+        LOGE("Invalid expr {}", expr);
         return "";
     }
     return (st.size() == 0 ? "" : st.top()) + s;
