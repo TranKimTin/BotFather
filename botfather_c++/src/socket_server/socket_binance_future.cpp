@@ -33,7 +33,7 @@ void SocketBinanceFuture::on_message(connection_hdl, message_ptr msg)
         for (const auto &item : jdata)
         {
             string symbol = item["s"].get<string>();
-            fundingRates[symbol] = stod(item["P"].get<string>()) * 100.0;
+            fundingRates[symbol] = stod(item["r"].get<string>()) * 100.0;
         }
     }
     else
