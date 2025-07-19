@@ -31,12 +31,13 @@ private:
     const double *close;
     const double *volume;
     long long *startTime;
+    double fundingRate;
 
 public:
     Expr(const string &broker, const string &symbol, const string &timeframe, int length,
          const double *open, const double *high, const double *low, const double *close, const double *volume,
-         long long *startTime)
-        : broker(broker), symbol(symbol), timeframe(timeframe), length(length), open(open), high(high), low(low), close(close), volume(volume), startTime(startTime)
+         long long *startTime, double fundingRate)
+        : broker(broker), symbol(symbol), timeframe(timeframe), length(length), open(open), high(high), low(low), close(close), volume(volume), startTime(startTime), fundingRate(fundingRate)
     {
     }
 
@@ -117,6 +118,7 @@ public:
 
     any visitHour(ExprParser::HourContext *ctx) override;
     any visitMinute(ExprParser::MinuteContext *ctx) override;
+    any visitFunding_rate(ExprParser::Funding_rateContext *ctx) override;
 
     // candlestick
     any visitBullish_engulfing(ExprParser::Bullish_engulfingContext *ctx) override;
@@ -128,8 +130,8 @@ public:
 
 any calculateExpr(const string &inputText, const string &broker, const string &symbol, const string &timeframe, int length,
                   const double *open, const double *high, const double *low, const double *close,
-                  const double *volume, long long *startTime);
+                  const double *volume, long long *startTime, double fundingRate);
 
 string calculateSubExpr(string &expr, const string &broker, const string &symbol, const string &timeframe, int length,
                         const double *open, const double *high, const double *low, const double *close,
-                        const double *volume, long long *startTime);
+                        const double *volume, long long *startTime, double fundingRate);

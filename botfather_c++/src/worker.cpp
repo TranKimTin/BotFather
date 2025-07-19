@@ -10,8 +10,8 @@
 
 static vector<string> orderTypes = {NODE_TYPE::BUY_MARKET, NODE_TYPE::BUY_LIMIT, NODE_TYPE::BUY_STOP_MARKET, NODE_TYPE::BUY_STOP_LIMIT, NODE_TYPE::SELL_MARKET, NODE_TYPE::SELL_LIMIT, NODE_TYPE::SELL_STOP_MARKET, NODE_TYPE::SELL_STOP_LIMIT};
 
-Worker::Worker(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, Digit digit)
-    : botList(botList), broker(move(broker)), symbol(move(symbol)), timeframe(move(timeframe)), open(move(open)), high(move(high)), low(move(low)), close(move(close)), volume(move(volume)), startTime(move(startTime)), digit(digit) {};
+Worker::Worker(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, Digit digit, double fundingRate)
+    : botList(botList), broker(move(broker)), symbol(move(symbol)), timeframe(move(timeframe)), open(move(open)), high(move(high)), low(move(low)), close(move(close)), volume(move(volume)), startTime(move(startTime)), digit(digit), fundingRate(fundingRate) {};
 
 static int binarySearch(const vector<Symbol> &symbolList, const string &symbol)
 {
@@ -83,14 +83,14 @@ string Worker::calculateSub(string &expr)
 {
     return calculateSubExpr(expr, broker, symbol, timeframe, open.size(),
                             open.data(), high.data(), low.data(), close.data(), volume.data(),
-                            startTime.data());
+                            startTime.data(), fundingRate);
 }
 
 any Worker::calculate(string &expr)
 {
     return calculateExpr(expr, broker, symbol, timeframe, open.size(),
                          open.data(), high.data(), low.data(), close.data(), volume.data(),
-                         startTime.data());
+                         startTime.data(), fundingRate);
 }
 
 bool Worker::adjustParam(NodeData &node)
@@ -410,7 +410,7 @@ bool Worker::handleLogic(NodeData &nodeData, Bot &bot)
     {
         any result = calculateExpr(nodeData.value, broker, symbol, timeframe, open.size(),
                                    open.data(), high.data(), low.data(), close.data(), volume.data(),
-                                   startTime.data());
+                                   startTime.data(), fundingRate);
 
         if (result.has_value())
         {

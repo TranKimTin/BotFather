@@ -36,6 +36,7 @@ void SocketData::init()
                 data[key].symbol = symbol;
                 data[key].interval = tf;
             }
+            fundingRates[symbol] = 0;
         }
     }
 
@@ -66,7 +67,7 @@ void SocketData::onCloseCandle(const string &symbol, string &timeframe, RateData
         throw runtime_error("No digit found for symbol " + symbol);
     }
 
-    shared_ptr<Worker> worker = make_shared<Worker>(botList, broker, symbol, timeframe, move(open), move(high), move(low), move(close), move(volume), move(startTime), digits[symbol]);
+    shared_ptr<Worker> worker = make_shared<Worker>(botList, broker, symbol, timeframe, move(open), move(high), move(low), move(close), move(volume), move(startTime), digits[symbol], fundingRates[symbol]);
 
     task.run([worker, this, timeframe]()
              { worker->run(); });
