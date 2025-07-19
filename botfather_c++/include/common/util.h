@@ -15,8 +15,15 @@ long long getCurrentTime();
 unordered_map<string, string> readEnvFile();
 vector<string> split(const string &s, char delimiter);
 vector<string> convertJsonStringArrayToVector(string s);
-string StringFormat(const char *format, ...);
 string doubleToString(double value, int precision);
+
+// template must define in header file
+template <typename... Args>
+string StringFormat(const string &format, Args &&...args)
+{
+    return fmt::format(format, forward<Args>(args)...);
+}
+
 
 RateData getBinanceOHLCV(const string &symbol, const string &timeframe, int limit, long long since = 0);
 RateData getBinanceFuturetOHLCV(const string &symbol, const string &timeframe, int limit, long long since = 0);

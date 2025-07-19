@@ -27,14 +27,26 @@ endif()
 
 option(DEBUG_LOG "Enable debug mode" OFF)
 if(DEBUG_LOG)
+    message(STATUS "Enable debug mode ON")
     add_definitions(-DDEBUG_LOG)
+else()
+    message(STATUS "Enable debug mode OFF")
+endif()
+
+option(LOG_FILE "Enable log file mode" OFF)
+if(LOG_FILE)
+    message(STATUS "Enable log file mode ON")
+    add_definitions(-DLOG_FILE)
+else()
+    message(STATUS "Enable log file mode OFF")
 endif()
 
 #include lib
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(OpenSSL REQUIRED)
-
-find_library(ANTLR4_LIB antlr4-runtime REQUIRED)
+find_package(spdlog REQUIRED)
+find_library(
+    ANTLR4_LIB antlr4-runtime REQUIRED)
 find_library(SIOCLIENT_LIB sioclient REQUIRED)
 find_library(SIOCLIENT_TLS_LIB sioclient_tls REQUIRED)
 
@@ -53,6 +65,7 @@ target_link_libraries(botfather
     tbb
     -lhiredis
     mysqlcppconn
+    spdlog::spdlog
     ${ANTLR4_LIB}
     ${SIOCLIENT_LIB}
     ${SIOCLIENT_TLS_LIB}

@@ -28,7 +28,7 @@ void test()
     const string API_KEY = env["API_KEY"];
     const string SECRET_KEY = env["SECRET_KEY"];
 
-    LOGD("SECRET_KEY: %s", SECRET_KEY.c_str());
+    LOGD("SECRET_KEY: {}", SECRET_KEY);
 
     shared_ptr<BinanceFuture> exchange = make_shared<BinanceFuture>(API_KEY, SECRET_KEY);
     exchange->buyLimit("BTCUSDT", "0.01", "100000", "101000", "99000", to_string(getCurrentTime() + 60000 * 15));
@@ -195,7 +195,7 @@ void sio_on_message(string const &event, sio::message::ptr const &data, bool isA
     if (event == "onUpdateConfig")
     {
         string botName = data->get_string();
-        LOGI("Update config for bot %s", botName.c_str());
+        LOGI("Update config for bot {}", botName);
         setBotList(botName);
     }
 }
@@ -225,7 +225,7 @@ void runApp()
     // connect socket_io to web config
     client.set_open_listener(sio_on_connected);
     client.socket()->on("onUpdateConfig", sio_on_message);
-    client.connect(StringFormat("%s:%d", env["HOST_WEB_SERVER"].c_str(), 8080));
+    client.connect(StringFormat("{}:{}", env["HOST_WEB_SERVER"], 8080));
 
     for (auto &t : threads)
     {

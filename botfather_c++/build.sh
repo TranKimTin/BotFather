@@ -12,5 +12,5 @@ cd "$SCRIPT_DIR"
 rm -rf build
 mkdir build
 
-cmake -S ./ -B ./build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake -S ./ -B ./build -G Ninja -DCMAKE_BUILD_TYPE=Release -DLOG_FILE=ON
 cmake --build ./build -- -j $(nproc)
