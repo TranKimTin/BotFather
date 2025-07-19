@@ -68,6 +68,18 @@ export default [
     },
     {
         type: 'function',
+        label: 'funding_rate',
+        detail: '()',
+        apply: 'funding_rate()',
+        boost: 0,
+        info: ` - Giá trị funding rate hiện tại (%)
+                - Spot có funding rate = 0
+                Ví dụ:
+                + funding_rate() = 0.01
+                `
+    },
+    {
+        type: 'function',
         label: 'open',
         detail: '(i)',
         apply: 'open(0)',

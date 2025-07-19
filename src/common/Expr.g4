@@ -70,6 +70,7 @@ expr
     | max_ampl                  # iMaxAmpl
     | min_amplP                 # iMinAmplP
     | max_amplP                 # iMaxAmplP
+    | funding_rate              # iFundingRate
     ;
 
 hour: 'hour' '(' ')';
@@ -129,6 +130,7 @@ min_ampl: 'min_ampl' '(' INT (',' INT)? ')';
 max_ampl: 'max_ampl' '(' INT (',' INT)? ')';
 min_amplP: 'min_ampl%' '(' INT (',' INT)? ')';
 max_amplP: 'max_ampl%' '(' INT (',' INT)? ')';
+funding_rate: 'funding_rate' '(' ')';
 
 comparisonOp
     : '>'
