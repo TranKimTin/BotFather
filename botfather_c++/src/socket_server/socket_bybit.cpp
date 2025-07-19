@@ -21,7 +21,7 @@ void SocketBybit::on_message(connection_hdl, message_ptr msg)
     string type = j["type"].get<string>();
     if (type != "snapshot")
     {
-        LOGE("Invalid message type: {}", type);
+        LOGE("Invalid message type: {}. message: {}", type, message);
         return;
     }
 

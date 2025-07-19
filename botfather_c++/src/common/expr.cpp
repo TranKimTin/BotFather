@@ -857,6 +857,11 @@ any Expr::visitMinute(ExprParser::MinuteContext *ctx)
     return minute;
 }
 
+any Expr::visitFunding_rate(ExprParser::Funding_rateContext *ctx)
+{
+    return fundingRate;
+}
+
 any Expr::visitBullish_engulfing(ExprParser::Bullish_engulfingContext *ctx)
 {
     auto args = ctx->INT();
@@ -995,19 +1000,18 @@ CachedParseTree &getParseTree(const string &key)
 
 any calculateExpr(const string &inputText, const string &broker, const string &symbol, const string &timeframe, int length,
                   const double *open, const double *high, const double *low, const double *close,
-                  const double *volume, long long *startTime)
+                  const double *volume, long long *startTime, double fundingRate)
 {
     const std::string key = toLowerCase(inputText);
     auto &entry = getParseTree(key);
 
-    Expr expr(broker, symbol, timeframe, length, open, high, low, close, volume, startTime);
-
+    Expr expr(broker, symbol, timeframe, length, open, high, low, close, volume, startTime, fundingRate);
     return expr.visit(entry.tree);
 }
 
 string calculateSubExpr(string &expr, const string &broker, const string &symbol, const string &timeframe, int length,
                         const double *open, const double *high, const double *low, const double *close,
-                        const double *volume, long long *startTime)
+                        const double *volume, long long *startTime, double fundingRate)
 {
     stack<string> st;
     string s;
@@ -1027,7 +1031,7 @@ string calculateSubExpr(string &expr, const string &broker, const string &symbol
             }
             string lastS = st.top();
             st.pop();
-            any result = calculateExpr(s, broker, symbol, timeframe, length, open, high, low, close, volume, startTime);
+            any result = calculateExpr(s, broker, symbol, timeframe, length, open, high, low, close, volume, startTime, fundingRate);
             s = lastS + " ";
             if (result.type() == typeid(double))
             {

@@ -14,6 +14,7 @@ protected:
     shared_ptr<vector<shared_ptr<Bot>>> botList;
     shared_ptr<boost::asio::ssl::context> on_tls_init(connection_hdl);
     unordered_map<string, Digit> digits;
+    unordered_map<string, double> fundingRates;
     bool firstConnection;
     string uri;
 
