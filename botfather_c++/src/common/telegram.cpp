@@ -44,8 +44,8 @@ Telegram &Telegram::getInstance()
 
 bool Telegram::sendMessageInternal(const string &message, const string &chatId)
 {
-    string url = StringFormat("https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=%s&parse_mode=HTML&disable_web_page_preview=true",
-                              botToken.c_str(), urlEncode(chatId).c_str(), urlEncode(message).c_str());
+    string url = StringFormat("https://api.telegram.org/bot{}/sendMessage?chat_id={}&text={}&parse_mode=HTML&disable_web_page_preview=true",
+                              botToken, urlEncode(chatId), urlEncode(message));
 
     try
     {
@@ -54,7 +54,7 @@ bool Telegram::sendMessageInternal(const string &message, const string &chatId)
     }
     catch (const exception &e)
     {
-        LOGE("Failed to send Telegram message: %s. message=%s", e.what(), message.c_str());
+        LOGE("Failed to send Telegram message: {}. message={}", e.what(), message);
         return false;
     }
 }
@@ -117,7 +117,7 @@ void Telegram::debounceWorker(const string &chatId, shared_ptr<ChatBuffer> buffe
 
 void Telegram::sendMessage(const string &message, const string &chatId)
 {
-    LOGI("Sending Telegram message to chat %s: %s", chatId.c_str(), message.c_str());
+    LOGI("Sending Telegram message to chat {}: {}", chatId, message);
     shared_ptr<ChatBuffer> buffer;
 
     {

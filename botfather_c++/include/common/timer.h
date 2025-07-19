@@ -14,7 +14,7 @@ public:
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = end - start_;
         long long ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-        LOGI("%s: %lld ms", name_.c_str(), ms);
+        LOGI("{}: {} ms", name_, ms);
     }
 
 private:

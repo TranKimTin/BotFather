@@ -43,7 +43,7 @@ static void checkOrderStatus()
 
                 if (entryStatus.empty() || tpStatus.empty() || slStatus.empty())
                 {
-                    LOGE("Failed to get order status for entryID: %s, tpID: %s, slID: %s", entryID.c_str(), tpID.c_str(), slID.c_str());
+                    LOGE("Failed to get order status for entryID: {}, tpID: {}, slID: {}", entryID, tpID, slID);
                     return;
                 }
 
@@ -57,7 +57,7 @@ static void checkOrderStatus()
 
                 if (entryStatus == "CANCELED" || tpStatus != "NEW" || slStatus != "NEW")
                 {
-                    LOGI("Cancel order. entryID=%s(%s), tpID=%s(%s), slID=%s(%s)", entryID.c_str(), entryStatus.c_str(), tpID.c_str(), tpStatus.c_str(), slID.c_str(), slStatus.c_str());
+                    LOGI("Cancel order. entryID={}({}), tpID={}({}), slID={}({})", entryID, entryStatus, tpID, tpStatus, slID, slStatus);
                     if (entryStatus == "NEW")
                     {
                         exchange->cancelOrderByClientId(symbol, entryID);
@@ -74,13 +74,13 @@ static void checkOrderStatus()
 
                 if (entryStatus != "NEW" && tpStatus != "NEW" || slStatus != "NEW")
                 {
-                    LOGI("Order %d is completed. entryID: %s, tpID: %s, slID: %s", id, entryID.c_str(), tpID.c_str(), slID.c_str());
+                    LOGI("Order {} is completed. entryID: {}, tpID: {}, slID: {}", id, entryID, tpID, slID);
                     db.executeUpdate("DELETE FROM RealOrders WHERE id = ?", {id});
                 }
             }
             catch (const exception err)
             {
-                LOGE("Exception in thread: %s", err.what());
+                LOGE("Exception in thread: {}", err.what());
             }
              semaphore.post(); });
     }

@@ -40,7 +40,7 @@ void SocketBinance::on_message(connection_hdl, message_ptr msg)
 
 void SocketBinance::connectSocket()
 {
-    LOGI("socket %s init %lu symbols", broker.c_str(), symbolList.size());
+    LOGI("socket {} init {} symbols", broker, symbolList.size());
 
     ws.set_access_channels(websocketpp::log::alevel::none);
     ws.clear_access_channels(websocketpp::log::alevel::all);
@@ -78,7 +78,7 @@ vector<string> SocketBinance::getSymbolList()
 RateData SocketBinance::getOHLCV(const string &symbol, const string &timeframe, int limit, long long since)
 {
     RateData rateData = getBinanceOHLCV(symbol, timeframe, limit, since);
-    LOGD("Get OHLCV %s:%s %s - %d items", broker.c_str(), symbol.c_str(), timeframe.c_str(), (int)rateData.startTime.size());
+    LOGD("Get OHLCV {}:{} {} - {} items", broker, symbol, timeframe, rateData.startTime.size());
     return rateData;
 }
 

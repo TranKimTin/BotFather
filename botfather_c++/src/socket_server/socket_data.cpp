@@ -62,7 +62,7 @@ void SocketData::onCloseCandle(const string &symbol, string &timeframe, RateData
 
     if (digits.find(symbol) == digits.end())
     {
-        LOGE("No digit found for symbol %s:%s", broker.c_str(), symbol.c_str());
+        LOGE("No digit found for symbol {}:{}", broker, symbol);
         throw runtime_error("No digit found for symbol " + symbol);
     }
 
@@ -104,7 +104,7 @@ void SocketData::mergeData(RateData &rateData, const string &symbol, string &tim
     {
         // if (!ignoreClose)
         // {
-        //     LOGI("Force final %s %s %s", symbol.c_str(), timeframe.c_str(), toTimeString(rateStartTime).c_str());
+        //     LOGI("Force final {} {} {}", symbol, timeframe, toTimeString(rateStartTime));
         //     onCloseCandle(symbol, timeframe, rateData);
         // }
 
@@ -119,7 +119,7 @@ void SocketData::mergeData(RateData &rateData, const string &symbol, string &tim
     }
     else
     {
-        LOGI("Merge data fail %s:%s %s %s", broker.c_str(), symbol.c_str(), timeframe.c_str(), currentTF.c_str());
+        LOGI("Merge data fail {}:{} {} {}", broker, symbol, timeframe, currentTF);
     }
 }
 
@@ -171,10 +171,10 @@ void SocketData::updateCache(const RateData &rateData)
             
             if (!Redis::getInstance().pushBack(key, v))
             {
-                LOGE("Failed to update cache for %s:%s %s",broker.c_str(), symbol.c_str(), timeframe.c_str());
+                LOGE("Failed to update cache for {}:{} {}",broker, symbol, timeframe);
                 return;
             };
-            LOGD("Update cache %s %s %s - %d items",broker.c_str(), symbol.c_str(), timeframe.c_str(), (int)v.size());
+            LOGD("Update cache {} {} {} - {} items",broker, symbol, timeframe, v.size());
         }
         else
         {
@@ -207,10 +207,10 @@ void SocketData::updateCache(const RateData &rateData)
             {
                 if (!Redis::getInstance().pushFront(key, v))
                 {
-                    LOGE("Failed to update cache for %s:%s %s",broker.c_str(),  symbol.c_str(), timeframe.c_str());
+                    LOGE("Failed to update cache for {}:{} {}",broker,  symbol, timeframe);
                     return;
                 }
-                LOGD("Update cache %s %s %s - %d items", broker.c_str(), symbol.c_str(), timeframe.c_str(), (int)v.size());
+                LOGD("Update cache {} {} {} - {} items", broker, symbol, timeframe, v.size());
             }
         }
         while (Redis::getInstance().size(key) > MAX_CANDLE)
@@ -252,7 +252,7 @@ RateData SocketData::getOHLCVFromCache(const string &symbol, const string &timef
         vector<string> parts = split(item, '_');
         if (parts.size() != 6)
         {
-            LOGE("Invalid OHLCV data format: %s", item.c_str());
+            LOGE("Invalid OHLCV data format: {}", item);
             break;
         }
         rateData.startTime.push_back(stoll(parts[0]));
@@ -263,7 +263,7 @@ RateData SocketData::getOHLCVFromCache(const string &symbol, const string &timef
         rateData.volume.push_back(stod(parts[5]));
     }
 
-    LOGD("Get OHLCV from cache %s %s %s - %d items", broker.c_str(), symbol.c_str(), timeframe.c_str(), (int)rateData.startTime.size());
+    LOGD("Get OHLCV from cache {} {} {} - {} items", broker, symbol, timeframe, rateData.startTime.size());
     return rateData;
 }
 
@@ -279,7 +279,7 @@ void SocketData::onSocketConnected(connection_hdl hdl)
     if (firstConnection)
     {
         firstConnection = false;
-        LOGI("Socket %s connected", broker.c_str());
+        LOGI("Socket {} connected", broker);
 
         thread t([this]()
                  {
@@ -344,7 +344,7 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                                 }
                                 adjustData(rateData);
                                 if (!isValidData(rateData)) {
-                                    LOGE("Invalid data for %s:%s %s", broker.c_str(), symbol.c_str(), tf.c_str());
+                                    LOGE("Invalid data for {}:{} {}", broker, symbol, tf);
                                     rateData = getOHLCV(symbol, tf, MAX_CANDLE);
                                     cnt++;
                                     string key = broker + "_" + symbol + "_" + tf;
@@ -378,7 +378,7 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                 }
             }
             
-            LOGD("%s: Init %d / %d. Get from cache %d times (%.1f%%)", broker.c_str(), end, (int) symbolList.size(), cnt, end * 100.0 / symbolList.size());
+            LOGD("{}: Init {} / {}. Get from cache {} times ({:.1f}%)", broker, end, symbolList.size(), cnt, end * 100.0 / symbolList.size());
 
             SLEEP_FOR(cnt * 5000 / 100 + 100);
         } });
@@ -387,7 +387,7 @@ void SocketData::onSocketConnected(connection_hdl hdl)
     }
     else
     {
-        LOGI("Socket %s reconnected", broker.c_str());
+        LOGI("Socket {} reconnected", broker);
     }
 }
 
@@ -397,7 +397,7 @@ void SocketData::reconnectSocket()
     WebSocket::connection_ptr con = ws.get_connection(uri, ec);
     if (ec)
     {
-        LOGE("Socket %s connect error: %s. uri=%s", broker.c_str(), ec.message().c_str(), uri.c_str());
+        LOGE("Socket {} connect error: {}. uri={}", broker, ec.message(), uri);
         SLEEP_FOR(3000);
         reconnectSocket();
         return;
@@ -408,13 +408,13 @@ void SocketData::reconnectSocket()
 
 void SocketData::onSocketClosed(connection_hdl hdl)
 {
-    LOGE("Socket %s closed.", broker.c_str());
+    LOGE("Socket {} closed.", broker);
     SLEEP_FOR(1000);
     reconnectSocket();
 }
 
 void SocketData::setBotList(shared_ptr<vector<shared_ptr<Bot>>> botList)
 {
-    LOGD("%s: Set bot list with size: %d", broker.c_str(), (int)botList->size());
+    LOGD("{}: Set bot list with size: {}", broker, botList->size());
     this->botList = botList;
 }

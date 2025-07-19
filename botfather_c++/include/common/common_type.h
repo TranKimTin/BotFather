@@ -19,6 +19,7 @@
 #include <cmath>
 #include <functional>
 #include <any>
+#include <filesystem>
 
 #include <websocketpp/config/asio_client.hpp>
 #include <websocketpp/client.hpp>
@@ -27,36 +28,24 @@
 #include <boost/asio/ssl.hpp>
 #include <nlohmann/json.hpp>
 
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/daily_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <fmt/format.h>
+#include <fmt/core.h>
+
 using namespace std;
 
 // #define DEBUG_LOG 1
 
-inline string current_timestamp()
-{
-    auto now = chrono::system_clock::now();
-    auto now_t = chrono::system_clock::to_time_t(now);
-    tm local_tm = *localtime(&now_t);
-
-    ostringstream oss;
-    oss << put_time(&local_tm, "%Y-%m-%d %H:%M:%S");
-    return oss.str();
-}
-
-inline string current_thread_id()
-{
-    ostringstream oss;
-    oss << this_thread::get_id();
-    return oss.str();
-}
-
 #ifndef DEBUG_LOG
 #define LOGD(mess, ...)
 #else
-#define LOGD(mess, ...) printf("[%s] [%s] [DEBUG] [%s] " mess "\n", current_thread_id().c_str(), current_timestamp().c_str(), __func__, ##__VA_ARGS__);
+#define LOGD(mess, ...) spdlog::debug("[{}] {}", __func__, fmt::format(mess, ##__VA_ARGS__))
 #endif
 
-#define LOGI(mess, ...) printf("[%s] [%s] [INFO] [%s] " mess "\n", current_thread_id().c_str(), current_timestamp().c_str(), __func__, ##__VA_ARGS__);
-#define LOGE(mess, ...) fprintf(stderr, "[%s] [%s] [ERROR] [%s] " mess "\n", current_thread_id().c_str(), current_timestamp().c_str(), __func__, ##__VA_ARGS__);
+#define LOGI(mess, ...) spdlog::info("[{}] {}", __func__, fmt::format(mess, ##__VA_ARGS__))
+#define LOGE(mess, ...) spdlog::error("[{}] {}", __func__, fmt::format(mess, ##__VA_ARGS__))
 
 #define SLEEP_FOR(ms) this_thread::sleep_for(chrono::milliseconds(ms))
 

@@ -49,7 +49,8 @@ $ sudo apt-get install -y \
     libhiredis-dev \
     libmysqlcppconn-dev \
     rapidjson-dev \
-    libasio-dev
+    libasio-dev \
+    libspdlog-dev
 
 # Set timezone (optional)
 $ sudo timedatectl set-timezone Asia/Ho_Chi_Minh
