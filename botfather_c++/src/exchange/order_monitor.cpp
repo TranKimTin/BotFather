@@ -7,17 +7,13 @@
 static void checkOrderStatus()
 {
     auto &db = MySQLConnector::getInstance();
-    string query = "SELECT id, symbol, entryID, tpID, slID FROM RealOrders";
+    string query = "SELECT id, symbol, entryID, tpID, slID, apiKey, secretKey, iv, botID FROM RealOrders";
     auto res = db.executeQuery(query, {});
     if (!res)
     {
         LOGE("Failed to fetch real orders from database");
         return;
     }
-    auto env = readEnvFile();
-    const string API_KEY = env["API_KEY"];
-    const string SECRET_KEY = env["SECRET_KEY"];
-    shared_ptr<IExchange> exchange = make_shared<BinanceFuture>(API_KEY, SECRET_KEY);
 
     const int MAX_THREAD = 10;
     mutex dbMutex;
@@ -31,9 +27,15 @@ static void checkOrderStatus()
         string tpID = res->getString("tpID");
         string slID = res->getString("slID");
         string symbol = res->getString("symbol");
+        string encryptedApiKey = res->getString("apiKey");
+        string encryptedSecretKey = res->getString("secretKey");
+        string iv = res->getString("iv");
+        int botID = res->getInt("botID");
+
+        shared_ptr<IExchange> exchange = make_shared<BinanceFuture>(encryptedApiKey, encryptedSecretKey, iv, botID);
 
         semaphore.wait();
-        threads.emplace_back([=, &db, &exchange, &semaphore, &dbMutex]()
+        threads.emplace_back([=, &db, &semaphore, &dbMutex]()
                              {
             try
             {

@@ -28,9 +28,11 @@ void test()
     const string API_KEY = env["API_KEY"];
     const string SECRET_KEY = env["SECRET_KEY"];
 
-    LOGD("SECRET_KEY: {}", SECRET_KEY);
+    string iv = generateRandomIV();
+    string apiKey = encryptAES(API_KEY, env["ENCRYP_KEY"], iv);
+    string secretKey = encryptAES(SECRET_KEY, env["ENCRYP_KEY"], iv);
 
-    shared_ptr<BinanceFuture> exchange = make_shared<BinanceFuture>(API_KEY, SECRET_KEY);
+    shared_ptr<BinanceFuture> exchange = make_shared<BinanceFuture>(apiKey, secretKey, iv, 2949);
     exchange->buyLimit("BTCUSDT", "0.01", "100000", "101000", "99000", to_string(getCurrentTime() + 60000 * 15));
 
     while (true)

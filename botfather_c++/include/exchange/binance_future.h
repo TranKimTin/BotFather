@@ -6,7 +6,7 @@
 class BinanceFuture : public IExchange
 {
 public:
-    BinanceFuture(const string &encryptedApiKey, const string &encryptedSecretKey, const string &iv);
+    BinanceFuture(const string &encryptedApiKey, const string &encryptedSecretKey, const string &iv, const int botID);
 
     string buyMarket(const string &symbol, string quantity, string takeProfit = "", string stopLoss = "") override;
     string sellMarket(const string &symbol, string quantity, string takeProfit = "", string stopLoss = "") override;
@@ -21,6 +21,7 @@ private:
     string iv;
     string apiKey;
     string secretKey;
+    int botID;
     // string BASE_URL = "https://fapi.binance.com";
     string BASE_URL = "https://testnet.binancefuture.com";
 

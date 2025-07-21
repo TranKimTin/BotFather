@@ -5,8 +5,8 @@
 #include <openssl/hmac.h>
 #include <openssl/evp.h>
 
-BinanceFuture::BinanceFuture(const string &encryptedApiKey, const string &encryptedSecretKey, const string &iv)
-    : encryptedApiKey(encryptedApiKey), encryptedSecretKey(encryptedSecretKey), iv(iv)
+BinanceFuture::BinanceFuture(const string &encryptedApiKey, const string &encryptedSecretKey, const string &iv, const int botID)
+    : encryptedApiKey(encryptedApiKey), encryptedSecretKey(encryptedSecretKey), iv(iv), botID(botID)
 {
     unordered_map<string, string> env = readEnvFile();
     apiKey = decryptAES(encryptedApiKey, env["ENCRYP_KEY"], iv);
@@ -472,8 +472,7 @@ string BinanceFuture::getOrderStatus(const string &symbol, const string &orderId
 int BinanceFuture::insertOrderToDB(const string &symbol, const string clientOrderId, const string tpID, const string slID)
 {
     auto &db = MySQLConnector::getInstance();
-    string query = "INSERT INTO RealOrders(broker, symbol, entryID, tpID, slID, apiKey, secretKey, iv) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
-    string iv = generateRandomIV();
+    string query = "INSERT INTO RealOrders(broker, symbol, entryID, tpID, slID, apiKey, secretKey, iv, botID) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
     vector<any> params = {
         "binance_future",
         symbol,
@@ -482,7 +481,8 @@ int BinanceFuture::insertOrderToDB(const string &symbol, const string clientOrde
         slID,
         encryptedApiKey,
         encryptedSecretKey,
-        iv};
+        iv,
+        botID};
     int res = db.executeUpdate(query, params);
     if (res <= 0)
     {

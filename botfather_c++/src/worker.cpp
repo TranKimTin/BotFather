@@ -487,7 +487,7 @@ bool Worker::handleLogic(NodeData &nodeData, Bot &bot)
 
         if (broker == "binance_future" && !bot.apiKey.empty() && !bot.secretKey.empty() && !bot.iv.empty())
         {
-            shared_ptr<BinanceFuture> exchange = make_shared<BinanceFuture>(bot.apiKey, bot.secretKey, bot.iv);
+            shared_ptr<BinanceFuture> exchange = make_shared<BinanceFuture>(bot.apiKey, bot.secretKey, bot.iv, bot.id);
 
             if (node.type == NODE_TYPE::BUY_MARKET)
             {
