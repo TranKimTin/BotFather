@@ -320,8 +320,8 @@ export default [
                 - slow: Số nến đường chậm để tính giá trị MACD
                 - signal: Số nến tính đường Signal MACD
                 Ví dụ:
-                + macd_value(14, 0) : MACD tại nến 0
-                + macd_value(14, 1) : MACD tại nến 1
+                + macd_value(12, 26, 9, 0) : MACD tại nến 0
+                + macd_value(12, 26, 9, 1) : MACD tại nến 1
                 `
     },
     {
@@ -336,8 +336,8 @@ export default [
                 - slow: Số nến đường chậm để tính giá trị MACD
                 - signal: Số nến tính đường Signal MACD
                 Ví dụ:
-                + macd_signal(14, 0) : Signal tại nến 0
-                + macd_signal(14, 1) : Signal tại nến 1
+                + macd_signal(12, 26, 9, 0) : Signal tại nến 0
+                + macd_signal(12, 26, 9, 1) : Signal tại nến 1
                 `
     },
     {
@@ -352,8 +352,8 @@ export default [
                 - slow: Số nến đường chậm để tính giá trị MACD
                 - signal: Số nến tính đường Signal MACD
                 Ví dụ:
-                + macd_histogram(14, 0) : Histogram tại nến 0
-                + macd_histogram(14, 1) : Histogram tại nến 1
+                + macd_histogram(12, 26, 9, 0) : Histogram tại nến 0
+                + macd_histogram(12, 26, 9, 1) : Histogram tại nến 1
                 `
     },
     {
@@ -809,6 +809,150 @@ export default [
                 Ví dụ:
                 + max_ampl(0, 10): Biên độ giá cao nhất từ nến 0 đến nến 10
                 + max_ampl(15, 20): Biên độ giá cao nhất từ nến 15 đến nến 20
+                `
+    },
+    {
+        type: 'function',
+        label: 'min_macd_value',
+        detail: '(fast, slow, signal, from, to)',
+        apply: 'min_macd_value(12, 26, 9, 0, 10)',
+        boost: 0,
+        info: ` - Giá trị nhỏ nhất của macd value từ nến from đến to
+                - fast: Số nến đường nhanh để tính giá trị MACD
+                - slow: Số nến đường chậm để tính giá trị MACD
+                - signal: Số nến tính đường Signal MACD
+                - from: nến bắt đầu
+                - to: nến kết thúc
+                Ví dụ:
+                + min_macd_value(12, 26, 9, 5, 10): macd value nhỏ nhất từ nến 5 đến nến 10
+                `
+    },
+    {
+        type: 'function',
+        label: 'max_macd_value',
+        detail: '(fast, slow, signal, from, to)',
+        apply: 'max_macd_value(12, 26, 9, 0, 10)',
+        boost: 0,
+        info: ` - Giá trị lớn nhất của macd value từ nến from đến to
+                - fast: Số nến đường nhanh để tính giá trị MACD
+                - slow: Số nến đường chậm để tính giá trị MACD
+                - signal: Số nến tính đường Signal MACD
+                - from: nến bắt đầu
+                - to: nến kết thúc
+                Ví dụ:
+                + max_macd_value(12, 26, 9, 5, 10): macd value lớn nhất từ nến 5 đến nến 10
+                `
+    },
+    {
+        type: 'function',
+        label: 'avg_macd_value',
+        detail: '(fast, slow, signal, from, to)',
+        apply: 'avg_macd_value(12, 26, 9, 0, 10)',
+        boost: 0,
+        info: ` - Giá trị trung bình của macd value từ nến from đến to
+                - fast: Số nến đường nhanh để tính giá trị MACD
+                - slow: Số nến đường chậm để tính giá trị MACD
+                - signal: Số nến tính đường Signal MACD
+                - from: nến bắt đầu
+                - to: nến kết thúc
+                Ví dụ:
+                + avg_macd_value(12, 26, 9, 5, 10): macd value trung bình từ nến 5 đến nến 10
+                `
+    },
+    {
+        type: 'function',
+        label: 'min_macd_signal',
+        detail: '(fast, slow, signal, from, to)',
+        apply: 'min_macd_signal(12, 26, 9, 0, 10)',
+        boost: 0,
+        info: ` - Giá trị nhỏ nhất của macd signal từ nến from đến to
+                - fast: Số nến đường nhanh để tính giá trị MACD
+                - slow: Số nến đường chậm để tính giá trị MACD
+                - signal: Số nến tính đường Signal MACD
+                - from: nến bắt đầu
+                - to: nến kết thúc
+                Ví dụ:
+                + min_macd_signal(12, 26, 9, 5, 10): macd signal nhỏ nhất từ nến 5 đến nến 10
+                `
+    },
+    {
+        type: 'function',
+        label: 'max_macd_signal',
+        detail: '(fast, slow, signal, from, to)',
+        apply: 'max_macd_signal(12, 26, 9, 0, 10)',
+        boost: 0,
+        info: ` - Giá trị lớn nhất của macd signal từ nến from đến to
+                - fast: Số nến đường nhanh để tính giá trị MACD
+                - slow: Số nến đường chậm để tính giá trị MACD
+                - signal: Số nến tính đường Signal MACD
+                - from: nến bắt đầu
+                - to: nến kết thúc
+                Ví dụ:
+                + max_macd_signal(12, 26, 9, 5, 10): macd signal lớn nhất từ nến 5 đến nến 10
+                `
+    },
+    {
+        type: 'function',
+        label: 'avg_macd_signal',
+        detail: '(fast, slow, signal, from, to)',
+        apply: 'avg_macd_signal(12, 26, 9, 0, 10)',
+        boost: 0,
+        info: ` - Giá trị trung bình của macd signal từ nến from đến to
+                - fast: Số nến đường nhanh để tính giá trị MACD
+                - slow: Số nến đường chậm để tính giá trị MACD
+                - signal: Số nến tính đường Signal MACD
+                - from: nến bắt đầu
+                - to: nến kết thúc
+                Ví dụ:
+                + avg_macd_signal(12, 26, 9, 5, 10): macd signal trung bình từ nến 5 đến nến 10
+                `
+    },
+    {
+        type: 'function',
+        label: 'min_macd_histogram',
+        detail: '(fast, slow, histogram, from, to)',
+        apply: 'min_macd_histogram(12, 26, 9, 0, 10)',
+        boost: 0,
+        info: ` - Giá trị nhỏ nhất của macd histogram từ nến from đến to
+                - fast: Số nến đường nhanh để tính giá trị MACD
+                - slow: Số nến đường chậm để tính giá trị MACD
+                - signal: Số nến tính đường Signal MACD
+                - from: nến bắt đầu
+                - to: nến kết thúc
+                Ví dụ:
+                + min_macd_histogram(12, 26, 9, 5, 10): macd histogram nhỏ nhất từ nến 5 đến nến 10
+                `
+    },
+    {
+        type: 'function',
+        label: 'max_macd_histogram',
+        detail: '(fast, slow, histogram, from, to)',
+        apply: 'max_macd_histogram(12, 26, 9, 0, 10)',
+        boost: 0,
+        info: ` - Giá trị lớn nhất của macd histogram từ nến from đến to
+                - fast: Số nến đường nhanh để tính giá trị MACD
+                - slow: Số nến đường chậm để tính giá trị MACD
+                - signal: Số nến tính đường Signal MACD
+                - from: nến bắt đầu
+                - to: nến kết thúc
+                Ví dụ:
+                + max_macd_histogram(12, 26, 9, 5, 10): macd histogram lớn nhất từ nến 5 đến nến 10
+                `
+    },
+    {
+        type: 'function',
+        label: 'avg_macd_histogram',
+        detail: '(fast, slow, histogram, from, to)',
+        apply: 'avg_macd_histogram(12, 26, 9, 0, 10)',
+        boost: 0,
+        info: ` - Giá trị trung bình của macd histogram từ nến from đến to
+                - fast: Số nến đường nhanh để tính giá trị MACD
+                - slow: Số nến đường chậm để tính giá trị MACD
+                - signal: Số nến tính đường Signal MACD
+                - from: nến bắt đầu
+                - to: nến kết thúc
+                Ví dụ:
+                + avg_macd_histogram(12, 26, 9, 5, 10): macd histogram trung bình từ nến 5 đến nến 10
                 `
     },
 ];

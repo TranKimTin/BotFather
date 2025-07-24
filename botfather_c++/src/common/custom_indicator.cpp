@@ -1,6 +1,7 @@
 #include "custom_indicator.h"
 
 static const int MAX_N = 300;
+static const double INF = 1e18;
 
 double iRSI(int period, const double close[], int n)
 {
@@ -758,4 +759,141 @@ double iAvgRSI(int period, int k, const double close[], int n)
     }
 
     return sumRSI / k;
+}
+
+double iMinMACD(int fastPeriod, int slowPeriod, int signalPeriod, int k, const double close[], int n, function<double(MACD_Output)> f)
+{
+    n = min(n, MAX_N + slowPeriod + k);
+
+    if (n <= slowPeriod || fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0)
+        return INF;
+
+    double kFast = 2.0 / (fastPeriod + 1);
+    double kSlow = 2.0 / (slowPeriod + 1);
+    double kSignal = 2.0 / (signalPeriod + 1);
+
+    double emaFast = close[n - 1];
+    double emaSlow = close[n - 1];
+    double macd = 0.0;
+    double signalEMA = 0.0;
+
+    bool signalInitialized = false;
+
+    double result = INF;
+
+    for (int i = n - 2; i >= 0; --i)
+    {
+        emaFast = (close[i] - emaFast) * kFast + emaFast;
+        emaSlow = (close[i] - emaSlow) * kSlow + emaSlow;
+
+        macd = emaFast - emaSlow;
+
+        if (signalInitialized)
+        {
+            signalEMA = (macd - signalEMA) * kSignal + signalEMA;
+        }
+        else
+        {
+            signalEMA = macd;
+            signalInitialized = true;
+        }
+
+        if (i < k)
+        {
+            result = min(result, f({macd, signalEMA, macd - signalEMA}));
+        }
+    }
+
+    return result;
+}
+
+double iMaxMACD(int fastPeriod, int slowPeriod, int signalPeriod, int k, const double close[], int n, function<double(MACD_Output)> f)
+{
+    n = min(n, MAX_N + slowPeriod + k);
+
+    if (n <= slowPeriod || fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0)
+        return INF;
+
+    double kFast = 2.0 / (fastPeriod + 1);
+    double kSlow = 2.0 / (slowPeriod + 1);
+    double kSignal = 2.0 / (signalPeriod + 1);
+
+    double emaFast = close[n - 1];
+    double emaSlow = close[n - 1];
+    double macd = 0.0;
+    double signalEMA = 0.0;
+
+    bool signalInitialized = false;
+
+    double result = -INF;
+
+    for (int i = n - 2; i >= 0; --i)
+    {
+        emaFast = (close[i] - emaFast) * kFast + emaFast;
+        emaSlow = (close[i] - emaSlow) * kSlow + emaSlow;
+
+        macd = emaFast - emaSlow;
+
+        if (signalInitialized)
+        {
+            signalEMA = (macd - signalEMA) * kSignal + signalEMA;
+        }
+        else
+        {
+            signalEMA = macd;
+            signalInitialized = true;
+        }
+
+        if (i < k)
+        {
+            result = max(result, f({macd, signalEMA, macd - signalEMA}));
+        }
+    }
+
+    return result;
+}
+double iAvgMACD(int fastPeriod, int slowPeriod, int signalPeriod, int k, const double close[], int n, function<double(MACD_Output)> f)
+{
+    n = min(n, MAX_N + slowPeriod + k);
+
+    if (n <= slowPeriod || fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0)
+        return 0.0;
+
+    double kFast = 2.0 / (fastPeriod + 1);
+    double kSlow = 2.0 / (slowPeriod + 1);
+    double kSignal = 2.0 / (signalPeriod + 1);
+
+    double emaFast = close[n - 1];
+    double emaSlow = close[n - 1];
+    double macd = 0.0;
+    double signalEMA = 0.0;
+
+    bool signalInitialized = false;
+
+    double sum = 0;
+
+    for (int i = n - 2; i >= 0; --i)
+    {
+        emaFast = (close[i] - emaFast) * kFast + emaFast;
+        emaSlow = (close[i] - emaSlow) * kSlow + emaSlow;
+
+        macd = emaFast - emaSlow;
+
+        if (signalInitialized)
+        {
+            signalEMA = (macd - signalEMA) * kSignal + signalEMA;
+        }
+        else
+        {
+            signalEMA = macd;
+            signalInitialized = true;
+        }
+
+        if (i < k)
+        {
+            sum += f({macd, signalEMA, macd - signalEMA});
+        }
+    }
+
+    return sum / k;
 }
