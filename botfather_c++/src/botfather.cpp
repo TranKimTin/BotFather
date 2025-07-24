@@ -15,7 +15,7 @@ vector<SocketData *> exchanges;
 vector<thread> threads;
 shared_ptr<vector<shared_ptr<Bot>>> botList;
 
-#define TEST
+// #define TEST
 
 #ifdef TEST
 #include "telegram.h"
