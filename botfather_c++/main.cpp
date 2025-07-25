@@ -13,8 +13,9 @@ using namespace std;
 
 void signal_handler(int signum)
 {
-    void *array[20];
-    int size = backtrace(array, 20);
+    const int max_frames = 50;
+    void *array[max_frames];
+    int size = backtrace(array, max_frames);
     char **messages = backtrace_symbols(array, size);
 
     LOGE("==== Caught signal {} ====", signum);
