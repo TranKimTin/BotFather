@@ -71,6 +71,15 @@ expr
     | min_amplP                 # iMinAmplP
     | max_amplP                 # iMaxAmplP
     | funding_rate              # iFundingRate
+    | min_macd_value            # iMinMACDValue
+    | max_macd_value            # iMaxMACDValue
+    | avg_macd_value            # iAvgMACDValue
+    | min_macd_signal           # iMinMACDSignal
+    | max_macd_signal           # iMaxMACDSignal
+    | avg_macd_signal           # iAvgMACDSignal
+    | min_macd_histogram        # iMinMACDHistogram
+    | max_macd_histogram        # iMaxMACDHistogram
+    | avg_macd_histogram        # iAvgMACDVHistogram
     ;
 
 hour: 'hour' '(' ')';
@@ -131,6 +140,15 @@ max_ampl: 'max_ampl' '(' INT (',' INT)? ')';
 min_amplP: 'min_ampl%' '(' INT (',' INT)? ')';
 max_amplP: 'max_ampl%' '(' INT (',' INT)? ')';
 funding_rate: 'funding_rate' '(' ')';
+min_macd_value: 'min_macd_value' '(' INT ',' INT ',' INT ',' INT (',' INT)? ')';
+max_macd_value: 'max_macd_value' '(' INT ',' INT ',' INT ',' INT (',' INT)? ')';
+avg_macd_value: 'avg_macd_value' '(' INT ',' INT ',' INT ',' INT (',' INT)? ')';
+min_macd_signal: 'min_macd_signal' '(' INT ',' INT ',' INT ',' INT (',' INT)? ')';
+max_macd_signal: 'max_macd_signal' '(' INT ',' INT ',' INT ',' INT (',' INT)? ')';
+avg_macd_signal: 'avg_macd_signal' '(' INT ',' INT ',' INT ',' INT (',' INT)? ')';
+min_macd_histogram: 'min_macd_histogram' '(' INT ',' INT ',' INT ',' INT (',' INT)? ')';
+max_macd_histogram: 'max_macd_histogram' '(' INT ',' INT ',' INT ',' INT (',' INT)? ')';
+avg_macd_histogram: 'avg_macd_histogram' '(' INT ',' INT ',' INT ',' INT (',' INT)? ')';
 
 comparisonOp
     : '>'

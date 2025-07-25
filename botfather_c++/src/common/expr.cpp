@@ -834,6 +834,171 @@ any Expr::visitMarsi(ExprParser::MarsiContext *ctx)
     return iAvgRSI(period, k, close + from, length - from);
 }
 
+any Expr::visitMin_macd_value(ExprParser::Min_macd_valueContext *ctx)
+{
+    int fastPeriod = stoi(ctx->INT(0)->getText());
+    int slowPeriod = stoi(ctx->INT(1)->getText());
+    int signalPeriod = stoi(ctx->INT(2)->getText());
+    int from = ctx->INT(3) ? stoi(ctx->INT(3)->getText()) : 0;
+    int to = ctx->INT(4) ? stoi(ctx->INT(4)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || from < 0 || to >= length - slowPeriod || to >= length - signalPeriod)
+        return {};
+
+    int k = to - from + 1;
+    return iMinMACD(fastPeriod, slowPeriod, signalPeriod, k, close + from, length - from, [](MACD_Output output)
+                    { return output.macd; });
+}
+any Expr::visitMax_macd_value(ExprParser::Max_macd_valueContext *ctx)
+{
+    int fastPeriod = stoi(ctx->INT(0)->getText());
+    int slowPeriod = stoi(ctx->INT(1)->getText());
+    int signalPeriod = stoi(ctx->INT(2)->getText());
+    int from = ctx->INT(3) ? stoi(ctx->INT(3)->getText()) : 0;
+    int to = ctx->INT(4) ? stoi(ctx->INT(4)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || from < 0 || to >= length - slowPeriod || to >= length - signalPeriod)
+        return {};
+
+    int k = to - from + 1;
+    return iMaxMACD(fastPeriod, slowPeriod, signalPeriod, k, close + from, length - from, [](MACD_Output output)
+                    { return output.macd; });
+}
+any Expr::visitAvg_macd_value(ExprParser::Avg_macd_valueContext *ctx)
+{
+    int fastPeriod = stoi(ctx->INT(0)->getText());
+    int slowPeriod = stoi(ctx->INT(1)->getText());
+    int signalPeriod = stoi(ctx->INT(2)->getText());
+    int from = ctx->INT(3) ? stoi(ctx->INT(3)->getText()) : 0;
+    int to = ctx->INT(4) ? stoi(ctx->INT(4)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || from < 0 || to >= length - slowPeriod || to >= length - signalPeriod)
+        return {};
+
+    int k = to - from + 1;
+    return iAvgMACD(fastPeriod, slowPeriod, signalPeriod, k, close + from, length - from, [](MACD_Output output)
+                    { return output.macd; });
+}
+
+any Expr::visitMax_macd_signal(ExprParser::Max_macd_signalContext *ctx)
+{
+    int fastPeriod = stoi(ctx->INT(0)->getText());
+    int slowPeriod = stoi(ctx->INT(1)->getText());
+    int signalPeriod = stoi(ctx->INT(2)->getText());
+    int from = ctx->INT(3) ? stoi(ctx->INT(3)->getText()) : 0;
+    int to = ctx->INT(4) ? stoi(ctx->INT(4)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || from < 0 || to >= length - slowPeriod || to >= length - signalPeriod)
+        return {};
+
+    int k = to - from + 1;
+    return iMaxMACD(fastPeriod, slowPeriod, signalPeriod, k, close + from, length - from, [](MACD_Output output)
+                    { return output.signal; });
+}
+any Expr::visitMin_macd_signal(ExprParser::Min_macd_signalContext *ctx)
+{
+    int fastPeriod = stoi(ctx->INT(0)->getText());
+    int slowPeriod = stoi(ctx->INT(1)->getText());
+    int signalPeriod = stoi(ctx->INT(2)->getText());
+    int from = ctx->INT(3) ? stoi(ctx->INT(3)->getText()) : 0;
+    int to = ctx->INT(4) ? stoi(ctx->INT(4)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || from < 0 || to >= length - slowPeriod || to >= length - signalPeriod)
+        return {};
+
+    int k = to - from + 1;
+    return iMinMACD(fastPeriod, slowPeriod, signalPeriod, k, close + from, length - from, [](MACD_Output output)
+                    { return output.signal; });
+}
+any Expr::visitAvg_macd_signal(ExprParser::Avg_macd_signalContext *ctx)
+{
+    int fastPeriod = stoi(ctx->INT(0)->getText());
+    int slowPeriod = stoi(ctx->INT(1)->getText());
+    int signalPeriod = stoi(ctx->INT(2)->getText());
+    int from = ctx->INT(3) ? stoi(ctx->INT(3)->getText()) : 0;
+    int to = ctx->INT(4) ? stoi(ctx->INT(4)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || from < 0 || to >= length - slowPeriod || to >= length - signalPeriod)
+        return {};
+
+    int k = to - from + 1;
+    return iAvgMACD(fastPeriod, slowPeriod, signalPeriod, k, close + from, length - from, [](MACD_Output output)
+                    { return output.signal; });
+}
+any Expr::visitMin_macd_histogram(ExprParser::Min_macd_histogramContext *ctx)
+{
+    int fastPeriod = stoi(ctx->INT(0)->getText());
+    int slowPeriod = stoi(ctx->INT(1)->getText());
+    int signalPeriod = stoi(ctx->INT(2)->getText());
+    int from = ctx->INT(3) ? stoi(ctx->INT(3)->getText()) : 0;
+    int to = ctx->INT(4) ? stoi(ctx->INT(4)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || from < 0 || to >= length - slowPeriod || to >= length - signalPeriod)
+        return {};
+
+    int k = to - from + 1;
+    return iMinMACD(fastPeriod, slowPeriod, signalPeriod, k, close + from, length - from, [](MACD_Output output)
+                    { return output.histogram; });
+}
+any Expr::visitMax_macd_histogram(ExprParser::Max_macd_histogramContext *ctx)
+{
+    int fastPeriod = stoi(ctx->INT(0)->getText());
+    int slowPeriod = stoi(ctx->INT(1)->getText());
+    int signalPeriod = stoi(ctx->INT(2)->getText());
+    int from = ctx->INT(3) ? stoi(ctx->INT(3)->getText()) : 0;
+    int to = ctx->INT(4) ? stoi(ctx->INT(4)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || from < 0 || to >= length - slowPeriod || to >= length - signalPeriod)
+        return {};
+
+    int k = to - from + 1;
+    return iMaxMACD(fastPeriod, slowPeriod, signalPeriod, k, close + from, length - from, [](MACD_Output output)
+                    { return output.histogram; });
+}
+
+any Expr::visitAvg_macd_histogram(ExprParser::Avg_macd_histogramContext *ctx)
+{
+    int fastPeriod = stoi(ctx->INT(0)->getText());
+    int slowPeriod = stoi(ctx->INT(1)->getText());
+    int signalPeriod = stoi(ctx->INT(2)->getText());
+    int from = ctx->INT(3) ? stoi(ctx->INT(3)->getText()) : 0;
+    int to = ctx->INT(4) ? stoi(ctx->INT(4)->getText()) : 0;
+
+    if (to < from)
+        swap(from, to);
+
+    if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || from < 0 || to >= length - slowPeriod || to >= length - signalPeriod)
+        return {};
+
+    int k = to - from + 1;
+    return iAvgMACD(fastPeriod, slowPeriod, signalPeriod, k, close + from, length - from, [](MACD_Output output)
+                    { return output.histogram; });
+}
+
 any Expr::visitHour(ExprParser::HourContext *ctx)
 {
     long long timestamp_ms = startTime[0];
@@ -980,19 +1145,25 @@ any Expr::visitDoji(ExprParser::DojiContext *ctx)
 }
 
 //////////////////////////////////////////////////////////////////
-static std::unordered_map<std::string, CachedParseTree> parseCache;
-static mutex parseCacheMutex;
+static unordered_map<string, CachedParseTree> parseCache;
+static shared_mutex parseCacheMutex;
 
 CachedParseTree &getParseTree(const string &key)
 {
-    lock_guard<mutex> lock(parseCacheMutex);
-    auto &entry = parseCache[key];
-    if (!entry.tree)
     {
-        entry.input = std::make_unique<ANTLRInputStream>(key);
-        entry.lexer = std::make_unique<ExprLexer>(entry.input.get());
-        entry.tokens = std::make_unique<CommonTokenStream>(entry.lexer.get());
-        entry.parser = std::make_unique<ExprParser>(entry.tokens.get());
+        shared_lock lock(parseCacheMutex);
+        auto it = parseCache.find(key);
+        if (it != parseCache.end() && it->second.tree)
+            return it->second;
+    }
+
+    unique_lock lock(parseCacheMutex);
+    auto &entry = parseCache[key];
+    if (!entry.tree) {
+        entry.input = make_unique<ANTLRInputStream>(key);
+        entry.lexer = make_unique<ExprLexer>(entry.input.get());
+        entry.tokens = make_unique<CommonTokenStream>(entry.lexer.get());
+        entry.parser = make_unique<ExprParser>(entry.tokens.get());
         entry.tree = entry.parser->expr();
     }
     return entry;
@@ -1002,7 +1173,7 @@ any calculateExpr(const string &inputText, const string &broker, const string &s
                   const double *open, const double *high, const double *low, const double *close,
                   const double *volume, long long *startTime, double fundingRate)
 {
-    const std::string key = toLowerCase(inputText);
+    const string key = toLowerCase(inputText);
     auto &entry = getParseTree(key);
 
     Expr expr(broker, symbol, timeframe, length, open, high, low, close, volume, startTime, fundingRate);

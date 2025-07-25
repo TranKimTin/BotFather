@@ -20,25 +20,32 @@ shared_ptr<vector<shared_ptr<Bot>>> botList;
 #ifdef TEST
 #include "telegram.h"
 #include "binance_future.h"
+#include "expr.h"
 
 void test()
 {
-    auto env = readEnvFile();
+    string broker = "binance_future";
+    string symbol = "BTCUSDT";
+    string timeframe = "4h";
+    RateData rateData = getBinanceFuturetOHLCV(symbol, timeframe, 600);
+    rateData.open.pop_front();
+    rateData.high.pop_front();
+    rateData.low.pop_front();
+    rateData.close.pop_front();
+    rateData.startTime.pop_front();
 
-    const string API_KEY = env["API_KEY"];
-    const string SECRET_KEY = env["SECRET_KEY"];
+    vector<double> open(rateData.open.begin(), rateData.open.end());
+    vector<double> high(rateData.high.begin(), rateData.high.end());
+    vector<double> low(rateData.low.begin(), rateData.low.end());
+    vector<double> close(rateData.close.begin(), rateData.close.end());
+    vector<double> volume(rateData.volume.begin(), rateData.volume.end());
+    vector<long long> startTime(rateData.startTime.begin(), rateData.startTime.end());
 
-    string iv = generateRandomIV();
-    string apiKey = encryptAES(API_KEY, env["ENCRYP_KEY"], iv);
-    string secretKey = encryptAES(SECRET_KEY, env["ENCRYP_KEY"], iv);
-
-    shared_ptr<BinanceFuture> exchange = make_shared<BinanceFuture>(apiKey, secretKey, iv, 2949);
-    exchange->buyLimit("BTCUSDT", "0.01", "100000", "101000", "99000", to_string(getCurrentTime() + 60000 * 15));
-
-    while (true)
-    {
-        SLEEP_FOR(1000);
-    }
+    string expr = "avg_macd_histogram(12,26,9,1,3)";
+    auto result = calculateExpr(expr, broker, symbol, timeframe, open.size(),
+                                open.data(), high.data(), low.data(), close.data(), volume.data(),
+                                startTime.data(), 0);
+    LOGD("Result {} = {}", expr, any_cast<double>(result));
 }
 #endif
 

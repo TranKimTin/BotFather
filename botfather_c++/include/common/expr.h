@@ -12,10 +12,10 @@ using namespace antlr4;
 
 struct CachedParseTree
 {
-    std::unique_ptr<ANTLRInputStream> input;
-    std::unique_ptr<ExprLexer> lexer;
-    std::unique_ptr<CommonTokenStream> tokens;
-    std::unique_ptr<ExprParser> parser;
+    unique_ptr<ANTLRInputStream> input;
+    unique_ptr<ExprLexer> lexer;
+    unique_ptr<CommonTokenStream> tokens;
+    unique_ptr<ExprParser> parser;
     antlr4::tree::ParseTree *tree = nullptr;
 };
 class Expr : public ExprBaseVisitor
@@ -115,6 +115,17 @@ public:
     any visitMin_rsi(ExprParser::Min_rsiContext *ctx) override;
     any visitMax_rsi(ExprParser::Max_rsiContext *ctx) override;
     any visitMarsi(ExprParser::MarsiContext *ctx) override;
+
+    any visitMin_macd_value(ExprParser::Min_macd_valueContext *ctx) override;
+    any visitMax_macd_value(ExprParser::Max_macd_valueContext *ctx) override;
+    any visitAvg_macd_value(ExprParser::Avg_macd_valueContext *ctx) override;
+    any visitMax_macd_signal(ExprParser::Max_macd_signalContext *ctx) override;
+    any visitMin_macd_signal(ExprParser::Min_macd_signalContext *ctx) override;
+    any visitAvg_macd_signal(ExprParser::Avg_macd_signalContext *ctx) override;
+    any visitMin_macd_histogram(ExprParser::Min_macd_histogramContext *ctx) override;
+    any visitMax_macd_histogram(ExprParser::Max_macd_histogramContext *ctx) override;
+    any visitAvg_macd_histogram(ExprParser::Avg_macd_histogramContext *ctx) override;
+
 
     any visitHour(ExprParser::HourContext *ctx) override;
     any visitMinute(ExprParser::MinuteContext *ctx) override;
