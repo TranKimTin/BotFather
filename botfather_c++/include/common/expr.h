@@ -146,3 +146,5 @@ any calculateExpr(const string &inputText, const string &broker, const string &s
 string calculateSubExpr(string &expr, const string &broker, const string &symbol, const string &timeframe, int length,
                         const double *open, const double *high, const double *low, const double *close,
                         const double *volume, long long *startTime, double fundingRate);
+
+CachedParseTree &getParseTree(const string &key);

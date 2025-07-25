@@ -9,6 +9,7 @@
 #include "socket_bybit.h"
 #include "socket_bybit_future.h"
 #include "socket_okx.h"
+#include "expr.h"
 
 sio::client client;
 vector<SocketData *> exchanges;
@@ -20,7 +21,6 @@ shared_ptr<vector<shared_ptr<Bot>>> botList;
 #ifdef TEST
 #include "telegram.h"
 #include "binance_future.h"
-#include "expr.h"
 
 void test()
 {
@@ -100,6 +100,10 @@ static Route getRoute(const json &j)
         }
     }
 
+    if (route.data.type == NODE_TYPE::EXPR)
+    {
+        getParseTree(route.data.value);
+    }
     return route;
 }
 
@@ -229,12 +233,12 @@ void runApp()
                              { exchange->init(); });
     }
 
-    setBotList();
-
     // connect socket_io to web config
     client.set_open_listener(sio_on_connected);
     client.socket()->on("onUpdateConfig", sio_on_message);
     client.connect(StringFormat("{}:{}", env["HOST_WEB_SERVER"], 8080));
+
+    setBotList();
 
     for (auto &t : threads)
     {
