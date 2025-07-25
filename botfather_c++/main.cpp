@@ -4,8 +4,34 @@
 #include "mysql_connector.h"
 #include "telegram.h"
 #include "order_monitor.h"
+#include <csignal>
+#include <execinfo.h> // backtrace
+#include <unistd.h>   // write
+#include <cstdlib>    // abort, exit
 
 using namespace std;
+
+void signal_handler(int signum)
+{
+    void *array[20];
+    int size = backtrace(array, 20);
+    char **messages = backtrace_symbols(array, size);
+
+    LOGE("==== Caught signal {} ====", signum);
+
+    for (int i = 0; i < size; ++i)
+    {
+        LOGE("  [{}] {}", i, messages[i]);
+    }
+
+    LOGE("===================================");
+
+    free(messages);
+
+    spdlog::shutdown();
+
+    exit(EXIT_FAILURE);
+}
 
 void init()
 {
@@ -15,15 +41,15 @@ void init()
     ssize_t len = readlink("/proc/self/exe", exePath, sizeof(exePath) - 1);
     if (len == -1)
     {
-        std::cerr << "readlink failed\n";
+        cerr << "readlink failed\n";
         throw "readlink failed";
     }
     exePath[len] = '\0';
-    std::filesystem::path exeDir = std::filesystem::path(exePath).parent_path();
-    std::filesystem::path logDir = (exeDir / ".." / "logs").lexically_normal();
-    std::filesystem::create_directories(logDir);
+    filesystem::path exeDir = filesystem::path(exePath).parent_path();
+    filesystem::path logDir = (exeDir / ".." / "logs").lexically_normal();
+    filesystem::create_directories(logDir);
 
-    std::string logFilePath = (logDir / "botfather.log").string();
+    string logFilePath = (logDir / "botfather.log").string();
     auto logger = spdlog::daily_logger_mt<spdlog::async_factory>(
         "botfather_daily_logger", // tên logger
         logFilePath,              // file log
@@ -43,9 +69,16 @@ void init()
     spdlog::flush_on(spdlog::level::err);
     spdlog::flush_every(chrono::seconds(5));
 
+    LOGI("Hello BotFather!");
+
     MySQLConnector::getInstance();
     Telegram::getInstance();
     startOrderMonitor();
+
+    signal(SIGSEGV, signal_handler);
+    signal(SIGABRT, signal_handler);
+    signal(SIGILL, signal_handler);
+    signal(SIGTERM, signal_handler);
 }
 
 void destroy()
@@ -56,14 +89,8 @@ void destroy()
 
 int main()
 {
-    // std::ios::sync_with_stdio(false);
-    // std::cin.tie(0);
-
-    auto now = std::chrono::system_clock::now();
-    auto duration = now.time_since_epoch();
-    long long milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-    LOGI("Hello BotFather! {}", toTimeString(milliseconds));
-
+    // ios::sync_with_stdio(false);
+     // cin.tie(0);\
     init();
     runApp();
     destroy();

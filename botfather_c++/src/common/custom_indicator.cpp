@@ -486,6 +486,13 @@ int macd_n_dinh(int fastPeriod, int slowPeriod, int signalPeriod, int redDepth, 
     return n;
 }
 
+int macd_n_day(int fastPeriod, int slowPeriod, int signalPeriod, int redDepth, int depth, int enableDivergence, double diffCandle0, vector<double> &diffPercents, const double close[], const double open[], const double high[], int length)
+{
+    vector<MACD_Output> values = iMACDs(fastPeriod, slowPeriod, signalPeriod, close, length);
+    
+    return 0;
+}
+
 double macd_slope(int fastPeriod, int slowPeriod, int signalPeriod, const double close[], int n)
 {
     n = min(n, MAX_N + slowPeriod);
