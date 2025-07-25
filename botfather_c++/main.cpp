@@ -51,6 +51,7 @@ void init()
 void destroy()
 {
     spdlog::shutdown();
+    LOGI("Goodbye BotFather!");
 }
 
 int main()
