@@ -45,9 +45,6 @@ void SocketData::init()
 
 void SocketData::onCloseCandle(const string &symbol, string &timeframe, RateData &rateData)
 {
-    if (timeframe == "1m")
-        return;
-
     if (rateData.startTime.size() < 15)
         return;
 
