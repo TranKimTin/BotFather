@@ -40,7 +40,8 @@ void init()
 
     spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%t] [%^%l%$] %v");
     spdlog::set_level(spdlog::level::debug);
-    spdlog::flush_on(spdlog::level::info);
+    spdlog::flush_on(spdlog::level::err);
+    spdlog::flush_every(chrono::seconds(2));
 
     MySQLConnector::getInstance();
     Telegram::getInstance();
@@ -49,6 +50,7 @@ void init()
 
 void destroy()
 {
+    spdlog::shutdown();
 }
 
 int main()
