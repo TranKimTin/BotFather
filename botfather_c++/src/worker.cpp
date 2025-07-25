@@ -53,7 +53,7 @@ void Worker::run()
                 continue;
             }
             visited.clear();
-            dfs_handleLogic(bot->route, *bot);
+            dfs_handleLogic(bot->route, bot);
         }
         catch (const exception &e)
         {
@@ -63,7 +63,7 @@ void Worker::run()
     }
 }
 
-void Worker::dfs_handleLogic(Route &route, Bot &bot)
+void Worker::dfs_handleLogic(Route &route, shared_ptr<Bot> bot)
 {
     if (visited[route.id])
     {
@@ -400,9 +400,8 @@ bool Worker::adjustParam(NodeData &node)
     return true;
 }
 
-bool Worker::handleLogic(NodeData &nodeData, Bot &bot)
+bool Worker::handleLogic(NodeData &nodeData, shared_ptr<Bot> bot)
 {
-    int botID = bot.id;
     if (nodeData.type == NODE_TYPE::START)
         return true;
 
@@ -462,7 +461,7 @@ bool Worker::handleLogic(NodeData &nodeData, Bot &bot)
         mess += StringFormat("\n{} {}", timeframe, toTimeString(startTime[0]));
         mess += StringFormat("\n{}", content);
 
-        for (const string &id : bot.idTelegram)
+        for (const string &id : bot->idTelegram)
         {
             if (id.empty())
                 continue;
@@ -480,17 +479,21 @@ bool Worker::handleLogic(NodeData &nodeData, Bot &bot)
 
     if (find(orderTypes.begin(), orderTypes.end(), node.type) != orderTypes.end())
     {
-        LOGI("New order - BotID: {}, Type: {}, Broker: {}, Symbol: {}, Timeframe: {}, Entry: {}, Stop: {}, TP: {}, SL: {}, Volume: {}, ExpiredTime: {}",
-             botID, node.type, broker, symbol, timeframe,
-             node.entry, node.stop, node.tp, node.sl,
-             node.volume, node.expiredTime);
+        thread t([this, node, bot]()
+                 {
+        int botID = bot->id;
 
-        if (broker == "binance_future" && !bot.apiKey.empty() && !bot.secretKey.empty() && !bot.iv.empty())
+        LOGI("New order - BotID: {}, Type: {}, Broker: {}, Symbol: {}, Timeframe: {}, Entry: {}, Stop: {}, TP: {}, SL: {}, Volume: {}, ExpiredTime: {}",
+            botID, node.type, broker, symbol, timeframe,
+            node.entry, node.stop, node.tp, node.sl,
+            node.volume, node.expiredTime);
+
+        if (broker == "binance_future" && !bot->apiKey.empty() && !bot->secretKey.empty() && !bot->iv.empty())
         {
             unordered_map<string, string> env = readEnvFile();
             string encrypKey = env["ENCRYP_KEY"];
-            string apiKey = decryptAES(bot.apiKey, encrypKey, bot.iv);
-            string secretKey = decryptAES(bot.secretKey, encrypKey, bot.iv);
+            string apiKey = decryptAES(bot->apiKey, encrypKey, bot->iv);
+            string secretKey = decryptAES(bot->secretKey, encrypKey, bot->iv);
             shared_ptr<BinanceFuture> exchange = make_shared<BinanceFuture>(apiKey, secretKey);
 
             if (node.type == NODE_TYPE::BUY_MARKET)
@@ -578,11 +581,13 @@ bool Worker::handleLogic(NodeData &nodeData, Bot &bot)
         if (db.executeUpdate(mysql_query, args) <= 0)
         {
             LOGE("Failed to insert order into database");
-            return false;
-        }
+            return ;
+        } });
 
+        t.detach();
         return true;
     }
+    
     return false;
 }
 
