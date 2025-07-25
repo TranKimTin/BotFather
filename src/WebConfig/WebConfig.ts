@@ -8,6 +8,9 @@ import http from 'http';
 import { CustomRequest } from '../common/Interface';
 import routes from './routes';
 import Telegram from '../common/telegram';
+import dotenv from 'dotenv';
+
+dotenv.config({ path: `${__dirname}/../../.env` });
 
 const app = express();
 const server = http.createServer(app);
@@ -63,4 +66,4 @@ server.listen(port, () => {
         `);
 });
 
-const telegram = new Telegram(undefined, undefined, true);
+const telegram = new Telegram(undefined, undefined, process.env.TELEGRAM_POLLING == "1");

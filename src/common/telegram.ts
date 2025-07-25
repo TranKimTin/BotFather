@@ -29,7 +29,8 @@ export default class Telegram {
         this.listErr = [];
         this.list = [];
         this.TAG = tag ? `${tag}\n` : '';
-        this.bot = new TelegramBot(botToken, { polling: !!polling, baseApiUrl: 'https://telegram.kimtin-tr.workers.dev' });
+        // this.bot = new TelegramBot(botToken, { polling: !!polling, baseApiUrl: 'https://telegram.kimtin-tr.workers.dev' });
+        this.bot = new TelegramBot(botToken, { polling: !!polling });
 
         if (polling) {
             this.bot.on('message', (msg) => {
