@@ -102,7 +102,8 @@ static Route getRoute(const json &j)
 
     if (route.data.type == NODE_TYPE::EXPR)
     {
-        getParseTree(route.data.value);
+        string expr = toLowerCase(route.data.value);
+        getParseTree(expr);
     }
     return route;
 }
