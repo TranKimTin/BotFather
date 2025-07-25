@@ -5,8 +5,13 @@
 #include <openssl/hmac.h>
 #include <openssl/evp.h>
 
-BinanceFuture::BinanceFuture(const string &apiKey, const string &secretKey)
-    : apiKey(apiKey), secretKey(secretKey) {}
+BinanceFuture::BinanceFuture(const string &encryptedApiKey, const string &encryptedSecretKey, const string &iv, const int botID)
+    : encryptedApiKey(encryptedApiKey), encryptedSecretKey(encryptedSecretKey), iv(iv), botID(botID)
+{
+    unordered_map<string, string> env = readEnvFile();
+    apiKey = decryptAES(encryptedApiKey, env["ENCRYP_KEY"], iv);
+    secretKey = decryptAES(encryptedSecretKey, env["ENCRYP_KEY"], iv);
+}
 
 string BinanceFuture::buyMarket(const string &symbol, string quantity,
                                 string takeProfit, string stopLoss)
@@ -71,23 +76,7 @@ string BinanceFuture::placeBuyMarketTPSL(const string &symbol, string &quantity,
     }
     if (!tpID.empty() && !slID.empty())
     {
-        auto &db = MySQLConnector::getInstance();
-        string query = "INSERT INTO RealOrders(broker, symbol, entryID, tpID, slID) VALUES(?, ?, ?, ?, ?)";
-        vector<any> params = {
-            "binance_future",
-            symbol,
-            clientOrderId,
-            tpID,
-            slID};
-        auto res = db.executeUpdate(query, params);
-        if (res <= 0)
-        {
-            LOGE("Insert order to database error");
-        }
-        else
-        {
-            LOGI("Insert order to database success {} {} {}", clientOrderId, tpID, slID);
-        }
+        insertOrderToDB(symbol, clientOrderId, tpID, slID);
     }
     return resEntry;
 }
@@ -154,23 +143,7 @@ string BinanceFuture::placeSellMarketTPSL(const string &symbol, string &quantity
     }
     if (!tpID.empty() && !slID.empty())
     {
-        auto &db = MySQLConnector::getInstance();
-        string query = "INSERT INTO RealOrders(broker, symbol, entryID, tpID, slID) VALUES(?, ?, ?, ?, ?)";
-        vector<any> params = {
-            "binance_future",
-            symbol,
-            clientOrderId,
-            tpID,
-            slID};
-        auto res = db.executeUpdate(query, params);
-        if (res <= 0)
-        {
-            LOGE("Insert order to database error");
-        }
-        else
-        {
-            LOGI("Insert order to database success {} {} {}", clientOrderId, tpID, slID);
-        }
+        insertOrderToDB(symbol, clientOrderId, tpID, slID);
     }
     return resEntry;
 }
@@ -267,23 +240,7 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
 
     if (!tpID.empty() && !slID.empty())
     {
-        auto &db = MySQLConnector::getInstance();
-        string query = "INSERT INTO RealOrders(broker, symbol, entryID, tpID, slID) VALUES(?, ?, ?, ?, ?)";
-        vector<any> params = {
-            "binance_future",
-            symbol,
-            clientOrderId,
-            tpID,
-            slID};
-        auto res = db.executeUpdate(query, params);
-        if (res <= 0)
-        {
-            LOGE("Insert order to database error");
-        }
-        else
-        {
-            LOGI("Insert order to database success {} {} {}", clientOrderId, tpID, slID);
-        }
+        insertOrderToDB(symbol, clientOrderId, tpID, slID);
     }
 
     return res;
@@ -380,23 +337,7 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
     }
     if (!tpID.empty() && !slID.empty())
     {
-        auto &db = MySQLConnector::getInstance();
-        string query = "INSERT INTO RealOrders(broker, symbol, entryID, tpID, slID) VALUES(?, ?, ?, ?, ?)";
-        vector<any> params = {
-            "binance_future",
-            symbol,
-            clientOrderId,
-            tpID,
-            slID};
-        auto res = db.executeUpdate(query, params);
-        if (res <= 0)
-        {
-            LOGE("Insert order to database error");
-        }
-        else
-        {
-            LOGI("Insert order to database success {} {} {}", clientOrderId, tpID, slID);
-        }
+        insertOrderToDB(symbol, clientOrderId, tpID, slID);
     }
     return res;
 }
@@ -526,4 +467,30 @@ string BinanceFuture::getOrderStatus(const string &symbol, const string &orderId
         LOGE("Error getting order status from Binance Future: {}", e.what());
         return "";
     }
+}
+
+int BinanceFuture::insertOrderToDB(const string &symbol, const string clientOrderId, const string tpID, const string slID)
+{
+    auto &db = MySQLConnector::getInstance();
+    string query = "INSERT INTO RealOrders(broker, symbol, entryID, tpID, slID, apiKey, secretKey, iv, botID) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    vector<any> params = {
+        "binance_future",
+        symbol,
+        clientOrderId,
+        tpID,
+        slID,
+        encryptedApiKey,
+        encryptedSecretKey,
+        iv,
+        botID};
+    int res = db.executeUpdate(query, params);
+    if (res <= 0)
+    {
+        LOGE("Insert order to database error");
+    }
+    else
+    {
+        LOGI("Insert order to database success {} {} {}", clientOrderId, tpID, slID);
+    }
+    return res;
 }

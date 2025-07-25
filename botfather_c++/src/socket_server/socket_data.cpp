@@ -379,7 +379,7 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                 }
             }
             
-            LOGD("{}: Init {} / {}. Get from cache {} times ({:.1f}%)", broker, end, symbolList.size(), cnt, end * 100.0 / symbolList.size());
+            LOGI("{}: Init {} / {}. Get from cache {} times ({:.1f}%)", broker, end, symbolList.size(), cnt, end * 100.0 / symbolList.size());
 
             SLEEP_FOR(cnt * 5000 / 100 + 100);
         } });

@@ -490,11 +490,7 @@ bool Worker::handleLogic(NodeData &nodeData, shared_ptr<Bot> bot)
 
         if (broker == "binance_future" && !bot->apiKey.empty() && !bot->secretKey.empty() && !bot->iv.empty())
         {
-            unordered_map<string, string> env = readEnvFile();
-            string encrypKey = env["ENCRYP_KEY"];
-            string apiKey = decryptAES(bot->apiKey, encrypKey, bot->iv);
-            string secretKey = decryptAES(bot->secretKey, encrypKey, bot->iv);
-            shared_ptr<BinanceFuture> exchange = make_shared<BinanceFuture>(apiKey, secretKey);
+            shared_ptr<BinanceFuture> exchange = make_shared<BinanceFuture>(bot.apiKey, bot.secretKey, bot.iv, bot.id);
 
             if (node.type == NODE_TYPE::BUY_MARKET)
             {

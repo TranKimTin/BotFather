@@ -6,7 +6,7 @@
 class BinanceFuture : public IExchange
 {
 public:
-    BinanceFuture(const string &apiKey, const string &secretKey);
+    BinanceFuture(const string &encryptedApiKey, const string &encryptedSecretKey, const string &iv, const int botID);
 
     string buyMarket(const string &symbol, string quantity, string takeProfit = "", string stopLoss = "") override;
     string sellMarket(const string &symbol, string quantity, string takeProfit = "", string stopLoss = "") override;
@@ -16,8 +16,12 @@ public:
     string cancelOrderByClientId(const string &symbol, const string &clientOrderId) override;
 
 private:
+    string encryptedApiKey;
+    string encryptedSecretKey;
+    string iv;
     string apiKey;
     string secretKey;
+    int botID;
     // string BASE_URL = "https://fapi.binance.com";
     string BASE_URL = "https://testnet.binancefuture.com";
 
@@ -28,4 +32,6 @@ private:
     string sendTPorSL(const string &symbol, const string &side, const string &type, string quantity, string stopPrice, string limitPrice = "");
     string placeBuyMarketTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId, string &resEntry);
     string placeSellMarketTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId, string &resEntry);
+
+    int insertOrderToDB(const string &symbol, const string clientOrderId, const string tpID, const string slID);
 };
