@@ -24,7 +24,7 @@ void init()
     std::filesystem::create_directories(logDir);
 
     std::string logFilePath = (logDir / "botfather.log").string();
-    auto logger = spdlog::daily_logger_mt(
+    auto logger = spdlog::daily_logger_mt<spdlog::async_factory>(
         "botfather_daily_logger", // tên logger
         logFilePath,              // file log
         0, 0,                     // 00:00 mỗi ngày
@@ -41,7 +41,7 @@ void init()
     spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%t] [%^%l%$] %v");
     spdlog::set_level(spdlog::level::debug);
     spdlog::flush_on(spdlog::level::err);
-    spdlog::flush_every(chrono::seconds(2));
+    spdlog::flush_every(chrono::seconds(5));
 
     MySQLConnector::getInstance();
     Telegram::getInstance();
