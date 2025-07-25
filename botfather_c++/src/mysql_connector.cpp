@@ -136,9 +136,10 @@ int MySQLConnector::executeUpdate(const string &query, const vector<any> &params
             conn->setSchema(database);
         }
 
-        unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement(query));
-        bindParams(pstmt.get(), params);
+        sql::PreparedStatement *pstmt = conn->prepareStatement(query);
+        bindParams(pstmt, params);
         int affected = pstmt->executeUpdate();
+        delete pstmt;
         releaseConnection(conn);
         return affected;
     }
