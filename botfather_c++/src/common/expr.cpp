@@ -1145,19 +1145,25 @@ any Expr::visitDoji(ExprParser::DojiContext *ctx)
 }
 
 //////////////////////////////////////////////////////////////////
-static std::unordered_map<std::string, CachedParseTree> parseCache;
-static mutex parseCacheMutex;
+static unordered_map<string, CachedParseTree> parseCache;
+static shared_mutex parseCacheMutex;
 
 CachedParseTree &getParseTree(const string &key)
 {
-    lock_guard<mutex> lock(parseCacheMutex);
-    auto &entry = parseCache[key];
-    if (!entry.tree)
     {
-        entry.input = std::make_unique<ANTLRInputStream>(key);
-        entry.lexer = std::make_unique<ExprLexer>(entry.input.get());
-        entry.tokens = std::make_unique<CommonTokenStream>(entry.lexer.get());
-        entry.parser = std::make_unique<ExprParser>(entry.tokens.get());
+        shared_lock lock(parseCacheMutex);
+        auto it = parseCache.find(key);
+        if (it != parseCache.end() && it->second.tree)
+            return it->second;
+    }
+
+    unique_lock lock(parseCacheMutex);
+    auto &entry = parseCache[key];
+    if (!entry.tree) {
+        entry.input = make_unique<ANTLRInputStream>(key);
+        entry.lexer = make_unique<ExprLexer>(entry.input.get());
+        entry.tokens = make_unique<CommonTokenStream>(entry.lexer.get());
+        entry.parser = make_unique<ExprParser>(entry.tokens.get());
         entry.tree = entry.parser->expr();
     }
     return entry;
@@ -1167,7 +1173,7 @@ any calculateExpr(const string &inputText, const string &broker, const string &s
                   const double *open, const double *high, const double *low, const double *close,
                   const double *volume, long long *startTime, double fundingRate)
 {
-    const std::string key = toLowerCase(inputText);
+    const string key = toLowerCase(inputText);
     auto &entry = getParseTree(key);
 
     Expr expr(broker, symbol, timeframe, length, open, high, low, close, volume, startTime, fundingRate);
