@@ -114,9 +114,10 @@ unique_ptr<sql::ResultSet> MySQLConnector::executeQuery(const string &query, con
         conn->setSchema(database);
     }
 
-    unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement(query));
-    bindParams(pstmt.get(), params);
+    sql::PreparedStatement *pstmt = conn->prepareStatement(query);
+    bindParams(pstmt, params);
     auto result = unique_ptr<sql::ResultSet>(pstmt->executeQuery());
+    delete pstmt;
     releaseConnection(conn);
     return result;
 }
