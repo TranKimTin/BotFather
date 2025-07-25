@@ -5,6 +5,7 @@
 SocketBinanceFuture::SocketBinanceFuture(const int _BATCH_SIZE) : SocketData(_BATCH_SIZE)
 {
     broker = "binance_future";
+    timeframes = {"1m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "8h", "12h", "1d"};
 }
 
 void SocketBinanceFuture::on_message(connection_hdl, message_ptr msg)

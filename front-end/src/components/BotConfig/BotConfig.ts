@@ -46,7 +46,7 @@ export default defineComponent({
     setup() {
         const r_botName = ref<string>('');
         const r_idTelegram = ref<string>('');
-        const timeframes: Array<string> = ['5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'];
+        const timeframes: Array<string> = ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'];
         const r_timeframesSelected = ref<Array<string>>([]);
         const r_symbolList = ref<Array<string>>([]);
         const r_symbolListSelected = ref<Array<string>>([]);

@@ -9,7 +9,7 @@ static tbb::task_group task;
 
 SocketData::SocketData(const int _BATCH_SIZE) : BATCH_SIZE(_BATCH_SIZE), firstConnection(true)
 {
-    timeframes = {"1m", "5m", "15m", "30m", "1h", "4h", "1d"};
+    timeframes = {"1m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "12h", "1d"};
 }
 
 void SocketData::init()
