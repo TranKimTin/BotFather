@@ -7,8 +7,10 @@
 #include "telegram.h"
 #include "exchange.h"
 #include "binance_future.h"
+#include "thread_pool.h"
 
 static vector<string> orderTypes = {NODE_TYPE::BUY_MARKET, NODE_TYPE::BUY_LIMIT, NODE_TYPE::BUY_STOP_MARKET, NODE_TYPE::BUY_STOP_LIMIT, NODE_TYPE::SELL_MARKET, NODE_TYPE::SELL_LIMIT, NODE_TYPE::SELL_STOP_MARKET, NODE_TYPE::SELL_STOP_LIMIT};
+static ThreadPool tasks(thread::hardware_concurrency() * 2);
 
 Worker::Worker(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, Digit digit, double fundingRate)
     : botList(botList), broker(move(broker)), symbol(move(symbol)), timeframe(move(timeframe)), open(move(open)), high(move(high)), low(move(low)), close(move(close)), volume(move(volume)), startTime(move(startTime)), digit(digit), fundingRate(fundingRate) {};
@@ -479,8 +481,8 @@ bool Worker::handleLogic(NodeData &nodeData, shared_ptr<Bot> bot)
 
     if (find(orderTypes.begin(), orderTypes.end(), node.type) != orderTypes.end())
     {
-        thread t([this, node, bot]()
-                 {
+        tasks.enqueue([this, node, bot]()
+                      {
         int botID = bot->id;
 
         LOGI("New order - BotID: {}, Type: {}, Broker: {}, Symbol: {}, Timeframe: {}, Entry: {}, Stop: {}, TP: {}, SL: {}, Volume: {}, ExpiredTime: {}",
@@ -580,7 +582,6 @@ bool Worker::handleLogic(NodeData &nodeData, shared_ptr<Bot> bot)
             return ;
         } });
 
-        t.detach();
         return true;
     }
 
