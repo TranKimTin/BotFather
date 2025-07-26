@@ -485,10 +485,11 @@ bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
                       {
         int botID = bot->id;
 
-        LOGI("New order - BotID: {}, Type: {}, Broker: {}, Symbol: {}, Timeframe: {}, Entry: {}, Stop: {}, TP: {}, SL: {}, Volume: {}, ExpiredTime: {}",
-            botID, node.type, broker, symbol, timeframe,
+        LOGI("New order - BotName: {}. BotID: {}, Type: {}, Broker: {}, Symbol: {}, Timeframe: {}, Entry: {}, Stop: {}, TP: {}, SL: {}, Volume: {}, ExpiredTime: {}",
+            bot->botName, botID, node.type, broker, symbol, timeframe,
             node.entry, node.stop, node.tp, node.sl,
             node.volume, node.expiredTime);
+        LOGI("open: {}, high: {}, low: {}, close: {}, startTime: {}, timestring: {}", open[0], high[0], low[0], close[0], startTime[0], toTimeString(startTime[0]));
 
         if (broker == "binance_future" && !bot->apiKey.empty() && !bot->secretKey.empty() && !bot->iv.empty())
         {
