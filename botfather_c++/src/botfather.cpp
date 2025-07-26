@@ -100,10 +100,13 @@ static Route getRoute(const json &j)
         }
     }
 
-    if (route.data.type == NODE_TYPE::EXPR)
+    if (route.data.type != NODE_TYPE::START && route.data.type != NODE_TYPE::TELEGRAM && route.data.type != NODE_TYPE::CLOSE_ALL_ORDER && route.data.type != NODE_TYPE::CLOSE_ALL_POSITION)
     {
         string expr = toLowerCase(route.data.value);
-        getParseTree(expr);
+        if (!expr.empty())
+        {
+            getParseTree(expr);
+        }
     }
     return route;
 }
