@@ -60,7 +60,6 @@ void init()
         false,                    // không ghi đè
         7                         // giữ 7 file
     );
-    logger->set_overflow_policy(spdlog::async_overflow_policy::overrun_oldest);
     spdlog::set_default_logger(logger);
 #else
     printf("Write log to console\n");
