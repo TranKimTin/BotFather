@@ -247,7 +247,16 @@ string doubleToString(double value, int precision)
 {
     ostringstream oss;
     oss << fixed << setprecision(precision) << value;
-    return oss.str();
+    string result = oss.str();
+
+    if (result.find('.') != string::npos)
+    {
+        result.erase(result.find_last_not_of('0') + 1);
+        if (result.back() == '.')
+            result.pop_back();
+    }
+
+    return result;
 }
 
 RateData getBinanceOHLCV(const string &symbol, const string &timeframe, int limit, long long since)
