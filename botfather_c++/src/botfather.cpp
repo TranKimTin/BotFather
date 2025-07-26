@@ -175,25 +175,26 @@ vector<shared_ptr<Bot>> getBotList(string botName)
 
 void setBotList(string botName)
 {
-    // if (botName == "")
+    botName = "";
+    if (botName == "")
     {
         botList = make_shared<vector<shared_ptr<Bot>>>(getBotList(botName));
     }
-    // else
-    // {
-    //     auto list = make_shared<vector<shared_ptr<Bot>>>(getBotList(botName));
+    else
+    {
+        auto list = make_shared<vector<shared_ptr<Bot>>>(getBotList(botName));
 
-    //     // Xóa tất cả bot cùng tên (nếu có nhiều hơn 1)
-    //     botList->erase(remove_if(botList->begin(), botList->end(),
-    //                              [&](const shared_ptr<Bot> &bot)
-    //                              {
-    //                                  return bot->botName == botName;
-    //                              }),
-    //                    botList->end());
+        // Xóa tất cả bot cùng tên (nếu có nhiều hơn 1)
+        botList->erase(remove_if(botList->begin(), botList->end(),
+                                 [&](const shared_ptr<Bot> &bot)
+                                 {
+                                     return bot->botName == botName;
+                                 }),
+                       botList->end());
 
-    //     // Thêm các bot mới vào
-    //     botList->insert(botList->end(), list->begin(), list->end());
-    // }
+        // Thêm các bot mới vào
+        botList->insert(botList->end(), list->begin(), list->end());
+    }
 
     for (SocketData *exchange : exchanges)
     {
