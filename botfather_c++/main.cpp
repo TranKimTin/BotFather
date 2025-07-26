@@ -51,6 +51,8 @@ void init()
     filesystem::create_directories(logDir);
 
     string logFilePath = (logDir / "botfather.log").string();
+
+    spdlog::init_thread_pool(65536, 1);
     auto logger = spdlog::daily_logger_mt<spdlog::async_factory>(
         "botfather_daily_logger", // tên logger
         logFilePath,              // file log
@@ -58,6 +60,7 @@ void init()
         false,                    // không ghi đè
         7                         // giữ 7 file
     );
+    logger->set_overflow_policy(spdlog::async_overflow_policy::overrun_oldest);
     spdlog::set_default_logger(logger);
 #else
     printf("Write log to console\n");
@@ -68,7 +71,7 @@ void init()
     spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%t] [%^%l%$] %v");
     spdlog::set_level(spdlog::level::debug);
     spdlog::flush_on(spdlog::level::err);
-    spdlog::flush_every(chrono::seconds(5));
+    spdlog::flush_every(chrono::seconds(3));
 
     LOGI("Hello BotFather!");
 
