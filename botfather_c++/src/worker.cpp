@@ -90,9 +90,19 @@ string Worker::calculateSub(string &expr)
 
 any Worker::calculate(string &expr)
 {
-    return calculateExpr(expr, broker, symbol, timeframe, open.size(),
-                         open.data(), high.data(), low.data(), close.data(), volume.data(),
-                         startTime.data(), fundingRate);
+    auto it = cached.find(expr);
+    if (it != cached.end())
+    {
+        return it->second;
+    }
+
+    any result = calculateExpr(
+        expr, broker, symbol, timeframe, open.size(),
+        open.data(), high.data(), low.data(), close.data(), volume.data(),
+        startTime.data(), fundingRate);
+
+    cached[expr] = result;
+    return result;
 }
 
 bool Worker::adjustParam(NodeData &node)
