@@ -66,7 +66,7 @@ void SocketData::onCloseCandle(const string &symbol, string &timeframe, RateData
 
     shared_ptr<Worker> worker = make_shared<Worker>(botList, broker, symbol, timeframe, move(open), move(high), move(low), move(close), move(volume), move(startTime), digits[symbol], fundingRates[symbol]);
 
-    task.run([worker, this, timeframe]()
+    task.run([worker]()
              { worker->run(); });
 
     if (rand() % 10 == 0)
