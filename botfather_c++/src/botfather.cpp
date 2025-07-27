@@ -49,7 +49,7 @@ void test()
 }
 #endif
 
-static Route getRoute(const json &j)
+static Route getRoute(const json &j, bool cachedTree)
 {
     // j: {"data":{"id":"1744877970451","value":"Start","type":"start"},"id":"1744877970451","next":[{"data":{"id":"1744877970452","value":"max_rsi(14, 70, 48) >= 80","type":"expr","unitVolume":"usd","unitEntry":"price","unitTP":"price","unitSL":"price","unitStop":"price","unitExpiredTime":"candle","expiredTime":"0"},"id":"1744877970452","next":[{"data":{"id":"1744877982563","value":"macd_n_dinh(12, 26, 9, 6, 8, 0, 2, 0, 5) >= 3","type":"expr","unitVolume":"usd","unitEntry":"price","unitTP":"price","unitSL":"price","unitStop":"price","unitExpiredTime":"candle","expiredTime":"0"},"id":"1744877982563","next":[{"data":{"id":"1744877970453","value":"ampl(1) >= avg_ampl(25, 0) * 1.8","type":"expr","unitVolume":"usd","unitEntry":"price","unitTP":"price","unitSL":"price","unitStop":"price","unitExpiredTime":"candle","expiredTime":"0"},"id":"1744877970453","next":[{"data":{"id":"1744877970454","value":"change(1) > 0","type":"expr","unitVolume":"usd","unitEntry":"price","unitTP":"price","unitSL":"price","unitStop":"price","unitExpiredTime":"candle","expiredTime":"0"},"id":"1744877970454","next":[{"data":{"id":"1744877970455","value":"change(0) < 0","type":"expr","unitVolume":"usd","unitEntry":"price","unitTP":"price","unitSL":"price","unitStop":"price","unitExpiredTime":"candle","expiredTime":"0"},"id":"1744877970455","next":[{"data":{"id":"1744877970456","value":"close(1) > max_high(100, 2)","type":"expr","unitVolume":"usd","unitEntry":"price","unitTP":"price","unitSL":"price","unitStop":"price","unitExpiredTime":"candle","expiredTime":"0"},"id":"1744877970456","next":[{"data":{"id":"1744877970457","value":"high(0) > max_high(100, 0)","type":"expr","unitVolume":"usd","unitEntry":"price","unitTP":"price","unitSL":"price","unitStop":"price","unitExpiredTime":"candle","expiredTime":"0"},"id":"1744877970457","next":[{"data":{"id":"1744877970458","value":"close(0) >= (open(1) + close(1))/2","type":"expr","unitVolume":"usd","unitEntry":"price","unitTP":"price","unitSL":"price","unitStop":"price","unitExpiredTime":"candle","expiredTime":"0"},"id":"1744877970458","next":[{"data":{"id":"1744877970459","value":"","type":"openSellLimit","unitVolume":"usd","unitEntry":"price","unitTP":"rr","unitSL":"price","unitStop":"price","unitExpiredTime":"candle","expiredTime":"1","volume":"5000","entry":"(close(0) + open(0))/2","sl":"high(0)","tp":"3.3","display":"Open SELL Limit. Volume=5000 (USD), Entry=(close(0) + open(0))/2 (USD), TP=3.3 (R), SL=high(0) (USD)"},"id":"1744877970459","next":[]}]}]}]}]}]}]}]}]}]}
     Route route;
@@ -96,22 +96,22 @@ static Route getRoute(const json &j)
     {
         for (const auto &nextNode : j["next"])
         {
-            route.next.push_back(getRoute(nextNode));
+            route.next.push_back(getRoute(nextNode, cachedTree));
         }
     }
 
-    if (route.data.type != NODE_TYPE::START && route.data.type != NODE_TYPE::TELEGRAM && route.data.type != NODE_TYPE::CLOSE_ALL_ORDER && route.data.type != NODE_TYPE::CLOSE_ALL_POSITION)
+    if (cachedTree && route.data.type != NODE_TYPE::START && route.data.type != NODE_TYPE::TELEGRAM && route.data.type != NODE_TYPE::CLOSE_ALL_ORDER && route.data.type != NODE_TYPE::CLOSE_ALL_POSITION)
     {
         string expr = toLowerCase(route.data.value);
         if (!expr.empty())
         {
-            getParseTree(expr);
+            cacheParseTree(expr);
         }
     }
     return route;
 }
 
-vector<shared_ptr<Bot>> getBotList(string botName)
+vector<shared_ptr<Bot>> getBotList(string botName, bool cachedTree)
 {
     Timer timer("getBotList");
     vector<shared_ptr<Bot>> botList;
@@ -166,23 +166,23 @@ vector<shared_ptr<Bot>> getBotList(string botName)
 
         string routeString = res->getString("route");
         json j = json::parse(routeString);
-        bot->route = getRoute(j);
+        bot->route = getRoute(j, cachedTree);
 
         botList.push_back(bot);
     }
     return botList;
 }
 
-void setBotList(string botName)
+void setBotList(string botName, bool cacheTree)
 {
     botName = "";
     if (botName == "")
     {
-        botList = make_shared<vector<shared_ptr<Bot>>>(getBotList(botName));
+        botList = make_shared<vector<shared_ptr<Bot>>>(getBotList(botName, cacheTree));
     }
     else
     {
-        auto list = make_shared<vector<shared_ptr<Bot>>>(getBotList(botName));
+        auto list = make_shared<vector<shared_ptr<Bot>>>(getBotList(botName, cacheTree));
 
         // Xóa tất cả bot cùng tên (nếu có nhiều hơn 1)
         botList->erase(remove_if(botList->begin(), botList->end(),
@@ -214,7 +214,7 @@ void sio_on_message(string const &event, sio::message::ptr const &data, bool isA
     {
         string botName = data->get_string();
         LOGI("Update config for bot {}", botName);
-        setBotList(botName);
+        setBotList(botName, false);
     }
 }
 
@@ -243,7 +243,7 @@ void runApp()
     client.socket()->on("onUpdateConfig", sio_on_message);
     client.connect(StringFormat("{}:{}", env["HOST_WEB_SERVER"], 8080));
 
-    setBotList();
+    setBotList("", true);
 
     for (auto &t : threads)
     {

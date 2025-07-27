@@ -1146,27 +1146,22 @@ any Expr::visitDoji(ExprParser::DojiContext *ctx)
 
 //////////////////////////////////////////////////////////////////
 static unordered_map<string, CachedParseTree> parseCache;
-static shared_mutex parseCacheMutex;
 
-CachedParseTree &getParseTree(const string &key)
+void cacheParseTree(const string &key)
 {
-    {
-        shared_lock lock(parseCacheMutex);
-        auto it = parseCache.find(key);
-        if (it != parseCache.end() && it->second.tree)
-            return it->second;
-    }
+    auto it = parseCache.find(key);
+    if (it != parseCache.end() && it->second.tree)
+        return;
 
-    unique_lock lock(parseCacheMutex);
     auto &entry = parseCache[key];
-    if (!entry.tree) {
+    if (!entry.tree)
+    {
         entry.input = make_unique<ANTLRInputStream>(key);
         entry.lexer = make_unique<ExprLexer>(entry.input.get());
         entry.tokens = make_unique<CommonTokenStream>(entry.lexer.get());
         entry.parser = make_unique<ExprParser>(entry.tokens.get());
         entry.tree = entry.parser->expr();
     }
-    return entry;
 }
 
 any calculateExpr(const string &inputText, const string &broker, const string &symbol, const string &timeframe, int length,
@@ -1174,10 +1169,22 @@ any calculateExpr(const string &inputText, const string &broker, const string &s
                   const double *volume, long long *startTime, double fundingRate)
 {
     const string key = toLowerCase(inputText);
-    auto &entry = getParseTree(key);
-
     Expr expr(broker, symbol, timeframe, length, open, high, low, close, volume, startTime, fundingRate);
-    return expr.visit(entry.tree);
+
+    auto it = parseCache.find(key);
+    if (it != parseCache.end() && it->second.tree)
+    {
+        return expr.visit(it->second.tree);
+    }
+    else
+    {
+        ANTLRInputStream input(key);
+        ExprLexer lexer(&input);
+        CommonTokenStream tokens(&lexer);
+        ExprParser parser(&tokens);
+        antlr4::tree::ParseTree *tree = parser.expr();
+        return expr.visit(tree);
+    }
 }
 
 string calculateSubExpr(string &expr, const string &broker, const string &symbol, const string &timeframe, int length,

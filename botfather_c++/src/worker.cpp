@@ -90,7 +90,8 @@ string Worker::calculateSub(string &expr)
 
 any Worker::calculate(string &expr)
 {
-    auto it = cached.find(expr);
+    string key = toLowerCase(expr);
+    auto it = cached.find(key);
     if (it != cached.end())
     {
         return it->second;
@@ -101,7 +102,7 @@ any Worker::calculate(string &expr)
         open.data(), high.data(), low.data(), close.data(), volume.data(),
         startTime.data(), fundingRate);
 
-    cached[expr] = result;
+    cached[key] = result;
     return result;
 }
 
