@@ -82,6 +82,8 @@ void init()
     signal(SIGABRT, signal_handler);
     signal(SIGILL, signal_handler);
     signal(SIGTERM, signal_handler);
+
+    srand(time(NULL));
 }
 
 void destroy()

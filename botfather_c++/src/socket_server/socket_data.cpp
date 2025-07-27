@@ -69,7 +69,10 @@ void SocketData::onCloseCandle(const string &symbol, string &timeframe, RateData
     task.run([worker, this, timeframe]()
              { worker->run(); });
 
-    this->updateCache(this->data[symbol + "_" + timeframe]);
+    if (rand() % 10 == 0)
+    {
+        this->updateCache(this->data[symbol + "_" + timeframe]);
+    }
 }
 
 void SocketData::mergeData(RateData &rateData, const string &symbol, string &timeframe, string &currentTF, double open, double high, double low, double close, double volume, long long startTime, bool isFinal, bool ignoreClose)

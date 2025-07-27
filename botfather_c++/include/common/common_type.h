@@ -23,6 +23,7 @@
 #include <functional>
 #include <any>
 #include <filesystem>
+#include <random>
 
 #include <websocketpp/config/asio_client.hpp>
 #include <websocketpp/client.hpp>
