@@ -22,7 +22,6 @@ private:
     string calculateSub(string &expr);
     any calculate(string &expr);
     bool adjustParam(NodeData &data);
-    int compareStringNumber(const string &a, const string &b);
 
 public:
     Worker(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, Digit digit, double fundingRate);

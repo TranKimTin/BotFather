@@ -18,7 +18,7 @@ void signal_handler(int signum)
     int size = backtrace(array, max_frames);
     char **messages = backtrace_symbols(array, size);
 
-    LOGE("==== Caught signal {} ====", signum);
+    LOGE("==== Fatal caught signal {} ====", signum);
 
     for (int i = 0; i < size; ++i)
     {

@@ -492,7 +492,12 @@ bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
 
     if (find(orderTypes.begin(), orderTypes.end(), node.type) != orderTypes.end())
     {
-        tasks.enqueue([this, node, bot]()
+        long long createdTime = startTime[0];
+        double o = open[0];
+        double h = high[0];
+        double l = low[0];
+        double c = close[0];
+        tasks.enqueue([createdTime, node, bot, broker = this->broker, symbol = this->symbol, timeframe = this->timeframe, o, h, l, c]()
                       {
         int botID = bot->id;
 
@@ -500,7 +505,7 @@ bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
             bot->botName, botID, node.type, broker, symbol, timeframe,
             node.entry, node.stop, node.tp, node.sl,
             node.volume, node.expiredTime);
-        LOGI("open: {}, high: {}, low: {}, close: {}, startTime: {}, timestring: {}", open[0], high[0], low[0], close[0], startTime[0], toTimeString(startTime[0]));
+        LOGI("open: {}, high: {}, low: {}, close: {}, startTime: {}, timestring: {}", o, h, l, c, createdTime, toTimeString(createdTime));
 
         if (broker == "binance_future" && !bot->apiKey.empty() && !bot->secretKey.empty() && !bot->iv.empty())
         {
@@ -558,7 +563,7 @@ bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
         //  {
         //     symbol, broker, timeframe, node.type, stod(node.volume), stod(node.stop),
         //     node.entry, node.tp, node.sl, ORDER_STATUS::OPENED,
-        //     toTimeString(nextTime(startTime[0], timeframe)), node.expiredTime, to_string(botID)};
+        //     toTimeString(nextTime(createdTime, timeframe)), node.expiredTime, to_string(botID)};
 
         args.push_back(symbol);
         args.push_back(broker);
@@ -577,7 +582,7 @@ bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
         args.push_back(stod(node.tp));
         args.push_back(stod(node.sl));
         args.push_back(ORDER_STATUS::OPENED);
-        args.push_back(nextTime(startTime[0], timeframe));
+        args.push_back(nextTime(createdTime, timeframe));
         if (node.expiredTime.empty() || node.expiredTime == "0")
         {
             args.push_back(NULL);
@@ -598,13 +603,4 @@ bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
     }
 
     return false;
-}
-
-int Worker::compareStringNumber(const string &a, const string &b)
-{
-    double A = stod(a);
-    double B = stod(b);
-    if (a == b)
-        return 0;
-    return a < b ? -1 : 1;
 }

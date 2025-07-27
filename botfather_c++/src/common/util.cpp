@@ -785,3 +785,12 @@ string generateRandomIV()
         oss << hex << setw(2) << setfill('0') << (int)iv[i];
     return oss.str();
 }
+
+int compareStringNumber(const string &a, const string &b)
+{
+    double A = stod(a);
+    double B = stod(b);
+    if (a == b)
+        return 0;
+    return a < b ? -1 : 1;
+}

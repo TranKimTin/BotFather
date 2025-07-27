@@ -48,3 +48,5 @@ vector<unsigned char> base64Decode(const string &input);
 string encryptAES(const string &plaintext, const string &key, const string &iv);
 string decryptAES(const string &ciphertext, const string &key, const string &iv);
 string generateRandomIV();
+
+int compareStringNumber(const string &a, const string &b);
