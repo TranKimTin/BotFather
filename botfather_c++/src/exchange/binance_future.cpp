@@ -494,3 +494,58 @@ int BinanceFuture::insertOrderToDB(const string &symbol, const string clientOrde
     }
     return res;
 }
+
+bool BinanceFuture::changeLeverage(const string &symbol, int leverage)
+{
+    map<string, string> params = {
+        {"symbol", symbol},
+        {"leverage", to_string(leverage)},
+        {"timestamp", to_string(getCurrentTime())}};
+
+    string query = buildQuery(params);
+    string signature = sign(query);
+    query += "&signature=" + signature;
+
+    string url = StringFormat("{}/fapi/v1/leverage?{}", BASE_URL, query);
+
+    try
+    {
+        LOGI("Changing leverage on Binance Future: {}", url);
+        string res = Axios::post(url, "", "application/json", {"X-MBX-APIKEY: " + apiKey});
+        LOGI("Response from Binance Future: {}", res);
+        return true;
+    }
+    catch (const exception &e)
+    {
+        LOGE("Error changing leverage on Binance Future: {}", e.what());
+        return false;
+    }
+}
+
+bool BinanceFuture::changeMarginType(const string &symbol, const string &marginType)
+{
+    // marginType: "CROSSED" or "ISOLATED"
+    map<string, string> params = {
+        {"symbol", symbol},
+        {"marginType", marginType},
+        {"timestamp", to_string(getCurrentTime())}};
+
+    string query = buildQuery(params);
+    string signature = sign(query);
+    query += "&signature=" + signature;
+
+    string url = StringFormat("{}/fapi/v1/marginType?{}", BASE_URL, query);
+
+    try
+    {
+        LOGI("Changing margin type on Binance Future: {}", url);
+        string res = Axios::post(url, "", "application/json", {"X-MBX-APIKEY: " + apiKey});
+        LOGI("Response from Binance Future: {}", res);
+        return true;
+    }
+    catch (const exception &e)
+    {
+        LOGE("Error changing margin type on Binance Future: {}", e.what());
+        return false;
+    }
+}

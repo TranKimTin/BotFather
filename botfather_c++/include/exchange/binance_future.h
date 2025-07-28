@@ -14,6 +14,8 @@ public:
     string sellLimit(const string &symbol, string quantity, string price, string takeProfit = "", string stopLoss = "", string expiredTime = "") override;
     string getOrderStatus(const string &symbol, const string &orderId) override;
     string cancelOrderByClientId(const string &symbol, const string &clientOrderId) override;
+    bool changeLeverage(const string &symbol, int leverage) override;
+    bool changeMarginType(const string &symbol, const string &marginType) override;  // marginType: "CROSSED" or "ISOLATED"
 
 private:
     string encryptedApiKey;
@@ -22,8 +24,8 @@ private:
     string apiKey;
     string secretKey;
     int botID;
-    // string BASE_URL = "https://fapi.binance.com";
-    string BASE_URL = "https://testnet.binancefuture.com";
+    string BASE_URL = "https://fapi.binance.com";
+    // string BASE_URL = "https://testnet.binancefuture.com";
 
     string sendOrder(const map<string, string> &params);
     string buildQuery(const map<string, string> &params);

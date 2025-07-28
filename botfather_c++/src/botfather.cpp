@@ -16,7 +16,7 @@ vector<SocketData *> exchanges;
 vector<thread> threads;
 shared_ptr<vector<shared_ptr<Bot>>> botList;
 
-// #define TEST
+#define TEST
 
 #ifdef TEST
 #include "telegram.h"
@@ -45,6 +45,28 @@ void test()
     vector<double> close(rateData.close.begin(), rateData.close.end());
     vector<double> volume(rateData.volume.begin(), rateData.volume.end());
     vector<long long> startTime(rateData.startTime.begin(), rateData.startTime.end());
+
+    vector<string> symbolList = getBinanceFutureSymbolList();
+    for (string s : symbolList)
+    {
+        string apiKey = env["API_KEY"];
+        string secretKey = env["SECRET_KEY"];
+        string key = env["ENCRYP_KEY"];
+
+        string iv = generateRandomIV();
+        string encryptedApiKey = encryptAES(apiKey, key, iv);
+        string encryptedSecretKey = encryptAES(secretKey, key, iv);
+
+        encryptedApiKey = "BvwqwA1xbbHfRpIVi7/0PHjrlZ80LkMX1i82NzflmUJGGsdoO+uicr52gHIUftpy/bMej4gvhhQZWmYs1idsvOJv7x2DxvAvyDK73xD4LmY=";
+        encryptedSecretKey = "BvwqwA1xbbHfRpIVi7/0PHjrlZ80LkMX1i82NzflmUJGGsdoO+uicr52gHIUftpy/bMej4gvhhQZWmYs1idsvOJv7x2DxvAvyDK73xD4LmY=";
+        iv = "a11145184dc93f7d90e8e6ad09d349be";
+
+        IExchange *exchange = new BinanceFuture(encryptedApiKey, encryptedSecretKey, iv, 0);
+        exchange->changeMarginType(s, "CROSSED");
+        exchange->changeLeverage(s, 50);
+    }
+
+    SLEEP_FOR(1000000);
 }
 #endif
 
