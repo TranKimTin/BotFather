@@ -1172,8 +1172,8 @@ export function base64Decode(input: string): Uint8Array {
 }
 
 export function encryptAES(plaintext: string, key: string, iv: string) {
-    const keyBuf = Buffer.from(key, 'utf8'); // hoặc 'binary' nếu bạn dùng raw key
-    const ivBuf = Buffer.from(iv, 'hex');   // hoặc Buffer.from(iv, 'hex') nếu IV ở dạng hex chuỗi
+    const keyBuf = Buffer.from(key, 'utf8');
+    const ivBuf = Buffer.from(iv, 'hex');  
 
     const cipher = crypto.createCipheriv('aes-256-cbc', keyBuf, ivBuf);
     let encrypted = cipher.update(plaintext, 'utf8', 'base64');
