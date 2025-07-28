@@ -577,6 +577,17 @@ unordered_map<string, Digit> getBinanceDigits()
         string symbol = s["symbol"].get<string>();
         result[symbol].prices = s["baseAssetPrecision"].get<int>();
         result[symbol].volume = s["quotePrecision"].get<int>();
+        for (auto &f : s["filters"])
+        {
+            if (f["filterType"].get<string>() == "PRICE_FILTER")
+            {
+                result[symbol].prices = (int)(-log10(stod(f["tickSize"].get<string>())));
+            }
+            else if (f["filterType"].get<string>() == "LOT_SIZE")
+            {
+                result[symbol].volume = (int)(-log10(stod(f["stepSize"].get<string>())));
+            }
+        }
     }
     return result;
 }
@@ -598,6 +609,18 @@ unordered_map<string, Digit> getBinanceFutureDigits()
         string symbol = s["symbol"].get<string>();
         result[symbol].prices = s["pricePrecision"].get<int>();
         result[symbol].volume = s["quantityPrecision"].get<int>();
+
+        for (auto &f : s["filters"])
+        {
+            if (f["filterType"].get<string>() == "PRICE_FILTER")
+            {
+                result[symbol].prices = (int)(-log10(stod(f["tickSize"].get<string>())));
+            }
+            else if (f["filterType"].get<string>() == "LOT_SIZE")
+            {
+                result[symbol].volume = (int)(-log10(stod(f["stepSize"].get<string>())));
+            }
+        }
     }
     return result;
 }
@@ -698,12 +721,13 @@ vector<unsigned char> base64Decode(const string &input)
     return buffer;
 }
 
-static vector<unsigned char> hexToBytes(const string &hexStr) {
+static vector<unsigned char> hexToBytes(const string &hexStr)
+{
     vector<unsigned char> bytes;
-    for (size_t i = 0; i < hexStr.length(); i += 2) {
+    for (size_t i = 0; i < hexStr.length(); i += 2)
+    {
         bytes.push_back(static_cast<unsigned char>(
-            std::stoul(hexStr.substr(i, 2), nullptr, 16)
-        ));
+            std::stoul(hexStr.substr(i, 2), nullptr, 16)));
     }
     return bytes;
 }

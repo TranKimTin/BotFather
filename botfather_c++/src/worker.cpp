@@ -498,7 +498,7 @@ bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
         double h = high[0];
         double l = low[0];
         double c = close[0];
-        tasks.enqueue([createdTime, node, bot, broker = this->broker, symbol = this->symbol, timeframe = this->timeframe, o, h, l, c]()
+        tasks.enqueue([createdTime, node, bot, broker = this->broker, symbol = this->symbol, timeframe = this->timeframe, o, h, l, c, digit = this->digit]()
                       {
         int botID = bot->id;
 
@@ -507,6 +507,7 @@ bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
             node.entry, node.stop, node.tp, node.sl,
             node.volume, node.expiredTime);
         LOGI("open: {}, high: {}, low: {}, close: {}, startTime: {}, timestring: {}", o, h, l, c, createdTime, toTimeString(createdTime));
+        LOGI("digit: {}, {}", digit.prices, digit.volume);
 
         if (broker == "binance_future" && bot->enableRealOrder && !bot->apiKey.empty() && !bot->secretKey.empty() && !bot->iv.empty())
         {
