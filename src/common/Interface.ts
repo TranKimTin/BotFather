@@ -56,6 +56,9 @@ export interface BotInfo {
     botName: string;
     route: Node;
     idTelegram: TelegramIdType;
+    apiKey: string | null;
+    secretKey: string | null;
+    enableRealOrder: number;
 }
 
 export type TelegramIdType = string | number;

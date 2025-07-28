@@ -14,6 +14,7 @@ import Select from 'primevue/select';
 import ExprInput from '../ExprInput/ExprInput.vue';
 import ContextMenu from 'primevue/contextmenu';
 import { useEventListener } from '@/Composables/useEvent';
+import Checkbox from 'primevue/checkbox';
 
 cytoscape.use(edgehandles);
 
@@ -42,7 +43,7 @@ interface NodeCopy {
 }
 
 export default defineComponent({
-    components: { MultiSelect, AutoComplete, Button, Dialog, InputText, Select, ExprInput, ContextMenu },
+    components: { MultiSelect, AutoComplete, Button, Dialog, InputText, Select, ExprInput, ContextMenu, Checkbox },
     setup() {
         const r_botName = ref<string>('');
         const r_idTelegram = ref<string>('');
@@ -54,6 +55,11 @@ export default defineComponent({
         const r_visible = ref<boolean>(false);
         const r_currentNode = ref<NodeData>({ id: '', type: '' });
         const r_type = ref<string>('');
+        const r_apiDialogVisible = ref<boolean>(false);
+        const r_apiKey = ref<string>("");
+        const r_secretKey = ref<string>("");
+        const r_enableRealOrder = ref<boolean>(false);
+
         const menu = ref();
         const items = ref([
             {
@@ -112,6 +118,12 @@ export default defineComponent({
                 shortcut: 'Ctrl + H',
                 route: () => `/history/${r_botName.value}`,
                 target: '_blank'
+            },
+            {
+                label: 'API key',
+                icon: 'pi pi-key',
+                shortcut: 'Ctrl + K',
+                command: settingApiKey,
             },
             {
                 label: 'Xóa bot',
@@ -338,6 +350,9 @@ export default defineComponent({
             r_idTelegram.value = botData.idTelegram;
             r_symbolListSelected.value = botData.symbolList;
             r_timeframesSelected.value = botData.timeframes;
+            r_apiKey.value = botData.apiKey;
+            r_secretKey.value = botData.secretKey;
+            r_enableRealOrder.value = botData.enableRealOrder;
 
             const treeData = {
                 ...botData.treeData,
@@ -577,6 +592,10 @@ export default defineComponent({
             else if (event.ctrlKey && event.key.toLowerCase() === 'h') {
                 window.open(`/history/${r_botName.value}`);
             }
+            else if (event.ctrlKey && event.key.toLowerCase() === 'k') {
+                event.preventDefault();
+                settingApiKey();
+            }
             else if (event.ctrlKey && event.key.toLowerCase() === 'delete') {
                 removeBot();
             }
@@ -599,7 +618,10 @@ export default defineComponent({
                     idTelegram: r_idTelegram.value,
                     timeframes: r_timeframesSelected.value,
                     symbolList: r_symbolListSelected.value,
-                    botName: botName
+                    botName: botName,
+                    apiKey: r_apiKey.value,
+                    secretKey: r_secretKey.value,
+                    enableRealOrder: r_enableRealOrder.value ? 1 : 0
                 };
 
                 let res = await axios.post('/save', data);
@@ -650,6 +672,10 @@ export default defineComponent({
                 reject: () => {
                 }
             });
+        }
+
+        async function settingApiKey() {
+            r_apiDialogVisible.value = true;
         }
 
         function newNode() {
@@ -758,6 +784,11 @@ export default defineComponent({
             menu.value.show(event);
         }
 
+        function saveApiConfig() {
+            Toast.showSuccess(`Save api config`);
+            r_apiDialogVisible.value = false;
+        }
+
         onMounted(async () => {
             r_botName.value = Cookies.get("botName") || '';
 
@@ -815,6 +846,10 @@ export default defineComponent({
             r_visible,
             r_currentNode,
             r_type,
+            r_apiDialogVisible,
+            r_apiKey,
+            r_secretKey,
+            r_enableRealOrder,
             brokerList,
             nodeTypes,
             unitsEntry,
@@ -835,7 +870,8 @@ export default defineComponent({
             newNode,
             updateNode,
             applyNode,
-            openContextMenu
+            openContextMenu,
+            saveApiConfig
         };
     }
 });

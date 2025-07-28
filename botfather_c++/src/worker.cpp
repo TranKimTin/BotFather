@@ -469,6 +469,7 @@ bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
             {"bybit_future", "https://www.bybit.com/trade/usdt/" + symbol}};
 
         string mess = emoji[broker];
+        mess += StringFormat("\n<a href='https://www.botfather.tech/history/{}'><b>{}</b></a>", bot->botName, bot->botName);
         mess += StringFormat("\n<a href='{}'><b>{}</b></a>", url[broker], symbol);
         mess += StringFormat("\n{}", broker);
         mess += StringFormat("\n{} {}", timeframe, toTimeString(startTime[0]));
@@ -507,7 +508,7 @@ bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
             node.volume, node.expiredTime);
         LOGI("open: {}, high: {}, low: {}, close: {}, startTime: {}, timestring: {}", o, h, l, c, createdTime, toTimeString(createdTime));
 
-        if (broker == "binance_future" && !bot->apiKey.empty() && !bot->secretKey.empty() && !bot->iv.empty())
+        if (broker == "binance_future" && bot->enableRealOrder && !bot->apiKey.empty() && !bot->secretKey.empty() && !bot->iv.empty())
         {
             shared_ptr<BinanceFuture> exchange = make_shared<BinanceFuture>(bot->apiKey, bot->secretKey, bot->iv, bot->id);
 

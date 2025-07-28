@@ -9,6 +9,7 @@ import pm2 from 'pm2';
 import dotenv from 'dotenv';
 import { BollingerBandsOutput } from 'technicalindicators/declarations/volatility/BollingerBands';
 import * as customIndicator from './CustomIndicator';
+import * as crypto from 'crypto';
 
 dotenv.config({ path: `${__dirname}/../../.env` });
 
@@ -1160,4 +1161,41 @@ export function shuffleArray(array: Array<any>) {
         [array[i], array[j]] = [array[j], array[i]];
     }
     return array;
+}
+
+export function base64Encode(data: Uint8Array): string {
+    return Buffer.from(data).toString('base64');
+}
+
+export function base64Decode(input: string): Uint8Array {
+    return Buffer.from(input, 'base64');
+}
+
+export function encryptAES(plaintext: string, key: string, iv: string) {
+    const keyBuf = Buffer.from(key, 'utf8'); // hoặc 'binary' nếu bạn dùng raw key
+    const ivBuf = Buffer.from(iv, 'hex');   // hoặc Buffer.from(iv, 'hex') nếu IV ở dạng hex chuỗi
+
+    const cipher = crypto.createCipheriv('aes-256-cbc', keyBuf, ivBuf);
+    let encrypted = cipher.update(plaintext, 'utf8', 'base64');
+    encrypted += cipher.final('base64');
+    return encrypted;
+}
+
+export function decryptAES(ciphertextBase64: string, key: string, iv: string): string {
+    const encrypted = Buffer.from(ciphertextBase64, 'base64');
+    const decipher = crypto.createDecipheriv(
+        'aes-256-cbc',
+        Buffer.from(key, 'utf8'),
+        Buffer.from(iv, 'hex')
+    );
+    const decrypted = Buffer.concat([
+        decipher.update(encrypted),
+        decipher.final()
+    ]);
+    return decrypted.toString('utf8');
+}
+
+export function generateRandomIV(): string {
+    const iv = crypto.randomBytes(16); // 16 bytes for AES block size
+    return iv.toString('hex');
 }

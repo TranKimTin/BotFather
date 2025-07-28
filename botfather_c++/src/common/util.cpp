@@ -698,16 +698,27 @@ vector<unsigned char> base64Decode(const string &input)
     return buffer;
 }
 
+static vector<unsigned char> hexToBytes(const string &hexStr) {
+    vector<unsigned char> bytes;
+    for (size_t i = 0; i < hexStr.length(); i += 2) {
+        bytes.push_back(static_cast<unsigned char>(
+            std::stoul(hexStr.substr(i, 2), nullptr, 16)
+        ));
+    }
+    return bytes;
+}
+
 // Encrypt AES-256-CBC → base64
-string encryptAES(const string &plaintext, const string &key, const string &iv)
+string encryptAES(const string &plaintext, const string &key, const string &ivHex)
 {
+    vector<unsigned char> ivBytes = hexToBytes(ivHex);
+
     EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
     if (!ctx)
         throw runtime_error("Failed to create context");
 
     if (EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr,
-                           (const unsigned char *)key.data(),
-                           (const unsigned char *)iv.data()) != 1)
+                           (const unsigned char *)key.data(), ivBytes.data()) != 1)
     {
         EVP_CIPHER_CTX_free(ctx);
         throw runtime_error("EncryptInit failed");
@@ -736,17 +747,17 @@ string encryptAES(const string &plaintext, const string &key, const string &iv)
     return base64Encode(ciphertext.data(), ciphertext.size());
 }
 
-// Decrypt AES-256-CBC ← base64
-string decryptAES(const string &ciphertextBase64, const string &key, const string &iv)
+string decryptAES(const string &ciphertextBase64, const string &key, const string &ivHex)
 {
     vector<unsigned char> ciphertext = base64Decode(ciphertextBase64);
+    vector<unsigned char> ivBytes = hexToBytes(ivHex);
+
     EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
     if (!ctx)
         throw runtime_error("Failed to create context");
 
     if (EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr,
-                           (const unsigned char *)key.data(),
-                           (const unsigned char *)iv.data()) != 1)
+                           (const unsigned char *)key.data(), ivBytes.data()) != 1)
     {
         EVP_CIPHER_CTX_free(ctx);
         throw runtime_error("DecryptInit failed");

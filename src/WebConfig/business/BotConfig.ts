@@ -5,6 +5,7 @@ import * as mysql from '../lib/mysql';
 import moment from 'moment';
 import dotenv from 'dotenv';
 import axios from 'axios';
+import Binance from 'binance-api-node'
 
 dotenv.config({ path: `${__dirname}/../../../.env` });
 
@@ -72,10 +73,13 @@ export async function getBotInfo(botName: string) {
                 type: NODE_TYPE.START,
                 value: "Start",
             }, id: 'start', next: []
-        }
+        },
+        apiKey: null,
+        secretKey: null,
+        enableRealOrder: 0
     };
 
-    const sql = `SELECT botName, idTelegram, route, symbolList, timeframes, treeData 
+    const sql = `SELECT botName, idTelegram, route, symbolList, timeframes, treeData, apiKey, secretKey, enableRealOrder 
                     FROM Bot WHERE botName = ?`;
     const data = await mysql.query(sql, [botName]);
 
@@ -87,6 +91,9 @@ export async function getBotInfo(botName: string) {
         botInfo.symbolList = JSON.parse(bot.symbolList);
         botInfo.timeframes = JSON.parse(bot.timeframes);
         botInfo.treeData = JSON.parse(bot.treeData);
+        botInfo.apiKey = bot.apiKey;
+        botInfo.secretKey = bot.secretKey;
+        botInfo.enableRealOrder = bot.enableRealOrder;
     }
 
     return botInfo;
@@ -200,6 +207,37 @@ export async function saveBot(data: BotInfo, userData: UserTokenInfo) {
         throw 'Điều kiện vòng tròn';
     }
 
+    let IV: string = '';
+
+    if (data.apiKey || data.secretKey) {
+        const query = `SELECT iv, apiKey, secretKey FROM Bot WHERE botName = ?`;
+        const res = await mysql.query(query, [botName]);
+        console.log(data.apiKey, data.secretKey)
+        if (res.length) {
+            const { iv, apiKey, secretKey } = res[0];
+            if (data.apiKey === apiKey && data.secretKey === secretKey) {
+                const key = process.env.ENCRYP_KEY || '';
+                data.apiKey = util.decryptAES(apiKey, key, iv);
+                data.secretKey = util.decryptAES(secretKey, key, iv);
+                IV = iv;
+            }
+        }
+        console.log(data.apiKey, data.secretKey)
+
+        const client = Binance({
+            apiKey: data.apiKey!,
+            apiSecret: data.secretKey!
+        });
+        try {
+            const account = await client.accountInfo();
+            if (!account) {
+                throw "api key không hợp lệ";
+            }
+        } catch (error: any) {
+            throw `api key không hợp lệ. ${error.message}`;
+        }
+    }
+
     const [{ count }] = await mysql.query(
         `SELECT count(1) AS count 
             FROM Bot
@@ -207,8 +245,12 @@ export async function saveBot(data: BotInfo, userData: UserTokenInfo) {
         [data.botName]);
 
     if (count === 0) {
-        console.log('Insert new bot', JSON.stringify(data));
-        const sql = `INSERT INTO Bot(botName, idTelegram, route, symbolList, timeframes, treeData, userID) VALUES(?,?,?,?,?,?,?)`;
+        console.log('Insert new bot', data.botName);
+        const sql = `INSERT INTO Bot(botName, idTelegram, route, symbolList, timeframes, treeData, userID, apiKey, secretKey, iv, enableRealOrder) VALUES(?,?,?,?,?,?,?,?,?,?,?)`;
+        const iv = IV || util.generateRandomIV();
+        const key = process.env.ENCRYP_KEY || '';
+        const apiKey = data.apiKey ? util.encryptAES(data.apiKey, key, iv) : '';
+        const secretKey = data.secretKey ? util.encryptAES(data.secretKey, key, iv) : '';
         await mysql.query(sql,
             [
                 data.botName,
@@ -217,19 +259,33 @@ export async function saveBot(data: BotInfo, userData: UserTokenInfo) {
                 JSON.stringify(data.symbolList),
                 JSON.stringify(data.timeframes),
                 JSON.stringify(data.treeData),
-                userData.id
+                userData.id,
+                apiKey,
+                secretKey,
+                iv,
+                data.enableRealOrder
             ]);
     }
     else {
-        console.log(' Update bot', JSON.stringify(data));
+        console.log(' Update bot', data.botName);
+        const iv = IV || util.generateRandomIV();
+        const key = process.env.ENCRYP_KEY || '';
+        const apiKey = data.apiKey ? util.encryptAES(data.apiKey, key, iv) : '';
+        const secretKey = data.secretKey ? util.encryptAES(data.secretKey, key, iv) : '';
+
         const sql = `UPDATE Bot
                     SET idTelegram = ?,
                         route = ?,
                         symbolList = ?,
                         timeframes = ?,
-                        treeData = ?
+                        treeData = ?,
+                        apiKey = ?,
+                        secretKey = ?,
+                        iv = ?,
+                        enableRealOrder = ?
                     WHERE botName = ?
                         `;
+
         await mysql.query(sql,
             [
                 data.idTelegram,
@@ -237,9 +293,14 @@ export async function saveBot(data: BotInfo, userData: UserTokenInfo) {
                 JSON.stringify(data.symbolList),
                 JSON.stringify(data.timeframes),
                 JSON.stringify(data.treeData),
+                apiKey,
+                secretKey,
+                iv,
+                data.enableRealOrder,
                 data.botName
             ]);
     }
+
 }
 
 export async function checkNode(data: NodeData) {

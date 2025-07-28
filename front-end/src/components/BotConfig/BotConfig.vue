@@ -111,6 +111,25 @@
             </div>
         </Dialog>
 
+        <Dialog v-model:visible="r_apiDialogVisible" modal header="Cấu hình API" :style="{ width: '70%' }">
+            <div class="flex flex-col gap-3 p-3">
+                <label class="font-semibold">API Key:</label>
+                <InputText v-model="r_apiKey" placeholder="Nhập API Key" autocomplete="off" />
+
+                <label class="font-semibold">Secret Key:</label>
+                <InputText v-model="r_secretKey" placeholder="Nhập Secret Key" autocomplete="off" type="password"/>
+
+                <div class="flex items-center gap-2 mt-2">
+                    <Checkbox v-model="r_enableRealOrder" :binary="true" inputId="realOrder" />
+                    <label for="realOrder">Bật chế độ vào lệnh thật</label>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 p-2">
+                <Button type="button" label="Hủy" severity="secondary" @click="r_apiDialogVisible = false"></Button>
+                <Button type="button" label="Lưu" @click="saveApiConfig"></Button>
+            </div>
+        </Dialog>
+
         <div class="row">
             <div class="col-2"><b>Tên bot</b></div>
             <div class="col-2"><b>Telegram</b></div>

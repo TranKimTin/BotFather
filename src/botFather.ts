@@ -127,7 +127,10 @@ export class BotFather {
                 route: JSON.parse(bot.route),
                 symbolList: JSON.parse(bot.symbolList),
                 timeframes: JSON.parse(bot.timeframes),
-                treeData: JSON.parse(bot.treeData)
+                treeData: JSON.parse(bot.treeData),
+                apiKey: null,
+                secretKey: null,
+                enableRealOrder: 0
             };
             botInfo.symbolList.sort();
             this.botChildren.push(botInfo);
