@@ -21,12 +21,17 @@ shared_ptr<vector<shared_ptr<Bot>>> botList;
 #ifdef TEST
 #include "telegram.h"
 #include "binance_future.h"
+#include <tbb/task_group.h>
+
+static tbb::task_group task;
 
 void test()
 {
+    auto env = readEnvFile();
+
     string broker = "binance_future";
     string symbol = "BTCUSDT";
-    string timeframe = "4h";
+    string timeframe = "1h";
     RateData rateData = getBinanceFuturetOHLCV(symbol, timeframe, 600);
     rateData.open.pop_front();
     rateData.high.pop_front();
@@ -40,12 +45,6 @@ void test()
     vector<double> close(rateData.close.begin(), rateData.close.end());
     vector<double> volume(rateData.volume.begin(), rateData.volume.end());
     vector<long long> startTime(rateData.startTime.begin(), rateData.startTime.end());
-
-    string expr = "avg_macd_histogram(12,26,9,1,3)";
-    auto result = calculateExpr(expr, broker, symbol, timeframe, open.size(),
-                                open.data(), high.data(), low.data(), close.data(), volume.data(),
-                                startTime.data(), 0);
-    LOGD("Result {} = {}", expr, any_cast<double>(result));
 }
 #endif
 
@@ -139,6 +138,7 @@ vector<shared_ptr<Bot>> getBotList(string botName, bool cachedTree)
         bot->apiKey = res->isNull("apiKey") ? "" : res->getString("apiKey");
         bot->secretKey = res->isNull("secretKey") ? "" : res->getString("secretKey");
         bot->iv = res->isNull("iv") ? "" : res->getString("iv");
+        bot->enableRealOrder = res->getInt("enableRealOrder") == 1 ? true : false;
 
         for (string &id : bot->idTelegram)
         {

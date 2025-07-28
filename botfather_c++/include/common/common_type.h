@@ -158,6 +158,7 @@ struct Bot
     string apiKey;
     string secretKey;
     string iv;
+    bool enableRealOrder;
 };
 
 struct Digit
