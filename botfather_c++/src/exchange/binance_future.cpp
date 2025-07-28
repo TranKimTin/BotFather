@@ -546,6 +546,7 @@ bool BinanceFuture::changeMarginType(const string &symbol, const string &marginT
     catch (const exception &e)
     {
         LOGE("Error changing margin type on Binance Future: {}", e.what());
+        LOGE("apiKey: {}", apiKey);
         return false;
     }
 }
