@@ -498,6 +498,7 @@ int BinanceFuture::insertOrderToDB(const string &symbol, const string clientOrde
 bool BinanceFuture::changeLeverage(const string &symbol, int leverage)
 {
     map<string, string> params = {
+        {"recvWindow", "5000"},
         {"symbol", symbol},
         {"leverage", to_string(leverage)},
         {"timestamp", to_string(getCurrentTime())}};
@@ -526,6 +527,7 @@ bool BinanceFuture::changeMarginType(const string &symbol, const string &marginT
 {
     // marginType: "CROSSED" or "ISOLATED"
     map<string, string> params = {
+        {"recvWindow", "5000"},
         {"symbol", symbol},
         {"marginType", marginType},
         {"timestamp", to_string(getCurrentTime())}};
@@ -546,7 +548,6 @@ bool BinanceFuture::changeMarginType(const string &symbol, const string &marginT
     catch (const exception &e)
     {
         LOGE("Error changing margin type on Binance Future: {}", e.what());
-        LOGE("apiKey: {}", apiKey);
         return false;
     }
 }
