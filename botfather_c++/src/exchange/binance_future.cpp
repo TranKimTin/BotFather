@@ -447,6 +447,7 @@ string BinanceFuture::cancelOrderByClientId(const string &symbol, const string &
 string BinanceFuture::getOrderStatus(const string &symbol, const string &orderId)
 {
     map<string, string> params = {
+        {"recvWindow", "5000"},
         {"symbol", symbol},
         {"origClientOrderId", orderId},
         {"timestamp", to_string(getCurrentTime())}};
