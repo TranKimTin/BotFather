@@ -191,13 +191,22 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
         string resTP = sendTPorSL(symbol, "SELL", "STOP", quantity, price, takeProfit);
         if (resTP == "")
         {
-            LOGI("Place TP error. Close position");
-            string resCancel = cancelOrderByClientId(symbol, clientOrderId);
-            if (resCancel == "")
+            string entryStatus = entryJson["status"].get<string>();
+            if (entryStatus != "NEW")
             {
-                LOGI("Cancel order {} error", clientOrderId);
-                LOGI("Close position");
-                return sellMarket(symbol, quantity, "", "");
+                LOGI("Entry match immediately.");
+                return placeBuyMarketTPSL(symbol, quantity, takeProfit, stopLoss, clientOrderId, resEntry);
+            }
+            else
+            {
+                LOGI("Place TP error. Close position");
+                string resCancel = cancelOrderByClientId(symbol, clientOrderId);
+                if (resCancel == "")
+                {
+                    LOGI("Cancel order {} error", clientOrderId);
+                    LOGI("Close position");
+                    return sellMarket(symbol, quantity, "", "");
+                }
             }
             return resTP;
         }
@@ -289,15 +298,24 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
         string resTP = sendTPorSL(symbol, "BUY", "STOP", quantity, price, takeProfit);
         if (resTP == "")
         {
-            LOGI("Place TP error. Close position");
-            string resCancel = cancelOrderByClientId(symbol, clientOrderId);
-            if (resCancel == "")
+            string entryStatus = entryJson["status"].get<string>();
+            if (entryStatus != "NEW")
             {
-                LOGI("Cancel order {} error", clientOrderId);
-                LOGI("Close position");
-                return buyMarket(symbol, quantity, "", "");
+                LOGI("Entry match immediately.");
+                return placeSellMarketTPSL(symbol, quantity, takeProfit, stopLoss, clientOrderId, resEntry);
             }
-            return resTP;
+            else
+            {
+                LOGI("Place TP error. Close position");
+                string resCancel = cancelOrderByClientId(symbol, clientOrderId);
+                if (resCancel == "")
+                {
+                    LOGI("Cancel order {} error", clientOrderId);
+                    LOGI("Close position");
+                    return buyMarket(symbol, quantity, "", "");
+                }
+                return resTP;
+            }
         }
         else
         {
