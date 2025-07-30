@@ -16,12 +16,20 @@ BinanceFuture::BinanceFuture(const string &encryptedApiKey, const string &encryp
 string BinanceFuture::buyMarket(const string &symbol, string quantity,
                                 string takeProfit, string stopLoss)
 {
+    int openOrderAlgoCount = getOpenAlgoOrdersCount(symbol);
+    if (openOrderAlgoCount == -1 || openOrderAlgoCount >= MAX_NUM_ALGO_ORDERS)
+    {
+        LOGE("Max number of algo orders reached ({}). Do nothing.", openOrderAlgoCount);
+        return "";
+    }
+    LOGI("openOrderAlgoCount: {}", openOrderAlgoCount);
+
     string clientOrderId = StringFormat("BFBM{}{}", symbol, getCurrentTime());
     map<string, string> params = {
         {"recvWindow", "5000"},
         {"symbol", symbol},
-        {"side", "BUY"},
-        {"type", "MARKET"},
+        {"side", BUY},
+        {"type", MARKET},
         {"quantity", quantity},
         {"newClientOrderId", clientOrderId},
         {"timestamp", to_string(getCurrentTime())}};
@@ -39,7 +47,7 @@ string BinanceFuture::placeBuyMarketTPSL(const string &symbol, string &quantity,
 
     if (!takeProfit.empty())
     {
-        string resTP = sendTPorSL(symbol, "SELL", "TAKE_PROFIT_MARKET", quantity, takeProfit);
+        string resTP = sendTPorSL(symbol, SELL, LIMIT, quantity, takeProfit, takeProfit);
         if (resTP == "")
         {
             LOGI("Place TP error. Close position");
@@ -55,7 +63,7 @@ string BinanceFuture::placeBuyMarketTPSL(const string &symbol, string &quantity,
     string slID;
     if (!stopLoss.empty())
     {
-        string resSL = sendTPorSL(symbol, "SELL", "STOP_MARKET", quantity, stopLoss);
+        string resSL = sendTPorSL(symbol, SELL, STOP_MARKET, quantity, stopLoss);
         if (resSL == "")
         {
             LOGI("Place SL error");
@@ -83,12 +91,20 @@ string BinanceFuture::placeBuyMarketTPSL(const string &symbol, string &quantity,
 
 string BinanceFuture::sellMarket(const string &symbol, string quantity, string takeProfit, string stopLoss)
 {
+    int openOrderAlgoCount = getOpenAlgoOrdersCount(symbol);
+    if (openOrderAlgoCount == -1 || openOrderAlgoCount >= MAX_NUM_ALGO_ORDERS)
+    {
+        LOGE("Max number of algo orders reached ({}). Do nothing.", openOrderAlgoCount);
+        return "";
+    }
+    LOGI("openOrderAlgoCount: {}", openOrderAlgoCount);
+
     string clientOrderId = StringFormat("BFSM{}{}", symbol, getCurrentTime());
     map<string, string> params = {
         {"recvWindow", "5000"},
         {"symbol", symbol},
-        {"side", "SELL"},
-        {"type", "MARKET"},
+        {"side", SELL},
+        {"type", MARKET},
         {"quantity", quantity},
         {"newClientOrderId", clientOrderId},
         {"timestamp", to_string(getCurrentTime())}};
@@ -105,7 +121,7 @@ string BinanceFuture::placeSellMarketTPSL(const string &symbol, string &quantity
     string tpID;
     if (!takeProfit.empty())
     {
-        string resTP = sendTPorSL(symbol, "BUY", "TAKE_PROFIT_MARKET", quantity, takeProfit);
+        string resTP = sendTPorSL(symbol, BUY, LIMIT, quantity, takeProfit, takeProfit);
         if (resTP == "")
         {
             LOGI("Place TP error. Close position");
@@ -122,7 +138,7 @@ string BinanceFuture::placeSellMarketTPSL(const string &symbol, string &quantity
     string slID;
     if (!stopLoss.empty())
     {
-        string resSL = sendTPorSL(symbol, "BUY", "STOP_MARKET", quantity, stopLoss);
+        string resSL = sendTPorSL(symbol, BUY, STOP_MARKET, quantity, stopLoss);
         if (resSL == "")
         {
             LOGI("Place SL error");
@@ -150,12 +166,20 @@ string BinanceFuture::placeSellMarketTPSL(const string &symbol, string &quantity
 
 string BinanceFuture::buyLimit(const string &symbol, string quantity, string price, string takeProfit, string stopLoss, string expiredTime)
 {
+    int openOrderAlgoCount = getOpenAlgoOrdersCount(symbol);
+    if (openOrderAlgoCount == -1 || openOrderAlgoCount >= MAX_NUM_ALGO_ORDERS - 1)
+    {
+        LOGE("Max number of algo orders reached ({}). Do nothing.", openOrderAlgoCount);
+        return "";
+    }
+    LOGI("openOrderAlgoCount: {}", openOrderAlgoCount);
+
     string clientOrderId = StringFormat("BFBL{}{}", symbol, getCurrentTime());
     map<string, string> params = {
         {"recvWindow", "5000"},
         {"symbol", symbol},
-        {"side", "BUY"},
-        {"type", "LIMIT"},
+        {"side", BUY},
+        {"type", LIMIT},
         {"quantity", quantity},
         {"price", price},
         {"timeInForce", "GTC"},
@@ -188,7 +212,7 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
 
     if (!takeProfit.empty())
     {
-        string resTP = sendTPorSL(symbol, "SELL", "STOP", quantity, price, takeProfit);
+        string resTP = sendTPorSL(symbol, SELL, STOP, quantity, price, takeProfit);
         if (resTP == "")
         {
             string entryStatus = entryJson["status"].get<string>();
@@ -221,7 +245,7 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
     string slID;
     if (!stopLoss.empty())
     {
-        string resSL = sendTPorSL(symbol, "SELL", "STOP_MARKET", quantity, stopLoss);
+        string resSL = sendTPorSL(symbol, SELL, STOP_MARKET, quantity, stopLoss);
         if (resSL == "")
         {
             LOGI("Place SL error");
@@ -257,12 +281,20 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
 
 string BinanceFuture::sellLimit(const string &symbol, string quantity, string price, string takeProfit, string stopLoss, string expiredTime)
 {
+    int openOrderAlgoCount = getOpenAlgoOrdersCount(symbol);
+    if (openOrderAlgoCount == -1 || openOrderAlgoCount >= MAX_NUM_ALGO_ORDERS)
+    {
+        LOGE("Max number of algo orders reached ({}). Do nothing.", openOrderAlgoCount);
+        return "";
+    }
+    LOGI("openOrderAlgoCount: {}", openOrderAlgoCount);
+
     string clientOrderId = StringFormat("BFSL{}{}", symbol, getCurrentTime());
     map<string, string> params = {
         {"recvWindow", "5000"},
         {"symbol", symbol},
-        {"side", "SELL"},
-        {"type", "LIMIT"},
+        {"side", SELL},
+        {"type", LIMIT},
         {"quantity", quantity},
         {"price", price},
         {"timeInForce", "GTC"},
@@ -295,7 +327,7 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
 
     if (!takeProfit.empty())
     {
-        string resTP = sendTPorSL(symbol, "BUY", "STOP", quantity, price, takeProfit);
+        string resTP = sendTPorSL(symbol, BUY, STOP, quantity, price, takeProfit);
         if (resTP == "")
         {
             string entryStatus = entryJson["status"].get<string>();
@@ -328,7 +360,7 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
     string slID;
     if (!stopLoss.empty())
     {
-        string resSL = sendTPorSL(symbol, "BUY", "STOP_MARKET", quantity, stopLoss);
+        string resSL = sendTPorSL(symbol, BUY, STOP_MARKET, quantity, stopLoss);
         if (resSL == "")
         {
             LOGI("Place SL error");
@@ -362,7 +394,7 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
 
 string BinanceFuture::sendTPorSL(const string &symbol, const string &side, const string &type, string quantity, string stopPrice, string limitPrice)
 {
-    string clientOrderId = (type == "TAKE_PROFIT_MARKET" || type == "STOP")
+    string clientOrderId = (type == TAKE_PROFIT_MARKET || type == STOP || type == LIMIT)
                                ? StringFormat("BFTP{}{}", symbol, getCurrentTime())
                                : StringFormat("BFSL{}{}", symbol, getCurrentTime());
 
@@ -371,14 +403,17 @@ string BinanceFuture::sendTPorSL(const string &symbol, const string &side, const
         {"symbol", symbol},
         {"side", side},
         {"type", type},
-        {"stopPrice", stopPrice},
         {"closePosition", "false"},
         {"reduceOnly", "true"},
         {"quantity", quantity},
         {"newClientOrderId", clientOrderId},
         {"timestamp", to_string(getCurrentTime())}};
 
-    if (type == "STOP")
+    if (type != LIMIT)
+    {
+        params["stopPrice"] = stopPrice;
+    }
+    if (type == STOP)
     {
         params["price"] = limitPrice;
     }
@@ -568,5 +603,49 @@ bool BinanceFuture::changeMarginType(const string &symbol, const string &marginT
     {
         LOGE("Error changing margin type on Binance Future: {}", e.what());
         return false;
+    }
+}
+
+int BinanceFuture::getOpenAlgoOrdersCount(const string &symbol)
+{
+    map<string, string> params = {
+        {"symbol", symbol},
+        {"recvWindow", "5000"},
+        {"timestamp", to_string(getCurrentTime())}};
+
+    string query = buildQuery(params);
+    string signature = sign(query);
+    query += "&signature=" + signature;
+
+    string url = StringFormat("{}/fapi/v1/openOrders?{}", BASE_URL, query);
+
+    try
+    {
+        LOGI("Fetching open orders from Binance Future: {}", url);
+        string res = Axios::get(url, {"X-MBX-APIKEY: " + apiKey});
+        LOGI("Response from Binance Future: {}", res);
+
+        auto json = nlohmann::json::parse(res);
+        int count = 0;
+
+        for (const auto &order : json)
+        {
+            string type = order["origType"].get<string>();
+            if (type == STOP ||
+                type == STOP_MARKET ||
+                type == TAKE_PROFIT ||
+                type == TAKE_PROFIT_MARKET ||
+                type == TRAILING_STOP_MARKET)
+            {
+                ++count;
+            }
+        }
+
+        return count;
+    }
+    catch (const exception &e)
+    {
+        LOGE("Error getting open algo orders: {}", e.what());
+        return -1;
     }
 }

@@ -15,7 +15,7 @@ public:
     string getOrderStatus(const string &symbol, const string &orderId) override;
     string cancelOrderByClientId(const string &symbol, const string &clientOrderId) override;
     bool changeLeverage(const string &symbol, int leverage) override;
-    bool changeMarginType(const string &symbol, const string &marginType) override;  // marginType: "CROSSED" or "ISOLATED"
+    bool changeMarginType(const string &symbol, const string &marginType) override; // marginType: "CROSSED" or "ISOLATED"
 
 private:
     string encryptedApiKey;
@@ -24,8 +24,19 @@ private:
     string apiKey;
     string secretKey;
     int botID;
-    string BASE_URL = "https://fapi.binance.com";
+    const string BASE_URL = "https://fapi.binance.com";
     // string BASE_URL = "https://testnet.binancefuture.com";
+
+    const int MAX_NUM_ALGO_ORDERS = 10;
+    const string SELL = "SELL";
+    const string BUY = "BUY";
+    const string MARKET = "MARKET";
+    const string LIMIT = "LIMIT";
+    const string STOP = "STOP";
+    const string STOP_MARKET = "STOP_MARKET";
+    const string TAKE_PROFIT = "TAKE_PROFIT";
+    const string TAKE_PROFIT_MARKET = "TAKE_PROFIT_MARKET";
+    const string TRAILING_STOP_MARKET = "TRAILING_STOP_MARKET";
 
     string sendOrder(const map<string, string> &params);
     string buildQuery(const map<string, string> &params);
@@ -36,4 +47,5 @@ private:
     string placeSellMarketTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId, string &resEntry);
 
     int insertOrderToDB(const string &symbol, const string clientOrderId, const string tpID, const string slID);
+    int getOpenAlgoOrdersCount(const string &symbol);
 };
