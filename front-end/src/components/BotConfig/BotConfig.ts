@@ -352,7 +352,7 @@ export default defineComponent({
             r_timeframesSelected.value = botData.timeframes;
             r_apiKey.value = botData.apiKey;
             r_secretKey.value = botData.secretKey;
-            r_enableRealOrder.value = botData.enableRealOrder;
+            r_enableRealOrder.value = (botData.enableRealOrder == 1) ? true : false;
 
             const treeData = {
                 ...botData.treeData,
