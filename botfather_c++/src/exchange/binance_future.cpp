@@ -406,6 +406,7 @@ string BinanceFuture::sendTPorSL(const string &symbol, const string &side, const
         {"closePosition", "false"},
         {"reduceOnly", "true"},
         {"quantity", quantity},
+        {"timeInForce", "GTC"},
         {"newClientOrderId", clientOrderId},
         {"timestamp", to_string(getCurrentTime())}};
 
