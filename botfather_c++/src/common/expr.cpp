@@ -280,7 +280,15 @@ any Expr::visitRsi(ExprParser::RsiContext *ctx)
     if (period <= 0 || shift < 0 || shift >= length - period)
         return {};
 
-    return iRSI(period, close + shift, length - shift);
+    string key = StringFormat("iRSI_{}", period);
+
+    vector<double> &cachedRSI = (*cached)[key];
+    if (cachedRSI.empty())
+    {
+        cachedRSI = iRSI(period, close, length);
+    }
+
+    return cachedRSI[shift];
 }
 
 any Expr::visitRsi_slope(ExprParser::Rsi_slopeContext *ctx)
@@ -326,7 +334,22 @@ any Expr::visitMacd_value(ExprParser::Macd_valueContext *ctx)
     if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || shift < 0 || shift >= length - slowPeriod)
         return {};
 
-    return iMACD(fastPeriod, slowPeriod, signalPeriod, close + shift, length - shift).macd;
+    string key = StringFormat("iMACD_{}_{}_{}", fastPeriod, slowPeriod, signalPeriod);
+
+    vector<double> &cachedMACD = (*cached)[key];
+    if (cachedMACD.empty())
+    {
+        vector<MACD_Output> macds = iMACD(fastPeriod, slowPeriod, signalPeriod, close, length);
+        cachedMACD.resize(macds.size() * 3);
+        for (int i = 0; i < macds.size(); i++)
+        {
+            cachedMACD[i * 3] = macds[i].macd;
+            cachedMACD[i * 3 + 1] = macds[i].signal;
+            cachedMACD[i * 3 + 2] = macds[i].histogram;
+        }
+    }
+
+    return cachedMACD[shift * 3];
 }
 
 any Expr::visitMacd_signal(ExprParser::Macd_signalContext *ctx)
@@ -339,7 +362,22 @@ any Expr::visitMacd_signal(ExprParser::Macd_signalContext *ctx)
     if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || shift < 0 || shift >= length - slowPeriod)
         return {};
 
-    return iMACD(fastPeriod, slowPeriod, signalPeriod, close + shift, length - shift).signal;
+    string key = StringFormat("iMACD_{}_{}_{}", fastPeriod, slowPeriod, signalPeriod);
+
+    vector<double> &cachedMACD = (*cached)[key];
+    if (cachedMACD.empty())
+    {
+        vector<MACD_Output> macds = iMACD(fastPeriod, slowPeriod, signalPeriod, close, length);
+        cachedMACD.resize(macds.size() * 3);
+        for (int i = 0; i < macds.size(); i++)
+        {
+            cachedMACD[i * 3] = macds[i].macd;
+            cachedMACD[i * 3 + 1] = macds[i].signal;
+            cachedMACD[i * 3 + 2] = macds[i].histogram;
+        }
+    }
+
+    return cachedMACD[shift * 3 + 1];
 }
 
 any Expr::visitMacd_histogram(ExprParser::Macd_histogramContext *ctx)
@@ -352,7 +390,22 @@ any Expr::visitMacd_histogram(ExprParser::Macd_histogramContext *ctx)
     if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || shift < 0 || shift >= length - slowPeriod)
         return {};
 
-    return iMACD(fastPeriod, slowPeriod, signalPeriod, close + shift, length - shift).histogram;
+    string key = StringFormat("iMACD_{}_{}_{}", fastPeriod, slowPeriod, signalPeriod);
+
+    vector<double> &cachedMACD = (*cached)[key];
+    if (cachedMACD.empty())
+    {
+        vector<MACD_Output> macds = iMACD(fastPeriod, slowPeriod, signalPeriod, close, length);
+        cachedMACD.resize(macds.size() * 3);
+        for (int i = 0; i < macds.size(); i++)
+        {
+            cachedMACD[i * 3] = macds[i].macd;
+            cachedMACD[i * 3 + 1] = macds[i].signal;
+            cachedMACD[i * 3 + 2] = macds[i].histogram;
+        }
+    }
+
+    return cachedMACD[shift * 3 + 2];
 }
 
 any Expr::visitBb_upper(ExprParser::Bb_upperContext *ctx)
@@ -1166,10 +1219,10 @@ void cacheParseTree(const string &key)
 
 any calculateExpr(const string &inputText, const string &broker, const string &symbol, const string &timeframe, int length,
                   const double *open, const double *high, const double *low, const double *close,
-                  const double *volume, long long *startTime, double fundingRate)
+                  const double *volume, long long *startTime, double fundingRate, unordered_map<string, vector<double>> *cached)
 {
     const string key = toLowerCase(inputText);
-    Expr expr(broker, symbol, timeframe, length, open, high, low, close, volume, startTime, fundingRate);
+    Expr expr(broker, symbol, timeframe, length, open, high, low, close, volume, startTime, fundingRate, cached);
 
     auto it = parseCache.find(key);
     if (it != parseCache.end() && it->second.tree)
@@ -1189,7 +1242,7 @@ any calculateExpr(const string &inputText, const string &broker, const string &s
 
 string calculateSubExpr(string &expr, const string &broker, const string &symbol, const string &timeframe, int length,
                         const double *open, const double *high, const double *low, const double *close,
-                        const double *volume, long long *startTime, double fundingRate)
+                        const double *volume, long long *startTime, double fundingRate, unordered_map<string, vector<double>> *cached)
 {
     stack<string> st;
     string s;
@@ -1209,7 +1262,7 @@ string calculateSubExpr(string &expr, const string &broker, const string &symbol
             }
             string lastS = st.top();
             st.pop();
-            any result = calculateExpr(s, broker, symbol, timeframe, length, open, high, low, close, volume, startTime, fundingRate);
+            any result = calculateExpr(s, broker, symbol, timeframe, length, open, high, low, close, volume, startTime, fundingRate, cached);
             s = lastS + " ";
             if (result.type() == typeid(double))
             {
