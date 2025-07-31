@@ -66,14 +66,18 @@ static void checkOrderStatus()
                     string symbol = tpJson["symbol"].get<string>();
                     string volume = tpJson["origQty"].get<string>();
 
+                    string clientOrderId;
                     if (side == "BUY")
                     {
-                        exchange->buyLimit(symbol, volume, limitPrice);
+                        clientOrderId = exchange->buyLimit(symbol, volume, limitPrice);
                     }
                     else
                     {
-                        exchange->sellLimit(symbol, volume, limitPrice);
+                        clientOrderId = exchange->sellLimit(symbol, volume, limitPrice);
                     }
+
+                    LOGE("New limit order created. clientOrderId: {}", clientOrderId);
+                    db.executeUpdate("UPDATE RealOrders SET tpID = ? WHERE id = ?", {clientOrderId, id});
                 }
                 else if (entryStatus == "CANCELED" || tpStatus == "CANCELED" || slStatus == "CANCELED" ||  tpStatus == "FILLED" || slStatus == "FILLED")
                 {

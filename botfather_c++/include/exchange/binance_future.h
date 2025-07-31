@@ -43,8 +43,8 @@ private:
     string sign(const string &query);
 
     string sendTPorSL(const string &symbol, const string &side, const string &type, string quantity, string stopPrice, string limitPrice = "");
-    string placeBuyMarketTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId, string &resEntry);
-    string placeSellMarketTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId, string &resEntry);
+    string placeBuyMarketTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId);
+    string placeSellMarketTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId);
 
     int insertOrderToDB(const string &symbol, const string clientOrderId, const string tpID, const string slID);
     int getOpenAlgoOrdersCount(const string &symbol);

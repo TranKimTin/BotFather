@@ -46,10 +46,10 @@ string BinanceFuture::buyMarket(const string &symbol, string quantity,
     if (res.empty())
         return res;
 
-    return placeBuyMarketTPSL(symbol, quantity, takeProfit, stopLoss, clientOrderId, res);
+    return placeBuyMarketTPSL(symbol, quantity, takeProfit, stopLoss, clientOrderId);
 }
 
-string BinanceFuture::placeBuyMarketTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId, string &resEntry)
+string BinanceFuture::placeBuyMarketTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId)
 {
     string tpID;
 
@@ -94,7 +94,7 @@ string BinanceFuture::placeBuyMarketTPSL(const string &symbol, string &quantity,
     {
         insertOrderToDB(symbol, clientOrderId, tpID, slID);
     }
-    return resEntry;
+    return clientOrderId;
 }
 
 string BinanceFuture::sellMarket(const string &symbol, string quantity, string takeProfit, string stopLoss)
@@ -129,10 +129,10 @@ string BinanceFuture::sellMarket(const string &symbol, string quantity, string t
     if (res.empty())
         return res;
 
-    return placeSellMarketTPSL(symbol, quantity, takeProfit, stopLoss, clientOrderId, res);
+    return placeSellMarketTPSL(symbol, quantity, takeProfit, stopLoss, clientOrderId);
 }
 
-string BinanceFuture::placeSellMarketTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId, string &resEntry)
+string BinanceFuture::placeSellMarketTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId)
 {
     string tpID;
     if (!takeProfit.empty())
@@ -177,7 +177,7 @@ string BinanceFuture::placeSellMarketTPSL(const string &symbol, string &quantity
     {
         insertOrderToDB(symbol, clientOrderId, tpID, slID);
     }
-    return resEntry;
+    return clientOrderId;
 }
 
 string BinanceFuture::buyLimit(const string &symbol, string quantity, string price, string takeProfit, string stopLoss, string expiredTime)
@@ -216,15 +216,15 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
         return res;
 
     string resEntry = getOrderStatus(symbol, clientOrderId);
-    if (resEntry.empty())
-        return resEntry;
-
-    json entryJson = json::parse(resEntry);
-    string entryStatus = entryJson["status"].get<string>();
-    if (entryStatus != "NEW")
+    if (!resEntry.empty())
     {
-        LOGI("Entry match immediately");
-        return placeBuyMarketTPSL(symbol, quantity, takeProfit, stopLoss, clientOrderId, resEntry);
+        json entryJson = json::parse(resEntry);
+        string entryStatus = entryJson["status"].get<string>();
+        if (entryStatus != "NEW")
+        {
+            LOGI("Entry match immediately");
+            return placeBuyMarketTPSL(symbol, quantity, takeProfit, stopLoss, clientOrderId);
+        }
     }
 
     string tpID;
@@ -243,7 +243,7 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
             if (entryStatus != "NEW")
             {
                 LOGI("Entry match immediately.");
-                return placeBuyMarketTPSL(symbol, quantity, takeProfit, stopLoss, clientOrderId, resEntry);
+                return placeBuyMarketTPSL(symbol, quantity, takeProfit, stopLoss, clientOrderId);
             }
             else
             {
@@ -300,7 +300,7 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
         insertOrderToDB(symbol, clientOrderId, tpID, slID);
     }
 
-    return res;
+    return clientOrderId;
 }
 
 string BinanceFuture::sellLimit(const string &symbol, string quantity, string price, string takeProfit, string stopLoss, string expiredTime)
@@ -339,15 +339,15 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
         return res;
 
     string resEntry = getOrderStatus(symbol, clientOrderId);
-    if (resEntry.empty())
-        return resEntry;
-
-    json entryJson = json::parse(resEntry);
-    string entryStatus = entryJson["status"].get<string>();
-    if (entryStatus != "NEW")
+    if (!resEntry.empty())
     {
-        LOGI("Entry match immediately");
-        return placeSellMarketTPSL(symbol, quantity, takeProfit, stopLoss, clientOrderId, resEntry);
+        json entryJson = json::parse(resEntry);
+        string entryStatus = entryJson["status"].get<string>();
+        if (entryStatus != "NEW")
+        {
+            LOGI("Entry match immediately");
+            return placeSellMarketTPSL(symbol, quantity, takeProfit, stopLoss, clientOrderId);
+        }
     }
 
     string tpID;
@@ -366,7 +366,7 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
             if (entryStatus != "NEW")
             {
                 LOGI("Entry match immediately.");
-                return placeSellMarketTPSL(symbol, quantity, takeProfit, stopLoss, clientOrderId, resEntry);
+                return placeSellMarketTPSL(symbol, quantity, takeProfit, stopLoss, clientOrderId);
             }
             else
             {
@@ -421,7 +421,7 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
     {
         insertOrderToDB(symbol, clientOrderId, tpID, slID);
     }
-    return res;
+    return clientOrderId;
 }
 
 string BinanceFuture::sendTPorSL(const string &symbol, const string &side, const string &type, string quantity, string stopPrice, string limitPrice)
