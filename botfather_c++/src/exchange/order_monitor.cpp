@@ -66,7 +66,7 @@ static void checkOrderStatus()
                     string symbol = tpJson["symbol"].get<string>();
                     string volume = tpJson["origQty"].get<string>();
 
-                    if (side == BUY)
+                    if (side == "BUY")
                     {
                         exchange->buyLimit(symbol, volume, limitPrice);
                     }
