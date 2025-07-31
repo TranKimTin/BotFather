@@ -3,12 +3,14 @@
 static const int MAX_N = 300;
 static const double INF = 1e18;
 
-double iRSI(int period, const double close[], int n)
+vector<double> iRSI(int period, const double close[], int n)
 {
     n = min(n, MAX_N + period);
 
     if (n <= period)
-        return 0.0;
+        return {};
+
+    vector<double> result;
 
     double avgGain = 0.0, avgLoss = 0.0;
 
@@ -21,6 +23,7 @@ double iRSI(int period, const double close[], int n)
     avgGain /= period;
     avgLoss /= period;
 
+    result.resize(n - 1 - period);
     for (int i = n - 2 - period; i >= 0; --i)
     {
         double diff = close[i] - close[i + 1];
@@ -29,12 +32,11 @@ double iRSI(int period, const double close[], int n)
 
         avgGain = (avgGain * (period - 1) + gain) / period;
         avgLoss = (avgLoss * (period - 1) + loss) / period;
+
+        result[i] = (avgLoss == 0.0) ? 100.0 : (100.0 - (100.0 / (1.0 + avgGain / avgLoss)));
     }
 
-    if (avgLoss == 0.0)
-        return 100.0;
-    double rs = avgGain / avgLoss;
-    return 100.0 - (100.0 / (1.0 + rs));
+    return result;
 }
 
 double iRSI_slope(int period, const double close[], int n)
@@ -135,12 +137,10 @@ double iEMA(int period, const double close[], int n)
     return ema;
 }
 
-MACD_Output iMACD(int fastPeriod, int slowPeriod, int signalPeriod, const double close[], int n)
+vector<MACD_Output> iMACD(int fastPeriod, int slowPeriod, int signalPeriod, const double close[], int n)
 {
-    n = min(n, MAX_N + slowPeriod);
-
     if (n <= slowPeriod || fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0)
-        return {0.0, 0.0, 0.0};
+        return {};
 
     double kFast = 2.0 / (fastPeriod + 1);
     double kSlow = 2.0 / (slowPeriod + 1);
@@ -153,6 +153,7 @@ MACD_Output iMACD(int fastPeriod, int slowPeriod, int signalPeriod, const double
 
     bool signalInitialized = false;
 
+    vector<MACD_Output> result(n - 1);
     for (int i = n - 2; i >= 0; --i)
     {
         emaFast = (close[i] - emaFast) * kFast + emaFast;
@@ -169,11 +170,12 @@ MACD_Output iMACD(int fastPeriod, int slowPeriod, int signalPeriod, const double
             signalEMA = macd;
             signalInitialized = true;
         }
+
+        double histogram = macd - signalEMA;
+        result[i] = {macd, signalEMA, histogram};
     }
 
-    double histogram = macd - signalEMA;
-
-    return {macd, signalEMA, histogram};
+    return result;
 }
 
 BB_Output iBB(int period, double stdDev, const double close[], int n)
@@ -489,7 +491,7 @@ int macd_n_dinh(int fastPeriod, int slowPeriod, int signalPeriod, int redDepth, 
 int macd_n_day(int fastPeriod, int slowPeriod, int signalPeriod, int redDepth, int depth, int enableDivergence, double diffCandle0, vector<double> &diffPercents, const double close[], const double open[], const double high[], int length)
 {
     vector<MACD_Output> values = iMACDs(fastPeriod, slowPeriod, signalPeriod, close, length);
-    
+
     return 0;
 }
 

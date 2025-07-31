@@ -32,12 +32,13 @@ private:
     const double *volume;
     long long *startTime;
     double fundingRate;
+    unordered_map<string, vector<double>> *cached;
 
 public:
     Expr(const string &broker, const string &symbol, const string &timeframe, int length,
          const double *open, const double *high, const double *low, const double *close, const double *volume,
-         long long *startTime, double fundingRate)
-        : broker(broker), symbol(symbol), timeframe(timeframe), length(length), open(open), high(high), low(low), close(close), volume(volume), startTime(startTime), fundingRate(fundingRate)
+         long long *startTime, double fundingRate, unordered_map<string, vector<double>> *cached)
+        : broker(broker), symbol(symbol), timeframe(timeframe), length(length), open(open), high(high), low(low), close(close), volume(volume), startTime(startTime), fundingRate(fundingRate), cached(cached)
     {
     }
 
@@ -141,10 +142,10 @@ public:
 
 any calculateExpr(const string &inputText, const string &broker, const string &symbol, const string &timeframe, int length,
                   const double *open, const double *high, const double *low, const double *close,
-                  const double *volume, long long *startTime, double fundingRate);
+                  const double *volume, long long *startTime, double fundingRate, unordered_map<string, vector<double>> *cached);
 
 string calculateSubExpr(string &expr, const string &broker, const string &symbol, const string &timeframe, int length,
                         const double *open, const double *high, const double *low, const double *close,
-                        const double *volume, long long *startTime, double fundingRate);
+                        const double *volume, long long *startTime, double fundingRate, unordered_map<string, vector<double>> *cached);
 
 void cacheParseTree(const string &key);

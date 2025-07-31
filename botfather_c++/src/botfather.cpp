@@ -46,26 +46,11 @@ void test()
     vector<double> volume(rateData.volume.begin(), rateData.volume.end());
     vector<long long> startTime(rateData.startTime.begin(), rateData.startTime.end());
 
-    vector<string> symbolList = getBinanceFutureSymbolList();
-    for (string s : symbolList)
-    {
-        string apiKey = env["API_KEY"];
-        string secretKey = env["SECRET_KEY"];
-        string key = env["ENCRYP_KEY"];
+    unordered_map<string, vector<double>> cached;
 
-        string iv = generateRandomIV();
-        string encryptedApiKey = encryptAES(apiKey, key, iv);
-        string encryptedSecretKey = encryptAES(secretKey, key, iv);
+    string expr = "{rsi(14,0)} - {rsi(14,1)} - {rsi(14,2)} - {rsi(14,10)}";
 
-        encryptedApiKey = "BvwqwA1xbbHfRpIVi7/0PHjrlZ80LkMX1i82NzflmUJGGsdoO+uicr52gHIUftpy/bMej4gvhhQZWmYs1idsvOJv7x2DxvAvyDK73xD4LmY=";
-        encryptedSecretKey = "BvwqwA1xbbHfRpIVi7/0PHjrlZ80LkMX1i82NzflmUJGGsdoO+uicr52gHIUftpy/bMej4gvhhQZWmYs1idsvOJv7x2DxvAvyDK73xD4LmY=";
-        iv = "a11145184dc93f7d90e8e6ad09d349be";
-
-        IExchange *exchange = new BinanceFuture(encryptedApiKey, encryptedSecretKey, iv, 0);
-        exchange->changeMarginType(s, "CROSSED");
-        exchange->changeLeverage(s, 50);
-    }
-
+    LOGI(calculateSubExpr(expr, broker, symbol, timeframe, open.size(), open.data(), high.data(), low.data(), close.data(), volume.data(), startTime.data(), 0.0, &cached));
     SLEEP_FOR(1000000);
 }
 #endif
