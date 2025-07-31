@@ -35,7 +35,7 @@ string BinanceFuture::buyMarket(const string &symbol, string quantity,
         {"timestamp", to_string(getCurrentTime())}};
 
     string res = sendOrder(params);
-    if (res == "")
+    if (res.empty())
         return res;
 
     return placeBuyMarketTPSL(symbol, quantity, takeProfit, stopLoss, clientOrderId, res);
@@ -48,7 +48,7 @@ string BinanceFuture::placeBuyMarketTPSL(const string &symbol, string &quantity,
     if (!takeProfit.empty())
     {
         string resTP = sendTPorSL(symbol, SELL, LIMIT, quantity, takeProfit, takeProfit);
-        if (resTP == "")
+        if (resTP.empty())
         {
             LOGI("Place TP error. Close position");
             return sellMarket(symbol, quantity, "", "");
@@ -64,7 +64,7 @@ string BinanceFuture::placeBuyMarketTPSL(const string &symbol, string &quantity,
     if (!stopLoss.empty())
     {
         string resSL = sendTPorSL(symbol, SELL, STOP_MARKET, quantity, stopLoss);
-        if (resSL == "")
+        if (resSL.empty())
         {
             LOGI("Place SL error");
             if (!tpID.empty())
@@ -110,7 +110,7 @@ string BinanceFuture::sellMarket(const string &symbol, string quantity, string t
         {"timestamp", to_string(getCurrentTime())}};
 
     string res = sendOrder(params);
-    if (res == "")
+    if (res.empty())
         return res;
 
     return placeSellMarketTPSL(symbol, quantity, takeProfit, stopLoss, clientOrderId, res);
@@ -122,7 +122,7 @@ string BinanceFuture::placeSellMarketTPSL(const string &symbol, string &quantity
     if (!takeProfit.empty())
     {
         string resTP = sendTPorSL(symbol, BUY, LIMIT, quantity, takeProfit, takeProfit);
-        if (resTP == "")
+        if (resTP.empty())
         {
             LOGI("Place TP error. Close position");
             return buyMarket(symbol, quantity, "", "");
@@ -139,7 +139,7 @@ string BinanceFuture::placeSellMarketTPSL(const string &symbol, string &quantity
     if (!stopLoss.empty())
     {
         string resSL = sendTPorSL(symbol, BUY, STOP_MARKET, quantity, stopLoss);
-        if (resSL == "")
+        if (resSL.empty())
         {
             LOGI("Place SL error");
             if (!tpID.empty())
@@ -193,7 +193,7 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
     }
 
     string res = sendOrder(params);
-    if (res == "")
+    if (res.empty())
         return res;
 
     string resEntry = getOrderStatus(symbol, clientOrderId);
@@ -213,8 +213,13 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
     if (!takeProfit.empty())
     {
         string resTP = sendTPorSL(symbol, SELL, STOP, quantity, price, takeProfit);
-        if (resTP == "")
+        if (resTP.empty())
         {
+            string resEntry = getOrderStatus(symbol, clientOrderId);
+            if (resEntry.empty())
+                return sellMarket(symbol, quantity, "", "");
+
+            json entryJson = json::parse(resEntry);
             string entryStatus = entryJson["status"].get<string>();
             if (entryStatus != "NEW")
             {
@@ -225,7 +230,7 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
             {
                 LOGI("Place TP error. Close position");
                 string resCancel = cancelOrderByClientId(symbol, clientOrderId);
-                if (resCancel == "")
+                if (resCancel.empty())
                 {
                     LOGI("Cancel order {} error", clientOrderId);
                     LOGI("Close position");
@@ -246,7 +251,7 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
     if (!stopLoss.empty())
     {
         string resSL = sendTPorSL(symbol, SELL, STOP_MARKET, quantity, stopLoss);
-        if (resSL == "")
+        if (resSL.empty())
         {
             LOGI("Place SL error");
             if (!tpID.empty())
@@ -257,7 +262,7 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
 
             LOGI("Close position");
             string resCancel = cancelOrderByClientId(symbol, clientOrderId);
-            if (resCancel == "")
+            if (resCancel.empty())
             {
                 LOGI("Cancel order {} error", clientOrderId);
                 return sellMarket(symbol, quantity, "", "");
@@ -308,7 +313,7 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
     }
 
     string res = sendOrder(params);
-    if (res == "")
+    if (res.empty())
         return res;
 
     string resEntry = getOrderStatus(symbol, clientOrderId);
@@ -328,8 +333,13 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
     if (!takeProfit.empty())
     {
         string resTP = sendTPorSL(symbol, BUY, STOP, quantity, price, takeProfit);
-        if (resTP == "")
+        if (resTP.empty())
         {
+            string resEntry = getOrderStatus(symbol, clientOrderId);
+            if (resEntry.empty())
+                return buyMarket(symbol, quantity, "", "");
+
+            json entryJson = json::parse(resEntry);
             string entryStatus = entryJson["status"].get<string>();
             if (entryStatus != "NEW")
             {
@@ -340,7 +350,7 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
             {
                 LOGI("Place TP error. Close position");
                 string resCancel = cancelOrderByClientId(symbol, clientOrderId);
-                if (resCancel == "")
+                if (resCancel.empty())
                 {
                     LOGI("Cancel order {} error", clientOrderId);
                     LOGI("Close position");
@@ -361,7 +371,7 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
     if (!stopLoss.empty())
     {
         string resSL = sendTPorSL(symbol, BUY, STOP_MARKET, quantity, stopLoss);
-        if (resSL == "")
+        if (resSL.empty())
         {
             LOGI("Place SL error");
             if (!tpID.empty())
@@ -372,7 +382,7 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
 
             LOGI("Close position");
             string resCancel = cancelOrderByClientId(symbol, clientOrderId);
-            if (resCancel == "")
+            if (resCancel.empty())
             {
                 LOGI("Cancel order {} error", clientOrderId);
                 return buyMarket(symbol, quantity, "", "");
