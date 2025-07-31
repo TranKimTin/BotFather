@@ -57,7 +57,7 @@ static void checkOrderStatus()
                 tpStatus = tpJson["status"].get<string>();
                 slStatus = slJson["status"].get<string>();
 
-                if (entryStatus == "CANCELED" || tpStatus = "CANCELED" || slStatus == "CANCELED" || tpStatus == "EXPIRED" || slStatus == "EXPIRED" || tpStatus == "FILLED" || slStatus == "FILLED")
+                if (entryStatus == "CANCELED" || tpStatus == "CANCELED" || slStatus == "CANCELED" || tpStatus == "EXPIRED" || slStatus == "EXPIRED" || tpStatus == "FILLED" || slStatus == "FILLED")
                 {
                     LOGI("Cancel order. entryID={}({}), tpID={}({}), slID={}({})", entryID, entryStatus, tpID, tpStatus, slID, slStatus);
                     if (entryStatus == "NEW")
