@@ -16,13 +16,16 @@ BinanceFuture::BinanceFuture(const string &encryptedApiKey, const string &encryp
 string BinanceFuture::buyMarket(const string &symbol, string quantity,
                                 string takeProfit, string stopLoss)
 {
-    int openOrderAlgoCount = getOpenAlgoOrdersCount(symbol);
-    if (openOrderAlgoCount == -1 || openOrderAlgoCount >= MAX_NUM_ALGO_ORDERS)
+    if (!takeProfit.empty() || !stopLoss.empty())
     {
-        LOGE("Max number of algo orders reached ({}). Do nothing.", openOrderAlgoCount);
-        return "";
+        int openOrderAlgoCount = getOpenAlgoOrdersCount(symbol);
+        if (openOrderAlgoCount == -1 || openOrderAlgoCount >= MAX_NUM_ALGO_ORDERS)
+        {
+            LOGE("Max number of algo orders reached ({}). Do nothing.", openOrderAlgoCount);
+            return "";
+        }
+        LOGI("openOrderAlgoCount: {}", openOrderAlgoCount);
     }
-    LOGI("openOrderAlgoCount: {}", openOrderAlgoCount);
 
     string clientOrderId = StringFormat("BFBM{}{}", symbol, getCurrentTime());
     map<string, string> params = {
@@ -33,6 +36,11 @@ string BinanceFuture::buyMarket(const string &symbol, string quantity,
         {"quantity", quantity},
         {"newClientOrderId", clientOrderId},
         {"timestamp", to_string(getCurrentTime())}};
+
+    if (takeProfit.empty() && stopLoss.empty())
+    {
+        params["reduceOnly"] = "true";
+    }
 
     string res = sendOrder(params);
     if (res.empty())
@@ -91,13 +99,16 @@ string BinanceFuture::placeBuyMarketTPSL(const string &symbol, string &quantity,
 
 string BinanceFuture::sellMarket(const string &symbol, string quantity, string takeProfit, string stopLoss)
 {
-    int openOrderAlgoCount = getOpenAlgoOrdersCount(symbol);
-    if (openOrderAlgoCount == -1 || openOrderAlgoCount >= MAX_NUM_ALGO_ORDERS)
+    if (!takeProfit.empty() || !stopLoss.empty())
     {
-        LOGE("Max number of algo orders reached ({}). Do nothing.", openOrderAlgoCount);
-        return "";
+        int openOrderAlgoCount = getOpenAlgoOrdersCount(symbol);
+        if (openOrderAlgoCount == -1 || openOrderAlgoCount >= MAX_NUM_ALGO_ORDERS)
+        {
+            LOGE("Max number of algo orders reached ({}). Do nothing.", openOrderAlgoCount);
+            return "";
+        }
+        LOGI("openOrderAlgoCount: {}", openOrderAlgoCount);
     }
-    LOGI("openOrderAlgoCount: {}", openOrderAlgoCount);
 
     string clientOrderId = StringFormat("BFSM{}{}", symbol, getCurrentTime());
     map<string, string> params = {
@@ -108,6 +119,11 @@ string BinanceFuture::sellMarket(const string &symbol, string quantity, string t
         {"quantity", quantity},
         {"newClientOrderId", clientOrderId},
         {"timestamp", to_string(getCurrentTime())}};
+
+    if (takeProfit.empty() && stopLoss.empty())
+    {
+        params["reduceOnly"] = "true";
+    }
 
     string res = sendOrder(params);
     if (res.empty())
@@ -166,13 +182,16 @@ string BinanceFuture::placeSellMarketTPSL(const string &symbol, string &quantity
 
 string BinanceFuture::buyLimit(const string &symbol, string quantity, string price, string takeProfit, string stopLoss, string expiredTime)
 {
-    int openOrderAlgoCount = getOpenAlgoOrdersCount(symbol);
-    if (openOrderAlgoCount == -1 || openOrderAlgoCount >= MAX_NUM_ALGO_ORDERS - 1)
+    if (!takeProfit.empty() || !stopLoss.empty())
     {
-        LOGE("Max number of algo orders reached ({}). Do nothing.", openOrderAlgoCount);
-        return "";
+        int openOrderAlgoCount = getOpenAlgoOrdersCount(symbol);
+        if (openOrderAlgoCount == -1 || openOrderAlgoCount >= MAX_NUM_ALGO_ORDERS - 1)
+        {
+            LOGE("Max number of algo orders reached ({}). Do nothing.", openOrderAlgoCount);
+            return "";
+        }
+        LOGI("openOrderAlgoCount: {}", openOrderAlgoCount);
     }
-    LOGI("openOrderAlgoCount: {}", openOrderAlgoCount);
 
     string clientOrderId = StringFormat("BFBL{}{}", symbol, getCurrentTime());
     map<string, string> params = {
@@ -286,13 +305,16 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
 
 string BinanceFuture::sellLimit(const string &symbol, string quantity, string price, string takeProfit, string stopLoss, string expiredTime)
 {
-    int openOrderAlgoCount = getOpenAlgoOrdersCount(symbol);
-    if (openOrderAlgoCount == -1 || openOrderAlgoCount >= MAX_NUM_ALGO_ORDERS)
+    if (!takeProfit.empty() || !stopLoss.empty())
     {
-        LOGE("Max number of algo orders reached ({}). Do nothing.", openOrderAlgoCount);
-        return "";
+        int openOrderAlgoCount = getOpenAlgoOrdersCount(symbol);
+        if (openOrderAlgoCount == -1 || openOrderAlgoCount >= MAX_NUM_ALGO_ORDERS)
+        {
+            LOGE("Max number of algo orders reached ({}). Do nothing.", openOrderAlgoCount);
+            return "";
+        }
+        LOGI("openOrderAlgoCount: {}", openOrderAlgoCount);
     }
-    LOGI("openOrderAlgoCount: {}", openOrderAlgoCount);
 
     string clientOrderId = StringFormat("BFSL{}{}", symbol, getCurrentTime());
     map<string, string> params = {
@@ -422,6 +444,7 @@ string BinanceFuture::sendTPorSL(const string &symbol, const string &side, const
     if (type == LIMIT)
     {
         params["timeInForce"] = "GTC";
+        params["price"] = limitPrice;
     }
     if (type != LIMIT)
     {
