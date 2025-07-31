@@ -57,7 +57,25 @@ static void checkOrderStatus()
                 tpStatus = tpJson["status"].get<string>();
                 slStatus = slJson["status"].get<string>();
 
-                if (entryStatus == "CANCELED" || tpStatus == "CANCELED" || slStatus == "CANCELED" || tpStatus == "EXPIRED" || slStatus == "EXPIRED" || tpStatus == "FILLED" || slStatus == "FILLED")
+                if(entryStatus == "FILLED" && tpStatus == "EXPIRED" && slStatus == "NEW") {
+                    LOGE("tp is expired, but sl is not filled yet. entryID: {}, tpID: {}, slID: {}", entryID, tpID, slID);
+                    LOGE("tpJSON: {}", tpJson.dump());
+
+                    string limitPrice =  tpJson["price"].get<string>();
+                    string side = tpJson["side"].get<string>();
+                    string symbol = tpJson["symbol"].get<string>();
+                    string volume = tpJson["origQty"].get<string>();
+
+                    if (side == BUY)
+                    {
+                        exchange->buyLimit(symbol, volume, limitPrice);
+                    }
+                    else
+                    {
+                        exchange->sellLimit(symbol, volume, limitPrice);
+                    }
+                }
+                else if (entryStatus == "CANCELED" || tpStatus == "CANCELED" || slStatus == "CANCELED" ||  tpStatus == "FILLED" || slStatus == "FILLED")
                 {
                     LOGI("Cancel order. entryID={}({}), tpID={}({}), slID={}({})", entryID, entryStatus, tpID, tpStatus, slID, slStatus);
                     if (entryStatus == "NEW")
