@@ -511,6 +511,7 @@ bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
 
         if (broker == "binance_future" && bot->enableRealOrder && !bot->apiKey.empty() && !bot->secretKey.empty() && !bot->iv.empty())
         {
+            LOGI("Real order {}", bot->botName);
             shared_ptr<BinanceFuture> exchange = make_shared<BinanceFuture>(bot->apiKey, bot->secretKey, bot->iv, bot->id);
 
             if (node.type == NODE_TYPE::BUY_MARKET)
