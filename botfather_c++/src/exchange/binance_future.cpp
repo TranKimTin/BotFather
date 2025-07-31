@@ -406,10 +406,13 @@ string BinanceFuture::sendTPorSL(const string &symbol, const string &side, const
         {"closePosition", "false"},
         {"reduceOnly", "true"},
         {"quantity", quantity},
-        {"timeInForce", "GTC"},
         {"newClientOrderId", clientOrderId},
         {"timestamp", to_string(getCurrentTime())}};
 
+    if (type == LIMIT)
+    {
+        params["timeInForce"] = "GTC";
+    }
     if (type != LIMIT)
     {
         params["stopPrice"] = stopPrice;
