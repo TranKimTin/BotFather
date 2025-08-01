@@ -46,6 +46,7 @@ static void checkOrderStatus()
                 if (entryStatus.empty() || tpStatus.empty() || slStatus.empty())
                 {
                     LOGE("Failed to get order status for entryID: {} ({}), tpID: {} ({}), slID: {} ({})", entryID, entryStatus, tpID, tpStatus, slID, slStatus);
+                    semaphore.post();
                     return;
                 }
 
@@ -106,7 +107,8 @@ static void checkOrderStatus()
             {
                 LOGE("Exception in thread: {}", err.what());
             }
-             semaphore.post(); });
+            semaphore.post(); 
+            return; });
     }
 
     for (auto &t : threads)
