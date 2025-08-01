@@ -272,6 +272,18 @@ any Expr::visitLower_shadowP(ExprParser::Lower_shadowPContext *ctx)
     return lowerShadow / open[shift] * 100.0;
 }
 
+vector<double> &Expr::getRSI(int period)
+{
+    string key = StringFormat("iRSI_{}", period);
+
+    auto it = cachedIndicator->find(key);
+    if (it == cachedIndicator->end())
+    {
+        it = cachedIndicator->emplace(key, iRSI(period, close, length)).first;
+    }
+    return it->second;
+}
+
 any Expr::visitRsi(ExprParser::RsiContext *ctx)
 {
     int period = stoi(ctx->INT(0)->getText());
@@ -280,20 +292,14 @@ any Expr::visitRsi(ExprParser::RsiContext *ctx)
     if (period <= 0 || shift < 0 || shift >= length - period)
         return {};
 
-    string key = StringFormat("iRSI_{}", period);
+    const vector<double> &cached = getRSI(period);
 
-    vector<double> &cachedRSI = (*cached)[key];
-    if (cachedRSI.empty())
-    {
-        cachedRSI = iRSI(period, close, length);
-    }
-
-    if (shift >= cachedRSI.size())
+    if (shift >= cached.size())
     {
         return {};
     }
 
-    return cachedRSI[shift];
+    return cached[shift];
 }
 
 any Expr::visitRsi_slope(ExprParser::Rsi_slopeContext *ctx)
@@ -329,6 +335,17 @@ any Expr::visitEma(ExprParser::EmaContext *ctx)
     return iEMA(period, close + shift, length - shift);
 }
 
+vector<double> &Expr::getMACD(int fastPeriod, int slowPeriod, int signalPeriod)
+{
+    string key = StringFormat("iMACD_{}_{}_{}", fastPeriod, slowPeriod, signalPeriod);
+
+    auto it = cachedIndicator->find(key);
+    if (it == cachedIndicator->end())
+    {
+        it = cachedIndicator->emplace(key, iMACD(fastPeriod, slowPeriod, signalPeriod, close, length)).first;
+    }
+    return it->second;
+}
 any Expr::visitMacd_value(ExprParser::Macd_valueContext *ctx)
 {
     int fastPeriod = stoi(ctx->INT(0)->getText());
@@ -339,26 +356,13 @@ any Expr::visitMacd_value(ExprParser::Macd_valueContext *ctx)
     if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || shift < 0 || shift >= length - slowPeriod)
         return {};
 
-    string key = StringFormat("iMACD_{}_{}_{}", fastPeriod, slowPeriod, signalPeriod);
+    const vector<double> &cached = getMACD(fastPeriod, slowPeriod, signalPeriod);
 
-    vector<double> &cachedMACD = (*cached)[key];
-    if (cachedMACD.empty())
-    {
-        vector<MACD_Output> macds = iMACD(fastPeriod, slowPeriod, signalPeriod, close, length);
-        cachedMACD.resize(macds.size() * 3);
-        for (int i = 0; i < macds.size(); i++)
-        {
-            cachedMACD[i * 3] = macds[i].macd;
-            cachedMACD[i * 3 + 1] = macds[i].signal;
-            cachedMACD[i * 3 + 2] = macds[i].histogram;
-        }
-    }
-
-    if (shift * 3 >= cachedMACD.size())
+    if (shift * 3 >= cached.size())
     {
         return {};
     }
-    return cachedMACD[shift * 3];
+    return cached[shift * 3];
 }
 
 any Expr::visitMacd_signal(ExprParser::Macd_signalContext *ctx)
@@ -371,26 +375,13 @@ any Expr::visitMacd_signal(ExprParser::Macd_signalContext *ctx)
     if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || shift < 0 || shift >= length - slowPeriod)
         return {};
 
-    string key = StringFormat("iMACD_{}_{}_{}", fastPeriod, slowPeriod, signalPeriod);
+    const vector<double> &cached = getMACD(fastPeriod, slowPeriod, signalPeriod);
 
-    vector<double> &cachedMACD = (*cached)[key];
-    if (cachedMACD.empty())
-    {
-        vector<MACD_Output> macds = iMACD(fastPeriod, slowPeriod, signalPeriod, close, length);
-        cachedMACD.resize(macds.size() * 3);
-        for (int i = 0; i < macds.size(); i++)
-        {
-            cachedMACD[i * 3] = macds[i].macd;
-            cachedMACD[i * 3 + 1] = macds[i].signal;
-            cachedMACD[i * 3 + 2] = macds[i].histogram;
-        }
-    }
-
-    if (shift * 3 + 1 >= cachedMACD.size())
+    if (shift * 3 + 1 >= cached.size())
     {
         return {};
     }
-    return cachedMACD[shift * 3 + 1];
+    return cached[shift * 3 + 1];
 }
 
 any Expr::visitMacd_histogram(ExprParser::Macd_histogramContext *ctx)
@@ -400,29 +391,13 @@ any Expr::visitMacd_histogram(ExprParser::Macd_histogramContext *ctx)
     int signalPeriod = stoi(ctx->INT(2)->getText());
     int shift = ctx->INT(3) ? stoi(ctx->INT(3)->getText()) : 0;
 
-    if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || shift < 0 || shift >= length - slowPeriod)
-        return {};
+    const vector<double> &cached = getMACD(fastPeriod, slowPeriod, signalPeriod);
 
-    string key = StringFormat("iMACD_{}_{}_{}", fastPeriod, slowPeriod, signalPeriod);
-
-    vector<double> &cachedMACD = (*cached)[key];
-    if (cachedMACD.empty())
-    {
-        vector<MACD_Output> macds = iMACD(fastPeriod, slowPeriod, signalPeriod, close, length);
-        cachedMACD.resize(macds.size() * 3);
-        for (int i = 0; i < macds.size(); i++)
-        {
-            cachedMACD[i * 3] = macds[i].macd;
-            cachedMACD[i * 3 + 1] = macds[i].signal;
-            cachedMACD[i * 3 + 2] = macds[i].histogram;
-        }
-    }
-
-    if (shift * 3 + 2 >= cachedMACD.size())
+    if (shift * 3 + 2 >= cached.size())
     {
         return {};
     }
-    return cachedMACD[shift * 3 + 2];
+    return cached[shift * 3 + 2];
 }
 
 any Expr::visitBb_upper(ExprParser::Bb_upperContext *ctx)
@@ -607,9 +582,14 @@ any Expr::visitMin_open(ExprParser::Min_openContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    int period = to - from + 1;
+    string key = StringFormat("mmOpen_{}_{}", from, to);
 
-    return iMin(period, open + from, length - from);
+    auto it = cachedMinMax->find(key);
+    if (it == cachedMinMax->end())
+    {
+        it = cachedMinMax->emplace(key, SparseTable(open, length)).first;
+    }
+    return it->second.query_min(from, to);
 }
 
 any Expr::visitMin_high(ExprParser::Min_highContext *ctx)
@@ -623,9 +603,14 @@ any Expr::visitMin_high(ExprParser::Min_highContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    int period = to - from + 1;
+    string key = StringFormat("mmHigh_{}_{}", from, to);
 
-    return iMin(period, high + from, length - from);
+    auto it = cachedMinMax->find(key);
+    if (it == cachedMinMax->end())
+    {
+        it = cachedMinMax->emplace(key, SparseTable(high, length)).first;
+    }
+    return it->second.query_min(from, to);
 }
 any Expr::visitMin_low(ExprParser::Min_lowContext *ctx)
 {
@@ -638,9 +623,14 @@ any Expr::visitMin_low(ExprParser::Min_lowContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    int period = to - from + 1;
+    string key = StringFormat("mmLow_{}_{}", from, to);
 
-    return iMin(period, low + from, length - from);
+    auto it = cachedMinMax->find(key);
+    if (it == cachedMinMax->end())
+    {
+        it = cachedMinMax->emplace(key, SparseTable(low, length)).first;
+    }
+    return it->second.query_min(from, to);
 }
 any Expr::visitMin_close(ExprParser::Min_closeContext *ctx)
 {
@@ -653,9 +643,14 @@ any Expr::visitMin_close(ExprParser::Min_closeContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    int period = to - from + 1;
+    string key = StringFormat("mmClose_{}_{}", from, to);
 
-    return iMin(period, close + from, length - from);
+    auto it = cachedMinMax->find(key);
+    if (it == cachedMinMax->end())
+    {
+        it = cachedMinMax->emplace(key, SparseTable(close, length)).first;
+    }
+    return it->second.query_min(from, to);
 }
 
 any Expr::visitMin_change(ExprParser::Min_changeContext *ctx)
@@ -736,9 +731,14 @@ any Expr::visitMax_open(ExprParser::Max_openContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    int period = to - from + 1;
+    string key = StringFormat("mmOpen_{}_{}", from, to);
 
-    return iMax(period, open + from, length - from);
+    auto it = cachedMinMax->find(key);
+    if (it == cachedMinMax->end())
+    {
+        it = cachedMinMax->emplace(key, SparseTable(open, length)).first;
+    }
+    return it->second.query_max(from, to);
 }
 
 any Expr::visitMax_high(ExprParser::Max_highContext *ctx)
@@ -752,9 +752,14 @@ any Expr::visitMax_high(ExprParser::Max_highContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    int period = to - from + 1;
+    string key = StringFormat("mmHigh_{}_{}", from, to);
 
-    return iMax(period, high + from, length - from);
+    auto it = cachedMinMax->find(key);
+    if (it == cachedMinMax->end())
+    {
+        it = cachedMinMax->emplace(key, SparseTable(high, length)).first;
+    }
+    return it->second.query_max(from, to);
 }
 
 any Expr::visitMax_low(ExprParser::Max_lowContext *ctx)
@@ -768,9 +773,14 @@ any Expr::visitMax_low(ExprParser::Max_lowContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    int period = to - from + 1;
+    string key = StringFormat("mmLow_{}_{}", from, to);
 
-    return iMax(period, low + from, length - from);
+    auto it = cachedMinMax->find(key);
+    if (it == cachedMinMax->end())
+    {
+        it = cachedMinMax->emplace(key, SparseTable(low, length)).first;
+    }
+    return it->second.query_max(from, to);
 }
 
 any Expr::visitMax_close(ExprParser::Max_closeContext *ctx)
@@ -784,9 +794,14 @@ any Expr::visitMax_close(ExprParser::Max_closeContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    int period = to - from + 1;
+    string key = StringFormat("mmClose_{}_{}", from, to);
 
-    return iMax(period, close + from, length - from);
+    auto it = cachedMinMax->find(key);
+    if (it == cachedMinMax->end())
+    {
+        it = cachedMinMax->emplace(key, SparseTable(close, length)).first;
+    }
+    return it->second.query_max(from, to);
 }
 any Expr::visitMax_change(ExprParser::Max_changeContext *ctx)
 {
@@ -868,8 +883,19 @@ any Expr::visitMin_rsi(ExprParser::Min_rsiContext *ctx)
     if (period <= 0 || from < 0 || to >= length - period)
         return {};
 
-    int k = to - from + 1;
-    return iMinRSI(period, k, close + from, length - from);
+    vector<double> &cachedRSI = getRSI(period);
+    if (from >= cachedRSI.size() || to >= cachedRSI.size())
+    {
+        return {};
+    }
+
+    string key = StringFormat("mmRSI_{}", period);
+    auto it = cachedMinMax->find(key);
+    if (it == cachedMinMax->end())
+    {
+        it = cachedMinMax->emplace(key, SparseTable(cachedRSI.data(), cachedRSI.size())).first;
+    }
+    return it->second.query_min(from, to);
 }
 
 any Expr::visitMax_rsi(ExprParser::Max_rsiContext *ctx)
@@ -884,8 +910,19 @@ any Expr::visitMax_rsi(ExprParser::Max_rsiContext *ctx)
     if (period <= 0 || from < 0 || to >= length - period)
         return {};
 
-    int k = to - from + 1;
-    return iMaxRSI(period, k, close + from, length - from);
+    vector<double> &cachedRSI = getRSI(period);
+    if (from >= cachedRSI.size() || to >= cachedRSI.size())
+    {
+        return {};
+    }
+
+    string key = StringFormat("mmRSI_{}", period);
+    auto it = cachedMinMax->find(key);
+    if (it == cachedMinMax->end())
+    {
+        it = cachedMinMax->emplace(key, SparseTable(cachedRSI.data(), cachedRSI.size())).first;
+    }
+    return it->second.query_max(from, to);
 }
 
 any Expr::visitMarsi(ExprParser::MarsiContext *ctx)
@@ -918,10 +955,27 @@ any Expr::visitMin_macd_value(ExprParser::Min_macd_valueContext *ctx)
     if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || from < 0 || to >= length - slowPeriod || to >= length - signalPeriod)
         return {};
 
-    int k = to - from + 1;
-    return iMinMACD(fastPeriod, slowPeriod, signalPeriod, k, close + from, length - from, [](MACD_Output output)
-                    { return output.macd; });
+    vector<double> &cachedMACD = getMACD(fastPeriod, slowPeriod, signalPeriod);
+
+    if (from * 3 >= cachedMACD.size() || to * 3 >= cachedMACD.size())
+    {
+        return {};
+    }
+
+    string key = StringFormat("mmMACDvalue_{}_{}_{}", fastPeriod, slowPeriod, signalPeriod);
+    auto it = cachedMinMax->find(key);
+    if (it == cachedMinMax->end())
+    {
+        vector<double> v(cachedMACD.size() / 3);
+        for (int i = 0; i < v.size(); ++i)
+        {
+            v[i] = cachedMACD[i * 3];
+        }
+        it = cachedMinMax->emplace(key, SparseTable(v.data(), v.size())).first;
+    }
+    return it->second.query_min(from, to);
 }
+
 any Expr::visitMax_macd_value(ExprParser::Max_macd_valueContext *ctx)
 {
     int fastPeriod = stoi(ctx->INT(0)->getText());
@@ -936,9 +990,23 @@ any Expr::visitMax_macd_value(ExprParser::Max_macd_valueContext *ctx)
     if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || from < 0 || to >= length - slowPeriod || to >= length - signalPeriod)
         return {};
 
-    int k = to - from + 1;
-    return iMaxMACD(fastPeriod, slowPeriod, signalPeriod, k, close + from, length - from, [](MACD_Output output)
-                    { return output.macd; });
+    vector<double> &cachedMACD = getMACD(fastPeriod, slowPeriod, signalPeriod);
+    if (from * 3 >= cachedMACD.size() || to * 3 >= cachedMACD.size())
+    {
+        return {};
+    }
+    string key = StringFormat("mmMACDvalue_{}_{}_{}", fastPeriod, slowPeriod, signalPeriod);
+    auto it = cachedMinMax->find(key);
+    if (it == cachedMinMax->end())
+    {
+        vector<double> v(cachedMACD.size() / 3);
+        for (int i = 0; i < v.size(); ++i)
+        {
+            v[i] = cachedMACD[i * 3];
+        }
+        it = cachedMinMax->emplace(key, SparseTable(v.data(), v.size())).first;
+    }
+    return it->second.query_max(from, to);
 }
 any Expr::visitAvg_macd_value(ExprParser::Avg_macd_valueContext *ctx)
 {
@@ -973,9 +1041,23 @@ any Expr::visitMax_macd_signal(ExprParser::Max_macd_signalContext *ctx)
     if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || from < 0 || to >= length - slowPeriod || to >= length - signalPeriod)
         return {};
 
-    int k = to - from + 1;
-    return iMaxMACD(fastPeriod, slowPeriod, signalPeriod, k, close + from, length - from, [](MACD_Output output)
-                    { return output.signal; });
+    vector<double> &cachedMACD = getMACD(fastPeriod, slowPeriod, signalPeriod);
+    if (from * 3 + 1 >= cachedMACD.size() || to * 3 + 1 >= cachedMACD.size())
+    {
+        return {};
+    }
+    string key = StringFormat("mmMACDsignal_{}_{}_{}", fastPeriod, slowPeriod, signalPeriod);
+    auto it = cachedMinMax->find(key);
+    if (it == cachedMinMax->end())
+    {
+        vector<double> v(cachedMACD.size() / 3);
+        for (int i = 0; i < v.size(); ++i)
+        {
+            v[i] = cachedMACD[i * 3 + 1];
+        }
+        it = cachedMinMax->emplace(key, SparseTable(v.data(), v.size())).first;
+    }
+    return it->second.query_max(from, to);
 }
 any Expr::visitMin_macd_signal(ExprParser::Min_macd_signalContext *ctx)
 {
@@ -991,9 +1073,23 @@ any Expr::visitMin_macd_signal(ExprParser::Min_macd_signalContext *ctx)
     if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || from < 0 || to >= length - slowPeriod || to >= length - signalPeriod)
         return {};
 
-    int k = to - from + 1;
-    return iMinMACD(fastPeriod, slowPeriod, signalPeriod, k, close + from, length - from, [](MACD_Output output)
-                    { return output.signal; });
+    vector<double> &cachedMACD = getMACD(fastPeriod, slowPeriod, signalPeriod);
+    if (from * 3 + 1 >= cachedMACD.size() || to * 3 + 1 >= cachedMACD.size())
+    {
+        return {};
+    }
+    string key = StringFormat("mmMACDsignal_{}_{}_{}", fastPeriod, slowPeriod, signalPeriod);
+    auto it = cachedMinMax->find(key);
+    if (it == cachedMinMax->end())
+    {
+        vector<double> v(cachedMACD.size() / 3);
+        for (int i = 0; i < v.size(); ++i)
+        {
+            v[i] = cachedMACD[i * 3 + 1];
+        }
+        it = cachedMinMax->emplace(key, SparseTable(v.data(), v.size())).first;
+    }
+    return it->second.query_min(from, to);
 }
 any Expr::visitAvg_macd_signal(ExprParser::Avg_macd_signalContext *ctx)
 {
@@ -1027,9 +1123,23 @@ any Expr::visitMin_macd_histogram(ExprParser::Min_macd_histogramContext *ctx)
     if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || from < 0 || to >= length - slowPeriod || to >= length - signalPeriod)
         return {};
 
-    int k = to - from + 1;
-    return iMinMACD(fastPeriod, slowPeriod, signalPeriod, k, close + from, length - from, [](MACD_Output output)
-                    { return output.histogram; });
+    vector<double> &cachedMACD = getMACD(fastPeriod, slowPeriod, signalPeriod);
+    if (from * 3 + 2 >= cachedMACD.size() || to * 3 + 2 >= cachedMACD.size())
+    {
+        return {};
+    }
+    string key = StringFormat("mmMACDhistogram_{}_{}_{}", fastPeriod, slowPeriod, signalPeriod);
+    auto it = cachedMinMax->find(key);
+    if (it == cachedMinMax->end())
+    {
+        vector<double> v(cachedMACD.size() / 3);
+        for (int i = 0; i < v.size(); ++i)
+        {
+            v[i] = cachedMACD[i * 3 + 2];
+        }
+        it = cachedMinMax->emplace(key, SparseTable(v.data(), v.size())).first;
+    }
+    return it->second.query_min(from, to);
 }
 any Expr::visitMax_macd_histogram(ExprParser::Max_macd_histogramContext *ctx)
 {
@@ -1045,9 +1155,23 @@ any Expr::visitMax_macd_histogram(ExprParser::Max_macd_histogramContext *ctx)
     if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || from < 0 || to >= length - slowPeriod || to >= length - signalPeriod)
         return {};
 
-    int k = to - from + 1;
-    return iMaxMACD(fastPeriod, slowPeriod, signalPeriod, k, close + from, length - from, [](MACD_Output output)
-                    { return output.histogram; });
+    vector<double> &cachedMACD = getMACD(fastPeriod, slowPeriod, signalPeriod);
+    if (from * 3 + 2 >= cachedMACD.size() || to * 3 + 2 >= cachedMACD.size())
+    {
+        return {};
+    }
+    string key = StringFormat("mmMACDhistogram_{}_{}_{}", fastPeriod, slowPeriod, signalPeriod);
+    auto it = cachedMinMax->find(key);
+    if (it == cachedMinMax->end())
+    {
+        vector<double> v(cachedMACD.size() / 3);
+        for (int i = 0; i < v.size(); ++i)
+        {
+            v[i] = cachedMACD[i * 3 + 2];
+        }
+        it = cachedMinMax->emplace(key, SparseTable(v.data(), v.size())).first;
+    }
+    return it->second.query_max(from, to);
 }
 
 any Expr::visitAvg_macd_histogram(ExprParser::Avg_macd_histogramContext *ctx)
@@ -1215,7 +1339,7 @@ any Expr::visitDoji(ExprParser::DojiContext *ctx)
 }
 
 //////////////////////////////////////////////////////////////////
-static unordered_map<string, CachedParseTree> parseCache;
+static unordered_map<string, cachedIndicatorParseTree> parseCache;
 
 void cacheParseTree(const string &key)
 {
@@ -1236,10 +1360,10 @@ void cacheParseTree(const string &key)
 
 any calculateExpr(const string &inputText, const string &broker, const string &symbol, const string &timeframe, int length,
                   const double *open, const double *high, const double *low, const double *close,
-                  const double *volume, long long *startTime, double fundingRate, unordered_map<string, vector<double>> *cached)
+                  const double *volume, long long *startTime, double fundingRate, unordered_map<string, vector<double>> *cachedIndicator, unordered_map<string, SparseTable> *cachedMinMax)
 {
     const string key = toLowerCase(inputText);
-    Expr expr(broker, symbol, timeframe, length, open, high, low, close, volume, startTime, fundingRate, cached);
+    Expr expr(broker, symbol, timeframe, length, open, high, low, close, volume, startTime, fundingRate, cachedIndicator, cachedMinMax);
 
     auto it = parseCache.find(key);
     if (it != parseCache.end() && it->second.tree)
@@ -1259,7 +1383,7 @@ any calculateExpr(const string &inputText, const string &broker, const string &s
 
 string calculateSubExpr(string &expr, const string &broker, const string &symbol, const string &timeframe, int length,
                         const double *open, const double *high, const double *low, const double *close,
-                        const double *volume, long long *startTime, double fundingRate, unordered_map<string, vector<double>> *cached)
+                        const double *volume, long long *startTime, double fundingRate, unordered_map<string, vector<double>> *cachedIndicator, unordered_map<string, SparseTable> *cachedMinMax)
 {
     stack<string> st;
     string s;
@@ -1279,7 +1403,7 @@ string calculateSubExpr(string &expr, const string &broker, const string &symbol
             }
             string lastS = st.top();
             st.pop();
-            any result = calculateExpr(s, broker, symbol, timeframe, length, open, high, low, close, volume, startTime, fundingRate, cached);
+            any result = calculateExpr(s, broker, symbol, timeframe, length, open, high, low, close, volume, startTime, fundingRate, cachedIndicator, cachedMinMax);
             s = lastS + " ";
             if (result.type() == typeid(double))
             {

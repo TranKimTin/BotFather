@@ -25,6 +25,8 @@
 #include <filesystem>
 #include <random>
 
+#include "sparse_table.h"
+
 #include <websocketpp/config/asio_client.hpp>
 #include <websocketpp/client.hpp>
 #include <boost/interprocess/sync/interprocess_semaphore.hpp>

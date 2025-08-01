@@ -85,7 +85,7 @@ string Worker::calculateSub(string &expr)
 {
     return calculateSubExpr(expr, broker, symbol, timeframe, open.size(),
                             open.data(), high.data(), low.data(), close.data(), volume.data(),
-                            startTime.data(), fundingRate, &cachedIndicator);
+                            startTime.data(), fundingRate, &cachedIndicator, &cachedMinMax);
 }
 
 any Worker::calculate(string &expr)
@@ -100,7 +100,7 @@ any Worker::calculate(string &expr)
     any result = calculateExpr(
         expr, broker, symbol, timeframe, open.size(),
         open.data(), high.data(), low.data(), close.data(), volume.data(),
-        startTime.data(), fundingRate, &cachedIndicator);
+        startTime.data(), fundingRate, &cachedIndicator, &cachedMinMax);
 
     cachedExpr[key] = result;
     return result;
@@ -422,7 +422,7 @@ bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
     {
         any result = calculateExpr(nodeData.value, broker, symbol, timeframe, open.size(),
                                    open.data(), high.data(), low.data(), close.data(), volume.data(),
-                                   startTime.data(), fundingRate, &cachedIndicator);
+                                   startTime.data(), fundingRate, &cachedIndicator, &cachedMinMax);
 
         if (result.has_value())
         {

@@ -47,10 +47,11 @@ void test()
     vector<long long> startTime(rateData.startTime.begin(), rateData.startTime.end());
 
     unordered_map<string, vector<double>> cached;
+    unordered_map<string, SparseTable> cachedMinMax;
 
-    string expr = "{rsi(14,0)} - {rsi(14,1)} - {rsi(14,2)} - {rsi(14,10)}";
+    string expr = "{max_open(0,10)} - {max_high(0,10)} -  {max_low(0,10)} -  {max_close(0,10)}";
 
-    LOGI(calculateSubExpr(expr, broker, symbol, timeframe, open.size(), open.data(), high.data(), low.data(), close.data(), volume.data(), startTime.data(), 0.0, &cached));
+    LOGI(calculateSubExpr(expr, broker, symbol, timeframe, open.size(), open.data(), high.data(), low.data(), close.data(), volume.data(), startTime.data(), 0.0, &cached, &cachedMinMax));
     SLEEP_FOR(1000000);
 }
 #endif
