@@ -6,6 +6,7 @@
 #include <tbb/task_group.h>
 
 static tbb::task_group task;
+thread_local Worker worker;
 
 SocketData::SocketData(const int _BATCH_SIZE) : BATCH_SIZE(_BATCH_SIZE), firstConnection(true)
 {
@@ -64,10 +65,21 @@ void SocketData::onCloseCandle(const string &symbol, string &timeframe, RateData
         throw runtime_error("No digit found for symbol " + symbol);
     }
 
-    shared_ptr<Worker> worker = make_shared<Worker>(botList, broker, symbol, timeframe, move(open), move(high), move(low), move(close), move(volume), move(startTime), digits[symbol], fundingRates[symbol]);
-
-    task.run([worker]()
-             { worker->run(); });
+    task.run([botList = botList,
+              broker = broker,
+              symbol = symbol,
+              timeframe = timeframe,
+              open = move(open),
+              high = move(high),
+              low = move(low),
+              close = move(close),
+              volume = move(volume),
+              startTime = move(startTime),
+              digit = digits[symbol],
+              funding = fundingRates[symbol]]()
+             { 
+                worker.init(botList, broker, symbol, timeframe, move(open), move(high), move(low), move(close), move(volume), move(startTime), digit, funding);
+                worker.run(); });
 
     if (rand() % 10 == 0)
     {
