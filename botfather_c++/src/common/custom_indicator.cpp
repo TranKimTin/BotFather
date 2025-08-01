@@ -135,7 +135,7 @@ double iEMA(int period, const double close[], int n)
     return ema;
 }
 
-vector<MACD_Output> iMACD(int fastPeriod, int slowPeriod, int signalPeriod, const double close[], int n)
+vector<double> iMACD(int fastPeriod, int slowPeriod, int signalPeriod, const double close[], int n)
 {
     if (n <= slowPeriod || fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0)
         return {};
@@ -151,7 +151,7 @@ vector<MACD_Output> iMACD(int fastPeriod, int slowPeriod, int signalPeriod, cons
 
     bool signalInitialized = false;
 
-    vector<MACD_Output> result(n - 1);
+    vector<double> result((n - 1) * 3);
     for (int i = n - 2; i >= 0; --i)
     {
         emaFast = (close[i] - emaFast) * kFast + emaFast;
@@ -170,7 +170,9 @@ vector<MACD_Output> iMACD(int fastPeriod, int slowPeriod, int signalPeriod, cons
         }
 
         double histogram = macd - signalEMA;
-        result[i] = {macd, signalEMA, histogram};
+        result[i * 3] = macd;
+        result[i * 3 + 1] = signalEMA;
+        result[i * 3 + 2] = histogram;
     }
 
     return result;

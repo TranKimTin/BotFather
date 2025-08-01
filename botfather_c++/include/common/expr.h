@@ -10,7 +10,7 @@
 #include <CommonTokenStream.h>
 using namespace antlr4;
 
-struct CachedParseTree
+struct cachedIndicatorParseTree
 {
     unique_ptr<ANTLRInputStream> input;
     unique_ptr<ExprLexer> lexer;
@@ -32,17 +32,21 @@ private:
     const double *volume;
     long long *startTime;
     double fundingRate;
-    unordered_map<string, vector<double>> *cached;
+    unordered_map<string, vector<double>> *cachedIndicator;
+    unordered_map<string, SparseTable>* cachedMinMax;
 
 public:
     Expr(const string &broker, const string &symbol, const string &timeframe, int length,
          const double *open, const double *high, const double *low, const double *close, const double *volume,
-         long long *startTime, double fundingRate, unordered_map<string, vector<double>> *cached)
-        : broker(broker), symbol(symbol), timeframe(timeframe), length(length), open(open), high(high), low(low), close(close), volume(volume), startTime(startTime), fundingRate(fundingRate), cached(cached)
+         long long *startTime, double fundingRate, unordered_map<string, vector<double>> *cachedIndicator, unordered_map<string, SparseTable>* cachedMinMax)
+        : broker(broker), symbol(symbol), timeframe(timeframe), length(length), open(open), high(high), low(low), close(close), volume(volume), startTime(startTime), fundingRate(fundingRate), cachedIndicator(cachedIndicator), cachedMinMax(cachedMinMax)
     {
     }
 
     // any visit(antlr4::tree::ParseTree *tree) override;
+
+    vector<double>& getRSI(int period);
+    vector<double>& getMACD(int fastPeriod, int slowPeriod, int signalPeriod);
 
     any visitNumber(ExprParser::NumberContext *ctx) override;
     any visitFloat(ExprParser::FloatContext *ctx) override;
@@ -142,10 +146,10 @@ public:
 
 any calculateExpr(const string &inputText, const string &broker, const string &symbol, const string &timeframe, int length,
                   const double *open, const double *high, const double *low, const double *close,
-                  const double *volume, long long *startTime, double fundingRate, unordered_map<string, vector<double>> *cached);
+                  const double *volume, long long *startTime, double fundingRate, unordered_map<string, vector<double>> *cachedIndicator, unordered_map<string, SparseTable>* cachedMinMax);
 
 string calculateSubExpr(string &expr, const string &broker, const string &symbol, const string &timeframe, int length,
                         const double *open, const double *high, const double *low, const double *close,
-                        const double *volume, long long *startTime, double fundingRate, unordered_map<string, vector<double>> *cached);
+                        const double *volume, long long *startTime, double fundingRate, unordered_map<string, vector<double>> *cachedIndicator, unordered_map<string, SparseTable>* cachedMinMax);
 
 void cacheParseTree(const string &key);
