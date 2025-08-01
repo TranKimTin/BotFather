@@ -12,9 +12,6 @@
 static vector<string> orderTypes = {NODE_TYPE::BUY_MARKET, NODE_TYPE::BUY_LIMIT, NODE_TYPE::BUY_STOP_MARKET, NODE_TYPE::BUY_STOP_LIMIT, NODE_TYPE::SELL_MARKET, NODE_TYPE::SELL_LIMIT, NODE_TYPE::SELL_STOP_MARKET, NODE_TYPE::SELL_STOP_LIMIT};
 static ThreadPool tasks(thread::hardware_concurrency() * 2 + 1);
 
-Worker::Worker(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, Digit digit, double fundingRate)
-    : botList(botList), broker(move(broker)), symbol(move(symbol)), timeframe(move(timeframe)), open(move(open)), high(move(high)), low(move(low)), close(move(close)), volume(move(volume)), startTime(move(startTime)), digit(digit), fundingRate(fundingRate) {};
-
 static int binarySearch(const vector<Symbol> &symbolList, const string &symbol)
 {
     int left = 0;
@@ -39,6 +36,26 @@ static int binarySearch(const vector<Symbol> &symbolList, const string &symbol)
     return -1;
 }
 
+void Worker::init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, Digit digit, double fundingRate)
+{
+    this->botList = botList;
+    this->broker = broker;
+    this->symbol = symbol;
+    this->timeframe = timeframe;
+    this->open = std::move(open);
+    this->high = std::move(high);
+    this->low = std::move(low);
+    this->close = std::move(close);
+    this->volume = std::move(volume);
+    this->startTime = std::move(startTime);
+    this->digit = digit;
+    this->fundingRate = fundingRate;
+
+    this->visited.clear();
+    this->cachedExpr.clear();
+    this->cachedIndicator.clear();
+    this->cachedMinMax.clear();
+}
 void Worker::run()
 {
     Timer timer(StringFormat("onCloseCandle {} {} {}", broker, symbol, timeframe));
