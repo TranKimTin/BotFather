@@ -288,7 +288,7 @@ any Expr::visitRsi(ExprParser::RsiContext *ctx)
         cachedRSI = iRSI(period, close, length);
     }
 
-    return cachedRSI[shift];
+    return shift < cachedRSI.size() ? cachedRSI[shift] : {};
 }
 
 any Expr::visitRsi_slope(ExprParser::Rsi_slopeContext *ctx)
@@ -349,7 +349,7 @@ any Expr::visitMacd_value(ExprParser::Macd_valueContext *ctx)
         }
     }
 
-    return cachedMACD[shift * 3];
+    return shift * 3 < cachedMACD.size() ? cachedMACD[shift * 3] : {};
 }
 
 any Expr::visitMacd_signal(ExprParser::Macd_signalContext *ctx)
@@ -377,7 +377,7 @@ any Expr::visitMacd_signal(ExprParser::Macd_signalContext *ctx)
         }
     }
 
-    return cachedMACD[shift * 3 + 1];
+    return shift * 3 + 1 < cachedMACD.size() ? cachedMACD[shift * 3 + 1] : {};
 }
 
 any Expr::visitMacd_histogram(ExprParser::Macd_histogramContext *ctx)
@@ -405,7 +405,7 @@ any Expr::visitMacd_histogram(ExprParser::Macd_histogramContext *ctx)
         }
     }
 
-    return cachedMACD[shift * 3 + 2];
+    return shift * 3 + 2 < cachedMACD.size() ? cachedMACD[shift * 3 + 2] : {};
 }
 
 any Expr::visitBb_upper(ExprParser::Bb_upperContext *ctx)

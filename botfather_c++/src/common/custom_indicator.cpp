@@ -5,8 +5,6 @@ static const double INF = 1e18;
 
 vector<double> iRSI(int period, const double close[], int n)
 {
-    n = min(n, MAX_N + period);
-
     if (n <= period)
         return {};
 
