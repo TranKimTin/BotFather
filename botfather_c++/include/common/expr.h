@@ -33,12 +33,12 @@ private:
     long long *startTime;
     double fundingRate;
     unordered_map<string, vector<double>> *cachedIndicator;
-    unordered_map<string, SparseTable>* cachedMinMax;
+    unordered_map<string, unique_ptr<SparseTable>>* cachedMinMax;
 
 public:
     Expr(const string &broker, const string &symbol, const string &timeframe, int length,
          const double *open, const double *high, const double *low, const double *close, const double *volume,
-         long long *startTime, double fundingRate, unordered_map<string, vector<double>> *cachedIndicator, unordered_map<string, SparseTable>* cachedMinMax)
+         long long *startTime, double fundingRate, unordered_map<string, vector<double>> *cachedIndicator, unordered_map<string, unique_ptr<SparseTable>>* cachedMinMax)
         : broker(broker), symbol(symbol), timeframe(timeframe), length(length), open(open), high(high), low(low), close(close), volume(volume), startTime(startTime), fundingRate(fundingRate), cachedIndicator(cachedIndicator), cachedMinMax(cachedMinMax)
     {
     }
@@ -146,10 +146,10 @@ public:
 
 any calculateExpr(const string &inputText, const string &broker, const string &symbol, const string &timeframe, int length,
                   const double *open, const double *high, const double *low, const double *close,
-                  const double *volume, long long *startTime, double fundingRate, unordered_map<string, vector<double>> *cachedIndicator, unordered_map<string, SparseTable>* cachedMinMax);
+                  const double *volume, long long *startTime, double fundingRate, unordered_map<string, vector<double>> *cachedIndicator, unordered_map<string, unique_ptr<SparseTable>>* cachedMinMax);
 
 string calculateSubExpr(string &expr, const string &broker, const string &symbol, const string &timeframe, int length,
                         const double *open, const double *high, const double *low, const double *close,
-                        const double *volume, long long *startTime, double fundingRate, unordered_map<string, vector<double>> *cachedIndicator, unordered_map<string, SparseTable>* cachedMinMax);
+                        const double *volume, long long *startTime, double fundingRate, unordered_map<string, vector<double>> *cachedIndicator, unordered_map<string, unique_ptr<SparseTable>>* cachedMinMax);
 
 void cacheParseTree(const string &key);

@@ -1,12 +1,15 @@
 #include "socket_data.h"
 #include "util.h"
 #include "thread_pool.h"
+#include "vector_pool.h"
 #include "worker.h"
 #include "redis.h"
 #include <tbb/task_group.h>
 
 static tbb::task_group task;
 thread_local Worker worker;
+thread_local VectorDoublePool vectorDoublePool;
+thread_local SparseTablePool sparseTablePool;
 
 SocketData::SocketData(const int _BATCH_SIZE) : BATCH_SIZE(_BATCH_SIZE), firstConnection(true)
 {

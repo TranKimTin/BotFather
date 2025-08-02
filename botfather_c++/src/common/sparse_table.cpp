@@ -2,7 +2,7 @@
 #include <cmath>
 #include <algorithm>
 
-SparseTable::SparseTable(const double *a, int length)
+void SparseTable::init(const double *a, int length)
 {
     n = length;
     int max_log = log2(n) + 1;
@@ -12,8 +12,13 @@ SparseTable::SparseTable(const double *a, int length)
     for (int i = 2; i <= n; ++i)
         log2s[i] = log2s[i / 2] + 1;
 
-    st_min.assign(n, vector<double>(max_log));
-    st_max.assign(n, vector<double>(max_log));
+    st_min.resize(n);
+    for (auto &row : st_min)
+        row.resize(max_log);
+
+    st_max.resize(n);
+    for (auto &row : st_max)
+        row.resize(max_log);
 
     for (int i = 0; i < n; ++i)
     {

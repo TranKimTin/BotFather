@@ -1,14 +1,17 @@
 #include "custom_indicator.h"
+#include "vector_pool.h"
 
 static const int MAX_N = 300;
 static const double INF = 1e18;
 
+extern thread_local VectorDoublePool vectorDoublePool;
+
 vector<double> iRSI(int period, const double close[], int n)
 {
-    if (n <= period)
-        return {};
+    vector<double> result = vectorDoublePool.acquire();
 
-    vector<double> result;
+    if (n <= period)
+        return result;
 
     double avgGain = 0.0, avgLoss = 0.0;
 
@@ -137,8 +140,10 @@ double iEMA(int period, const double close[], int n)
 
 vector<double> iMACD(int fastPeriod, int slowPeriod, int signalPeriod, const double close[], int n)
 {
+    vector<double> result = vectorDoublePool.acquire();
+
     if (n <= slowPeriod || fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0)
-        return {};
+        return result;
 
     double kFast = 2.0 / (fastPeriod + 1);
     double kSlow = 2.0 / (slowPeriod + 1);
@@ -151,7 +156,7 @@ vector<double> iMACD(int fastPeriod, int slowPeriod, int signalPeriod, const dou
 
     bool signalInitialized = false;
 
-    vector<double> result((n - 1) * 3);
+    result.resize((n - 1) * 3);
     for (int i = n - 2; i >= 0; --i)
     {
         emaFast = (close[i] - emaFast) * kFast + emaFast;

@@ -8,9 +8,12 @@
 #include "exchange.h"
 #include "binance_future.h"
 #include "thread_pool.h"
+#include "vector_pool.h"
 
 static vector<string> orderTypes = {NODE_TYPE::BUY_MARKET, NODE_TYPE::BUY_LIMIT, NODE_TYPE::BUY_STOP_MARKET, NODE_TYPE::BUY_STOP_LIMIT, NODE_TYPE::SELL_MARKET, NODE_TYPE::SELL_LIMIT, NODE_TYPE::SELL_STOP_MARKET, NODE_TYPE::SELL_STOP_LIMIT};
 static ThreadPool tasks(thread::hardware_concurrency() * 2 + 1);
+extern thread_local VectorDoublePool vectorDoublePool;
+extern thread_local SparseTablePool sparseTablePool;
 
 static int binarySearch(const vector<Symbol> &symbolList, const string &symbol)
 {
@@ -42,17 +45,28 @@ void Worker::init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, st
     this->broker = broker;
     this->symbol = symbol;
     this->timeframe = timeframe;
-    this->open = std::move(open);
-    this->high = std::move(high);
-    this->low = std::move(low);
-    this->close = std::move(close);
-    this->volume = std::move(volume);
-    this->startTime = std::move(startTime);
+    this->open = move(open);
+    this->high = move(high);
+    this->low = move(low);
+    this->close = move(close);
+    this->volume = move(volume);
+    this->startTime = move(startTime);
     this->digit = digit;
     this->fundingRate = fundingRate;
 
     this->visited.clear();
     this->cachedExpr.clear();
+
+    for(auto &pair : cachedIndicator)
+    {
+        vectorDoublePool.release(pair.second);
+    }
+
+    for (auto &pair : cachedMinMax)
+    {
+        sparseTablePool.release(move(pair.second));
+    }
+
     this->cachedIndicator.clear();
     this->cachedMinMax.clear();
 }
