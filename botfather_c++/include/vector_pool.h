@@ -1,7 +1,4 @@
-#include <vector>
-#include "sparse_table.h"
-#include <stack>
-using namespace std;
+#include <common_type.h>
 
 class VectorDoublePool
 {

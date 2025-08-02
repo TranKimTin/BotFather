@@ -3,11 +3,13 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <stack>
 #include <map>
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
 #include <queue>
+#include <deque>
 #include <chrono>
 #include <thread>
 #include <condition_variable>
@@ -24,6 +26,7 @@
 #include <any>
 #include <filesystem>
 #include <random>
+#include <algorithm>
 
 #include "sparse_table.h"
 
