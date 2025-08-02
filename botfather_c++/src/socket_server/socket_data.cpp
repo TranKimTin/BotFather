@@ -154,7 +154,7 @@ void SocketData::adjustData(RateData &rateData)
 
 void SocketData::updateCache(const RateData &rateData)
 {
-    if (rateData.interval == "1m" || rateData.startTime.empty())
+    if (rateData.startTime.empty())
     {
         return;
     }
