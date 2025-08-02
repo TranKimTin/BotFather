@@ -46,8 +46,8 @@ void test()
     vector<double> volume(rateData.volume.begin(), rateData.volume.end());
     vector<long long> startTime(rateData.startTime.begin(), rateData.startTime.end());
 
-    unordered_map<string, vector<double>> cached;
-    unordered_map<string, unique_ptr<SparseTable>> cachedMinMax;
+    unordered_map<long long, vector<double>> cached;
+    unordered_map<long long, unique_ptr<SparseTable>> cachedMinMax;
 
     string expr = "{max_open(0,10)} - {max_high(0,10)} -  {max_low(0,10)} -  {max_close(0,10)}";
 
