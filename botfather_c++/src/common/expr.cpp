@@ -1411,10 +1411,11 @@ any Expr::visitDoji(ExprParser::DojiContext *ctx)
 }
 
 //////////////////////////////////////////////////////////////////
-static unordered_map<string, cachedIndicatorParseTree> parseCache;
+static unordered_map<long long, cachedIndicatorParseTree> parseCache;
 
-void cacheParseTree(const string &key)
+void cacheParseTree(const string &expr)
 {
+    long long key = hashString(expr);
     auto it = parseCache.find(key);
     if (it != parseCache.end() && it->second.tree)
         return;
@@ -1422,7 +1423,7 @@ void cacheParseTree(const string &key)
     auto &entry = parseCache[key];
     if (!entry.tree)
     {
-        entry.input = make_unique<ANTLRInputStream>(key);
+        entry.input = make_unique<ANTLRInputStream>(expr);
         entry.lexer = make_unique<ExprLexer>(entry.input.get());
         entry.tokens = make_unique<CommonTokenStream>(entry.lexer.get());
         entry.parser = make_unique<ExprParser>(entry.tokens.get());
@@ -1434,7 +1435,8 @@ any calculateExpr(const string &inputText, const string &broker, const string &s
                   const double *open, const double *high, const double *low, const double *close,
                   const double *volume, long long *startTime, double fundingRate, unordered_map<long long, vector<double>> *cachedIndicator, unordered_map<long long, unique_ptr<SparseTable>> *cachedMinMax)
 {
-    const string key = toLowerCase(inputText);
+    const string text = toLowerCase(inputText);
+    const long long key = hashString(text);
     Expr expr(broker, symbol, timeframe, length, open, high, low, close, volume, startTime, fundingRate, cachedIndicator, cachedMinMax);
 
     auto it = parseCache.find(key);
@@ -1444,7 +1446,7 @@ any calculateExpr(const string &inputText, const string &broker, const string &s
     }
     else
     {
-        ANTLRInputStream input(key);
+        ANTLRInputStream input(text);
         ExprLexer lexer(&input);
         CommonTokenStream tokens(&lexer);
         ExprParser parser(&tokens);

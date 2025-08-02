@@ -101,11 +101,12 @@ void Worker::run()
 
 void Worker::dfs_handleLogic(Route &route, const shared_ptr<Bot> &bot)
 {
-    if (visited[route.id])
+    long long keyID = (route.id.empty() || route.id == "start") ? 0 : stoll(route.id);
+    if (visited[keyID])
     {
         return;
     }
-    visited[route.id] = true;
+    visited[keyID] = true;
     if (handleLogic(route.data, bot))
     {
         for (Route &next : route.next)
@@ -124,7 +125,7 @@ string Worker::calculateSub(string &expr)
 
 any Worker::calculate(string &expr)
 {
-    string key = toLowerCase(expr);
+    long long key = hashString(toLowerCase(expr));
     auto it = cachedExpr.find(key);
     if (it != cachedExpr.end())
     {
