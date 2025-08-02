@@ -6,6 +6,18 @@
 
 extern thread_local VectorDoublePool vectorDoublePool;
 extern thread_local SparseTablePool sparseTablePool;
+
+static const long long ID_RSI = 1;
+static const long long ID_MACD = 2;
+static const long long ID_MM_OPEN = 3;
+static const long long ID_MM_HIGH = 4;
+static const long long ID_MM_LOW = 5;
+static const long long ID_MM_CLOSE = 6;
+static const long long ID_MM_RSI = 7;
+static const long long ID_MM_MACD_VALUE = 8;
+static const long long ID_MM_MACD_SIGNAL = 9;
+static const long long ID_MM_MACD_HISTOGRAM = 10;
+
 any Expr::visitNumber(ExprParser::NumberContext *ctx)
 {
     if (ctx->INT())
@@ -277,7 +289,7 @@ any Expr::visitLower_shadowP(ExprParser::Lower_shadowPContext *ctx)
 
 vector<double> &Expr::getRSI(int period)
 {
-    string key = StringFormat("iRSI_{}", period);
+    long long key = ID_RSI | (static_cast<long long>(period) << 10);
 
     auto it = cachedIndicator->find(key);
     if (it == cachedIndicator->end())
@@ -340,7 +352,7 @@ any Expr::visitEma(ExprParser::EmaContext *ctx)
 
 vector<double> &Expr::getMACD(int fastPeriod, int slowPeriod, int signalPeriod)
 {
-    string key = StringFormat("iMACD_{}_{}_{}", fastPeriod, slowPeriod, signalPeriod);
+    long long key = ID_MACD | (static_cast<long long>(fastPeriod) << 10) | (static_cast<long long>(slowPeriod) << 20) | (static_cast<long long>(signalPeriod) << 30);
 
     auto it = cachedIndicator->find(key);
     if (it == cachedIndicator->end())
@@ -585,7 +597,7 @@ any Expr::visitMin_open(ExprParser::Min_openContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    string key = StringFormat("mmOpen_{}_{}", from, to);
+    long long key = ID_MM_OPEN;
 
     auto it = cachedMinMax->find(key);
     if (it == cachedMinMax->end())
@@ -609,7 +621,7 @@ any Expr::visitMin_high(ExprParser::Min_highContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    string key = StringFormat("mmHigh_{}_{}", from, to);
+    long long key = ID_MM_HIGH;
 
     auto it = cachedMinMax->find(key);
     if (it == cachedMinMax->end())
@@ -632,7 +644,7 @@ any Expr::visitMin_low(ExprParser::Min_lowContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    string key = StringFormat("mmLow_{}_{}", from, to);
+    long long key = ID_MM_LOW;
 
     auto it = cachedMinMax->find(key);
     if (it == cachedMinMax->end())
@@ -655,7 +667,7 @@ any Expr::visitMin_close(ExprParser::Min_closeContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    string key = StringFormat("mmClose_{}_{}", from, to);
+    long long key = ID_MM_CLOSE;
 
     auto it = cachedMinMax->find(key);
     if (it == cachedMinMax->end())
@@ -746,7 +758,7 @@ any Expr::visitMax_open(ExprParser::Max_openContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    string key = StringFormat("mmOpen_{}_{}", from, to);
+    long long key = ID_MM_OPEN;
 
     auto it = cachedMinMax->find(key);
     if (it == cachedMinMax->end())
@@ -770,7 +782,7 @@ any Expr::visitMax_high(ExprParser::Max_highContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    string key = StringFormat("mmHigh_{}_{}", from, to);
+    long long key = ID_MM_HIGH;
 
     auto it = cachedMinMax->find(key);
     if (it == cachedMinMax->end())
@@ -794,7 +806,7 @@ any Expr::visitMax_low(ExprParser::Max_lowContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    string key = StringFormat("mmLow_{}_{}", from, to);
+    long long key = ID_MM_LOW;
 
     auto it = cachedMinMax->find(key);
     if (it == cachedMinMax->end())
@@ -818,7 +830,7 @@ any Expr::visitMax_close(ExprParser::Max_closeContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    string key = StringFormat("mmClose_{}_{}", from, to);
+    long long key = ID_MM_CLOSE;
 
     auto it = cachedMinMax->find(key);
     if (it == cachedMinMax->end())
@@ -916,7 +928,8 @@ any Expr::visitMin_rsi(ExprParser::Min_rsiContext *ctx)
         return {};
     }
 
-    string key = StringFormat("mmRSI_{}", period);
+    long long key = ID_MM_RSI | (static_cast<long long>(period) << 10);
+
     auto it = cachedMinMax->find(key);
     if (it == cachedMinMax->end())
     {
@@ -946,7 +959,8 @@ any Expr::visitMax_rsi(ExprParser::Max_rsiContext *ctx)
         return {};
     }
 
-    string key = StringFormat("mmRSI_{}", period);
+    long long key = ID_MM_RSI | (static_cast<long long>(period) << 10);
+
     auto it = cachedMinMax->find(key);
     if (it == cachedMinMax->end())
     {
@@ -995,7 +1009,8 @@ any Expr::visitMin_macd_value(ExprParser::Min_macd_valueContext *ctx)
         return {};
     }
 
-    string key = StringFormat("mmMACDvalue_{}_{}_{}", fastPeriod, slowPeriod, signalPeriod);
+    long long key = ID_MM_MACD_VALUE | (static_cast<long long>(fastPeriod) << 10) | (static_cast<long long>(slowPeriod) << 20) | (static_cast<long long>(signalPeriod) << 30);
+
     auto it = cachedMinMax->find(key);
     if (it == cachedMinMax->end())
     {
@@ -1032,7 +1047,8 @@ any Expr::visitMax_macd_value(ExprParser::Max_macd_valueContext *ctx)
     {
         return {};
     }
-    string key = StringFormat("mmMACDvalue_{}_{}_{}", fastPeriod, slowPeriod, signalPeriod);
+    long long key = ID_MM_MACD_VALUE | (static_cast<long long>(fastPeriod) << 10) | (static_cast<long long>(slowPeriod) << 20) | (static_cast<long long>(signalPeriod) << 30);
+
     auto it = cachedMinMax->find(key);
     if (it == cachedMinMax->end())
     {
@@ -1086,7 +1102,8 @@ any Expr::visitMax_macd_signal(ExprParser::Max_macd_signalContext *ctx)
     {
         return {};
     }
-    string key = StringFormat("mmMACDsignal_{}_{}_{}", fastPeriod, slowPeriod, signalPeriod);
+    long long key = ID_MM_MACD_SIGNAL | (static_cast<long long>(fastPeriod) << 10) | (static_cast<long long>(slowPeriod) << 20) | (static_cast<long long>(signalPeriod) << 30);
+
     auto it = cachedMinMax->find(key);
     if (it == cachedMinMax->end())
     {
@@ -1121,7 +1138,8 @@ any Expr::visitMin_macd_signal(ExprParser::Min_macd_signalContext *ctx)
     {
         return {};
     }
-    string key = StringFormat("mmMACDsignal_{}_{}_{}", fastPeriod, slowPeriod, signalPeriod);
+    long long key = ID_MM_MACD_SIGNAL | (static_cast<long long>(fastPeriod) << 10) | (static_cast<long long>(slowPeriod) << 20) | (static_cast<long long>(signalPeriod) << 30);
+
     auto it = cachedMinMax->find(key);
     if (it == cachedMinMax->end())
     {
@@ -1174,7 +1192,8 @@ any Expr::visitMin_macd_histogram(ExprParser::Min_macd_histogramContext *ctx)
     {
         return {};
     }
-    string key = StringFormat("mmMACDhistogram_{}_{}_{}", fastPeriod, slowPeriod, signalPeriod);
+    long long key = ID_MM_MACD_HISTOGRAM | (static_cast<long long>(fastPeriod) << 10) | (static_cast<long long>(slowPeriod) << 20) | (static_cast<long long>(signalPeriod) << 30);
+
     auto it = cachedMinMax->find(key);
     if (it == cachedMinMax->end())
     {
@@ -1209,7 +1228,8 @@ any Expr::visitMax_macd_histogram(ExprParser::Max_macd_histogramContext *ctx)
     {
         return {};
     }
-    string key = StringFormat("mmMACDhistogram_{}_{}_{}", fastPeriod, slowPeriod, signalPeriod);
+    long long key = ID_MM_MACD_HISTOGRAM | (static_cast<long long>(fastPeriod) << 10) | (static_cast<long long>(slowPeriod) << 20) | (static_cast<long long>(signalPeriod) << 30);
+
     auto it = cachedMinMax->find(key);
     if (it == cachedMinMax->end())
     {
@@ -1412,7 +1432,7 @@ void cacheParseTree(const string &key)
 
 any calculateExpr(const string &inputText, const string &broker, const string &symbol, const string &timeframe, int length,
                   const double *open, const double *high, const double *low, const double *close,
-                  const double *volume, long long *startTime, double fundingRate, unordered_map<string, vector<double>> *cachedIndicator, unordered_map<string, unique_ptr<SparseTable>> *cachedMinMax)
+                  const double *volume, long long *startTime, double fundingRate, unordered_map<long long, vector<double>> *cachedIndicator, unordered_map<long long, unique_ptr<SparseTable>> *cachedMinMax)
 {
     const string key = toLowerCase(inputText);
     Expr expr(broker, symbol, timeframe, length, open, high, low, close, volume, startTime, fundingRate, cachedIndicator, cachedMinMax);
@@ -1435,7 +1455,7 @@ any calculateExpr(const string &inputText, const string &broker, const string &s
 
 string calculateSubExpr(string &expr, const string &broker, const string &symbol, const string &timeframe, int length,
                         const double *open, const double *high, const double *low, const double *close,
-                        const double *volume, long long *startTime, double fundingRate, unordered_map<string, vector<double>> *cachedIndicator, unordered_map<string, unique_ptr<SparseTable>> *cachedMinMax)
+                        const double *volume, long long *startTime, double fundingRate, unordered_map<long long, vector<double>> *cachedIndicator, unordered_map<long long, unique_ptr<SparseTable>> *cachedMinMax)
 {
     stack<string> st;
     string s;

@@ -18,8 +18,8 @@ private:
     unordered_map<string, any> cachedExpr;
     Digit digit;
     double fundingRate;
-    unordered_map<string, vector<double>> cachedIndicator;
-    unordered_map<string, unique_ptr<SparseTable>> cachedMinMax;
+    unordered_map<long long, vector<double>> cachedIndicator;
+    unordered_map<long long, unique_ptr<SparseTable>> cachedMinMax;
 
     string calculateSub(string &expr);
     any calculate(string &expr);
