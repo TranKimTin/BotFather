@@ -25,15 +25,23 @@ public:
         pool.push(move(vec));
     }
 
+    size_t cached_count() const
+    {
+        return pool.size();
+    }
+
 private:
     stack<vector<double>> pool;
 };
 
-class SparseTablePool {
+class SparseTablePool
+{
 public:
     // Lấy 1 SparseTable từ pool, nếu hết thì tạo mới
-    unique_ptr<SparseTable> acquire() {
-        if (!pool.empty()) {
+    unique_ptr<SparseTable> acquire()
+    {
+        if (!pool.empty())
+        {
             auto ptr = move(pool.top());
             pool.pop();
             return ptr;
@@ -42,12 +50,13 @@ public:
     }
 
     // Trả SparseTable về pool
-    void release(unique_ptr<SparseTable> table) {
+    void release(unique_ptr<SparseTable> table)
+    {
         pool.push(move(table));
     }
 
-    // Kiểm tra số lượng đang cache trong pool (tùy mục đích debug)
-    size_t cached_count() const {
+    size_t cached_count() const
+    {
         return pool.size();
     }
 
