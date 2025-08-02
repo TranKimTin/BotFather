@@ -19,7 +19,7 @@ private:
     Digit digit;
     double fundingRate;
     unordered_map<string, vector<double>> cachedIndicator;
-    unordered_map<string, SparseTable> cachedMinMax;
+    unordered_map<string, unique_ptr<SparseTable>> cachedMinMax;
 
     string calculateSub(string &expr);
     any calculate(string &expr);

@@ -1,4 +1,4 @@
-#pragma one
+#pragma once
 
 #include <vector>
 using namespace std;
@@ -12,7 +12,8 @@ private:
     int n;
 
 public:
-    explicit SparseTable(const double *a, int length);
+    SparseTable() = default;  // Cho phép tạo qua pool
+    void init(const double* a, int length);  // Dùng thay constructor
     double query_min(int l, int r) const;
     double query_max(int l, int r) const;
     int size();

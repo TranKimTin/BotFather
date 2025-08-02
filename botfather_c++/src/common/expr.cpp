@@ -2,7 +2,10 @@
 #include "util.h"
 #include "custom_indicator.h"
 #include "timer.h"
+#include "vector_pool.h"
 
+extern thread_local VectorDoublePool vectorDoublePool;
+extern thread_local SparseTablePool sparseTablePool;
 any Expr::visitNumber(ExprParser::NumberContext *ctx)
 {
     if (ctx->INT())
@@ -587,9 +590,12 @@ any Expr::visitMin_open(ExprParser::Min_openContext *ctx)
     auto it = cachedMinMax->find(key);
     if (it == cachedMinMax->end())
     {
-        it = cachedMinMax->emplace(key, SparseTable(open, length)).first;
+        auto st = sparseTablePool.acquire();
+        st->init(open, length);
+
+        it = cachedMinMax->emplace(key, move(st)).first;
     }
-    return it->second.query_min(from, to);
+    return it->second->query_min(from, to);
 }
 
 any Expr::visitMin_high(ExprParser::Min_highContext *ctx)
@@ -608,9 +614,12 @@ any Expr::visitMin_high(ExprParser::Min_highContext *ctx)
     auto it = cachedMinMax->find(key);
     if (it == cachedMinMax->end())
     {
-        it = cachedMinMax->emplace(key, SparseTable(high, length)).first;
+        auto st = sparseTablePool.acquire();
+        st->init(high, length);
+
+        it = cachedMinMax->emplace(key, move(st)).first;
     }
-    return it->second.query_min(from, to);
+    return it->second->query_min(from, to);
 }
 any Expr::visitMin_low(ExprParser::Min_lowContext *ctx)
 {
@@ -628,9 +637,12 @@ any Expr::visitMin_low(ExprParser::Min_lowContext *ctx)
     auto it = cachedMinMax->find(key);
     if (it == cachedMinMax->end())
     {
-        it = cachedMinMax->emplace(key, SparseTable(low, length)).first;
+        auto st = sparseTablePool.acquire();
+        st->init(low, length);
+
+        it = cachedMinMax->emplace(key, move(st)).first;
     }
-    return it->second.query_min(from, to);
+    return it->second->query_min(from, to);
 }
 any Expr::visitMin_close(ExprParser::Min_closeContext *ctx)
 {
@@ -648,9 +660,12 @@ any Expr::visitMin_close(ExprParser::Min_closeContext *ctx)
     auto it = cachedMinMax->find(key);
     if (it == cachedMinMax->end())
     {
-        it = cachedMinMax->emplace(key, SparseTable(close, length)).first;
+        auto st = sparseTablePool.acquire();
+        st->init(close, length);
+
+        it = cachedMinMax->emplace(key, move(st)).first;
     }
-    return it->second.query_min(from, to);
+    return it->second->query_min(from, to);
 }
 
 any Expr::visitMin_change(ExprParser::Min_changeContext *ctx)
@@ -736,9 +751,12 @@ any Expr::visitMax_open(ExprParser::Max_openContext *ctx)
     auto it = cachedMinMax->find(key);
     if (it == cachedMinMax->end())
     {
-        it = cachedMinMax->emplace(key, SparseTable(open, length)).first;
+        auto st = sparseTablePool.acquire();
+        st->init(open, length);
+
+        it = cachedMinMax->emplace(key, move(st)).first;
     }
-    return it->second.query_max(from, to);
+    return it->second->query_max(from, to);
 }
 
 any Expr::visitMax_high(ExprParser::Max_highContext *ctx)
@@ -757,9 +775,12 @@ any Expr::visitMax_high(ExprParser::Max_highContext *ctx)
     auto it = cachedMinMax->find(key);
     if (it == cachedMinMax->end())
     {
-        it = cachedMinMax->emplace(key, SparseTable(high, length)).first;
+        auto st = sparseTablePool.acquire();
+        st->init(high, length);
+
+        it = cachedMinMax->emplace(key, move(st)).first;
     }
-    return it->second.query_max(from, to);
+    return it->second->query_max(from, to);
 }
 
 any Expr::visitMax_low(ExprParser::Max_lowContext *ctx)
@@ -778,9 +799,12 @@ any Expr::visitMax_low(ExprParser::Max_lowContext *ctx)
     auto it = cachedMinMax->find(key);
     if (it == cachedMinMax->end())
     {
-        it = cachedMinMax->emplace(key, SparseTable(low, length)).first;
+        auto st = sparseTablePool.acquire();
+        st->init(low, length);
+
+        it = cachedMinMax->emplace(key, move(st)).first;
     }
-    return it->second.query_max(from, to);
+    return it->second->query_max(from, to);
 }
 
 any Expr::visitMax_close(ExprParser::Max_closeContext *ctx)
@@ -799,9 +823,12 @@ any Expr::visitMax_close(ExprParser::Max_closeContext *ctx)
     auto it = cachedMinMax->find(key);
     if (it == cachedMinMax->end())
     {
-        it = cachedMinMax->emplace(key, SparseTable(close, length)).first;
+        auto st = sparseTablePool.acquire();
+        st->init(close, length);
+
+        it = cachedMinMax->emplace(key, move(st)).first;
     }
-    return it->second.query_max(from, to);
+    return it->second->query_max(from, to);
 }
 any Expr::visitMax_change(ExprParser::Max_changeContext *ctx)
 {
@@ -893,9 +920,12 @@ any Expr::visitMin_rsi(ExprParser::Min_rsiContext *ctx)
     auto it = cachedMinMax->find(key);
     if (it == cachedMinMax->end())
     {
-        it = cachedMinMax->emplace(key, SparseTable(cachedRSI.data(), cachedRSI.size())).first;
+        auto st = sparseTablePool.acquire();
+        st->init(cachedRSI.data(), cachedRSI.size());
+
+        it = cachedMinMax->emplace(key, move(st)).first;
     }
-    return it->second.query_min(from, to);
+    return it->second->query_min(from, to);
 }
 
 any Expr::visitMax_rsi(ExprParser::Max_rsiContext *ctx)
@@ -920,9 +950,12 @@ any Expr::visitMax_rsi(ExprParser::Max_rsiContext *ctx)
     auto it = cachedMinMax->find(key);
     if (it == cachedMinMax->end())
     {
-        it = cachedMinMax->emplace(key, SparseTable(cachedRSI.data(), cachedRSI.size())).first;
+        auto st = sparseTablePool.acquire();
+        st->init(cachedRSI.data(), cachedRSI.size());
+
+        it = cachedMinMax->emplace(key, move(st)).first;
     }
-    return it->second.query_max(from, to);
+    return it->second->query_max(from, to);
 }
 
 any Expr::visitMarsi(ExprParser::MarsiContext *ctx)
@@ -971,9 +1004,13 @@ any Expr::visitMin_macd_value(ExprParser::Min_macd_valueContext *ctx)
         {
             v[i] = cachedMACD[i * 3];
         }
-        it = cachedMinMax->emplace(key, SparseTable(v.data(), v.size())).first;
+
+        auto st = sparseTablePool.acquire();
+        st->init(v.data(), v.size());
+
+        it = cachedMinMax->emplace(key, move(st)).first;
     }
-    return it->second.query_min(from, to);
+    return it->second->query_min(from, to);
 }
 
 any Expr::visitMax_macd_value(ExprParser::Max_macd_valueContext *ctx)
@@ -1004,9 +1041,12 @@ any Expr::visitMax_macd_value(ExprParser::Max_macd_valueContext *ctx)
         {
             v[i] = cachedMACD[i * 3];
         }
-        it = cachedMinMax->emplace(key, SparseTable(v.data(), v.size())).first;
+        auto st = sparseTablePool.acquire();
+        st->init(v.data(), v.size());
+
+        it = cachedMinMax->emplace(key, move(st)).first;
     }
-    return it->second.query_max(from, to);
+    return it->second->query_max(from, to);
 }
 any Expr::visitAvg_macd_value(ExprParser::Avg_macd_valueContext *ctx)
 {
@@ -1055,9 +1095,12 @@ any Expr::visitMax_macd_signal(ExprParser::Max_macd_signalContext *ctx)
         {
             v[i] = cachedMACD[i * 3 + 1];
         }
-        it = cachedMinMax->emplace(key, SparseTable(v.data(), v.size())).first;
+        auto st = sparseTablePool.acquire();
+        st->init(v.data(), v.size());
+
+        it = cachedMinMax->emplace(key, move(st)).first;
     }
-    return it->second.query_max(from, to);
+    return it->second->query_max(from, to);
 }
 any Expr::visitMin_macd_signal(ExprParser::Min_macd_signalContext *ctx)
 {
@@ -1087,9 +1130,12 @@ any Expr::visitMin_macd_signal(ExprParser::Min_macd_signalContext *ctx)
         {
             v[i] = cachedMACD[i * 3 + 1];
         }
-        it = cachedMinMax->emplace(key, SparseTable(v.data(), v.size())).first;
+        auto st = sparseTablePool.acquire();
+        st->init(v.data(), v.size());
+
+        it = cachedMinMax->emplace(key, move(st)).first;
     }
-    return it->second.query_min(from, to);
+    return it->second->query_min(from, to);
 }
 any Expr::visitAvg_macd_signal(ExprParser::Avg_macd_signalContext *ctx)
 {
@@ -1137,9 +1183,12 @@ any Expr::visitMin_macd_histogram(ExprParser::Min_macd_histogramContext *ctx)
         {
             v[i] = cachedMACD[i * 3 + 2];
         }
-        it = cachedMinMax->emplace(key, SparseTable(v.data(), v.size())).first;
+        auto st = sparseTablePool.acquire();
+        st->init(v.data(), v.size());
+
+        it = cachedMinMax->emplace(key, move(st)).first;
     }
-    return it->second.query_min(from, to);
+    return it->second->query_min(from, to);
 }
 any Expr::visitMax_macd_histogram(ExprParser::Max_macd_histogramContext *ctx)
 {
@@ -1169,9 +1218,12 @@ any Expr::visitMax_macd_histogram(ExprParser::Max_macd_histogramContext *ctx)
         {
             v[i] = cachedMACD[i * 3 + 2];
         }
-        it = cachedMinMax->emplace(key, SparseTable(v.data(), v.size())).first;
+        auto st = sparseTablePool.acquire();
+        st->init(v.data(), v.size());
+
+        it = cachedMinMax->emplace(key, move(st)).first;
     }
-    return it->second.query_max(from, to);
+    return it->second->query_max(from, to);
 }
 
 any Expr::visitAvg_macd_histogram(ExprParser::Avg_macd_histogramContext *ctx)
@@ -1360,7 +1412,7 @@ void cacheParseTree(const string &key)
 
 any calculateExpr(const string &inputText, const string &broker, const string &symbol, const string &timeframe, int length,
                   const double *open, const double *high, const double *low, const double *close,
-                  const double *volume, long long *startTime, double fundingRate, unordered_map<string, vector<double>> *cachedIndicator, unordered_map<string, SparseTable> *cachedMinMax)
+                  const double *volume, long long *startTime, double fundingRate, unordered_map<string, vector<double>> *cachedIndicator, unordered_map<string, unique_ptr<SparseTable>> *cachedMinMax)
 {
     const string key = toLowerCase(inputText);
     Expr expr(broker, symbol, timeframe, length, open, high, low, close, volume, startTime, fundingRate, cachedIndicator, cachedMinMax);
@@ -1383,7 +1435,7 @@ any calculateExpr(const string &inputText, const string &broker, const string &s
 
 string calculateSubExpr(string &expr, const string &broker, const string &symbol, const string &timeframe, int length,
                         const double *open, const double *high, const double *low, const double *close,
-                        const double *volume, long long *startTime, double fundingRate, unordered_map<string, vector<double>> *cachedIndicator, unordered_map<string, SparseTable> *cachedMinMax)
+                        const double *volume, long long *startTime, double fundingRate, unordered_map<string, vector<double>> *cachedIndicator, unordered_map<string, unique_ptr<SparseTable>> *cachedMinMax)
 {
     stack<string> st;
     string s;
