@@ -67,9 +67,6 @@ void Worker::init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, st
         sparseTablePool.release(move(pair.second));
     }
 
-    LOGI("cachedIndicator size: {}, vectorDoublePool size: {}", cachedIndicator.size(), vectorDoublePool.cached_count());
-    LOGI("cachedMinMax size: {}, sparseTablePool size: {}", cachedMinMax.size(), sparseTablePool.cached_count());
-
     this->cachedIndicator.clear();
     this->cachedMinMax.clear();
 }
