@@ -202,12 +202,26 @@ $ sudo service nginx restart
 
 ## ⌛ Profiling
 ```
+$ cd ~/
+$ git clone https://github.com/brendangregg/FlameGraph.git
+cd FlameGraph
+
 # Realtime profiling
 $ perf top -p <PID>
 
 # Record profiling
-$ perf record -g -p <PID>
+$ sudo perf record -g -p <PID>
+
+# Report on terminal
 $ perf report
+
+# Report on browser
+$ sudo perf script > out.perf
+$ ./stackcollapse-perf.pl out.perf > out.folded
+$ ./flamegraph.pl out.folded > flamegraph.svg
+$ scp user@your-server-ip:~!~/FlameGraph/flamegraph.svg .
+# open flamegraph.svg with browser
+
 ```
 
 ## 📬 Contact
