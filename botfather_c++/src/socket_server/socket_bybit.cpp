@@ -46,7 +46,7 @@ void SocketBybit::on_message(connection_hdl, message_ptr msg)
         {
             lock_guard<mutex> lock(mMutex);
 
-            string key = symbol + "_" + tf;
+            long long key = hashString(symbol + "_" + tf);
             RateData &rateData = data[key];
             if (rateData.startTime.empty())
                 continue;
@@ -115,7 +115,7 @@ RateData SocketBybit::getOHLCV(const string &symbol, const string &timeframe, in
     return rateData;
 }
 
-unordered_map<string, Digit> SocketBybit::getDigit()
+unordered_map<long long, Digit> SocketBybit::getDigit()
 {
     return getBybitDigits();
 }

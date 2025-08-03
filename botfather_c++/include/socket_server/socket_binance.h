@@ -9,7 +9,7 @@ protected:
     void on_message(connection_hdl, message_ptr msg) override;
     RateData getOHLCV(const string &symbol, const string &timeframe, int limit, long long since = 0) override;
     vector<string> getSymbolList() override;
-    unordered_map<string, Digit> getDigit() override;
+    unordered_map<long long, Digit> getDigit() override;
 
 public:
     SocketBinance(const int _BATCH_SIZE);

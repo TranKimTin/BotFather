@@ -10,7 +10,7 @@ protected:
     RateData getOHLCV(const string &symbol, const string &timeframe, int limit, long long since = 0) override;
     vector<string> getSymbolList() override;
     void onSocketConnected(connection_hdl hdl) override;
-    unordered_map<string, Digit> getDigit() override;
+    unordered_map<long long, Digit> getDigit() override;
 
 public:
     SocketBybit(const int _BATCH_SIZE);

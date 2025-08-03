@@ -50,7 +50,9 @@ $ sudo apt-get install -y \
     libmysqlcppconn-dev \
     rapidjson-dev \
     libasio-dev \
-    libspdlog-dev
+    libspdlog-dev \
+    linux-tools-common \
+    linux-tools-generic
 
 # Set timezone (optional)
 $ sudo timedatectl set-timezone Asia/Ho_Chi_Minh
@@ -196,6 +198,16 @@ server {
 $ sudo ln -s /etc/nginx/sites-available/domain.config /etc/nginx/sites-enabled/domain.config
 $ sudo service nginx configtest
 $ sudo service nginx restart
+```
+
+## ⌛ Profiling
+```
+# Realtime profiling
+$ perf top -p <PID>
+
+# Record profiling
+$ perf record -g -p <PID>
+$ perf report
 ```
 
 ## 📬 Contact

@@ -37,11 +37,11 @@ vector<string> getBybitFutureSymbolList();
 vector<string> getBybitSymbolList();
 vector<string> getOkxSymbolList();
 
-unordered_map<string, Digit> getBinanceDigits();
-unordered_map<string, Digit> getBinanceFutureDigits();
-unordered_map<string, Digit> getBybitDigits();
-unordered_map<string, Digit> getBybitFutureDigits();
-unordered_map<string, Digit> getOkxDigits();
+unordered_map<long long, Digit> getBinanceDigits();
+unordered_map<long long, Digit> getBinanceFutureDigits();
+unordered_map<long long, Digit> getBybitDigits();
+unordered_map<long long, Digit> getBybitFutureDigits();
+unordered_map<long long, Digit> getOkxDigits();
 
 string base64Encode(const unsigned char *data, int len);
 vector<unsigned char> base64Decode(const string &input);

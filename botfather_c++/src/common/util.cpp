@@ -560,9 +560,9 @@ vector<string> getOkxSymbolList()
     return symbols;
 }
 
-unordered_map<string, Digit> getBinanceDigits()
+unordered_map<long long, Digit> getBinanceDigits()
 {
-    unordered_map<string, Digit> result;
+    unordered_map<long long, Digit> result;
 
     string url = "https://api.binance.com/api/v1/exchangeInfo";
     string response = Axios::get(url);
@@ -575,26 +575,27 @@ unordered_map<string, Digit> getBinanceDigits()
             continue;
 
         string symbol = s["symbol"].get<string>();
-        result[symbol].prices = s["baseAssetPrecision"].get<int>();
-        result[symbol].volume = s["quotePrecision"].get<int>();
+        long long key = hashString(symbol);
+        result[key].prices = s["baseAssetPrecision"].get<int>();
+        result[key].volume = s["quotePrecision"].get<int>();
         for (auto &f : s["filters"])
         {
             if (f["filterType"].get<string>() == "PRICE_FILTER")
             {
-                result[symbol].prices = (int)(-log10(stod(f["tickSize"].get<string>())));
+                result[key].prices = (int)(-log10(stod(f["tickSize"].get<string>())));
             }
             else if (f["filterType"].get<string>() == "LOT_SIZE")
             {
-                result[symbol].volume = (int)(-log10(stod(f["stepSize"].get<string>())));
+                result[key].volume = (int)(-log10(stod(f["stepSize"].get<string>())));
             }
         }
     }
     return result;
 }
 
-unordered_map<string, Digit> getBinanceFutureDigits()
+unordered_map<long long, Digit> getBinanceFutureDigits()
 {
-    unordered_map<string, Digit> result;
+    unordered_map<long long, Digit> result;
 
     string url = "https://fapi.binance.com/fapi/v1/exchangeInfo";
     string response = Axios::get(url);
@@ -607,27 +608,28 @@ unordered_map<string, Digit> getBinanceFutureDigits()
             continue;
 
         string symbol = s["symbol"].get<string>();
-        result[symbol].prices = s["pricePrecision"].get<int>();
-        result[symbol].volume = s["quantityPrecision"].get<int>();
+        long long key = hashString(symbol);
+        result[key].prices = s["pricePrecision"].get<int>();
+        result[key].volume = s["quantityPrecision"].get<int>();
 
         for (auto &f : s["filters"])
         {
             if (f["filterType"].get<string>() == "PRICE_FILTER")
             {
-                result[symbol].prices = (int)(-log10(stod(f["tickSize"].get<string>())));
+                result[key].prices = (int)(-log10(stod(f["tickSize"].get<string>())));
             }
             else if (f["filterType"].get<string>() == "LOT_SIZE")
             {
-                result[symbol].volume = (int)(-log10(stod(f["stepSize"].get<string>())));
+                result[key].volume = (int)(-log10(stod(f["stepSize"].get<string>())));
             }
         }
     }
     return result;
 }
 
-unordered_map<string, Digit> getBybitDigits()
+unordered_map<long long, Digit> getBybitDigits()
 {
-    unordered_map<string, Digit> result;
+    unordered_map<long long, Digit> result;
 
     string url = "https://api.bybit.com/v5/market/instruments-info?category=spot";
     string response = Axios::get(url);
@@ -639,15 +641,16 @@ unordered_map<string, Digit> getBybitDigits()
             continue;
 
         string symbol = s["symbol"].get<string>();
-        result[symbol].prices = (int)(-log10(stod(s["priceFilter"]["tickSize"].get<string>())));
-        result[symbol].volume = (int)(-log10(stod(s["lotSizeFilter"]["basePrecision"].get<string>())));
+        long long key = hashString(symbol);
+        result[key].prices = (int)(-log10(stod(s["priceFilter"]["tickSize"].get<string>())));
+        result[key].volume = (int)(-log10(stod(s["lotSizeFilter"]["basePrecision"].get<string>())));
     }
 
     return result;
 }
-unordered_map<string, Digit> getBybitFutureDigits()
+unordered_map<long long, Digit> getBybitFutureDigits()
 {
-    unordered_map<string, Digit> result;
+    unordered_map<long long, Digit> result;
 
     string url = "https://api.bybit.com/v5/market/instruments-info?category=linear&limit=1000";
     string response = Axios::get(url);
@@ -659,15 +662,16 @@ unordered_map<string, Digit> getBybitFutureDigits()
             continue;
 
         string symbol = s["symbol"].get<string>();
-        result[symbol].prices = (int)(-log10(stod(s["priceFilter"]["tickSize"].get<string>())));
-        result[symbol].volume = (int)(-log10(stod(s["lotSizeFilter"]["qtyStep"].get<string>())));
+        long long key = hashString(symbol);
+        result[key].prices = (int)(-log10(stod(s["priceFilter"]["tickSize"].get<string>())));
+        result[key].volume = (int)(-log10(stod(s["lotSizeFilter"]["qtyStep"].get<string>())));
     }
 
     return result;
 }
-unordered_map<string, Digit> getOkxDigits()
+unordered_map<long long, Digit> getOkxDigits()
 {
-    unordered_map<string, Digit> result;
+    unordered_map<long long, Digit> result;
     string url = "https://www.okx.com/api/v5/public/instruments?instType=SPOT";
     string response = Axios::get(url);
     json j = json::parse(response);
@@ -678,8 +682,9 @@ unordered_map<string, Digit> getOkxDigits()
             continue;
 
         string symbol = s["instId"].get<string>();
-        result[symbol].prices = (int)(-log10(stod(s["tickSz"].get<string>())));
-        result[symbol].volume = (int)(-log10(stod(s["lotSz"].get<string>())));
+        long long key = hashString(symbol);
+        result[key].prices = (int)(-log10(stod(s["tickSz"].get<string>())));
+        result[key].volume = (int)(-log10(stod(s["lotSz"].get<string>())));
     }
     return result;
 }

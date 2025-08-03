@@ -298,7 +298,7 @@ export async function getDigitsSpot() {
     const data: any = res.data;
     const digits: { [key: string]: { price: number, volume: number, minVolumeInUSD: number } } = {};
     for (const item of data.symbols) {
-        digits[item.symbol] = {
+        digits[hashString(item.symbol)] = {
             price: +item.baseAssetPrecision,
             volume: +item.quotePrecision,
             minVolumeInUSD: +item.filters.filter((i: any) => i.filterType === 'NOTIONAL')[0].minNotional
@@ -314,7 +314,7 @@ export async function getDigitsFuture() {
     const data: any = res.data;
     const digits: { [key: string]: { price: number, volume: number, minVolumeInUSD: number } } = {};
     for (const item of data.symbols) {
-        digits[item.symbol] = {
+        digits[hashString(item.symbol)] = {
             price: +item.pricePrecision,
             volume: +item.quantityPrecision,
             minVolumeInUSD: +item.filters.filter((i: any) => i.filterType === 'MIN_NOTIONAL')[0].notional
@@ -1173,7 +1173,7 @@ export function base64Decode(input: string): Uint8Array {
 
 export function encryptAES(plaintext: string, key: string, iv: string) {
     const keyBuf = Buffer.from(key, 'utf8');
-    const ivBuf = Buffer.from(iv, 'hex');  
+    const ivBuf = Buffer.from(iv, 'hex');
 
     const cipher = crypto.createCipheriv('aes-256-cbc', keyBuf, ivBuf);
     let encrypted = cipher.update(plaintext, 'utf8', 'base64');

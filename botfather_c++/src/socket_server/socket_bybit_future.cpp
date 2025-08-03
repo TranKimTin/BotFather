@@ -37,7 +37,7 @@ void SocketBybitFuture::on_message(connection_hdl, message_ptr msg)
         {
             string symbol = jData["symbol"].get<string>();
             lock_guard<mutex> lock(mMutex);
-            fundingRates[symbol] = stod(jData["fundingRate"].get<string>()) * 100.0;
+            fundingRates[hashString(symbol)] = stod(jData["fundingRate"].get<string>()) * 100.0;
         }
     }
     else
@@ -61,7 +61,7 @@ void SocketBybitFuture::on_message(connection_hdl, message_ptr msg)
             {
                 lock_guard<mutex> lock(mMutex);
 
-                string key = symbol + "_" + tf;
+                long long key = hashString(symbol + "_" + tf);
                 RateData &rateData = data[key];
                 if (rateData.startTime.empty())
                     continue;
@@ -132,7 +132,7 @@ RateData SocketBybitFuture::getOHLCV(const string &symbol, const string &timefra
     return rateData;
 }
 
-unordered_map<string, Digit> SocketBybitFuture::getDigit()
+unordered_map<long long, Digit> SocketBybitFuture::getDigit()
 {
     return getBybitFutureDigits();
 }

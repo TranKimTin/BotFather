@@ -35,12 +35,12 @@ void SocketData::init()
         {
             for (string &tf : timeframes)
             {
-                string key = symbol + "_" + tf;
+                long long key = hashString(symbol + "_" + tf);
                 data[key] = RateData();
                 data[key].symbol = symbol;
                 data[key].interval = tf;
             }
-            fundingRates[symbol] = 0;
+            fundingRates[hashString(symbol)] = 0;
         }
     }
 
@@ -62,7 +62,7 @@ void SocketData::onCloseCandle(const string &symbol, string &timeframe, RateData
     vector<double> volume(rateData.volume.begin(), rateData.volume.end());
     vector<long long> startTime(rateData.startTime.begin(), rateData.startTime.end());
 
-    if (digits.find(symbol) == digits.end())
+    if (digits.find(hashString(symbol)) == digits.end())
     {
         LOGE("No digit found for symbol {}:{}", broker, symbol);
         throw runtime_error("No digit found for symbol " + symbol);
@@ -78,15 +78,16 @@ void SocketData::onCloseCandle(const string &symbol, string &timeframe, RateData
               close = move(close),
               volume = move(volume),
               startTime = move(startTime),
-              digit = digits[symbol],
-              funding = fundingRates[symbol]]()
+              digit = digits[hashString(symbol)],
+              funding = fundingRates[hashString(symbol)]]()
              { 
                 worker.init(botList, broker, symbol, timeframe, move(open), move(high), move(low), move(close), move(volume), move(startTime), digit, funding);
                 worker.run(); });
 
     if (rand() % 10 == 0)
     {
-        this->updateCache(this->data[symbol + "_" + timeframe]);
+        long long key = hashString(symbol + "_" + timeframe);
+        this->updateCache(this->data[key]);
     }
 }
 
@@ -335,7 +336,7 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                                     }
 
                                     lock_guard<mutex> lock(mMutex);
-                                    RateData &smaller = data[symbol + "_" + timeframes[m]];
+                                    RateData &smaller = data[hashString(symbol + "_" + timeframes[m])];
                                     int size = smaller.startTime.size();
                                     if(size == 0 || smaller.startTime.back() > rateData.startTime[0]) {
                                         rateData = getOHLCV(symbol, tf, MAX_CANDLE);
@@ -370,7 +371,7 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                         }
 
                         
-                        string key = symbol + "_" + tf;
+                        long long key = hashString(symbol + "_" + tf);
 
                         {
                             lock_guard<mutex> lock(mMutex);
