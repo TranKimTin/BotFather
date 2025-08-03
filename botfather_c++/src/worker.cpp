@@ -72,7 +72,11 @@ void Worker::init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, st
 }
 void Worker::run()
 {
-    Timer timer(StringFormat("onCloseCandle {} {} {}", broker, symbol, timeframe));
+    Timer *timer = NULL;
+    if (timeframe != "1m")
+    {
+        timer = new Timer(StringFormat("onCloseCandle {} {} {}", broker, symbol, timeframe));
+    }
     for (const shared_ptr<Bot> &bot : *botList)
     {
         try
@@ -93,6 +97,10 @@ void Worker::run()
             LOGE("Error in bot {}: {}", bot->botName, e.what());
             continue;
         }
+    }
+    if (timer)
+    {
+        delete timer;
     }
 }
 
