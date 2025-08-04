@@ -219,7 +219,7 @@ $ perf report
 $ sudo perf script > out.perf
 $ ./stackcollapse-perf.pl out.perf > out.folded
 $ ./flamegraph.pl out.folded > flamegraph.svg
-$ scp user@your-server-ip:~!~/FlameGraph/flamegraph.svg .
+$ scp user@your-server-ip:~/FlameGraph/flamegraph.svg .
 # open flamegraph.svg with browser
 
 ```
