@@ -53,7 +53,8 @@ export enum ORDER_STATUS {
 export interface PropData {
     timestamp: string,
     balance: number,
-    balanceNoFee: number
+    balanceNoFee: number,
+    balanceReal: number
 }
 
 export default defineComponent({
@@ -115,6 +116,8 @@ export default defineComponent({
                     let feeLoss = 0;
                     let totalFee = 0;
                     let lastTimeUpdated: string = '';
+                    let idxTradeReal = 0;
+                    let balanceReal = 0;
 
                     let sortedData = [...orders];
                     sortedData.sort((a, b) => {
@@ -152,13 +155,21 @@ export default defineComponent({
                             gain += order.profit;
                             feeGain += fee;
                             cntGain++;
-                            balanceData.push({ timestamp: order.timeTP, balance: gain + loss - totalFee, balanceNoFee: gain + loss });
+                            while (idxTradeReal < tradeReal.length && tradeReal[idxTradeReal].time <= new Date(order.timeTP).getTime()) {
+                                balanceReal += parseFloat(tradeReal[idxTradeReal].income);
+                                idxTradeReal++;
+                            }
+                            balanceData.push({ timestamp: order.timeTP, balance: gain + loss - totalFee, balanceNoFee: gain + loss, balanceReal });
                         }
                         else if (order.timeSL) {
                             loss += order.profit;
                             feeLoss += fee;
                             cntLoss++;
-                            balanceData.push({ timestamp: order.timeSL, balance: gain + loss - totalFee, balanceNoFee: gain + loss });
+                            while (idxTradeReal < tradeReal.length && tradeReal[idxTradeReal].time <= new Date(order.timeTP).getTime()) {
+                                balanceReal += parseFloat(tradeReal[idxTradeReal].income);
+                                idxTradeReal++;
+                            }
+                            balanceData.push({ timestamp: order.timeSL, balance: gain + loss - totalFee, balanceNoFee: gain + loss, balanceReal });
                         }
                         else if (order.timeEntry && order.profit) {
                             cntOpening++;

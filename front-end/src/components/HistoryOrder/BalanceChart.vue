@@ -67,6 +67,17 @@ export default {
                         pointHoverRadius: 5,
                         pointBackgroundColor: '#ffffff',
                         pointBorderColor: '#6699FF'
+                    },
+                                        {
+                        label: 'Trade real',
+                        backgroundColor: '#34f013ff',
+                        borderColor: '#34f013ff',
+                        data: data.map(item => item.balanceReal),
+                        fill: false,
+                        pointRadius: 1,
+                        pointHoverRadius: 5,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: '#34f013ff'
                     }
                 ]
             }
