@@ -39,7 +39,7 @@
         </div>
     </div>
     <div>
-        {{r_tradeRealTimestamp.value}}
+        {{r_tradeRealTimestamp}}
     </div>
     <div class="grid grid-cols-2 gap-2 p-2">
         <div>
