@@ -96,6 +96,10 @@
                                 </th>
                                 <th
                                     class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
+                                    Real / Demo
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
                                     Số lệnh (đã đóng)
                                 </th>
                                 <th
@@ -135,7 +139,11 @@
                                         {{ u.botName }}
                                     </div>
                                 </td>
-
+                                <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
+                                    <div class="text-sm leading-5 text-gray-900">
+                                        {{ u.enableRealOrder == 1 ? "Real" : "Demo" }}
+                                    </div>
+                                </td>
                                 <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
                                     <div class="text-sm leading-5 text-gray-900">
                                         {{ u.tradeCountClosed.toLocaleString() }}
