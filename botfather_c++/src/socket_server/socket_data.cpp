@@ -4,8 +4,9 @@
 #include "vector_pool.h"
 #include "worker.h"
 #include "redis.h"
+#include <tbb/task_group.h>
 
-static ThreadPool task(thread::hardware_concurrency());
+static tbb::task_group task;
 thread_local Worker worker;
 thread_local VectorDoublePool vectorDoublePool;
 thread_local SparseTablePool sparseTablePool;
@@ -55,12 +56,22 @@ void SocketData::onCloseCandle(const string &symbol, string &timeframe, RateData
     if (!botList)
         return;
 
-    vector<double> open(rateData.open.begin(), rateData.open.end());
-    vector<double> high(rateData.high.begin(), rateData.high.end());
-    vector<double> low(rateData.low.begin(), rateData.low.end());
-    vector<double> close(rateData.close.begin(), rateData.close.end());
-    vector<double> volume(rateData.volume.begin(), rateData.volume.end());
-    vector<long long> startTime(rateData.startTime.begin(), rateData.startTime.end());
+    vector<double> open(length);
+    vector<double> high(length);
+    vector<double> low(length);
+    vector<double> close(length);
+    vector<double> volume(length);
+    vector<long long> startTime(length);
+
+    for (int i = 0; i < length; i++)
+    {
+        open[i] = rateData.open[i];
+        high[i] = rateData.high[i];
+        low[i] = rateData.low[i];
+        close[i] = rateData.close[i];
+        volume[i] = rateData.volume[i];
+        startTime[i] = rateData.startTime[i];
+    }
 
     if (digits.find(hashString(symbol)) == digits.end())
     {
@@ -68,19 +79,19 @@ void SocketData::onCloseCandle(const string &symbol, string &timeframe, RateData
         throw runtime_error("No digit found for symbol " + symbol);
     }
 
-    task.enqueue([botList = botList,
-                  broker = broker,
-                  symbol = symbol,
-                  timeframe = timeframe,
-                  open = move(open),
-                  high = move(high),
-                  low = move(low),
-                  close = move(close),
-                  volume = move(volume),
-                  startTime = move(startTime),
-                  digit = digits[hashString(symbol)],
-                  funding = fundingRates[hashString(symbol)]]()
-                 { 
+    task.run([botList = botList,
+              broker = broker,
+              symbol = symbol,
+              timeframe = timeframe,
+              open = move(open),
+              high = move(high),
+              low = move(low),
+              close = move(close),
+              volume = move(volume),
+              startTime = move(startTime),
+              digit = digits[hashString(symbol)],
+              funding = fundingRates[hashString(symbol)]]()
+             { 
                 worker.init(botList, broker, symbol, timeframe, move(open), move(high), move(low), move(close), move(volume), move(startTime), digit, funding);
                 worker.run(); });
 
