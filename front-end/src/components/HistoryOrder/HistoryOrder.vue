@@ -38,7 +38,7 @@
             Drawdown: <span v-if="r_maxDD > 0">-</span> {{ r_maxDD }} $
         </div>
     </div>
-    <div>
+    <div class="grid grid-cols-1 gap-2 p-2">
         {{r_tradeRealTimestamp}}
     </div>
     <div class="grid grid-cols-2 gap-2 p-2">

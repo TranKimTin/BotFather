@@ -200,7 +200,7 @@ export default defineComponent({
                     r_isLoading.value = false;
                     r_balanceData.value = balanceData;
                     if (tradeReal.length > 0) {
-                        r_tradeRealTimestamp.value = 'Cập nhật trade real từ ' + new Date(tradeReal[tradeReal.length - 1].time).toLocaleString();
+                        r_tradeRealTimestamp.value = 'Cập nhật trade real từ ' + new Date(tradeReal[0].time).toLocaleString();
                     }
                     if (firstLoad) {
                         firstLoad = false;
