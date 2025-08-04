@@ -31,6 +31,16 @@ interface Order {
     lastTimeUpdated: string
 };
 
+interface Income {
+    symbol: string,
+    incomeType: string,
+    income: string,
+    info: string,
+    time: number,
+    tranId: string,
+    tradeId: string,
+}
+
 export enum ORDER_STATUS {
     OPENED = 'Mở lệnh',
     MATCH_STOP = 'Khớp stop',
@@ -87,7 +97,9 @@ export default defineComponent({
                     filterBroker: r_brokerSelected.value.join(','),
                     filterTimeframe: r_timeframesSelected.value.join(',')
                 };
-                axios.get(`/getHistoryOrder`, params).then(async (result: Array<Order>) => {
+                axios.get(`/getHistoryOrder`, params).then(async (result: { orders: Array<Order>, tradeReal: Array<Income> }) => {
+                    const { orders, tradeReal } = result;
+
                     let gain = 0;
                     let loss = 0;
                     let unrealizedGain = 0;
@@ -104,7 +116,7 @@ export default defineComponent({
                     let totalFee = 0;
                     let lastTimeUpdated: string = '';
 
-                    let sortedData = [...result];
+                    let sortedData = [...orders];
                     sortedData.sort((a, b) => {
                         let timeA = new Date(a.createdTime).getTime();
                         let timeB = new Date(a.createdTime).getTime();
@@ -140,7 +152,7 @@ export default defineComponent({
                             gain += order.profit;
                             feeGain += fee;
                             cntGain++;
-                            balanceData.push({ timestamp: order.timeTP, balance: gain + loss - totalFee, balanceNoFee: gain + loss});
+                            balanceData.push({ timestamp: order.timeTP, balance: gain + loss - totalFee, balanceNoFee: gain + loss });
                         }
                         else if (order.timeSL) {
                             loss += order.profit;
@@ -164,7 +176,7 @@ export default defineComponent({
                         if (order.profit) order.profit -= fee;
                     }
 
-                    r_orderList.value = result;
+                    r_orderList.value = orders;
                     r_gain.value = parseFloat((gain - feeGain).toFixed(2));
                     r_loss.value = parseFloat((loss - feeLoss).toFixed(2));
                     r_unrealizedGain.value = parseFloat(unrealizedGain.toFixed(2));

@@ -159,7 +159,39 @@ export async function getHistoryOrder(botName: string, filterBroker: Array<strin
         order.timeSL = order.timeSL ? moment(order.timeSL).format('YYYY-MM-DD HH:mm') : '';
         order.lastTimeUpdated = order.lastTimeUpdated ? moment(order.lastTimeUpdated).format('YYYY-MM-DD HH:mm') : '';
     }
-    return orders;
+
+    let tradeReal = [];
+
+    const bot = await mysql.query(`SELECT apiKey, secretKey, iv FROM Bot WHERE botName = ?`, [botName]);
+    if (bot.length > 0) {
+        let { apiKey, secretKey, iv } = bot[0];
+        if (apiKey && secretKey && iv) {
+            const key = process.env.ENCRYP_KEY || '';
+            apiKey = util.decryptAES(apiKey, key, iv);
+            secretKey = util.decryptAES(secretKey, key, iv);
+            let client = Binance({
+                apiKey: apiKey,
+                apiSecret: secretKey
+            });
+
+            const history = await client.futuresIncome({
+                limit: 1000
+            });
+            for (let item of history) {
+                if (item.asset === 'USDT') {
+                    if (item.incomeType === 'REALIZED_PNL' || item.incomeType === 'FUNDING_FEE' || item.incomeType === 'COMMISSION') {
+                        tradeReal.push(item);
+                    }
+                }
+            }
+        }
+    }
+    tradeReal.sort((a, b) => a.time - b.time);
+
+    return {
+        orders,
+        tradeReal
+    };
 }
 
 export async function calculator(broker: string, symbol: string, timeframe: string, expr: string) {
