@@ -207,7 +207,7 @@ $ git clone https://github.com/brendangregg/FlameGraph.git
 cd FlameGraph
 
 # Realtime profiling
-$ perf top -p <PID>
+$ perf top -p <PID> -- sleep 30
 
 # Record profiling
 $ sudo perf record -g -p <PID>
