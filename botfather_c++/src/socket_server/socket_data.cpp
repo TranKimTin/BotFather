@@ -49,18 +49,29 @@ void SocketData::init()
 
 void SocketData::onCloseCandle(const string &symbol, string &timeframe, RateData &rateData)
 {
-    if (rateData.startTime.size() < 15)
+    const int length = rateData.startTime.size();
+    if (length < 15)
         return;
 
     if (!botList)
         return;
 
-    vector<double> open(rateData.open.begin(), rateData.open.end());
-    vector<double> high(rateData.high.begin(), rateData.high.end());
-    vector<double> low(rateData.low.begin(), rateData.low.end());
-    vector<double> close(rateData.close.begin(), rateData.close.end());
-    vector<double> volume(rateData.volume.begin(), rateData.volume.end());
-    vector<long long> startTime(rateData.startTime.begin(), rateData.startTime.end());
+    vector<double> open(length);
+    vector<double> high(length);
+    vector<double> low(length);
+    vector<double> close(length);
+    vector<double> volume(length);
+    vector<long long> startTime(length);
+
+    for (int i = 0; i < length; i++)
+    {
+        open[i] = rateData.open[i];
+        high[i] = rateData.high[i];
+        low[i] = rateData.low[i];
+        close[i] = rateData.close[i];
+        volume[i] = rateData.volume[i];
+        startTime[i] = rateData.startTime[i];
+    }
 
     if (digits.find(hashString(symbol)) == digits.end())
     {
