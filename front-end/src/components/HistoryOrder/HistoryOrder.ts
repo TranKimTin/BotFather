@@ -8,6 +8,7 @@ import BalanceChart from "./BalanceChart.vue";
 import { useConfirm } from "primevue/useconfirm";
 import * as Toast from '../../toast/toast';
 import Select from 'primevue/select';
+import moment from 'moment';
 
 interface Order {
     id: number,
@@ -200,7 +201,7 @@ export default defineComponent({
                     r_isLoading.value = false;
                     r_balanceData.value = balanceData;
                     if (tradeReal.length > 0) {
-                        r_tradeRealTimestamp.value = 'Cập nhật trade real từ ' + new Date(tradeReal[0].time).toLocaleString();
+                        r_tradeRealTimestamp.value = 'Cập nhật trade real từ ' + moment(tradeReal[0].time).format('DD/MM/YYYY HH:mm:ss') + ' đến ' + moment(tradeReal[tradeReal.length - 1].time).format('DD/MM/YYYY HH:mm:ss');
                     }
                     if (firstLoad) {
                         firstLoad = false;
