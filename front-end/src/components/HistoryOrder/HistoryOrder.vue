@@ -38,6 +38,9 @@
             Drawdown: <span v-if="r_maxDD > 0">-</span> {{ r_maxDD }} $
         </div>
     </div>
+    <div>
+        {{r_tradeRealTimestamp.value}}
+    </div>
     <div class="grid grid-cols-2 gap-2 p-2">
         <div>
             <label for="broker">Lọc sàn</label>

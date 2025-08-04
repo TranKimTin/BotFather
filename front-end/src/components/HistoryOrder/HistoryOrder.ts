@@ -79,6 +79,7 @@ export default defineComponent({
         const brokers: Array<string> = ['binance', 'bybit', 'okx', 'binance_future', 'bybit_future'];
         const r_brokerSelected = ref<Array<string>>([...brokers]);
         const r_balanceData = ref<Array<PropData>>([]);
+        const r_tradeRealTimestamp = ref<string>('');
 
         const r_botNameList = ref<Array<string>>([]);
         const r_botName = ref<string>(botName);
@@ -198,6 +199,9 @@ export default defineComponent({
                     r_cntOpening.value = cntOpening;
                     r_isLoading.value = false;
                     r_balanceData.value = balanceData;
+                    if (tradeReal.length > 0) {
+                        r_tradeRealTimestamp.value = 'Cập nhật trade real từ ' + new Date(tradeReal[tradeReal.length - 1].time).toLocaleString();
+                    }
                     if (firstLoad) {
                         firstLoad = false;
                         const timeframeSelected = [...new Set(sortedData.map(order => order.timeframe))];
@@ -282,6 +286,7 @@ export default defineComponent({
             r_balanceData,
             r_botNameList,
             r_botName,
+            r_tradeRealTimestamp,
             timeframes,
             brokers,
             clearHistory
