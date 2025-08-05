@@ -329,14 +329,20 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                         RateData rateData;
                         if(tf == "1m")
                         {
-                            rateData = getOHLCV(symbol, tf, MAX_CANDLE);
-                            cnt++;
+                            rateData = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE);
+                            if(rateData.startTime.empty()) {
+                                rateData = getOHLCV(symbol, tf, MAX_CANDLE);
+                                cnt++;
+                            }
                         }
                         else {
                             rateData = getOHLCVFromCache(symbol, tf);
                             if (rateData.startTime.empty()) {
-                                rateData = getOHLCV(symbol, tf, MAX_CANDLE);
-                                cnt++;
+                                rateData = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE);
+                                if(rateData.startTime.empty()) {
+                                    rateData = getOHLCV(symbol, tf, MAX_CANDLE);
+                                    cnt++;
+                                }
                                 string key = broker + "_" + symbol + "_" + tf;
                                 Redis::getInstance().clearList(key);
                             }
@@ -349,16 +355,29 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                                     lock_guard<mutex> lock(mMutex);
                                     RateData &smaller = data[hashString(symbol + "_" + timeframes[m])];
                                     int size = smaller.startTime.size();
-                                    if(size == 0 || smaller.startTime.back() > rateData.startTime[0]) {
-                                        rateData = getOHLCV(symbol, tf, MAX_CANDLE);
-                                        cnt++;
+                                    if (size == 0 || smaller.startTime.back() > rateData.startTime[0]) {
+                                        rateData = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE);
+                                        if(rateData.startTime.empty()) {
+                                            rateData = getOHLCV(symbol, tf, MAX_CANDLE);
+                                            cnt++;
+                                        }
                                         break;
                                     }
 
                                     int l = 0;
-                                    while(l < size && smaller.startTime[l] > rateData.startTime[0]) {
+                                    while(l < size && getStartTime(tf, smaller.startTime[l]) >= rateData.startTime[0]) {
                                         l++;
                                     }
+                                    l--;
+                                    if(l >= 0 && getStartTime(tf, smaller.startTime[l]) != rateData.startTime[0]) {
+                                        rateData = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE);
+                                        if(rateData.startTime.empty()) {
+                                            rateData = getOHLCV(symbol, tf, MAX_CANDLE);
+                                            cnt++;
+                                        }  
+                                        break;
+                                    }
+
                                     while(l >= 0){
                                         long long startTime = smaller.startTime[l];
                                         double open = smaller.open[l];
@@ -372,9 +391,12 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                                 }
                                 adjustData(rateData);
                                 if (!isValidData(rateData)) {
-                                    LOGE("Invalid data for {}:{} {}", broker, symbol, tf);
-                                    rateData = getOHLCV(symbol, tf, MAX_CANDLE);
-                                    cnt++;
+                                    rateData = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE);
+                                    if(rateData.startTime.empty() || isValidData(rateData)) {
+                                        LOGE("Invalid data for {}:{} {}", broker, symbol, tf);
+                                        rateData = getOHLCV(symbol, tf, MAX_CANDLE);
+                                        cnt++;
+                                    }
                                     string key = broker + "_" + symbol + "_" + tf;
                                     Redis::getInstance().clearList(key);
                                 }
@@ -408,7 +430,7 @@ void SocketData::onSocketConnected(connection_hdl hdl)
             
             LOGI("{}: Init {} / {}. Get from cache {} times ({:.1f}%)", broker, end, symbolList.size(), cnt, end * 100.0 / symbolList.size());
 
-            SLEEP_FOR(cnt * 5000 / 100 + 100);
+            SLEEP_FOR(cnt * 5000 / 100 + 10);
         } });
 
         t.detach();

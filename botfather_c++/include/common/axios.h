@@ -1,7 +1,8 @@
 #pragma once
 #include "common_type.h"
 
-class Axios {
+class Axios
+{
 public:
     static std::string get(const std::string &url, const vector<string> &headers = {});
     static std::string post(const std::string &url,
@@ -14,4 +15,6 @@ public:
                            const std::vector<std::string> &headers = {});
     static std::string del(const std::string &url,
                            const std::vector<std::string> &headers = {});
+
+    static string getHTTP(const string &url, const vector<string> &headers = {});
 };

@@ -259,6 +259,39 @@ string doubleToString(double value, int precision)
     return result;
 }
 
+RateData getOHLCVFromRateServer(const string &broker, const string &symbol, const string &timeframe, int limit)
+{
+    auto env = readEnvFile();
+    string serverURL = env["RATE_SERVER"];
+    string url = StringFormat("http://{}:8081/api/getOHLCV?broker={}&symbol={}&timeframe={}&limit={}", serverURL, broker, symbol, timeframe, limit);
+    string response = Axios::getHTTP(url);
+    if (response == "")
+        return {};
+
+    json j = json::parse(response);
+    RateData rateData;
+    rateData.symbol = symbol;
+    rateData.interval = timeframe;
+    for (const auto &item : j)
+    {
+        vector<string> rate = split(item.get<string>(), '_');
+
+        if (rate.size() != 6)
+        {
+            LOGE("Invalid rate data format: {}", item.get<string>());
+            return {};
+        }
+
+        rateData.startTime.push_front(stoll(rate[0]));
+        rateData.open.push_front(stod(rate[1]));
+        rateData.high.push_front(stod(rate[2]));
+        rateData.low.push_front(stod(rate[3]));
+        rateData.close.push_front(stod(rate[4]));
+        rateData.volume.push_front(stod(rate[5]));
+    }
+    return rateData;
+}
+
 RateData getBinanceOHLCV(const string &symbol, const string &timeframe, int limit, long long since)
 {
     string url = "https://api.binance.com/api/v3/klines?symbol=" + symbol + "&interval=" + timeframe + "&limit=" + to_string(limit);
