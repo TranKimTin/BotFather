@@ -8,7 +8,7 @@ export class BinanceFutureSocket extends SocketData {
     public static readonly broker = 'binance_future';
 
     constructor(onCloseCandle: (broker: string, symbol: string, timeframe: string, data: Array<RateData>) => void, symbolList: Array<string>) {
-        const timeframes = [/*'1m', '3m', */'5m', '15m', '30m', '1h', /*'2h',*/ '4h', /*'6h', '8h', '12h',*/ '1d'];
+        const timeframes = ["1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "8h", "12h", "1d"];
         super(timeframes, BinanceFutureSocket.broker, 100, onCloseCandle, symbolList);
     }
 
