@@ -204,7 +204,7 @@ export default defineComponent({
                     if (tradeReal.length > 0) {
                         r_tradeRealTimestamp.value = moment(tradeReal[0].time).format('DD/MM/YYYY HH:mm:ss');
                     }
-                    r_accountBalance.value = accountBalance ? `Balance: ${accountBalance.balance} ${accountBalance.asset} - Margin còn lại: ${accountBalance.balance} ${accountBalance.asset}` : 'Không có dữ liệu tài khoản';
+                    r_accountBalance.value = accountBalance ? `Balance: ${accountBalance.balance} ${accountBalance.asset} - Margin còn lại: ${accountBalance.availableBalance} ${accountBalance.asset}` : 'Không có dữ liệu tài khoản';
                     if (firstLoad) {
                         firstLoad = false;
                         const timeframeSelected = [...new Set(sortedData.map(order => order.timeframe))];
