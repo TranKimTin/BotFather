@@ -234,11 +234,11 @@ void runApp()
 
 #ifndef TEST
 
-    exchanges.push_back(new SocketBinance(5));
-    exchanges.push_back(new SocketBinanceFuture(5));
-    exchanges.push_back(new SocketBybit(5));
-    exchanges.push_back(new SocketBybitFuture(5));
-    exchanges.push_back(new SocketOkx(5));
+    exchanges.push_back(new SocketBinance(50));
+    exchanges.push_back(new SocketBinanceFuture(50));
+    exchanges.push_back(new SocketBybit(50));
+    exchanges.push_back(new SocketBybitFuture(50));
+    exchanges.push_back(new SocketOkx(30));
 
     for (SocketData *exchange : exchanges)
     {
