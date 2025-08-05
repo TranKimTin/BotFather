@@ -38,8 +38,14 @@
             Drawdown: <span v-if="r_maxDD > 0">-</span> {{ r_maxDD }} $
         </div>
     </div>
-    <div class="grid grid-cols-1 gap-2 p-2">
-        {{r_tradeRealTimestamp}}
+    <div class="grid grid-cols-2 gap-2 p-2">
+        <div class="flex-auto">
+            Cập nhật trade real từ {{ r_tradeRealTimestamp }}
+        </div>
+        <div class="flex-auto">
+            {{ r_accountBalance }}
+        </div>
+        
     </div>
     <div class="grid grid-cols-2 gap-2 p-2">
         <div>

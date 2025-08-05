@@ -161,6 +161,7 @@ export async function getHistoryOrder(botName: string, filterBroker: Array<strin
     }
 
     let tradeReal = [];
+    let accountBalance;
 
     const bot = await mysql.query(`SELECT apiKey, secretKey, iv FROM Bot WHERE botName = ?`, [botName]);
     if (bot.length > 0) {
@@ -184,13 +185,16 @@ export async function getHistoryOrder(botName: string, filterBroker: Array<strin
                     }
                 }
             }
+
+            accountBalance = (await client.futuresAccountBalance()).find(item => item.asset === 'USDT');;
         }
     }
     tradeReal.sort((a, b) => a.time - b.time);
 
     return {
         orders,
-        tradeReal
+        tradeReal,
+        accountBalance
     };
 }
 

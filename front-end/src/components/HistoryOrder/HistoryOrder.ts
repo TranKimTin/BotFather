@@ -81,6 +81,7 @@ export default defineComponent({
         const r_brokerSelected = ref<Array<string>>([...brokers]);
         const r_balanceData = ref<Array<PropData>>([]);
         const r_tradeRealTimestamp = ref<string>('');
+        const r_accountBalance = ref<string>('');
 
         const r_botNameList = ref<Array<string>>([]);
         const r_botName = ref<string>(botName);
@@ -100,8 +101,8 @@ export default defineComponent({
                     filterBroker: r_brokerSelected.value.join(','),
                     filterTimeframe: r_timeframesSelected.value.join(',')
                 };
-                axios.get(`/getHistoryOrder`, params).then(async (result: { orders: Array<Order>, tradeReal: Array<Income> }) => {
-                    const { orders, tradeReal } = result;
+                axios.get(`/getHistoryOrder`, params).then(async (result: { orders: Array<Order>, tradeReal: Array<Income>, accountBalance: any }) => {
+                    const { orders, tradeReal, accountBalance } = result;
 
                     let gain = 0;
                     let loss = 0;
@@ -201,8 +202,9 @@ export default defineComponent({
                     r_isLoading.value = false;
                     r_balanceData.value = balanceData;
                     if (tradeReal.length > 0) {
-                        r_tradeRealTimestamp.value = 'Cập nhật trade real từ ' + moment(tradeReal[0].time).format('DD/MM/YYYY HH:mm:ss') + ' đến ' + moment(tradeReal[tradeReal.length - 1].time).format('DD/MM/YYYY HH:mm:ss');
+                        r_tradeRealTimestamp.value = moment(tradeReal[0].time).format('DD/MM/YYYY HH:mm:ss');
                     }
+                    r_accountBalance.value = accountBalance ? `Balance: ${accountBalance.balance} ${accountBalance.asset} - Margin còn lại: ${accountBalance.balance} ${accountBalance.asset}` : 'Không có dữ liệu tài khoản';
                     if (firstLoad) {
                         firstLoad = false;
                         const timeframeSelected = [...new Set(sortedData.map(order => order.timeframe))];
@@ -288,6 +290,7 @@ export default defineComponent({
             r_botNameList,
             r_botName,
             r_tradeRealTimestamp,
+            r_accountBalance,
             timeframes,
             brokers,
             clearHistory
