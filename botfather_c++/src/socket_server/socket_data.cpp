@@ -95,7 +95,7 @@ void SocketData::onCloseCandle(const string &symbol, string &timeframe, RateData
                 worker.init(botList, broker, symbol, timeframe, move(open), move(high), move(low), move(close), move(volume), move(startTime), digit, funding);
                 worker.run(); });
 
-    if (rand() % 10 == 0)
+    if (timeframe == "1m" || rand() % 10 == 0)
     {
         long long key = hashString(symbol + "_" + timeframe);
         this->updateCache(this->data[key]);
