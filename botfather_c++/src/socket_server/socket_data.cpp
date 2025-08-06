@@ -217,7 +217,7 @@ void SocketData::updateCache(const RateData &rateData)
                     i++;
                 }
                 i--;
-                if(i+1 == size || rateData.startTime[i+1] != lastTime) {
+                if (i+1 == size || rateData.startTime[i+1] != lastTime) {
                     LOGE("Cache data is not continuous for {}:{} {}", broker, symbol, timeframe);
                     Redis::getInstance().clearList(key);
                     return;
