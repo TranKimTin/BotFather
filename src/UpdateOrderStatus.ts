@@ -61,11 +61,11 @@ async function getOHLCV(broker: string, symbol: string, timeframe: string, limit
         };
     });
 
-    if (isValidRates(data)) {
-        while (since && data.length > 0 && data.at(-1)!.startTime < since) {
-            data.pop();
-        }
-        if (data.length > 0) return data;
+    while (since && data.length > 0 && data.at(-1)!.startTime < since) {
+        data.pop();
+    }
+    if (isValidRates(data) && data.length > 0) {
+        return data;
     }
 
     console.log(`Data invalid: ${data.length}. Get OHLCV from util: ${broker} ${symbol} ${timeframe} ${limit} ${since}`);
