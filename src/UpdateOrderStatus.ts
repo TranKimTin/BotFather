@@ -69,7 +69,7 @@ async function getOHLCV(broker: string, symbol: string, timeframe: string, limit
         return data;
     }
 
-    console.log(`Data invalid: ${data.length}. Get OHLCV from util: ${broker} ${symbol} ${timeframe} ${limit} ${since}`);
+    console.log(`Data invalid: ${data.length}. Get OHLCV from util: ${broker} ${symbol} ${timeframe} ${limit} ${since} (since=${moment(since).format('YYYY-MM-DD HH:mm')})`);
     return util.getOHLCV(broker, symbol, timeframe, limit, since)
 }
 
