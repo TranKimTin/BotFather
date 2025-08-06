@@ -158,7 +158,7 @@ export default defineComponent({
                             gain += order.profit;
                             feeGain += fee;
                             cntGain++;
-                            while (idxTradeReal < tradeReal.length && tradeReal[idxTradeReal].time <= new Date(order.timeTP).getTime()) {
+                            while (idxTradeReal < tradeReal.length && tradeReal[idxTradeReal].time <= new Date(order.timeTP).getTime() + 60000) {
                                 balanceReal += parseFloat(tradeReal[idxTradeReal].income);
                                 idxTradeReal++;
                             }
@@ -168,7 +168,7 @@ export default defineComponent({
                             loss += order.profit;
                             feeLoss += fee;
                             cntLoss++;
-                            while (idxTradeReal < tradeReal.length && tradeReal[idxTradeReal].time <= new Date(order.timeSL).getTime()) {
+                            while (idxTradeReal < tradeReal.length && tradeReal[idxTradeReal].time <= new Date(order.timeSL).getTime() + 60000) {
                                 balanceReal += parseFloat(tradeReal[idxTradeReal].income);
                                 idxTradeReal++;
                             }
