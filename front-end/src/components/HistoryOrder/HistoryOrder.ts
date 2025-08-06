@@ -190,6 +190,7 @@ export default defineComponent({
                         if (order.profit) order.profit -= fee;
                     }
 
+                    console.log(idxTradeReal, tradeReal);
                     if (idxTradeReal < tradeReal.length) {
                         while (idxTradeReal < tradeReal.length) {
                             balanceReal += parseFloat(tradeReal[idxTradeReal].income);
