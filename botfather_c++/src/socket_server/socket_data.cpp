@@ -199,7 +199,7 @@ void SocketData::updateCache(const RateData &rateData)
             
             if (!Redis::getInstance().pushBack(key, v))
             {
-                LOGE("Failed to update cache for {}:{} {}",broker, symbol, timeframe);
+                LOGE("Failed to update full cache for {}:{} {}. length: {}",broker, symbol, timeframe, v.size());
                 return;
             };
             LOGD("Update cache {} {} {} - {} items",broker, symbol, timeframe, v.size());
@@ -240,7 +240,7 @@ void SocketData::updateCache(const RateData &rateData)
             {
                 if (!Redis::getInstance().pushFront(key, v))
                 {
-                    LOGE("Failed to update cache for {}:{} {}",broker,  symbol, timeframe);
+                    LOGE("Failed to update cache for {}:{} {}. length: {}",broker,  symbol, timeframe, v.size());
                     return;
                 }
                 LOGD("Update cache {} {} {} - {} items", broker, symbol, timeframe, v.size());
