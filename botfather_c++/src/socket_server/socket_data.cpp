@@ -435,7 +435,9 @@ void SocketData::onSocketConnected(connection_hdl hdl)
             
             LOGI("{}: Init {} / {}. Get from cache {} times ({:.1f}%)", broker, end, symbolList.size(), cnt, end * 100.0 / symbolList.size());
 
-            SLEEP_FOR(cnt * 5000 / 100 + 10);
+            if(cnt > 0){
+                SLEEP_FOR(cnt * 5000 / 100);
+            }
         } });
 
         t.detach();
