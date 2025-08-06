@@ -79,6 +79,7 @@ static void checkOrderStatus()
 
                     LOGE("New limit order created. clientOrderId: {}", clientOrderId);
                     db.executeUpdate("UPDATE RealOrders SET tpID = ? WHERE id = ?", {clientOrderId, id});
+                    tpStatus = "NEW";
                 }
                 else if (entryStatus == "CANCELED" || tpStatus == "CANCELED" || slStatus == "CANCELED" ||  tpStatus == "FILLED" || slStatus == "FILLED")
                 {
@@ -97,7 +98,7 @@ static void checkOrderStatus()
                     }
                 }
 
-                if (entryStatus != "NEW" && tpStatus != "NEW" || slStatus != "NEW")
+                if (entryStatus != "NEW" && (tpStatus != "NEW" || slStatus != "NEW"))
                 {
                     LOGI("Order {} is completed. entryID: {}, tpID: {}, slID: {}", id, entryID, tpID, slID);
                     db.executeUpdate("DELETE FROM RealOrders WHERE id = ?", {id});
