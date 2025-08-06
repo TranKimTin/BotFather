@@ -37,7 +37,7 @@ function isValidRates(rates: Array<RateData>): boolean {
     const timeIntervalMiliseconds = rates[0].startTime - rates[1].startTime;
     for (let i = 2; i < rates.length; i++) {
         if (rates[i - 1].startTime - rates[i].startTime !== timeIntervalMiliseconds) {
-            console.log(`Invalid rates: ${moment(rates[i - 1].startTime).format("YYYY-MM-DD HH:mm")} - ${moment(rates[i].startTime).format("YYYY-MM-DD HH:mm")} != ${timeIntervalMiliseconds}`);
+            console.log(`Invalid rates: ${moment(rates[i - 1].startTime).format("YYYY-MM-DD HH:mm")} - ${moment(rates[i].startTime).format("YYYY-MM-DD HH:mm")} = (${rates[i - 1].startTime} - ${rates[i].startTime}}) != ${timeIntervalMiliseconds}`);
             return false;
         }
     }
