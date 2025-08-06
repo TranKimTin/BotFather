@@ -190,6 +190,14 @@ export default defineComponent({
                         if (order.profit) order.profit -= fee;
                     }
 
+                    if (idxTradeReal < tradeReal.length) {
+                        while (idxTradeReal < tradeReal.length) {
+                            balanceReal += parseFloat(tradeReal[idxTradeReal].income);
+                            idxTradeReal++;
+                        }
+                        balanceData.push({ timestamp: moment(tradeReal[idxTradeReal - 1].time).format("YYYY-MM-DD HH:mm"), balance: gain + loss - totalFee, balanceNoFee: gain + loss, balanceReal });
+                    }
+
                     r_orderList.value = orders;
                     r_gain.value = parseFloat((gain - feeGain).toFixed(2));
                     r_loss.value = parseFloat((loss - feeLoss).toFixed(2));
