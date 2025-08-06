@@ -282,12 +282,12 @@ RateData getOHLCVFromRateServer(const string &broker, const string &symbol, cons
             return {};
         }
 
-        rateData.startTime.push_front(stoll(rate[0]));
-        rateData.open.push_front(stod(rate[1]));
-        rateData.high.push_front(stod(rate[2]));
-        rateData.low.push_front(stod(rate[3]));
-        rateData.close.push_front(stod(rate[4]));
-        rateData.volume.push_front(stod(rate[5]));
+        rateData.startTime.push_back(stoll(rate[0]));
+        rateData.open.push_back(stod(rate[1]));
+        rateData.high.push_back(stod(rate[2]));
+        rateData.low.push_back(stod(rate[3]));
+        rateData.close.push_back(stod(rate[4]));
+        rateData.volume.push_back(stod(rate[5]));
     }
     return rateData;
 }

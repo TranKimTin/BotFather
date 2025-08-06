@@ -130,6 +130,10 @@ void SocketData::mergeData(RateData &rateData, const string &symbol, string &tim
     }
     else if (rateStartTime > rateData.startTime[0])
     {
+        if (rateStartTime - rateData.startTime[0] != timeframeToNumberMiliseconds(timeframe))
+        {
+            LOGE("Merge data fail {}:{} {} {}. Expected start time: {}, but got: {}", broker, symbol, timeframe, currentTF, toTimeString(rateData.startTime[0] + timeframeToNumberMiliseconds(timeframe)), toTimeString(rateStartTime));
+        }
         // if (!ignoreClose)
         // {
         //     LOGI("Force final {} {} {}", symbol, timeframe, toTimeString(rateStartTime));
@@ -147,7 +151,7 @@ void SocketData::mergeData(RateData &rateData, const string &symbol, string &tim
     }
     else
     {
-        LOGI("Merge data fail {}:{} {} {}", broker, symbol, timeframe, currentTF);
+        LOGI("Merge data fail {}:{} {} {}. {} - {}", broker, symbol, timeframe, currentTF, toTimeString(rateStartTime), toTimeString(rateData.startTime[0]));
     }
 }
 
