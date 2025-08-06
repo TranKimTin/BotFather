@@ -126,7 +126,10 @@ bool Redis::pushFront(const string &key, const vector<string> &values)
 
     redisReply *reply = (redisReply *)redisCommand(context, ss.str().c_str());
     if (!reply)
+    {
+        LOGE("Failed to push front values to Redis for key: {}, value length: {}", key, values.size());
         return false;
+    }
 
     freeReplyObject(reply);
     return true;
