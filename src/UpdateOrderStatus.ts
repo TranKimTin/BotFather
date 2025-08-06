@@ -231,4 +231,4 @@ async function main() {
     }
 }
 
-setTimeout(main, 33 * 60 * 1000);
+main();
