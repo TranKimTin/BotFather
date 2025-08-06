@@ -30,6 +30,8 @@ interface Order {
     lastTimeUpdated: number
 };
 
+let validSymbols: { [key: string]: boolean } = {};
+
 function isValidRates(rates: Array<RateData>): boolean {
     if (rates.length <= 1) return true;
     const timeIntervalMiliseconds = rates[0].startTime - rates[1].startTime;
@@ -209,6 +211,32 @@ async function handleOrder(order: Order) {
 
 async function main() {
     try {
+        const [binanceSymbolList, binanceFutureSymbolList, bybitSymbolList, bybitFutureSymbolList, okxSymbolList] = await Promise.all([
+            util.getBinanceSymbolList(),
+            util.getBinanceFutureSymbolList(),
+            util.getBybitSymbolList(),
+            util.getBybitFutureSymbolList(),
+            util.getOkxSymbolList()
+        ]);
+
+        validSymbols = {};
+        for (const symbol of binanceSymbolList) {
+            validSymbols[`binance_${symbol}`] = true;
+        }
+        for (const symbol of binanceFutureSymbolList) {
+            validSymbols[`binance_future_${symbol}`] = true;
+        }
+        for (const symbol of bybitSymbolList) {
+            validSymbols[`bybit_${symbol}`] = true;
+        }
+        for (const symbol of bybitFutureSymbolList) {
+            validSymbols[`bybit_future_${symbol}`] = true;
+        }
+        for (const symbol of okxSymbolList) {
+            validSymbols[`okx_${symbol}`] = true;
+        }
+        console.log(`Valid symbols: ${Object.keys(validSymbols).length}`);
+
         const orders: Array<Order> = await mysql.query(
             `SELECT * FROM Orders WHERE status NOT IN (?, ?, ?)`,
             [ORDER_STATUS.MATCH_TP, ORDER_STATUS.MATCH_SL, ORDER_STATUS.CANCELED]
@@ -216,6 +244,9 @@ async function main() {
         let promiseList = [];
 
         for (const order of orders) {
+            if (!validSymbols[`${order.broker}_${order.symbol}`]) {
+                continue;
+            }
             promiseList.push(handleOrder(order));
             if (promiseList.length > 10) {
                 await Promise.all(promiseList);
