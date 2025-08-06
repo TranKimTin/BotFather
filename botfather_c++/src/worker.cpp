@@ -533,7 +533,6 @@ bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
 
     if (find(orderTypes.begin(), orderTypes.end(), node.type) != orderTypes.end())
     {
-        return true;
         long long createdTime = startTime[0];
         double o = open[0];
         double h = high[0];
