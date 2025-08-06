@@ -357,8 +357,11 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                                         continue;
                                     }
 
-                                    lock_guard<mutex> lock(mMutex);
-                                    RateData &smaller = data[hashString(symbol + "_" + timeframes[m])];
+                                    RateData smaller;
+                                    {
+                                        lock_guard<mutex> lock(mMutex);
+                                        RateData smaller = data[hashString(symbol + "_" + timeframes[m])];
+                                    }
                                     int size = smaller.startTime.size();
                                     if (size == 0 || smaller.startTime.back() > rateData.startTime[0]) {
                                         rateData = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE);
