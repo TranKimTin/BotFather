@@ -257,6 +257,12 @@ export class SocketData {
         return this.gData[symbol][timeframe];
     }
 
+    public async setData(symbol: string, timeframe: string) {
+        this.gData[symbol][timeframe] = await this.getOHLCV!(symbol, timeframe);
+        await redis.remove(`${this.broker}_${symbol}_${timeframe}`);
+        return this.gData[symbol][timeframe];
+    }
+
     public getSymbols() {
         return this.symbolList;
     }

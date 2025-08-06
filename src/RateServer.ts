@@ -58,7 +58,7 @@ const exchange: { [key: string]: SocketData } = {};
     app.use(express.static(path.join(__dirname, 'public')));
 
 
-    app.get('/api/getOHLCV', (req: any, res: any) => {
+    app.get('/api/getOHLCV', async (req: any, res: any) => {
         let { broker, symbol, timeframe, limit } = req.query;
         console.log(`Request OHLCV: ${broker} ${symbol} ${timeframe} ${limit}`);
 
@@ -67,6 +67,14 @@ const exchange: { [key: string]: SocketData } = {};
         }
 
         let rates = exchange[broker].getData(symbol, timeframe);
+
+        for (let i = 2; i < rates.length; i++) {
+            if (rates[i].startTime - rates[i - 1].startTime != rates[1].startTime - rates[0].startTime) {
+                console.error(`Data is not continuous for ${broker} ${symbol} ${timeframe}`);
+                rates = await exchange[broker].setData(symbol, timeframe);
+                break;
+            }
+        }
         while (rates.length > limit) {
             rates.pop();
         }
