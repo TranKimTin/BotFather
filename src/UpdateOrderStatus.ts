@@ -249,7 +249,7 @@ async function main() {
                 continue;
             }
             promiseList.push(handleOrder(order));
-            if (promiseList.length > 10) {
+            if (promiseList.length > 50) {
                 await Promise.all(promiseList);
                 promiseList = [];
             }
