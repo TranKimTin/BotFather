@@ -440,7 +440,7 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                                 i--;
                             }
                             while(i >= 0) {
-                                mergeData(data[key], symbol, oldData.interval, oldData.interval, oldData.open[i], oldData.high[i], oldData.low[i], oldData.close[i], oldData.volume[i], oldData.startTime[i], false, true);
+                                mergeData(data[key], symbol, oldData.interval, oldData.interval, oldData.open[i], oldData.high[i], oldData.low[i], oldData.close[i], oldData.volume[i], oldData.startTime[i], i > 0, true);
                             }
                             updateCache(data[key]);
                         }
