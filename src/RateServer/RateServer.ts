@@ -58,7 +58,6 @@ const child = fork('./SocketServer.js', {
             return res.json([]);
         }
         let lastRate = (await redis.get(`lastRate_${broker}_${symbol}_${timeframe}`) as string || '').split('_');
-        console.log({ lastRate });
         if (lastRate.length === 6 && +lastRate[0] > rates[0].startTime) {
             rates.unshift({
                 startTime: parseInt(lastRate[0]),
