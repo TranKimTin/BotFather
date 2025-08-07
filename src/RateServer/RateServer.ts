@@ -74,7 +74,7 @@ const child = fork('./SocketServer.js', {
                 console.error(`Data is not continuous for ${broker} ${symbol} ${timeframe}`);
                 child.send({ type: 'update', broker, symbol, timeframe });
                 const data = await getOHLCV(broker, symbol, timeframe, limit);
-                return res.json(data)
+                return res.json(data);
             }
         }
         while (rates.length > limit) {
