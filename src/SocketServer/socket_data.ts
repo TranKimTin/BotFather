@@ -77,6 +77,9 @@ export class SocketData {
             // console.log(`${this.broker}: merge error`);
             // console.log(dataList[0], data);
         }
+        if (!dataList[0].isFinal) {
+            redis.set(`lastRate_${this.broker}_${data.symbol}_${data.interval}`, `${data.startTime}_${data.open}_${data.high}_${data.low}_${data.close}_${data.volume}`);
+        }
     }
 
     protected fetchCandles(candle: RateData) {
