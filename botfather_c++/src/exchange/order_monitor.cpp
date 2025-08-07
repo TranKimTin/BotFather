@@ -15,7 +15,7 @@ static void checkOrderStatus()
         return;
     }
 
-    const int MAX_THREAD = 3;
+    const int MAX_THREAD = 1;
     mutex dbMutex;
     boost::interprocess::interprocess_semaphore semaphore(MAX_THREAD);
     vector<thread> threads;
