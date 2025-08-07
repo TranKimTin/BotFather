@@ -113,6 +113,12 @@ void SocketData::mergeData(RateData &rateData, const string &symbol, string &tim
 
     if (rateData.open.empty())
     {
+        rateData.open.push_front(open);
+        rateData.high.push_front(high);
+        rateData.low.push_front(low);
+        rateData.close.push_front(close);
+        rateData.volume.push_front(volume);
+        rateData.startTime.push_front(rateStartTime);
         return;
     }
 
@@ -423,10 +429,21 @@ void SocketData::onSocketConnected(connection_hdl hdl)
 
                         {
                             lock_guard<mutex> lock(mMutex);
+                            auto oldData = data[key];
                             data[key] = rateData;
+                            int i = 0;
+                            while (i < oldData.startTime.size() && oldData.startTime[i] > rateData.startTime[0])
+                            {
+                                i++;
+                            }
+                            if (i == oldData.startTime.size()) {
+                                i--;
+                            }
+                            while(i >= 0) {
+                                mergeData(data[key], symbol, oldData.interval, oldData.interval, oldData.open[i], oldData.high[i], oldData.low[i], oldData.close[i], oldData.volume[i], oldData.startTime[i], false, true);
+                            }
                             updateCache(data[key]);
                         }
-                        
                     }
                     return cnt;
                  }));
