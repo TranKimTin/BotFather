@@ -259,11 +259,11 @@ string doubleToString(double value, int precision)
     return result;
 }
 
-RateData getOHLCVFromRateServer(const string &broker, const string &symbol, const string &timeframe, int limit)
+RateData getOHLCVFromRateServer(const string &broker, const string &symbol, const string &timeframe, int limit, int since)
 {
     auto env = readEnvFile();
     string serverURL = env["RATE_SERVER"];
-    string url = StringFormat("http://{}:8081/api/getOHLCV?broker={}&symbol={}&timeframe={}&limit={}", serverURL, broker, symbol, timeframe, limit);
+    string url = StringFormat("http://{}:8081/api/getOHLCV?broker={}&symbol={}&timeframe={}&limit={}&since={}", serverURL, broker, symbol, timeframe, limit, since);
     string response = Axios::getHTTP(url);
     if (response == "")
         return {};

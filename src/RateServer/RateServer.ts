@@ -34,54 +34,68 @@ const child = fork('./SocketServer.js', {
 
 
     app.get('/api/getOHLCV', async (req: any, res: any) => {
-        let { broker, symbol, timeframe, limit } = req.query;
-        console.log(`Request OHLCV: ${broker} ${symbol} ${timeframe} ${limit}`);
+        try {
+            let { broker, symbol, timeframe, limit, since } = req.query;
+            console.log(`Request OHLCV: ${broker} ${symbol} ${timeframe} ${limit} ${since}`);
 
-        if (!broker || !symbol || !timeframe || !limit) {
-            return res.json([]);
-        }
+            limit = parseInt(limit);
+            since = parseInt(since);
 
-        let key = `${broker}_${symbol}_${timeframe}`;
-
-        let rates = (await redis.getArray(key)).map(item => {
-            let parts = item.split('_');
-            return {
-                startTime: parseInt(parts[0]),
-                open: parseFloat(parts[1]),
-                high: parseFloat(parts[2]),
-                low: parseFloat(parts[3]),
-                close: parseFloat(parts[4]),
-                volume: parseFloat(parts[5])
-            };
-        });
-        if (rates.length === 0) {
-            return res.json([]);
-        }
-        let lastRate = (await redis.get(`lastRate_${broker}_${symbol}_${timeframe}`) as string || '').split('_');
-        if (lastRate.length === 6 && +lastRate[0] > rates[0].startTime) {
-            rates.unshift({
-                startTime: parseInt(lastRate[0]),
-                open: parseFloat(lastRate[1]),
-                high: parseFloat(lastRate[2]),
-                low: parseFloat(lastRate[3]),
-                close: parseFloat(lastRate[4]),
-                volume: parseFloat(lastRate[5])
-            });
-        }
-
-        for (let i = 2; i < rates.length; i++) {
-            if (rates[i].startTime - rates[i - 1].startTime != rates[1].startTime - rates[0].startTime) {
-                console.error(`Data is not continuous for ${broker} ${symbol} ${timeframe}`);
-                child.send({ type: 'update', broker, symbol, timeframe });
-                const data = await getOHLCV(broker, symbol, timeframe, limit);
-                return res.json(data.map(item => `${item.startTime}_${item.open}_${item.high}_${item.low}_${item.close}_${item.volume}`));
+            if (!broker || !symbol || !timeframe || !limit || since === undefined) {
+                return res.json([]);
             }
-        }
-        while (rates.length > limit) {
-            rates.pop();
-        }
 
-        res.json(rates.map(item => `${item.startTime}_${item.open}_${item.high}_${item.low}_${item.close}_${item.volume}`));
+            let key = `${broker}_${symbol}_${timeframe}`;
+
+            let rates = (await redis.getArray(key)).map(item => {
+                let parts = item.split('_');
+                return {
+                    startTime: parseInt(parts[0]),
+                    open: parseFloat(parts[1]),
+                    high: parseFloat(parts[2]),
+                    low: parseFloat(parts[3]),
+                    close: parseFloat(parts[4]),
+                    volume: parseFloat(parts[5])
+                };
+            });
+            if (rates.length === 0) {
+                return res.json([]);
+            }
+            let lastRate = (await redis.get(`lastRate_${broker}_${symbol}_${timeframe}`) as string || '').split('_');
+            if (lastRate.length === 6 && +lastRate[0] > rates[0].startTime) {
+                rates.unshift({
+                    startTime: parseInt(lastRate[0]),
+                    open: parseFloat(lastRate[1]),
+                    high: parseFloat(lastRate[2]),
+                    low: parseFloat(lastRate[3]),
+                    close: parseFloat(lastRate[4]),
+                    volume: parseFloat(lastRate[5])
+                });
+            }
+
+            for (let i = 2; i < rates.length; i++) {
+                if (rates[i].startTime - rates[i - 1].startTime != rates[1].startTime - rates[0].startTime) {
+                    console.error(`Data is not continuous for ${broker} ${symbol} ${timeframe}`);
+                    child.send({ type: 'update', broker, symbol, timeframe });
+                    const data = await getOHLCV(broker, symbol, timeframe, limit, since);
+                    return res.json(data.map(item => `${item.startTime}_${item.open}_${item.high}_${item.low}_${item.close}_${item.volume}`));
+                }
+            }
+
+            while (rates.length > 0 && rates.at(-1)!.startTime < since) {
+                rates.pop();
+            }
+
+            while (rates.length > limit) {
+                rates.pop();
+            }
+
+            res.json(rates.map(item => `${item.startTime}_${item.open}_${item.high}_${item.low}_${item.close}_${item.volume}`));
+        }
+        catch (err) {
+            console.error('Error in getOHLCV:', err);
+            res.json([]);
+        }
     });
 
     const port = 8081;
