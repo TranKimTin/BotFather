@@ -355,6 +355,8 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                                 RateData dataFromServer = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE, rateData.startTime[0] + 60000);
                                 if (dataFromServer.startTime.empty() || dataFromServer.startTime.back() != rateData.startTime[0] + 60000) {
                                     rateData = RateData();
+                                    rateData.symbol = symbol;
+                                    rateData.interval = tf;
                                 }
                                 for (int i = dataFromServer.startTime.size() - 1; i >= 0; i--) {
                                     rateData.startTime.push_front(dataFromServer.startTime[i]);
