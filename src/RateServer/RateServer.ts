@@ -77,12 +77,12 @@ const child = fork('./SocketServer.js', {
                 if (rates[i].startTime - rates[i - 1].startTime != rates[1].startTime - rates[0].startTime) {
                     console.error(`Data is not continuous for ${broker} ${symbol} ${timeframe}`);
                     child.send({ type: 'update', broker, symbol, timeframe });
-                    const data = await getOHLCV(broker, symbol, timeframe, limit, since);
+                    const data = await getOHLCV(broker, symbol, timeframe, limit, since || undefined);
                     return res.json(data.map(item => `${item.startTime}_${item.open}_${item.high}_${item.low}_${item.close}_${item.volume}`));
                 }
             }
 
-            while (rates.length > 0 && rates.at(-1)!.startTime < since) {
+            while (since && rates.length > 0 && rates.at(-1)!.startTime < since) {
                 rates.pop();
             }
 
