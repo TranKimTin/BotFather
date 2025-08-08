@@ -211,6 +211,11 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
         params["goodTillDate"] = expiredTime;
     }
 
+    if (takeProfit.empty() && stopLoss.empty())
+    {
+        params["reduceOnly"] = "true";
+    }
+
     string res = sendOrder(params);
     if (res.empty())
         return res;
@@ -332,6 +337,11 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
     {
         params["timeInForce"] = "GTD";
         params["goodTillDate"] = expiredTime;
+    }
+
+    if (takeProfit.empty() && stopLoss.empty())
+    {
+        params["reduceOnly"] = "true";
     }
 
     string res = sendOrder(params);
