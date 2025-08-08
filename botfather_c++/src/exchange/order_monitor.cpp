@@ -80,7 +80,6 @@ static void checkOrderStatus()
                     LOGE("New limit order created. clientOrderId: {}", clientOrderId);
                     db.executeUpdate("UPDATE RealOrders SET tpID = ? WHERE id = ?", {clientOrderId, id});
                     tpStatus = "NEW";
-                    tpID = clientOrderId;
                 }
                 else if (entryStatus == "CANCELED" || tpStatus == "CANCELED" || slStatus == "CANCELED" ||  tpStatus == "FILLED" || slStatus == "FILLED")
                 {
