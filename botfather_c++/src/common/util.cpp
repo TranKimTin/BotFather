@@ -259,7 +259,7 @@ string doubleToString(double value, int precision)
     return result;
 }
 
-RateData getOHLCVFromRateServer(const string &broker, const string &symbol, const string &timeframe, int limit, int since)
+RateData getOHLCVFromRateServer(const string &broker, const string &symbol, const string &timeframe, int limit, long long since)
 {
     auto env = readEnvFile();
     string serverURL = env["RATE_SERVER"];

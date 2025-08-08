@@ -25,7 +25,7 @@ string StringFormat(const string &format, Args &&...args)
 }
 
 
-RateData getOHLCVFromRateServer(const string &broker, const string &symbol, const string &timeframe, int limit, int since = 0);
+RateData getOHLCVFromRateServer(const string &broker, const string &symbol, const string &timeframe, int limit, long long since = 0);
 RateData getBinanceOHLCV(const string &symbol, const string &timeframe, int limit, long long since = 0);
 RateData getBinanceFuturetOHLCV(const string &symbol, const string &timeframe, int limit, long long since = 0);
 RateData getBybitFutureOHLCV(const string &symbol, const string &timeframe, int limit, long long since = 0);
