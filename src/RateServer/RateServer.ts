@@ -36,7 +36,6 @@ const child = fork('./SocketServer.js', {
     app.get('/api/getOHLCV', async (req: any, res: any) => {
         try {
             let { broker, symbol, timeframe, limit, since } = req.query;
-            console.log(`Request OHLCV: ${broker} ${symbol} ${timeframe} ${limit} ${since}`);
 
             limit = parseInt(limit);
             since = parseInt(since);
