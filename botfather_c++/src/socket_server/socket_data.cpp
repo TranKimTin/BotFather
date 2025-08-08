@@ -347,7 +347,25 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                         RateData rateData;
                         if(tf == "1m")
                         {
-                            rateData = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE);
+                            rateData = getOHLCVFromCache(symbol, tf);
+                            if (rateData.startTime.empty() || !isValidData(rateData)) {
+                                rateData = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE);
+                            }
+                            else {
+                                RateData dataFromServer = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE, rateData.startTime[0] + 60000);
+                                if (dataFromServer.startTime.empty() || dataFromServer.startTime.back() != rateData.startTime[0] + 60000) {
+                                    rateData = RateData();
+                                }
+                                for (int i = dataFromServer.startTime.size() - 1; i >= 0; i--) {
+                                    rateData.startTime.push_front(dataFromServer.startTime[i]);
+                                    rateData.open.push_front(dataFromServer.open[i]);
+                                    rateData.high.push_front(dataFromServer.high[i]);
+                                    rateData.low.push_front(dataFromServer.low[i]);
+                                    rateData.close.push_front(dataFromServer.close[i]);
+                                    rateData.volume.push_front(dataFromServer.volume[i]);
+                                }
+                            }
+                            
                             if(rateData.startTime.empty()) {
                                 rateData = getOHLCV(symbol, tf, MAX_CANDLE);
                                 cnt++;
