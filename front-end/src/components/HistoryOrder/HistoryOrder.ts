@@ -199,6 +199,8 @@ export default defineComponent({
                         balanceData.push({ timestamp: moment(tradeReal[idxTradeReal - 1].time).format("YYYY-MM-DD HH:mm"), balance: gain + loss - totalFee, balanceNoFee: gain + loss, balanceReal });
                     }
 
+                    console.log({gain, feeGain, loss, feeLoss, unrealizedGain, unrealizedLoss, cntGain, cntLoss, cntOpening})
+
                     r_orderList.value = orders;
                     r_gain.value = parseFloat((gain - feeGain).toFixed(2));
                     r_loss.value = parseFloat((loss - feeLoss).toFixed(2));
