@@ -179,7 +179,7 @@ export async function getOrder(req: any, res: any) {
 
         const data = await BotConfig.getOrder(botName, orderID);
         (req as unknown as CustomRequest).onChangeConfig(botName);
-        res.json({ code: 200, message: "Xóa thành công", data: data });
+        res.json({ code: 200, message: "Get order success", data: data });
     }
     catch (err: any) {
         console.error(err);

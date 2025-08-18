@@ -391,8 +391,8 @@ export async function getOrder(botName: string, orderID: string) {
     });
     try {
         const order = await client.futuresGetOrder({
-            symbol: orderID,
-            origClientOrderId: botName
+            symbol: orderID.slice(4, orderID.indexOf('USDT') + 4),
+            origClientOrderId: orderID
         });
         return order;
     } catch (error: any) {
