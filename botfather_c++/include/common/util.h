@@ -53,3 +53,5 @@ string generateRandomIV();
 int compareStringNumber(const string &a, const string &b);
 
 long long hashString(const string s);
+
+int fast_stoi(const char *s);

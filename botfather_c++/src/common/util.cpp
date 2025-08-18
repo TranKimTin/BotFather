@@ -877,3 +877,27 @@ long long hashString(const string s)
     }
     return hash;
 }
+
+int fast_stoi(const char *s)
+{
+    int x = 0;
+    bool neg = false;
+
+    if (*s == '-')
+    {
+        neg = true;
+        ++s;
+    }
+    else if (*s == '+')
+    {
+        ++s;
+    }
+
+    while (*s)
+    {
+        x = x * 10 + (*s - '0');
+        ++s;
+    }
+
+    return neg ? -x : x;
+}
