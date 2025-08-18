@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 dotenv.config({ path: `${__dirname}/../../../.env` });
 
 export async function getBotInfo(userData: UserTokenInfo) {
-    const sql = `SELECT b.botName, b.enableRealOrder,
+    const sql = `SELECT u.email, b.botName, b.enableRealOrder,
                     COUNT(IF(o.status in ('Khớp TP', 'Khớp SL', 'Khớp entry'), IF(o.timeSL IS NOT NULL OR o.timeTP IS NOT NULL, 1, NULL), NULL)) AS tradeCountClosed,
                     COUNT(IF(o.status in ('Khớp TP', 'Khớp SL', 'Khớp entry'), IF(o.timeSL IS NULL AND o.timeTP IS NULL, 1, NULL), NULL)) AS tradeCountOpening,
                     SUM(IF(o.status in ('Khớp TP', 'Khớp SL', 'Khớp entry'), IF(o.timeSL IS NOT NULL OR o.timeTP IS NOT NULL, o.profit, 0), 0)) AS profit,

@@ -3,6 +3,7 @@ import * as axios from '../../axios/axios';
 
 interface BotInfo {
     botName: string,
+    email: string,
     tradeCountClosed: number,
     tradeCountOpening: number,
     profit: number,
