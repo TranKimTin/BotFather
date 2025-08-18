@@ -37,10 +37,10 @@ string BinanceFuture::buyMarket(const string &symbol, string quantity,
         {"newClientOrderId", clientOrderId},
         {"timestamp", to_string(getCurrentTime())}};
 
-    if (takeProfit.empty() && stopLoss.empty())
-    {
-        params["reduceOnly"] = "true";
-    }
+    // if (takeProfit.empty() && stopLoss.empty())
+    // {
+    //     params["reduceOnly"] = "true";
+    // }
 
     string res = sendOrder(params);
     if (res.empty())
@@ -120,10 +120,10 @@ string BinanceFuture::sellMarket(const string &symbol, string quantity, string t
         {"newClientOrderId", clientOrderId},
         {"timestamp", to_string(getCurrentTime())}};
 
-    if (takeProfit.empty() && stopLoss.empty())
-    {
-        params["reduceOnly"] = "true";
-    }
+    // if (takeProfit.empty() && stopLoss.empty())
+    // {
+    //     params["reduceOnly"] = "true";
+    // }
 
     string res = sendOrder(params);
     if (res.empty())
@@ -211,10 +211,10 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
         params["goodTillDate"] = expiredTime;
     }
 
-    if (takeProfit.empty() && stopLoss.empty())
-    {
-        params["reduceOnly"] = "true";
-    }
+    // if (takeProfit.empty() && stopLoss.empty())
+    // {
+    //     params["reduceOnly"] = "true";
+    // }
 
     string res = sendOrder(params);
     if (res.empty())
@@ -339,10 +339,10 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
         params["goodTillDate"] = expiredTime;
     }
 
-    if (takeProfit.empty() && stopLoss.empty())
-    {
-        params["reduceOnly"] = "true";
-    }
+    // if (takeProfit.empty() && stopLoss.empty())
+    // {
+    //     params["reduceOnly"] = "true";
+    // }
 
     string res = sendOrder(params);
     if (res.empty())
@@ -446,7 +446,7 @@ string BinanceFuture::sendTPorSL(const string &symbol, const string &side, const
         {"side", side},
         {"type", type},
         {"closePosition", "false"},
-        {"reduceOnly", "true"},
+        // {"reduceOnly", "true"},
         {"quantity", quantity},
         {"newClientOrderId", clientOrderId},
         {"timestamp", to_string(getCurrentTime())}};
