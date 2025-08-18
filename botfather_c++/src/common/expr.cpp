@@ -461,7 +461,7 @@ any Expr::visitMacd_n_dinh(ExprParser::Macd_n_dinhContext *ctx)
     int enableDivergence = fast_stoi(ctx->INT(5)->getText().c_str());
     double diffCandle0 = stod(ctx->number(0)->getText());
     int shift = ctx->INT(6) ? fast_stoi(ctx->INT(6)->getText().c_str()) : 0;
-    vector<double> diffPercents;
+    vector<double> diffPercents = vectorDoublePool.acquire();
 
     for (int i = 1; ctx->number(i); i++)
     {
@@ -472,6 +472,8 @@ any Expr::visitMacd_n_dinh(ExprParser::Macd_n_dinhContext *ctx)
         return {};
 
     int result = macd_n_dinh(fastPeriod, slowPeriod, signalPeriod, redDepth, depth, enableDivergence, diffCandle0, diffPercents, close + shift, open + shift, high + shift, length - shift);
+    
+    vectorDoublePool.release(diffPercents);
     return (double)result;
 }
 
