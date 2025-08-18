@@ -55,13 +55,20 @@ void SocketData::onCloseCandle(const string &symbol, string &timeframe, RateData
 
     if (!botList)
         return;
+    
+    vector<double> open = VectorDoublePool::getInstance().acquireLock();
+    vector<double> high = VectorDoublePool::getInstance().acquireLock();
+    vector<double> low = VectorDoublePool::getInstance().acquireLock();
+    vector<double> close = VectorDoublePool::getInstance().acquireLock();
+    vector<double> volume = VectorDoublePool::getInstance().acquireLock();
+    vector<long long> startTime = VectorLongLongPool::getInstance().acquireLock();
 
-    vector<double> open(length);
-    vector<double> high(length);
-    vector<double> low(length);
-    vector<double> close(length);
-    vector<double> volume(length);
-    vector<long long> startTime(length);
+    open.resize(length);
+    high.resize(length);
+    low.resize(length);
+    close.resize(length);
+    volume.resize(length);
+    startTime.resize(length);
 
     for (int i = 0; i < length; i++)
     {

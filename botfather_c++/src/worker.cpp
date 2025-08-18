@@ -41,6 +41,13 @@ static int binarySearch(const vector<Symbol> &symbolList, const string &symbol)
 
 void Worker::init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, Digit digit, double fundingRate)
 {
+    VectorDoublePool::getInstance().releaseLock(open);
+    VectorDoublePool::getInstance().releaseLock(high);
+    VectorDoublePool::getInstance().releaseLock(low);
+    VectorDoublePool::getInstance().releaseLock(close);
+    VectorDoublePool::getInstance().releaseLock(volume);
+    VectorLongLongPool::getInstance().releaseLock(startTime);
+
     this->botList = botList;
     this->broker = broker;
     this->symbol = symbol;
