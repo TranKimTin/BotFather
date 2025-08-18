@@ -369,3 +369,36 @@ export async function requireOwnBot(botName: string, userData: UserTokenInfo) {
     if (bot.length === 0 || bot[0].userID === userData.id) return true;
     return false;
 }
+
+export async function getOrder(botName: string, orderID: string) {
+    const sql = `SELECT apiKey, secretKey, iv FROM Bot WHERE botName = ?`;
+    const bot = await mysql.query(sql, [botName]);
+    if (bot.length === 0) {
+        throw `Không tìm thấy bot ${botName}`;
+    }
+
+    const { apiKey, secretKey, iv } = bot[0];
+    if (!apiKey || !secretKey || !iv) {
+        throw 'Chưa cấu hình api key';
+    }
+
+    const key = process.env.ENCRYP_KEY || '';
+    const decryptedApiKey = util.decryptAES(apiKey, key, iv);
+    const decryptedSecretKey = util.decryptAES(secretKey, key, iv);
+    const client = Binance({
+        apiKey: decryptedApiKey,
+        apiSecret: decryptedSecretKey
+    });
+    try {
+        const order = await client.futuresGetOrder({
+            symbol: orderID,
+            origClientOrderId: botName
+        });
+        return order;
+    } catch (error: any) {
+        if (error.code === -2011) {
+            throw `Không tìm thấy lệnh ${orderID}`;
+        }
+        throw error.message || 'Lỗi khi lấy trạng thái lệnh';
+    }
+}

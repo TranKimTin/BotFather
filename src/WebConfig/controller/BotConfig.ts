@@ -163,4 +163,26 @@ export async function clearHistory(req: any, res: any) {
         console.error(err);
         res.json({ code: 400, message: err, data: [] });
     }
-}   
+}
+
+export async function getOrder(req: any, res: any) {
+    try {
+        const botName: string = req.query.botName;
+        const orderID: string = req.query.orderID;
+        const userData: UserTokenInfo = req.user;
+
+        const isOwnBot = await BotConfig.requireOwnBot(botName, userData);
+        if (!isOwnBot) {
+            res.json({ code: 403, message: 'Không có quyền truy cập bot', data: [] });
+            return;
+        }
+
+        const data = await BotConfig.getOrder(botName, orderID);
+        (req as unknown as CustomRequest).onChangeConfig(botName);
+        res.json({ code: 200, message: "Xóa thành công", data: data });
+    }
+    catch (err: any) {
+        console.error(err);
+        res.json({ code: 400, message: err, data: [] });
+    }
+}

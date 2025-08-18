@@ -17,6 +17,9 @@ routes.get('/calculator', requireToken, BotConfig.calculator);
 routes.get('/dashboard/statistic', requireToken, Dashboard.statistic);
 routes.get('/getBalance', requireToken, User.getBalance);
 
+routes.get('/real/getOrder', requireToken, BotConfig.getOrderStatus);
+
+
 routes.post("/save", requireToken, BotConfig.saveBot);
 routes.post("/check", requireToken, BotConfig.checkNode);
 routes.post("/login", User.Login);
