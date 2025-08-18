@@ -6,14 +6,17 @@ using namespace std;
 class SparseTable
 {
 private:
-    vector<vector<double>> st_min;
-    vector<vector<double>> st_max;
+    vector<double> st_min; // mảng phẳng
+    vector<double> st_max; // mảng phẳng
     vector<int> log2s;
     int n;
+    int max_log;
+
+    inline int idx(int i, int j) const { return i * max_log + j; }
 
 public:
-    SparseTable() = default;  // Cho phép tạo qua pool
-    void init(const double* a, int length);  // Dùng thay constructor
+    SparseTable() = default;                // Cho phép tạo qua pool
+    void init(const double *a, int length); // Dùng thay constructor
     double query_min(int l, int r) const;
     double query_max(int l, int r) const;
     int size();
