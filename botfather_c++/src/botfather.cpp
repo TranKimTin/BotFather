@@ -123,7 +123,7 @@ vector<shared_ptr<Bot>> getBotList(string botName, bool cachedTree)
     Timer timer("getBotList");
     vector<shared_ptr<Bot>> botList;
     auto &db = MySQLConnector::getInstance();
-    string mysql_query = "SELECT id,botName,userID,timeframes,route,idTelegram,apiKey,secretKey,iv,enableRealOrder FROM Bot";
+    string mysql_query = "SELECT id,botName,userID,timeframes,symbolList,route,idTelegram,apiKey,secretKey,iv,enableRealOrder FROM Bot";
     vector<any> args;
 
     if (botName != "")
