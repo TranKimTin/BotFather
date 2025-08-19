@@ -3,6 +3,8 @@
 
 using namespace std;
 
+static thread_local unordered_map<string, unique_ptr<httplib::SSLClient>> clients;
+
 static void parseUrl(const string &url, string &host, string &path)
 {
     const string https_prefix = "https://";
@@ -18,16 +20,16 @@ static void parseUrl(const string &url, string &host, string &path)
     path = "/" + host_and_path.substr(slash_pos + 1);
 }
 
-void parseUrlHTTP(const std::string &url, std::string &host, int &port, std::string &path)
+void parseUrlHTTP(const string &url, string &host, int &port, string &path)
 {
-    std::string working = url;
+    string working = url;
 
-    const std::string prefix = "http://";
+    const string prefix = "http://";
     if (working.compare(0, prefix.size(), prefix) == 0)
         working = working.substr(prefix.size());
 
     size_t path_pos = working.find('/');
-    if (path_pos == std::string::npos)
+    if (path_pos == string::npos)
     {
         path = "/";
     }
@@ -38,10 +40,10 @@ void parseUrlHTTP(const std::string &url, std::string &host, int &port, std::str
     }
 
     size_t colon_pos = working.find(':');
-    if (colon_pos != std::string::npos)
+    if (colon_pos != string::npos)
     {
         host = working.substr(0, colon_pos);
-        port = std::stoi(working.substr(colon_pos + 1));
+        port = stoi(working.substr(colon_pos + 1));
     }
     else
     {
@@ -68,17 +70,28 @@ static httplib::Headers convertHeaders(const vector<string> &headerStrings)
     return headers;
 }
 
+static httplib::SSLClient *getClient(const string &host)
+{
+    auto &cli = clients[host];
+    if (!cli)
+    {
+        cli = make_unique<httplib::SSLClient>(host, 443);
+        cli->set_follow_location(true);
+        cli->set_keep_alive(true);
+    }
+    return cli.get();
+}
+
 string Axios::get(const string &url, const vector<string> &headers)
 {
     string host, path;
     parseUrl(url, host, path);
 
-    httplib::SSLClient cli(host, 443);
-    cli.set_follow_location(true);
+    httplib::SSLClient *cli = getClient(host);
 
     httplib::Headers header = convertHeaders(headers);
 
-    auto res = cli.Get(path.c_str(), header);
+    auto res = cli->Get(path.c_str(), header);
     if (res && res->status == 200)
         return res->body;
 
@@ -112,10 +125,9 @@ string Axios::post(const string &url, const string &body,
     string host, path;
     parseUrl(url, host, path);
 
-    httplib::SSLClient cli(host, 443);
-    cli.set_follow_location(true);
+    httplib::SSLClient *cli = getClient(host);
 
-    auto res = cli.Post(path.c_str(), convertHeaders(headers), body, contentType.c_str());
+    auto res = cli->Post(path.c_str(), convertHeaders(headers), body, contentType.c_str());
     if (res && res->status == 200)
         return res->body;
 
@@ -129,10 +141,9 @@ string Axios::put(const string &url, const string &body,
     string host, path;
     parseUrl(url, host, path);
 
-    httplib::SSLClient cli(host, 443);
-    cli.set_follow_location(true);
+    httplib::SSLClient *cli = getClient(host);
 
-    auto res = cli.Put(path.c_str(), convertHeaders(headers), body, contentType.c_str());
+    auto res = cli->Put(path.c_str(), convertHeaders(headers), body, contentType.c_str());
     if (res && res->status == 200)
         return res->body;
 
@@ -145,10 +156,9 @@ string Axios::del(const string &url, const vector<string> &headers)
     string host, path;
     parseUrl(url, host, path);
 
-    httplib::SSLClient cli(host, 443);
-    cli.set_follow_location(true);
+    httplib::SSLClient *cli = getClient(host);
 
-    auto res = cli.Delete(path.c_str(), convertHeaders(headers));
+    auto res = cli->Delete(path.c_str(), convertHeaders(headers));
     if (res && res->status == 200)
         return res->body;
 
