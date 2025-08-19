@@ -123,7 +123,7 @@ vector<shared_ptr<Bot>> getBotList(string botName, bool cachedTree)
     Timer timer("getBotList");
     vector<shared_ptr<Bot>> botList;
     auto &db = MySQLConnector::getInstance();
-    string mysql_query = "SELECT * FROM Bot";
+    string mysql_query = "SELECT id,botName,userID,timeframes,route,idTelegram,apiKey,secretKey,iv,enableRealOrder FROM Bot";
     vector<any> args;
 
     if (botName != "")
@@ -139,7 +139,7 @@ vector<shared_ptr<Bot>> getBotList(string botName, bool cachedTree)
 
         bot->id = res->getInt("id");
         bot->botName = res->getString("botName");
-        bot->treeData = res->getString("treeData");
+        // bot->treeData = res->getString("treeData");
         bot->userID = res->getInt("userID");
         bot->timeframes = convertJsonStringArrayToVector(res->getString("timeframes"));
         bot->idTelegram = split(res->getString("idTelegram"), ',');

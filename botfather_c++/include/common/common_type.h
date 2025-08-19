@@ -158,7 +158,7 @@ struct Bot
     Route route;
     vector<Symbol> symbolList;
     vector<string> timeframes;
-    string treeData;
+    // string treeData;
     int userID;
     string apiKey;
     string secretKey;
