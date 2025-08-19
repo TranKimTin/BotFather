@@ -212,54 +212,9 @@ BB_Output iBB(int period, double stdDev, const double close[], int n)
     return {lower, mean, upper};
 }
 
-static vector<MACD_Output> iMACDs(int fastPeriod, int slowPeriod, int signalPeriod, const double close[], int n)
+int macd_n_dinh(int fastPeriod, int slowPeriod, int signalPeriod, int redDepth, int depth, int enableDivergence, double diffCandle0, vector<double> &diffPercents, const double close[], const double open[], const double high[], int length, vector<double> &values)
 {
-    n = min(n, MAX_N + slowPeriod);
-
-    if (n <= slowPeriod || fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0)
-        return {};
-
-    vector<MACD_Output> result;
-
-    double kFast = 2.0 / (fastPeriod + 1);
-    double kSlow = 2.0 / (slowPeriod + 1);
-    double kSignal = 2.0 / (signalPeriod + 1);
-
-    double emaFast = close[n - 1];
-    double emaSlow = close[n - 1];
-    double macd = 0.0;
-    double signalEMA = 0.0;
-
-    bool signalInitialized = false;
-
-    for (int i = n - 2; i >= 0; --i)
-    {
-        emaFast = (close[i] - emaFast) * kFast + emaFast;
-        emaSlow = (close[i] - emaSlow) * kSlow + emaSlow;
-
-        macd = emaFast - emaSlow;
-
-        if (signalInitialized)
-        {
-            signalEMA = (macd - signalEMA) * kSignal + signalEMA;
-        }
-        else
-        {
-            signalEMA = macd;
-            signalInitialized = true;
-        }
-        double histogram = macd - signalEMA;
-        result.push_back({macd, signalEMA, histogram});
-    }
-
-    reverse(result.begin(), result.end());
-
-    return result;
-}
-
-int macd_n_dinh(int fastPeriod, int slowPeriod, int signalPeriod, int redDepth, int depth, int enableDivergence, double diffCandle0, vector<double> &diffPercents, const double close[], const double open[], const double high[], int length)
-{
-    vector<MACD_Output> values = iMACDs(fastPeriod, slowPeriod, signalPeriod, close, length);
+    int valueSize = values.size() / 3;
     int i = 0;
     int cnt = 0;
     int n = 0;
@@ -267,19 +222,19 @@ int macd_n_dinh(int fastPeriod, int slowPeriod, int signalPeriod, int redDepth, 
     int indexMaxPrice = i, preIndexMaxPrice = i;
 
     {
-        while (i < values.size() - 1)
+        while (i < valueSize - 1)
         {
-            if (values[i].macd <= 0)
+            if (values[i * 3] <= 0)
             {
                 break;
             };
-            if (values[i].signal <= 0)
+            if (values[i * 3 + 1] <= 0)
             {
                 break;
             };
-            if (values[i].histogram >= 0)
+            if (values[i * 3 + 2] >= 0)
                 break;
-            if (values[i].macd > values[indexMaxMACD].macd)
+            if (values[i * 3] > values[indexMaxMACD * 3])
             {
                 indexMaxMACD = i;
             }
@@ -300,21 +255,21 @@ int macd_n_dinh(int fastPeriod, int slowPeriod, int signalPeriod, int redDepth, 
 
         cnt = 0;
         int check = 0;
-        while (i < values.size() - 1)
+        while (i < valueSize - 1)
         {
-            if (values[i].macd <= 0)
+            if (values[i * 3] <= 0)
             {
                 check = 3;
                 break;
             }
-            if (values[i].signal <= 0)
+            if (values[i * 3 + 1] <= 0)
             {
                 check = 3;
                 break;
             }
-            if (values[i].histogram < 0)
+            if (values[i * 3 + 2] < 0)
                 break;
-            if (values[i].macd > values[indexMaxMACD].macd)
+            if (values[i * 3] > values[indexMaxMACD * 3])
             {
                 indexMaxMACD = i;
             }
@@ -335,12 +290,12 @@ int macd_n_dinh(int fastPeriod, int slowPeriod, int signalPeriod, int redDepth, 
         }
         if (check == 3)
         {
-            while (i < values.size() - 1)
+            while (i < valueSize - 1)
             {
-                if (values[i].histogram < 0)
+                if (values[i * 3 + 2] < 0)
                     break;
                 cnt++;
-                if (values[i].macd > values[indexMaxMACD].macd)
+                if (values[i * 3] > values[indexMaxMACD * 3])
                 {
                     indexMaxMACD = i;
                 }
@@ -373,26 +328,26 @@ int macd_n_dinh(int fastPeriod, int slowPeriod, int signalPeriod, int redDepth, 
 
     preIndexMaxMACD = i;
     preIndexMaxPrice = i;
-    for (; i < values.size() - 1; i++)
+    for (; i < valueSize - 1; i++)
     {
         cnt = 0;
         int cntRed = 0;
         int check = 0;
-        while (i < values.size() - 1)
+        while (i < valueSize - 1)
         {
-            if (values[i].macd <= 0)
+            if (values[i * 3] <= 0)
             {
                 check = 1;
                 break;
             };
-            if (values[i].signal <= 0)
+            if (values[i * 3 + 1] <= 0)
             {
                 check = 1;
                 break;
             };
-            if (values[i].histogram >= 0)
+            if (values[i * 3 + 2] >= 0)
                 break;
-            if (values[i].macd > values[preIndexMaxMACD].macd)
+            if (values[i * 3] > values[preIndexMaxMACD * 3])
             {
                 preIndexMaxMACD = i;
             }
@@ -415,21 +370,21 @@ int macd_n_dinh(int fastPeriod, int slowPeriod, int signalPeriod, int redDepth, 
         // }
 
         cnt = 0;
-        while (i < values.size() - 1)
+        while (i < valueSize - 1)
         {
-            if (values[i].macd <= 0)
+            if (values[i * 3] <= 0)
             {
                 check = 3;
                 break;
             }
-            if (values[i].signal <= 0)
+            if (values[i * 3 + 1] <= 0)
             {
                 check = 3;
                 break;
             }
-            if (values[i].histogram < 0)
+            if (values[i * 3 + 2] < 0)
                 break;
-            if (values[i].macd > values[preIndexMaxMACD].macd)
+            if (values[i * 3] > values[preIndexMaxMACD * 3])
             {
                 preIndexMaxMACD = i;
             }
@@ -444,11 +399,11 @@ int macd_n_dinh(int fastPeriod, int slowPeriod, int signalPeriod, int redDepth, 
 
         if (check == 3)
         {
-            while (i < values.size() - 1)
+            while (i < valueSize - 1)
             {
-                if (values[i].histogram < 0)
+                if (values[i * 3 + 2] < 0)
                     break;
-                if (values[i].macd > values[preIndexMaxMACD].macd)
+                if (values[i * 3] > values[preIndexMaxMACD * 3])
                 {
                     preIndexMaxMACD = i;
                 }
@@ -463,7 +418,7 @@ int macd_n_dinh(int fastPeriod, int slowPeriod, int signalPeriod, int redDepth, 
         }
         // console.log({ enableDivergence, preIndexMaxMACD, indexMaxMACD, m1: values[preIndexMaxMACD], m2: values[indexMaxMACD], indexMaxPrice, preIndexMaxPrice, p: data[preIndexMaxPrice], p2: data[indexMaxPrice], diff: diffPercents[0] });
 
-        if (enableDivergence == 1 && values[preIndexMaxMACD].macd <= values[indexMaxMACD].macd)
+        if (enableDivergence == 1 && values[preIndexMaxMACD * 3] <= values[indexMaxMACD * 3])
         {
             return n;
         }
@@ -495,7 +450,7 @@ int macd_n_dinh(int fastPeriod, int slowPeriod, int signalPeriod, int redDepth, 
 
 int macd_n_day(int fastPeriod, int slowPeriod, int signalPeriod, int redDepth, int depth, int enableDivergence, double diffCandle0, vector<double> &diffPercents, const double close[], const double open[], const double high[], int length)
 {
-    vector<MACD_Output> values = iMACDs(fastPeriod, slowPeriod, signalPeriod, close, length);
+    vector<double> values = iMACD(fastPeriod, slowPeriod, signalPeriod, close, length);
 
     return 0;
 }

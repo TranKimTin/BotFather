@@ -471,8 +471,9 @@ any Expr::visitMacd_n_dinh(ExprParser::Macd_n_dinhContext *ctx)
     if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || redDepth < 0 || depth < 0 || enableDivergence < 0 || diffCandle0 < 0 || shift < 0 || shift >= length - slowPeriod)
         return {};
 
-    int result = macd_n_dinh(fastPeriod, slowPeriod, signalPeriod, redDepth, depth, enableDivergence, diffCandle0, diffPercents, close + shift, open + shift, high + shift, length - shift);
-    
+    vector<double> &cachedMACD = getMACD(fastPeriod, slowPeriod, signalPeriod);
+    int result = macd_n_dinh(fastPeriod, slowPeriod, signalPeriod, redDepth, depth, enableDivergence, diffCandle0, diffPercents, close + shift, open + shift, high + shift, length - shift, cachedMACD);
+
     vectorDoublePool.release(diffPercents);
     return (double)result;
 }
