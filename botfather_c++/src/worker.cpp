@@ -56,7 +56,7 @@ void Worker::init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, st
 void Worker::run()
 {
     Timer *timer = NULL;
-    if (timeframe != "1m")
+    if (timeframe != "1m" && timeframe != "3m" && timeframe != "5m")
     {
         timer = new Timer(StringFormat("onCloseCandle {} {} {}", broker, symbol, timeframe));
     }
