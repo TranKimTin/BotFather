@@ -41,7 +41,7 @@ any Expr::visitFloat(ExprParser::FloatContext *ctx)
 
 any Expr::visitInt(ExprParser::IntContext *ctx)
 {
-    return stod(ctx->INT()->getText());
+    return static_cast<double>(fast_stoi(ctx->INT()->getText().c_str()));
 }
 
 any Expr::visitString(ExprParser::StringContext *ctx)
@@ -76,7 +76,8 @@ any Expr::visitMulDiv(ExprParser::MulDivContext *ctx)
     double l = any_cast<double>(left);
     double r = any_cast<double>(right);
 
-    return ctx->children[1]->getText() == "*" ? l * r : l / r;
+    int t = static_cast<antlr4::tree::TerminalNode *>(ctx->children[1])->getSymbol()->getType();
+    return (t == ExprParser::MUL) ? l * r : l / r;
 }
 
 any Expr::visitAddSub(ExprParser::AddSubContext *ctx)
@@ -90,7 +91,8 @@ any Expr::visitAddSub(ExprParser::AddSubContext *ctx)
     double l = any_cast<double>(left);
     double r = any_cast<double>(right);
 
-    return ctx->children[1]->getText() == "+" ? l + r : l - r;
+    int t = static_cast<antlr4::tree::TerminalNode *>(ctx->children[1])->getSymbol()->getType();
+    return (t == ExprParser::PLUS) ? l + r : l - r;
 }
 
 any Expr::visitComparison(ExprParser::ComparisonContext *ctx)
@@ -104,20 +106,27 @@ any Expr::visitComparison(ExprParser::ComparisonContext *ctx)
     double l = any_cast<double>(left);
     double r = any_cast<double>(right);
 
-    string op = ctx->comparisonOp()->getText();
+    int type = ctx->comparisonOp()->getStart()->getType();
 
-    if (op == "==")
-        return l == r ? 1.0 : 0.0;
-    if (op == "=")
-        return l == r ? 1.0 : 0.0;
-    if (op == "<")
-        return l < r ? 1.0 : 0.0;
-    if (op == "<=")
-        return l <= r ? 1.0 : 0.0;
-    if (op == ">")
+    // comparisonOp : GT | GE | LT | LE | EQ | ASSIGN ;
+
+    switch (type)
+    {
+    case ExprParser::GT:
         return l > r ? 1.0 : 0.0;
-    if (op == ">=")
+    case ExprParser::GE:
         return l >= r ? 1.0 : 0.0;
+    case ExprParser::LT:
+        return l < r ? 1.0 : 0.0;
+    case ExprParser::LE:
+        return l <= r ? 1.0 : 0.0;
+    case ExprParser::EQ:
+        return l == r ? 1.0 : 0.0;
+    case ExprParser::ASSIGN:
+        return l == r ? 1.0 : 0.0;
+    default:
+        return {};
+    }
 
     return {};
 }
@@ -475,7 +484,7 @@ any Expr::visitMacd_n_dinh(ExprParser::Macd_n_dinhContext *ctx)
     int result = macd_n_dinh(fastPeriod, slowPeriod, signalPeriod, redDepth, depth, enableDivergence, diffCandle0, diffPercents, close + shift, open + shift, high + shift, length - shift, cachedMACD);
 
     vectorDoublePool.release(diffPercents);
-    return (double)result;
+    return static_cast<double>(result);
 }
 
 any Expr::visitMacd_slope(ExprParser::Macd_slopeContext *ctx)

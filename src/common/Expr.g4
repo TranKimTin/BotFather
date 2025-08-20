@@ -1,8 +1,8 @@
 grammar Expr;
 
 expr
-    : expr ('*' | '/') expr     # MulDiv
-    | expr ('+' | '-') expr     # AddSub
+    : expr (MUL | DIV) expr     # MulDiv
+    | expr (PLUS | MINUS) expr  # AddSub
     | '-' expr                  # Negative
     | '+' expr                  # Positive
     | expr comparisonOp expr    # Comparison
@@ -150,18 +150,24 @@ min_macd_histogram: 'min_macd_histogram' '(' INT ',' INT ',' INT ',' INT (',' IN
 max_macd_histogram: 'max_macd_histogram' '(' INT ',' INT ',' INT ',' INT (',' INT)? ')';
 avg_macd_histogram: 'avg_macd_histogram' '(' INT ',' INT ',' INT ',' INT (',' INT)? ')';
 
-comparisonOp
-    : '>'
-    | '>='
-    | '<'
-    | '<='
-    | '=='
-    | '='
-    ;
+comparisonOp : GT | GE | LT | LE | EQ | ASSIGN ;
 
 number: INT | FLOAT;
 
 // Lexer rules
+
+PLUS  : '+';
+MINUS : '-';
+MUL   : '*';
+DIV   : '/';
+
+GT      : '>';
+GE      : '>=';
+LT      : '<';
+LE      : '<=';
+EQ      : '==';
+ASSIGN  : '=';
+
 INT: '-'? [0-9]+ ;
 FLOAT: '-'? [0-9]+ '.' ([0-9]+)?;
 STRING: '\'' (~['\r\n])* '\'';
