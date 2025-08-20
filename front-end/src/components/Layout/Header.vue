@@ -10,11 +10,25 @@
         </div>
 
         <div class="flex items-center">
-            <div class="bg-gray-100 text-gray-600 font-semibold text-xs p-2 rounded-full shadow-md px-5">
+            <div class="bg-gray-100 text-gray-600 font-semibold text-xs p-2 rounded-full shadow-md px-5 ml-2">
+                Donate: <strong>USDT - BNB Smart Chain (BEP20)</strong>
+                <span class="block text-blue-600 text-base font-bold flex items-center gap-2">
+                    {{ address }}
+                    <button @click="copyAddress" class="ml-1 p-1 hover:bg-gray-200 rounded" title="Copy">
+                        <!-- Heroicons outline clipboard -->
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5 text-gray-500 hover:text-blue-600 transition" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2m2-2h4a2 2 0 012 2v2a2 2 0 01-2 2h-4a2 2 0 01-2-2V4a2 2 0 012-2z" />
+                        </svg>
+                    </button>
+                </span>
+            </div>
+            <div class="bg-gray-100 text-gray-600 font-semibold text-xs p-2 rounded-full shadow-md px-5 ml-2">
                 Số dư hiện tại
                 <span class="block text-blue-600 text-base font-bold">{{ r_balance.toLocaleString() }}đ</span>
             </div>
-
 
             <button class="flex mx-4 text-gray-600 focus:outline-none">
                 <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

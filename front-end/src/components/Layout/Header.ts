@@ -12,6 +12,12 @@ export default defineComponent({
         const router = useRouter();
         const dropdownOpen = ref(false);
         const r_balance = ref<number>(0);
+        const address = '0x4d20bc4aa801b728340defcf78c1ddc9d2c087c7';
+
+        function copyAddress() {
+            navigator.clipboard.writeText(address);
+            mToast.showSuccess(`Xin cảm ơn ❤️ ${address}`);
+        }
 
         const logout = () => {
             axios.post('/logout').then(response => {
@@ -32,6 +38,6 @@ export default defineComponent({
             }
         });
 
-        return { dropdownOpen, r_balance, logout };
+        return { dropdownOpen, r_balance, logout, address, copyAddress };
     },
 });
