@@ -210,7 +210,7 @@ cd FlameGraph
 $ perf top -p <PID> -- sleep 30
 
 # Record profiling
-$ sudo perf record -g -p <PID>
+$ sudo perf record -g --call-graph=dwarf -p <PID>
 
 # Report on terminal
 $ perf report
