@@ -164,6 +164,7 @@ struct Bot
     string secretKey;
     string iv;
     bool enableRealOrder;
+    unordered_set<long long> symbolExist;
 };
 
 struct Digit

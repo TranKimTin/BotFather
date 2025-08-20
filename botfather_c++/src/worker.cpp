@@ -15,30 +15,6 @@ static ThreadPool tasks(thread::hardware_concurrency() * 2 + 1);
 extern thread_local VectorDoublePool vectorDoublePool;
 extern thread_local SparseTablePool sparseTablePool;
 
-static int binarySearch(const vector<Symbol> &symbolList, const string &symbol)
-{
-    int left = 0;
-    int right = symbolList.size() - 1;
-
-    while (left <= right)
-    {
-        int mid = left + (right - left) / 2;
-        if (symbolList[mid].symbolName == symbol)
-        {
-            return mid;
-        }
-        else if (symbolList[mid].symbolName < symbol)
-        {
-            left = mid + 1;
-        }
-        else
-        {
-            right = mid - 1;
-        }
-    }
-    return -1;
-}
-
 void Worker::init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, Digit digit, double fundingRate)
 {
     VectorDoublePool::getInstance().releaseLock(this->open);
@@ -88,7 +64,7 @@ void Worker::run()
     {
         try
         {
-            if (binarySearch(bot->symbolList, broker + ":" + symbol) == -1)
+            if (bot->symbolExist.find(hashString(broker + ":" + symbol)) == bot->symbolExist.end())
             {
                 continue;
             }

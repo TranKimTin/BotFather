@@ -49,7 +49,7 @@ void test()
     unordered_map<long long, vector<double>> cached;
     unordered_map<long long, unique_ptr<SparseTable>> cachedMinMax;
 
-    string expr = "{max_open(0,10)} - {max_high(0,10)} -  {max_low(0,10)} -  {max_close(0,10)}";
+    string expr = "{1 + 2}";
 
     LOGI(calculateSubExpr(expr, broker, symbol, timeframe, open.size(), open.data(), high.data(), low.data(), close.data(), volume.data(), startTime.data(), 0.0, &cached, &cachedMinMax));
     SLEEP_FOR(1000000);
@@ -154,6 +154,7 @@ vector<shared_ptr<Bot>> getBotList(string botName, bool cachedTree)
         }
 
         bot->symbolList.clear();
+        bot->symbolExist.clear();
         vector<string> symbolList = convertJsonStringArrayToVector(res->getString("symbolList"));
         for (const string &symbol : symbolList)
         {
@@ -165,12 +166,8 @@ vector<shared_ptr<Bot>> getBotList(string botName, bool cachedTree)
             s.symbolName = symbol;
 
             bot->symbolList.push_back(s);
+            bot->symbolExist.insert(hashString(symbol));
         }
-        sort(bot->symbolList.begin(), bot->symbolList.end(),
-             [](const Symbol &a, const Symbol &b)
-             {
-                 return a.symbolName < b.symbolName;
-             });
 
         string routeString = res->getString("route");
         json j = json::parse(routeString);
