@@ -66,6 +66,9 @@ static void checkOrderStatus()
                     string side = tpJson["side"].get<string>();
                     string symbol = tpJson["symbol"].get<string>();
                     string volume = tpJson["origQty"].get<string>();
+                    string tpClientOrderId = tpJson["clientOrderId"].get<string>();
+
+                    exchange->cancelOrderByClientId(symbol, tpClientOrderId);
 
                     string clientOrderId;
                     if (side == "BUY")
