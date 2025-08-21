@@ -41,7 +41,7 @@ any Expr::visitFloat(ExprParser::FloatContext *ctx)
 
 any Expr::visitInt(ExprParser::IntContext *ctx)
 {
-    return static_cast<double>(fast_stoi(ctx->INT()->getText().c_str()));
+    return stod(ctx->INT()->getText());
 }
 
 any Expr::visitString(ExprParser::StringContext *ctx)
