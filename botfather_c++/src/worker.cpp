@@ -60,15 +60,17 @@ void Worker::run()
     {
         timer = new Timer(StringFormat("onCloseCandle {} {} {}", broker, symbol, timeframe));
     }
+    string key;
     for (const shared_ptr<Bot> &bot : *botList)
     {
         try
         {
-            string key = broker;
+            key.clear();
+            key.append(broker);
             key.push_back(':');
             key.append(symbol);
 
-            if (bot->symbolExist.find(hashString(key)) == bot->symbolExist.end())
+            if (bot->symbolExist.count(hashString(key)) == 0)
             {
                 continue;
             }
@@ -94,11 +96,11 @@ void Worker::run()
 void Worker::dfs_handleLogic(Route &route, const shared_ptr<Bot> &bot)
 {
     long long keyID = (route.id.empty() || route.id == "start") ? 0 : stoll(route.id);
-    if (visited[keyID])
+    if (visited.count(keyID) > 0)
     {
         return;
     }
-    visited[keyID] = true;
+    visited.insert(keyID);
     if (handleLogic(route.data, bot))
     {
         for (Route &next : route.next)

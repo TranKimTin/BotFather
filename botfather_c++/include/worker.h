@@ -14,7 +14,7 @@ private:
     vector<double> volume;
     vector<long long> startTime;
     shared_ptr<vector<shared_ptr<Bot>>> botList;
-    unordered_map<long long, bool> visited;
+    unordered_set<long long> visited;
     unordered_map<long long, any> cachedExpr;
     Digit digit;
     double fundingRate;
