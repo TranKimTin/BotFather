@@ -870,9 +870,9 @@ int compareStringNumber(const string &a, const string &b)
 {
     double A = stod(a);
     double B = stod(b);
-    if (a == b)
+    if (A == B)
         return 0;
-    return a < b ? -1 : 1;
+    return A < B ? -1 : 1;
 }
 
 long long hashString(const string s)
