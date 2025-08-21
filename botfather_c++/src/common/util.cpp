@@ -875,7 +875,7 @@ int compareStringNumber(const string &a, const string &b)
     return A < B ? -1 : 1;
 }
 
-long long hashString(const string s)
+long long hashString(const string &s)
 {
     long long hash = 5381;
     for (char c : s)

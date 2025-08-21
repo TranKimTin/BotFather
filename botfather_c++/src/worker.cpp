@@ -64,7 +64,11 @@ void Worker::run()
     {
         try
         {
-            if (bot->symbolExist.find(hashString(broker + ":" + symbol)) == bot->symbolExist.end())
+            string key = broker;
+            key.push_back(':');
+            key.append(symbol);
+
+            if (bot->symbolExist.find(hashString(key)) == bot->symbolExist.end())
             {
                 continue;
             }
