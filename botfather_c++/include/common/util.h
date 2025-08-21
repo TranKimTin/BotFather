@@ -2,7 +2,7 @@
 
 // string
 string toLowerCase(string str);
-string trim(const string& s);
+string trim(const string &s);
 bool endsWith(const string &str, const string &suffix);
 bool checkFinal(const string &tf, long long startTime, string &currentTF);
 long long getStartTime(const string &tf, long long currentTime);
@@ -23,7 +23,6 @@ string StringFormat(const string &format, Args &&...args)
 {
     return fmt::format(format, forward<Args>(args)...);
 }
-
 
 RateData getOHLCVFromRateServer(const string &broker, const string &symbol, const string &timeframe, int limit, long long since = 0);
 RateData getBinanceOHLCV(const string &symbol, const string &timeframe, int limit, long long since = 0);
@@ -52,6 +51,6 @@ string generateRandomIV();
 
 int compareStringNumber(const string &a, const string &b);
 
-long long hashString(const string s);
+long long hashString(const string &s);
 
 int fast_stoi(const char *s);
