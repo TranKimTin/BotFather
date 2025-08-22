@@ -136,6 +136,7 @@ vector<shared_ptr<Bot>> getBotList(string botName, bool cachedTree)
     while (res->next())
     {
         shared_ptr<Bot> bot = make_shared<Bot>();
+        bot->symbolExist.max_load_factor(0.5);
 
         bot->id = res->getInt("id");
         bot->botName = res->getString("botName");

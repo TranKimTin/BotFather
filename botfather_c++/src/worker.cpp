@@ -37,9 +37,6 @@ void Worker::init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, st
     this->digit = digit;
     this->fundingRate = fundingRate;
 
-    this->visited.clear();
-    this->cachedExpr.clear();
-
     for (auto &pair : cachedIndicator)
     {
         vectorDoublePool.release(pair.second);
@@ -50,6 +47,8 @@ void Worker::init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, st
         sparseTablePool.release(move(pair.second));
     }
 
+    this->visited.clear();
+    this->cachedExpr.clear();
     this->cachedIndicator.clear();
     this->cachedMinMax.clear();
 }

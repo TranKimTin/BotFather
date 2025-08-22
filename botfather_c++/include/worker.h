@@ -26,7 +26,13 @@ private:
     bool adjustParam(NodeData &data);
 
 public:
-    Worker() {};
+    Worker()
+    {
+        visited.max_load_factor(0.5);
+        cachedExpr.max_load_factor(0.5);
+        cachedIndicator.max_load_factor(0.5);
+        cachedMinMax.max_load_factor(0.5);
+    };
     void init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, Digit digit, double fundingRate);
     void run();
     void dfs_handleLogic(Route &route, const shared_ptr<Bot> &bot);

@@ -14,6 +14,7 @@ thread_local SparseTablePool sparseTablePool;
 SocketData::SocketData(const int _BATCH_SIZE) : BATCH_SIZE(_BATCH_SIZE), firstConnection(true)
 {
     timeframes = {"1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "12h", "1d"};
+    data.max_load_factor(0.5);
 }
 
 void SocketData::init()
@@ -31,6 +32,9 @@ void SocketData::init()
         // }
 
         digits = getDigit();
+        digits.max_load_factor(0.5);
+        fundingRates.max_load_factor(0.5);
+
         for (string &symbol : symbolList)
         {
             for (string &tf : timeframes)
@@ -55,7 +59,7 @@ void SocketData::onCloseCandle(const string &symbol, string &timeframe, RateData
 
     if (!botList)
         return;
-    
+
     vector<double> open = VectorDoublePool::getInstance().acquireLock();
     vector<double> high = VectorDoublePool::getInstance().acquireLock();
     vector<double> low = VectorDoublePool::getInstance().acquireLock();
