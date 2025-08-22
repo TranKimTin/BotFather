@@ -18,7 +18,7 @@ export async function getBotInfo(userData: UserTokenInfo) {
                 LEFT JOIN Orders o ON o.botID = b.id
                 WHERE (u.id = ? OR ? = ?)
                 GROUP BY b.id
-                ORDER BY b.enableRealOrder DESC, b.botName ASC;`;
+                ORDER BY b.enableRealOrder DESC, profit DESC, b.botName ASC;`;
     const data = await mysql.query(sql, [userData.id, userData.role, ROLE.ADMIN, ORDER_STATUS.MATCH_ENTRY, ORDER_STATUS.MATCH_TP, ORDER_STATUS.MATCH_SL]);
     for (const item of data) {
         if (item.winrate === null) {
