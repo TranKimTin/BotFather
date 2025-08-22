@@ -29,7 +29,7 @@ string BinanceFuture::buyMarket(const string &symbol, string quantity,
 
     string clientOrderId = StringFormat("BFBM{}{}", symbol, getCurrentTime());
     map<string, string> params = {
-        {"recvWindow", "5000"},
+        {"recvWindow", "30000"},
         {"symbol", symbol},
         {"side", BUY},
         {"type", MARKET},
@@ -112,7 +112,7 @@ string BinanceFuture::sellMarket(const string &symbol, string quantity, string t
 
     string clientOrderId = StringFormat("BFSM{}{}", symbol, getCurrentTime());
     map<string, string> params = {
-        {"recvWindow", "5000"},
+        {"recvWindow", "30000"},
         {"symbol", symbol},
         {"side", SELL},
         {"type", MARKET},
@@ -195,7 +195,7 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
 
     string clientOrderId = StringFormat("BFBL{}{}", symbol, getCurrentTime());
     map<string, string> params = {
-        {"recvWindow", "5000"},
+        {"recvWindow", "30000"},
         {"symbol", symbol},
         {"side", BUY},
         {"type", LIMIT},
@@ -323,7 +323,7 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
 
     string clientOrderId = StringFormat("BFSL{}{}", symbol, getCurrentTime());
     map<string, string> params = {
-        {"recvWindow", "5000"},
+        {"recvWindow", "30000"},
         {"symbol", symbol},
         {"side", SELL},
         {"type", LIMIT},
@@ -441,7 +441,7 @@ string BinanceFuture::sendTPorSL(const string &symbol, const string &side, const
                                : StringFormat("BFSL{}{}", symbol, getCurrentTime());
 
     map<string, string> params = {
-        {"recvWindow", "5000"},
+        {"recvWindow", "30000"},
         {"symbol", symbol},
         {"side", side},
         {"type", type},
@@ -547,7 +547,7 @@ string BinanceFuture::cancelOrderByClientId(const string &symbol, const string &
 string BinanceFuture::getOrderStatus(const string &symbol, const string &orderId)
 {
     map<string, string> params = {
-        {"recvWindow", "5000"},
+        {"recvWindow", "30000"},
         {"symbol", symbol},
         {"origClientOrderId", orderId},
         {"timestamp", to_string(getCurrentTime())}};
@@ -599,7 +599,7 @@ int BinanceFuture::insertOrderToDB(const string &symbol, const string clientOrde
 bool BinanceFuture::changeLeverage(const string &symbol, int leverage)
 {
     map<string, string> params = {
-        {"recvWindow", "5000"},
+        {"recvWindow", "30000"},
         {"symbol", symbol},
         {"leverage", to_string(leverage)},
         {"timestamp", to_string(getCurrentTime())}};
@@ -628,7 +628,7 @@ bool BinanceFuture::changeMarginType(const string &symbol, const string &marginT
 {
     // marginType: "CROSSED" or "ISOLATED"
     map<string, string> params = {
-        {"recvWindow", "5000"},
+        {"recvWindow", "30000"},
         {"symbol", symbol},
         {"marginType", marginType},
         {"timestamp", to_string(getCurrentTime())}};
@@ -657,7 +657,7 @@ int BinanceFuture::getOpenAlgoOrdersCount(const string &symbol)
 {
     map<string, string> params = {
         {"symbol", symbol},
-        {"recvWindow", "5000"},
+        {"recvWindow", "30000"},
         {"timestamp", to_string(getCurrentTime())}};
 
     string query = buildQuery(params);
