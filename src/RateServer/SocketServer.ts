@@ -36,11 +36,39 @@ const exchange: { [key: string]: SocketData } = {};
     exchange['bybit_future'].initData();
     exchange['okx'].initData();
 
-    process.on('message', (msg: any) => {
-        if (msg.type === 'update') {
-            let { broker, symbol, timeframe } = msg;
-            console.log('update data for', broker, symbol, timeframe);
-            exchange[broker].setData(symbol, timeframe);
+    const queue: {
+        broker: string;
+        symbol: string;
+        timeframe: string;
+    }[] = [];
+
+    let processing = false;
+
+    const processQueue = async function () {
+        if (processing) return;
+        processing = true;
+
+        while (queue.length > 0) {
+            const { broker, symbol, timeframe } = queue.shift()!;
+            console.log("update data for", broker, symbol, timeframe);
+            try {
+                await exchange[broker].setData(symbol, timeframe);
+            } catch (err) {
+                console.error("update error:", err);
+            }
+        }
+
+        processing = false;
+    }
+
+    process.on('message', async (msg: any) => {
+        if (msg.type === "update") {
+            queue.push({
+                broker: msg.broker,
+                symbol: msg.symbol,
+                timeframe: msg.timeframe,
+            });
+            processQueue();
         }
     });
 })();
