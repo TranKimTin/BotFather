@@ -14,7 +14,7 @@ BinanceFuture::BinanceFuture(const string &encryptedApiKey, const string &encryp
 }
 
 string BinanceFuture::buyMarket(const string &symbol, string quantity,
-                                string takeProfit, string stopLoss)
+                                string takeProfit, string stopLoss, bool reduceOnly)
 {
     if (!takeProfit.empty() || !stopLoss.empty())
     {
@@ -37,10 +37,10 @@ string BinanceFuture::buyMarket(const string &symbol, string quantity,
         {"newClientOrderId", clientOrderId},
         {"timestamp", to_string(getCurrentTime())}};
 
-    // if (takeProfit.empty() && stopLoss.empty())
-    // {
-    //     params["reduceOnly"] = "true";
-    // }
+    if (reduceOnly)
+    {
+        params["reduceOnly"] = "true";
+    }
 
     string res = sendOrder(params);
     if (res.empty())
@@ -99,7 +99,7 @@ string BinanceFuture::placeBuyMarketTPSL(const string &symbol, string &quantity,
     return clientOrderId;
 }
 
-string BinanceFuture::sellMarket(const string &symbol, string quantity, string takeProfit, string stopLoss)
+string BinanceFuture::sellMarket(const string &symbol, string quantity, string takeProfit, string stopLoss, bool reduceOnly)
 {
     if (!takeProfit.empty() || !stopLoss.empty())
     {
@@ -122,10 +122,10 @@ string BinanceFuture::sellMarket(const string &symbol, string quantity, string t
         {"newClientOrderId", clientOrderId},
         {"timestamp", to_string(getCurrentTime())}};
 
-    // if (takeProfit.empty() && stopLoss.empty())
-    // {
-    //     params["reduceOnly"] = "true";
-    // }
+    if (reduceOnly)
+    {
+        params["reduceOnly"] = "true";
+    }
 
     string res = sendOrder(params);
     if (res.empty())

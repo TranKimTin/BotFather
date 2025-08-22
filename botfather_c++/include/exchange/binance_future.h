@@ -8,8 +8,8 @@ class BinanceFuture : public IExchange
 public:
     BinanceFuture(const string &encryptedApiKey, const string &encryptedSecretKey, const string &iv, const int botID);
 
-    string buyMarket(const string &symbol, string quantity, string takeProfit = "", string stopLoss = "") override;
-    string sellMarket(const string &symbol, string quantity, string takeProfit = "", string stopLoss = "") override;
+    string buyMarket(const string &symbol, string quantity, string takeProfit = "", string stopLoss = "", bool reduceOnly = false) override;
+    string sellMarket(const string &symbol, string quantity, string takeProfit = "", string stopLoss = "", bool reduceOnly = false) override;
     string buyLimit(const string &symbol, string quantity, string price, string takeProfit = "", string stopLoss = "", string expiredTime = "") override;
     string sellLimit(const string &symbol, string quantity, string price, string takeProfit = "", string stopLoss = "", string expiredTime = "") override;
     string getOrderStatus(const string &symbol, const string &orderId) override;
