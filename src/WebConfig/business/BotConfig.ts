@@ -158,7 +158,7 @@ export async function getHistoryOrder(botName: string, filterBroker: Array<strin
         order.timeTP = order.timeTP ? moment(order.timeTP).format('YYYY-MM-DD HH:mm') : '';
         order.timeSL = order.timeSL ? moment(order.timeSL).format('YYYY-MM-DD HH:mm') : '';
         order.lastTimeUpdated = order.lastTimeUpdated ? moment(order.lastTimeUpdated).format('YYYY-MM-DD HH:mm') : '';
-        order.volumeInUSD = order.volume * order.entry;
+        order.volumeInUSD = parseFloat((order.volume * order.entry).toFixed(2));
     }
 
     let tradeReal = [];
