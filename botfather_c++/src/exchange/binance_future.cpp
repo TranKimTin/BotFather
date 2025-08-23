@@ -447,8 +447,8 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
 string BinanceFuture::sendTPorSL(const string &symbol, const string &side, const string &type, string quantity, string stopPrice, string limitPrice)
 {
     string clientOrderId = (type == TAKE_PROFIT_MARKET || type == STOP || type == LIMIT)
-                               ? StringFormat("BFTP{}{}", symbol, getCurrentTime())
-                               : StringFormat("BFSL{}{}", symbol, getCurrentTime());
+                               ? StringFormat("BF_TP{}{}", symbol, getCurrentTime())
+                               : StringFormat("BF_SL{}{}", symbol, getCurrentTime());
 
     map<string, string> params = {
         {"recvWindow", "30000"},
