@@ -107,6 +107,8 @@
             </Column>
             <Column field="volume" header="Volume">
             </Column>
+            <Column field="volumeInUSD" header="volumeInUSD">
+            </Column>
             <Column field="stop" header="Stop"></Column>
             <Column header="entry">
                 <template #body="order">

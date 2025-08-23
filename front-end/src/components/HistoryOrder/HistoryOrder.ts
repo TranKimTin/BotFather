@@ -17,6 +17,7 @@ interface Order {
     timeframe: string,
     orderType: string,
     volume: number,
+    volumeInUSD: number,
     stop: number,
     entry: number,
     tp: number,
