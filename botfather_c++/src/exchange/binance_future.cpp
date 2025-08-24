@@ -60,7 +60,7 @@ string BinanceFuture::placeBuyMarketTPSL(const string &symbol, string &quantity,
         {
             LOGI("Place TP error. Close position");
             SLEEP_FOR(1000);
-            return sellMarket(symbol, quantity, "", "");
+            return sellMarket(symbol, quantity, "", "", true);
         }
         else
         {
@@ -83,7 +83,7 @@ string BinanceFuture::placeBuyMarketTPSL(const string &symbol, string &quantity,
             }
             LOGI("Close position");
             SLEEP_FOR(1000);
-            return sellMarket(symbol, quantity, "", "");
+            return sellMarket(symbol, quantity, "", "", true);
         }
         else
         {
@@ -144,7 +144,7 @@ string BinanceFuture::placeSellMarketTPSL(const string &symbol, string &quantity
         {
             LOGI("Place TP error. Close position");
             SLEEP_FOR(1000);
-            return buyMarket(symbol, quantity, "", "");
+            return buyMarket(symbol, quantity, "", "", true);
         }
         else
         {
@@ -168,7 +168,7 @@ string BinanceFuture::placeSellMarketTPSL(const string &symbol, string &quantity
             }
             LOGI("Close position");
             SLEEP_FOR(1000);
-            return buyMarket(symbol, quantity, "", "");
+            return buyMarket(symbol, quantity, "", "", true);
         }
         else
         {
@@ -245,7 +245,7 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
         {
             string resEntry = getOrderStatus(symbol, clientOrderId);
             if (resEntry.empty())
-                return sellMarket(symbol, quantity, "", "");
+                return sellMarket(symbol, quantity, "", "", true);
 
             json entryJson = json::parse(resEntry);
             string entryStatus = entryJson["status"].get<string>();
@@ -264,7 +264,7 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
                     LOGI("Cancel order {} error", clientOrderId);
                     LOGI("Close position");
                     SLEEP_FOR(1000);
-                    return sellMarket(symbol, quantity, "", "");
+                    return sellMarket(symbol, quantity, "", "", true);
                 }
             }
             return resTP;
@@ -296,7 +296,7 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
             if (resCancel.empty())
             {
                 LOGI("Cancel order {} error", clientOrderId);
-                return sellMarket(symbol, quantity, "", "");
+                return sellMarket(symbol, quantity, "", "", true);
             }
         }
         else
@@ -376,7 +376,7 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
         {
             string resEntry = getOrderStatus(symbol, clientOrderId);
             if (resEntry.empty())
-                return buyMarket(symbol, quantity, "", "");
+                return buyMarket(symbol, quantity, "", "", true);
 
             json entryJson = json::parse(resEntry);
             string entryStatus = entryJson["status"].get<string>();
@@ -389,13 +389,13 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
             {
                 LOGI("Place TP error. Close position");
                 SLEEP_FOR(1000);
-                string resCancel = cancelOrderByClientId(symbol, clientOrderId);
+                string resCancel = cancelOrderByClientId(symbol, clientOrderId, true);
                 if (resCancel.empty())
                 {
                     LOGI("Cancel order {} error", clientOrderId);
                     LOGI("Close position");
                     SLEEP_FOR(1000);
-                    return buyMarket(symbol, quantity, "", "");
+                    return buyMarket(symbol, quantity, "", "", true);
                 }
                 return resTP;
             }
@@ -427,7 +427,7 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
             if (resCancel.empty())
             {
                 LOGI("Cancel order {} error", clientOrderId);
-                return buyMarket(symbol, quantity, "", "");
+                return buyMarket(symbol, quantity, "", "", true);
             }
         }
         else
