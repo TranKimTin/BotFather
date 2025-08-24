@@ -479,14 +479,14 @@ bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
     {
         string content = calculateSub(nodeData.value);
 
-        unordered_map<string, string> emoji = {
+        boost::unordered_flat_map<string, string> emoji = {
             {"binance", "🥇🥇🥇"},
             {"bybit", ""},
             {"okx", "🏁🏁🏁"},
             {"binance_future", "🥇🥇🥇"},
             {"bybit_future", ""}};
 
-        unordered_map<string, string> url = {
+        boost::unordered_flat_map<string, string> url = {
             {"binance", "https://www.binance.com/en/trade/" + symbol + "?_from=markets&type=spot"},
             {"bybit", "https://www.bybit.com/vi-VN/trade/spot/" + symbol.substr(0, symbol.find("USDT")) + "/USDT"},
             {"okx", "https://www.okx.com/vi/trade-spot/" + symbol},

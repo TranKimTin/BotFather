@@ -24,7 +24,7 @@ static string urlEncode(const string &value)
 
 Telegram::Telegram()
 {
-    unordered_map<string, string> env = readEnvFile();
+    boost::unordered_flat_map<string, string> env = readEnvFile();
     if (env.find("TELEGRAM_TOKEN") != env.end())
     {
         botToken = env["TELEGRAM_TOKEN"];

@@ -5,7 +5,7 @@ class SocketData
 {
 protected:
     string broker;
-    unordered_map<long long, RateData> data; // key = symbol + "_" + timeframe;
+    boost::unordered_flat_map<long long, RateData> data; // key = symbol + "_" + timeframe;
     vector<string> timeframes;
     vector<string> symbolList;
     WebSocket ws;
@@ -13,8 +13,8 @@ protected:
     std::mutex mMutex;
     shared_ptr<vector<shared_ptr<Bot>>> botList;
     shared_ptr<boost::asio::ssl::context> on_tls_init(connection_hdl);
-    unordered_map<long long, Digit> digits;
-    unordered_map<long long, double> fundingRates;
+    boost::unordered_flat_map<long long, Digit> digits;
+    boost::unordered_flat_map<long long, double> fundingRates;
     bool firstConnection;
     string uri;
 
@@ -31,7 +31,7 @@ protected:
 
     virtual void on_message(connection_hdl, message_ptr msg) = 0;
     virtual vector<string> getSymbolList() = 0;
-    virtual unordered_map<long long, Digit> getDigit() = 0;
+    virtual boost::unordered_flat_map<long long, Digit> getDigit() = 0;
     virtual RateData getOHLCV(const string &symbol, const string &timeframe, int limit, long long since = 0) = 0; // from since, get limit candle
 
 public:

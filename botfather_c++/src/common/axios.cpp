@@ -3,7 +3,7 @@
 
 using namespace std;
 
-static thread_local unordered_map<string, unique_ptr<httplib::SSLClient>> clients;
+static thread_local boost::unordered_flat_map<string, unique_ptr<httplib::SSLClient>> clients;
 
 static void parseUrl(const string &url, string &host, string &path)
 {

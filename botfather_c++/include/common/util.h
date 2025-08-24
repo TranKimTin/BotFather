@@ -12,7 +12,7 @@ long long timeframeToNumberSeconds(const string &tf);
 long long nextTime(long long timestamp, const string &timeframe);
 string toTimeString(long long timestampMs);
 long long getCurrentTime();
-unordered_map<string, string> readEnvFile();
+boost::unordered_flat_map<string, string> readEnvFile();
 vector<string> split(const string &s, char delimiter);
 vector<string> convertJsonStringArrayToVector(string s);
 string doubleToString(double value, int precision);
@@ -37,11 +37,11 @@ vector<string> getBybitFutureSymbolList();
 vector<string> getBybitSymbolList();
 vector<string> getOkxSymbolList();
 
-unordered_map<long long, Digit> getBinanceDigits();
-unordered_map<long long, Digit> getBinanceFutureDigits();
-unordered_map<long long, Digit> getBybitDigits();
-unordered_map<long long, Digit> getBybitFutureDigits();
-unordered_map<long long, Digit> getOkxDigits();
+boost::unordered_flat_map<long long, Digit> getBinanceDigits();
+boost::unordered_flat_map<long long, Digit> getBinanceFutureDigits();
+boost::unordered_flat_map<long long, Digit> getBybitDigits();
+boost::unordered_flat_map<long long, Digit> getBybitFutureDigits();
+boost::unordered_flat_map<long long, Digit> getOkxDigits();
 
 string base64Encode(const unsigned char *data, int len);
 vector<unsigned char> base64Decode(const string &input);

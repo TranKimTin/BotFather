@@ -160,7 +160,7 @@ long long getCurrentTime()
     return chrono::duration_cast<chrono::milliseconds>(duration).count();
 }
 
-unordered_map<string, string> readEnvFile()
+boost::unordered_flat_map<string, string> readEnvFile()
 {
     char exePath[PATH_MAX];
     ssize_t len = readlink("/proc/self/exe", exePath, sizeof(exePath) - 1);
@@ -182,7 +182,7 @@ unordered_map<string, string> readEnvFile()
         throw runtime_error(".env not found");
     }
 
-    unordered_map<string, string> envMap;
+    boost::unordered_flat_map<string, string> envMap;
     string line;
 
     while (getline(file, line))
@@ -601,9 +601,9 @@ vector<string> getOkxSymbolList()
     return symbols;
 }
 
-unordered_map<long long, Digit> getBinanceDigits()
+boost::unordered_flat_map<long long, Digit> getBinanceDigits()
 {
-    unordered_map<long long, Digit> result;
+    boost::unordered_flat_map<long long, Digit> result;
 
     string url = "https://api.binance.com/api/v1/exchangeInfo";
     string response = Axios::get(url);
@@ -634,9 +634,9 @@ unordered_map<long long, Digit> getBinanceDigits()
     return result;
 }
 
-unordered_map<long long, Digit> getBinanceFutureDigits()
+boost::unordered_flat_map<long long, Digit> getBinanceFutureDigits()
 {
-    unordered_map<long long, Digit> result;
+    boost::unordered_flat_map<long long, Digit> result;
 
     string url = "https://fapi.binance.com/fapi/v1/exchangeInfo";
     string response = Axios::get(url);
@@ -668,9 +668,9 @@ unordered_map<long long, Digit> getBinanceFutureDigits()
     return result;
 }
 
-unordered_map<long long, Digit> getBybitDigits()
+boost::unordered_flat_map<long long, Digit> getBybitDigits()
 {
-    unordered_map<long long, Digit> result;
+    boost::unordered_flat_map<long long, Digit> result;
 
     string url = "https://api.bybit.com/v5/market/instruments-info?category=spot";
     string response = Axios::get(url);
@@ -689,9 +689,9 @@ unordered_map<long long, Digit> getBybitDigits()
 
     return result;
 }
-unordered_map<long long, Digit> getBybitFutureDigits()
+boost::unordered_flat_map<long long, Digit> getBybitFutureDigits()
 {
-    unordered_map<long long, Digit> result;
+    boost::unordered_flat_map<long long, Digit> result;
 
     string url = "https://api.bybit.com/v5/market/instruments-info?category=linear&limit=1000";
     string response = Axios::get(url);
@@ -710,9 +710,9 @@ unordered_map<long long, Digit> getBybitFutureDigits()
 
     return result;
 }
-unordered_map<long long, Digit> getOkxDigits()
+boost::unordered_flat_map<long long, Digit> getOkxDigits()
 {
-    unordered_map<long long, Digit> result;
+    boost::unordered_flat_map<long long, Digit> result;
     string url = "https://www.okx.com/api/v5/public/instruments?instType=SPOT";
     string response = Axios::get(url);
     json j = json::parse(response);

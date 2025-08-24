@@ -14,12 +14,12 @@ private:
     vector<double> volume;
     vector<long long> startTime;
     shared_ptr<vector<shared_ptr<Bot>>> botList;
-    unordered_set<long long> visited;
-    unordered_map<long long, any> cachedExpr;
+    boost::unordered_flat_set<long long> visited;
+    boost::unordered_flat_map<long long, any> cachedExpr;
     Digit digit;
     double fundingRate;
-    unordered_map<long long, vector<double>> cachedIndicator;
-    unordered_map<long long, unique_ptr<SparseTable>> cachedMinMax;
+    boost::unordered_flat_map<long long, vector<double>> cachedIndicator;
+    boost::unordered_flat_map<long long, unique_ptr<SparseTable>> cachedMinMax;
 
     string calculateSub(string &expr);
     any calculate(string &expr);

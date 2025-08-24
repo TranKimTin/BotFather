@@ -132,7 +132,7 @@ RateData SocketBybitFuture::getOHLCV(const string &symbol, const string &timefra
     return rateData;
 }
 
-unordered_map<long long, Digit> SocketBybitFuture::getDigit()
+boost::unordered_flat_map<long long, Digit> SocketBybitFuture::getDigit()
 {
     return getBybitFutureDigits();
 }

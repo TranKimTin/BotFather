@@ -46,8 +46,8 @@ void test()
     vector<double> volume(rateData.volume.begin(), rateData.volume.end());
     vector<long long> startTime(rateData.startTime.begin(), rateData.startTime.end());
 
-    unordered_map<long long, vector<double>> cached;
-    unordered_map<long long, unique_ptr<SparseTable>> cachedMinMax;
+    boost::unordered_flat_map<long long, vector<double>> cached;
+    boost::unordered_flat_map<long long, unique_ptr<SparseTable>> cachedMinMax;
 
     string expr = "{1 + 2}";
 
@@ -237,7 +237,7 @@ void sio_on_message(string const &event, sio::message::ptr const &data, bool isA
 
 void runApp()
 {
-    unordered_map<string, string> env = readEnvFile();
+    boost::unordered_flat_map<string, string> env = readEnvFile();
 
     Redis::getInstance().connect(env["REDIS_SERVER"], stoi(env["REDIS_PORT"]), env["REDIS_PASSWORD"]);
 
