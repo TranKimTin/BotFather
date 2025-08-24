@@ -389,7 +389,7 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
             {
                 LOGI("Place TP error. Close position");
                 SLEEP_FOR(1000);
-                string resCancel = cancelOrderByClientId(symbol, clientOrderId, true);
+                string resCancel = cancelOrderByClientId(symbol, clientOrderId);
                 if (resCancel.empty())
                 {
                     LOGI("Cancel order {} error", clientOrderId);
