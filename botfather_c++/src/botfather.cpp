@@ -99,6 +99,17 @@ static Route getRoute(const json &j, bool cachedTree)
             route.data.volume = jData["volume"].get<string>();
     }
 
+    if (route.data.type != NODE_TYPE::TELEGRAM)
+    {
+        route.data.value = toLowerCase(route.data.value);
+    }
+    route.data.stop = toLowerCase(route.data.stop);
+    route.data.entry = toLowerCase(route.data.entry);
+    route.data.tp = toLowerCase(route.data.tp);
+    route.data.sl = toLowerCase(route.data.sl);
+    route.data.volume = toLowerCase(route.data.volume);
+    route.data.expiredTime = toLowerCase(route.data.expiredTime);
+
     if (j.contains("next"))
     {
         for (const auto &nextNode : j["next"])

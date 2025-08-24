@@ -1444,8 +1444,7 @@ any calculateExpr(const string &inputText, const string &broker, const string &s
                   const double *open, const double *high, const double *low, const double *close,
                   const double *volume, long long *startTime, double fundingRate, unordered_map<long long, vector<double>> *cachedIndicator, unordered_map<long long, unique_ptr<SparseTable>> *cachedMinMax)
 {
-    const string text = toLowerCase(inputText);
-    const long long key = hashString(text);
+    const long long key = hashString(inputText);
     Expr expr(broker, symbol, timeframe, length, open, high, low, close, volume, startTime, fundingRate, cachedIndicator, cachedMinMax);
 
     auto it = parseCache.find(key);
@@ -1455,7 +1454,7 @@ any calculateExpr(const string &inputText, const string &broker, const string &s
     }
     else
     {
-        ANTLRInputStream input(text);
+        ANTLRInputStream input(inputText);
         ExprLexer lexer(&input);
         CommonTokenStream tokens(&lexer);
         ExprParser parser(&tokens);
@@ -1486,7 +1485,7 @@ string calculateSubExpr(string &expr, const string &broker, const string &symbol
             }
             string lastS = st.top();
             st.pop();
-            any result = calculateExpr(s, broker, symbol, timeframe, length, open, high, low, close, volume, startTime, fundingRate, cachedIndicator, cachedMinMax);
+            any result = calculateExpr(toLowerCase(s), broker, symbol, timeframe, length, open, high, low, close, volume, startTime, fundingRate, cachedIndicator, cachedMinMax);
             s = lastS + " ";
             if (result.type() == typeid(double))
             {

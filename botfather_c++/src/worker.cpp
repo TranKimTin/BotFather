@@ -118,7 +118,7 @@ string Worker::calculateSub(string &expr)
 
 any Worker::calculate(string &expr)
 {
-    long long key = hashString(toLowerCase(expr));
+    long long key = hashString(expr);
     auto it = cachedExpr.find(key);
     if (it != cachedExpr.end())
     {
