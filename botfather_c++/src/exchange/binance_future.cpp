@@ -8,7 +8,7 @@
 BinanceFuture::BinanceFuture(const string &encryptedApiKey, const string &encryptedSecretKey, const string &iv, const int botID)
     : encryptedApiKey(encryptedApiKey), encryptedSecretKey(encryptedSecretKey), iv(iv), botID(botID)
 {
-    unordered_map<string, string> env = readEnvFile();
+    boost::unordered_flat_map<string, string> env = readEnvFile();
     apiKey = decryptAES(encryptedApiKey, env["ENCRYP_KEY"], iv);
     secretKey = decryptAES(encryptedSecretKey, env["ENCRYP_KEY"], iv);
 }

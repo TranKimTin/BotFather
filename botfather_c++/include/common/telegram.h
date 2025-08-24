@@ -16,7 +16,7 @@ private:
         thread worker;
     };
 
-    unordered_map<string, shared_ptr<ChatBuffer>> buffers;
+    boost::unordered_flat_map<string, shared_ptr<ChatBuffer>> buffers;
 
     Telegram();
     void debounceWorker(const string &chatId, shared_ptr<ChatBuffer> buffer);

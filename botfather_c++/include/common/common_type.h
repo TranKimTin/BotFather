@@ -32,9 +32,13 @@
 
 #include <websocketpp/config/asio_client.hpp>
 #include <websocketpp/client.hpp>
+
 #include <boost/interprocess/sync/interprocess_semaphore.hpp>
 #include <boost/asio/ssl/context.hpp>
 #include <boost/asio/ssl.hpp>
+#include <boost/unordered/unordered_flat_set.hpp>
+#include <boost/unordered/unordered_flat_map.hpp>
+
 #include <nlohmann/json.hpp>
 
 #include <spdlog/spdlog.h>
@@ -164,7 +168,7 @@ struct Bot
     string secretKey;
     string iv;
     bool enableRealOrder;
-    unordered_set<long long> symbolExist;
+    boost::unordered_flat_set<long long> symbolExist;
 };
 
 struct Digit

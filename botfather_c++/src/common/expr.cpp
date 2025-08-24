@@ -1420,7 +1420,7 @@ any Expr::visitDoji(ExprParser::DojiContext *ctx)
 }
 
 //////////////////////////////////////////////////////////////////
-static unordered_map<long long, cachedIndicatorParseTree> parseCache;
+static boost::unordered_flat_map<long long, cachedIndicatorParseTree> parseCache;
 
 void cacheParseTree(const string &expr)
 {
@@ -1442,7 +1442,7 @@ void cacheParseTree(const string &expr)
 
 any calculateExpr(const string &inputText, const string &broker, const string &symbol, const string &timeframe, int length,
                   const double *open, const double *high, const double *low, const double *close,
-                  const double *volume, long long *startTime, double fundingRate, unordered_map<long long, vector<double>> *cachedIndicator, unordered_map<long long, unique_ptr<SparseTable>> *cachedMinMax)
+                  const double *volume, long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, unique_ptr<SparseTable>> *cachedMinMax)
 {
     const long long key = hashString(inputText);
     Expr expr(broker, symbol, timeframe, length, open, high, low, close, volume, startTime, fundingRate, cachedIndicator, cachedMinMax);
@@ -1465,7 +1465,7 @@ any calculateExpr(const string &inputText, const string &broker, const string &s
 
 string calculateSubExpr(string &expr, const string &broker, const string &symbol, const string &timeframe, int length,
                         const double *open, const double *high, const double *low, const double *close,
-                        const double *volume, long long *startTime, double fundingRate, unordered_map<long long, vector<double>> *cachedIndicator, unordered_map<long long, unique_ptr<SparseTable>> *cachedMinMax)
+                        const double *volume, long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, unique_ptr<SparseTable>> *cachedMinMax)
 {
     stack<string> st;
     string s;

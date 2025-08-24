@@ -108,7 +108,7 @@ RateData SocketBinanceFuture::getOHLCV(const string &symbol, const string &timef
     return rateData;
 }
 
-unordered_map<long long, Digit> SocketBinanceFuture::getDigit()
+boost::unordered_flat_map<long long, Digit> SocketBinanceFuture::getDigit()
 {
     return getBinanceFutureDigits();
 }
