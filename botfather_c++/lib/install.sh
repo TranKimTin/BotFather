@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 set -e
 
 SCRIPT_PATH="$0"
@@ -12,7 +13,7 @@ cd "$SCRIPT_DIR"
 echo "========== Cloning and building ANTLR4 =========="
 if [ ! -d "antlr4" ]; then
   echo "Cloning ANTLR4..."
-  git clone https://github.com/antlr/antlr4.git antlr4
+  git clone https://github.com/TranKimTin/antlr4.git antlr4
 else
   echo "ANTLR4 already exists, skipping clone."
 fi
