@@ -46,6 +46,8 @@ string BinanceFuture::buyMarket(const string &symbol, string quantity,
     if (res.empty())
         return res;
 
+    SLEEP_FOR(1000);
+
     return placeBuyMarketTPSL(symbol, quantity, takeProfit, stopLoss, clientOrderId);
 }
 
@@ -130,6 +132,8 @@ string BinanceFuture::sellMarket(const string &symbol, string quantity, string t
     string res = sendOrder(params);
     if (res.empty())
         return res;
+
+    SLEEP_FOR(1000);
 
     return placeSellMarketTPSL(symbol, quantity, takeProfit, stopLoss, clientOrderId);
 }
@@ -223,6 +227,8 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
     string res = sendOrder(params);
     if (res.empty())
         return res;
+
+    SLEEP_FOR(1000);
 
     string resEntry = getOrderStatus(symbol, clientOrderId);
     if (!resEntry.empty())
@@ -354,6 +360,8 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
     string res = sendOrder(params);
     if (res.empty())
         return res;
+
+    SLEEP_FOR(1000);
 
     string resEntry = getOrderStatus(symbol, clientOrderId);
     if (!resEntry.empty())
