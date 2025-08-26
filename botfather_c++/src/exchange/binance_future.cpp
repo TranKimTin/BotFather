@@ -44,7 +44,10 @@ string BinanceFuture::buyMarket(const string &symbol, string quantity,
 
     string res = sendOrder(params);
     if (res.empty())
+    {
+        LOGE("Place entry error");
         return res;
+    }
 
     SLEEP_FOR(1000);
 
@@ -131,7 +134,10 @@ string BinanceFuture::sellMarket(const string &symbol, string quantity, string t
 
     string res = sendOrder(params);
     if (res.empty())
+    {
+        LOGE("Place entry error");
         return res;
+    }
 
     SLEEP_FOR(1000);
 
@@ -226,7 +232,10 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
 
     string res = sendOrder(params);
     if (res.empty())
+    {
+        LOGE("Place entry error");
         return res;
+    }
 
     SLEEP_FOR(1000);
 
@@ -249,6 +258,7 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
         string resTP = sendTPorSL(symbol, SELL, STOP, quantity, price, takeProfit);
         if (resTP.empty())
         {
+            SLEEP_FOR(1000);
             string resEntry = getOrderStatus(symbol, clientOrderId);
             if (resEntry.empty())
                 return sellMarket(symbol, quantity, "", "", true);
@@ -359,7 +369,10 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
 
     string res = sendOrder(params);
     if (res.empty())
+    {
+        LOGE("Place entry error");
         return res;
+    }
 
     SLEEP_FOR(1000);
 
@@ -382,6 +395,7 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
         string resTP = sendTPorSL(symbol, BUY, STOP, quantity, price, takeProfit);
         if (resTP.empty())
         {
+            SLEEP_FOR(1000);
             string resEntry = getOrderStatus(symbol, clientOrderId);
             if (resEntry.empty())
                 return buyMarket(symbol, quantity, "", "", true);
