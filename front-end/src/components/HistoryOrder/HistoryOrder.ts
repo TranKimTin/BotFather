@@ -83,7 +83,8 @@ export default defineComponent({
         const r_brokerSelected = ref<Array<string>>([...brokers]);
         const r_balanceData = ref<Array<PropData>>([]);
         const r_tradeRealTimestamp = ref<string>('');
-        const r_accountBalance = ref<string>('');
+        const r_accountBalance = ref<number>(0);
+        const r_accountMargin = ref<number>(0);
 
         const r_botNameList = ref<Array<string>>([]);
         const r_botName = ref<string>(botName);
@@ -218,7 +219,8 @@ export default defineComponent({
                     if (tradeReal.length > 0) {
                         r_tradeRealTimestamp.value = moment(tradeReal[0].time).format('DD/MM/YYYY HH:mm:ss');
                     }
-                    r_accountBalance.value = accountBalance ? `Balance: ${Math.round(accountBalance.balance)} ${accountBalance.asset} - Margin còn lại: ${Math.round(accountBalance.availableBalance)} ${accountBalance.asset}` : 'Không có dữ liệu tài khoản';
+                    r_accountBalance.value = accountBalance ? Math.round(accountBalance.balance) : 0;
+                    r_accountMargin.value = accountBalance ? Math.round(accountBalance.availableBalance) : 0;
                     if (firstLoad) {
                         firstLoad = false;
                         const timeframeSelected = [...new Set(sortedData.map(order => order.timeframe))];
@@ -305,6 +307,7 @@ export default defineComponent({
             r_botName,
             r_tradeRealTimestamp,
             r_accountBalance,
+            r_accountMargin,
             r_tradereal_profit,
             timeframes,
             brokers,

@@ -41,10 +41,13 @@
     <div class="grid grid-cols-2 gap-2 p-2">
         <div class="flex-auto">
             Lãi real: <strong :style="{ color: r_tradereal_profit >= 0 ? 'green' : 'red' }">{{
-                +(r_tradereal_profit).toFixed(2) }} $</strong>
+                +(r_tradereal_profit).toFixed(2) }} $</strong> (từ {{ r_tradeRealTimestamp }})
         </div>
         <div class="flex-auto">
-            {{ r_accountBalance }} (từ {{ r_tradeRealTimestamp }})
+            balance: {{ r_accountBalance }} $
+        </div>
+        <div class="flex-auto">
+            Margin còn lại: {{ r_accountMargin }} $
         </div>
         
     </div>
