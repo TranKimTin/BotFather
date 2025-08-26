@@ -1,11 +1,13 @@
 import { ORDER_STATUS, ROLE, UserTokenInfo } from '../../common/Interface';
 import * as mysql from '../lib/mysql';
+import * as util from '../../common/util';
+import Binance, { FuturesAccountInfoResult } from 'binance-api-node';
 import dotenv from 'dotenv';
 
 dotenv.config({ path: `${__dirname}/../../../.env` });
 
 export async function getBotInfo(userData: UserTokenInfo) {
-    const sql = `SELECT u.email, b.botName, b.enableRealOrder,
+    const sql = `SELECT u.email, b.botName, b.enableRealOrder, b.apiKey, b.secretKey, b.iv,
                     COUNT(IF(o.status in ('Khớp TP', 'Khớp SL', 'Khớp entry'), IF(o.timeSL IS NOT NULL OR o.timeTP IS NOT NULL, 1, NULL), NULL)) AS tradeCountClosed,
                     COUNT(IF(o.status in ('Khớp TP', 'Khớp SL', 'Khớp entry'), IF(o.timeSL IS NULL AND o.timeTP IS NULL, 1, NULL), NULL)) AS tradeCountOpening,
                     SUM(IF(o.status in ('Khớp TP', 'Khớp SL', 'Khớp entry'), IF(o.timeSL IS NOT NULL OR o.timeTP IS NOT NULL, o.profit, 0), 0)) AS profit,
@@ -20,7 +22,27 @@ export async function getBotInfo(userData: UserTokenInfo) {
                 GROUP BY b.id
                 ORDER BY b.enableRealOrder DESC, b.botName ASC;`;
     const data = await mysql.query(sql, [userData.id, userData.role, ROLE.ADMIN, ORDER_STATUS.MATCH_ENTRY, ORDER_STATUS.MATCH_TP, ORDER_STATUS.MATCH_SL]);
+    const accountInfo: { [key: string]: FuturesAccountInfoResult } = {};
+
     for (const item of data) {
+        if (item.apiKey && item.secretKey && item.iv) {
+            const apiKey = util.decryptAES(item.apiKey, process.env.ENCRYP_KEY!, item.iv);
+            if (!accountInfo[apiKey]) {
+                const secretKey = util.decryptAES(item.secretKey, process.env.ENCRYP_KEY!, item.iv);
+                let client = Binance({
+                    apiKey: apiKey,
+                    apiSecret: secretKey
+                });
+                accountInfo[apiKey] = await client.futuresAccountInfo();
+                accountInfo[apiKey].positions = accountInfo[apiKey].positions.filter(item => item.initialMargin != '0');
+                accountInfo[apiKey].positions.sort((a, b) => (+a.unrealizedProfit) - (+b.unrealizedProfit));
+            }
+            item.accountInfo = accountInfo[apiKey];
+        }
+        delete item.apiKey;
+        delete item.secretKey;
+        delete item.iv;
+
         if (item.winrate === null) {
             item.winrate = 0;
         }

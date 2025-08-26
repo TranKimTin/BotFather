@@ -5,7 +5,7 @@ import * as mysql from '../lib/mysql';
 import moment from 'moment';
 import dotenv from 'dotenv';
 import axios from 'axios';
-import Binance from 'binance-api-node'
+import Binance from 'binance-api-node';
 
 dotenv.config({ path: `${__dirname}/../../../.env` });
 
@@ -186,7 +186,7 @@ export async function getHistoryOrder(botName: string, filterBroker: Array<strin
                     }
                 }
             }
-            accountInfo = (await client.futuresAccountInfo());
+            accountInfo = await client.futuresAccountInfo();
             accountInfo.positions = accountInfo.positions.filter(item => item.initialMargin != '0');
             accountInfo.positions.sort((a, b) => (+a.unrealizedProfit) - (+b.unrealizedProfit));
         }

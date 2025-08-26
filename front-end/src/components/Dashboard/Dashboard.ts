@@ -12,7 +12,8 @@ interface BotInfo {
     volumeOpening: number,
     winrate: number
     cost: number,
-    enableRealOrder: number
+    enableRealOrder: number,
+    accountInfo: any
 }
 
 export default defineComponent({
