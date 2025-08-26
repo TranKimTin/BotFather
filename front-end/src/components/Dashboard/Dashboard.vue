@@ -80,141 +80,144 @@
         <div class="mt-8" />
 
         <div class="flex flex-col mt-8">
-            <div class="py-2 -my-2 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-                <table>
-                    <thead>
-                        <tr>
-                            <th
-                                class="w-16 text-center px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
+            <div class="py-2 -my-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+                <div
+                    class="inline-block min-w-full overflow-hidden align-middle border-b border-gray-200 shadow sm:rounded-lg">
+                    <table class="min-w-full">
+                        <thead>
+                            <tr>
+                                <th
+                                    class="w-16 text-center px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
 
-                            </th>
-                            <th
-                                class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                                Tên bot
-                            </th>
-                            <th
-                                class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                                User
-                            </th>
-                            <th
-                                class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                                Real / Demo
-                            </th>
-                            <th
-                                class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                                Số lệnh (đã đóng)
-                            </th>
-                            <th
-                                class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                                Số lệnh (đang mở)
-                            </th>
-                            <th
-                                class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                                Lãi / volume (đã đóng)
-                            </th>
-                            <th
-                                class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                                Lãi / volume (đang mở)
-                            </th>
-                            <th
-                                class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                                Tỉ lệ thắng
-                            </th>
-                            <th
-                                class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                                Balance real
-                            </th>
-                            <th
-                                class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                                Margin còn lại
-                            </th>
-                            <th
-                                class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                                Tổng PnL chưa chốt
-                            </th>
-                            <th class="px-6 py-3 border-b border-gray-200 bg-gray-50">
-                            </th>
-                        </tr>
-                    </thead>
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
+                                    Tên bot
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
+                                    User
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
+                                    Real / Demo
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
+                                    Số lệnh (đã đóng)
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
+                                    Số lệnh (đang mở)
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
+                                    Lãi / volume (đã đóng)
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
+                                    Lãi / volume (đang mở)
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
+                                    Tỉ lệ thắng
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
+                                    Balance real
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
+                                    Margin còn lại
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
+                                    Tổng PnL chưa chốt
+                                </th>
+                                <th class="px-6 py-3 border-b border-gray-200 bg-gray-50">
+                                </th>
+                            </tr>
+                        </thead>
 
-                    <tbody class="bg-white">
-                        <tr v-for="(u, index) in botList" :key="index">
-                            <td class="w-16 text-center px-6 py-4 border-b border-gray-200 whitespace-nowrap ">
-                                <div class="text-sm leading-5 text-gray-900">
-                                    {{ index + 1 }}
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
-                                <div class="text-sm leading-5 text-gray-900">
-                                    {{ u.botName }}
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
-                                <div class="text-sm leading-5 text-gray-900">
-                                    {{ u.email }}
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
-                                <div class="text-sm leading-5 text-gray-900">
-                                    {{ u.enableRealOrder == 1 ? "Real" : "Demo" }}
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
-                                <div class="text-sm leading-5 text-gray-900">
-                                    {{ u.tradeCountClosed.toLocaleString() }}
-                                </div>
-                            </td>
+                        <tbody class="bg-white">
+                            <tr v-for="(u, index) in botList" :key="index">
+                                <td class="w-16 text-center px-6 py-4 border-b border-gray-200 whitespace-nowrap ">
+                                    <div class="text-sm leading-5 text-gray-900">
+                                        {{ index + 1 }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
+                                    <div class="text-sm leading-5 text-gray-900">
+                                        {{ u.botName }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
+                                    <div class="text-sm leading-5 text-gray-900">
+                                        {{ u.email }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
+                                    <div class="text-sm leading-5 text-gray-900">
+                                        {{ u.enableRealOrder == 1 ? "Real" : "Demo" }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
+                                    <div class="text-sm leading-5 text-gray-900">
+                                        {{ u.tradeCountClosed.toLocaleString() }}
+                                    </div>
+                                </td>
 
-                            <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
-                                <div class="text-sm leading-5 text-gray-900">
-                                    {{ u.tradeCountOpening.toLocaleString() }}
-                                </div>
-                            </td>
+                                <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
+                                    <div class="text-sm leading-5 text-gray-900">
+                                        {{ u.tradeCountOpening.toLocaleString() }}
+                                    </div>
+                                </td>
 
-                            <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
-                                <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
-                                    :class="u.profit >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'">{{
-                                        u.profit.toLocaleString() }} </span> / {{ u.volumeClosed.toLocaleString() }} $
-                            </td>
+                                <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
+                                    <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
+                                        :class="u.profit >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'">{{
+                                            u.profit.toLocaleString() }} </span> / {{ u.volumeClosed.toLocaleString() }} $
+                                </td>
 
-                            <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
-                                <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
-                                    :class="u.unrealizedProfit >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'">{{
-                                        u.unrealizedProfit.toLocaleString() }} </span> / {{
-                                        u.volumeOpening.toLocaleString() }} $
-                            </td>
+                                <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
+                                    <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
+                                        :class="u.unrealizedProfit >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'">{{
+                                            u.unrealizedProfit.toLocaleString() }} </span> / {{
+                                            u.volumeOpening.toLocaleString() }} $
+                                </td>
 
-                            <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
-                                <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full">
-                                    {{ u.winrate }} %
-                                </span>
-                            </td>
+                                <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
+                                    <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full">
+                                        {{ u.winrate }} %
+                                    </span>
+                                </td>
 
-                            <td
-                                class="px-6 py-4 text-sm leading-5 text-gray-500 border-b border-gray-200 whitespace-nowrap">
-                                {{ Math.round(u.accountInfo.totalWalletBalance) }} $
-                            </td>
-                            <td
-                                class="px-6 py-4 text-sm leading-5 text-gray-500 border-b border-gray-200 whitespace-nowrap">
-                                <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
-                                    :class="(u.accountInfo.availableBalance / u.accountInfo.totalWalletBalance * 100) >= 10 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'">{{
-                                        Math.round(u.accountInfo.availableBalance) }} $</span>
-                            </td>
-                            <td
-                                class="px-6 py-4 text-sm leading-5 text-gray-500 border-b border-gray-200 whitespace-nowrap">
-                                <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
-                                    :class="u.accountInfo.totalUnrealizedProfit >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'">{{
-                                        Math.round(u.accountInfo.totalUnrealizedProfit) }} $</span>
-                            </td>
+                                <td
+                                    class="px-6 py-4 text-sm leading-5 text-gray-500 border-b border-gray-200 whitespace-nowrap">
+                                    {{ Math.round(u.accountInfo.totalWalletBalance) }} $
+                                </td>
+                                <td
+                                    class="px-6 py-4 text-sm leading-5 text-gray-500 border-b border-gray-200 whitespace-nowrap">
+                                    <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
+                                        :class="(u.accountInfo.availableBalance / u.accountInfo.totalWalletBalance * 100) >= 10 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'">{{
+                                            Math.round(u.accountInfo.availableBalance) }} $</span>
+                                </td>
+                                <td
+                                    class="px-6 py-4 text-sm leading-5 text-gray-500 border-b border-gray-200 whitespace-nowrap">
+                                    <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
+                                        :class="u.accountInfo.totalUnrealizedProfit >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'">{{
+                                            Math.round(u.accountInfo.totalUnrealizedProfit) }} $</span>
+                                </td>
 
-                            <td
-                                class="px-6 py-4 text-sm font-medium leading-5 border-b border-gray-200 whitespace-nowrap">
-                                <a :href="`/history/${u.botName}`" target="_blank"
-                                    class="text-indigo-600 hover:text-indigo-900"><i class="pi pi-cog"></i></a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                                <td
+                                    class="px-6 py-4 text-sm font-medium leading-5 border-b border-gray-200 whitespace-nowrap">
+                                    <a :href="`/history/${u.botName}`" target="_blank"
+                                        class="text-indigo-600 hover:text-indigo-900"><i class="pi pi-cog"></i></a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
