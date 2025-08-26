@@ -39,6 +39,13 @@ export async function getBotInfo(userData: UserTokenInfo) {
             }
             item.accountInfo = accountInfo[apiKey];
         }
+        else {
+            item.accountInfo = {
+                totalWalletBalance: 0,
+                availableBalance: 0,
+                totalUnrealizedProfit: 0
+            };
+        }
         delete item.apiKey;
         delete item.secretKey;
         delete item.iv;
