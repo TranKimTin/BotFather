@@ -85,6 +85,7 @@ export default defineComponent({
         const r_tradeRealTimestamp = ref<string>('');
         const r_accountBalance = ref<number>(0);
         const r_accountMargin = ref<number>(0);
+        const r_AccountUnrealizedPnL = ref<number>(0);
 
         const r_botNameList = ref<Array<string>>([]);
         const r_botName = ref<string>(botName);
@@ -104,8 +105,10 @@ export default defineComponent({
                     filterBroker: r_brokerSelected.value.join(','),
                     filterTimeframe: r_timeframesSelected.value.join(',')
                 };
-                axios.get(`/getHistoryOrder`, params).then(async (result: { orders: Array<Order>, tradeReal: Array<Income>, accountBalance: any }) => {
-                    const { orders, tradeReal, accountBalance } = result;
+                axios.get(`/getHistoryOrder`, params).then(async (result: { orders: Array<Order>, tradeReal: Array<Income>, accountInfo: any }) => {
+                    const { orders, tradeReal, accountInfo } = result;
+
+                    console.log({ accountInfo });
 
                     let gain = 0;
                     let loss = 0;
@@ -219,8 +222,9 @@ export default defineComponent({
                     if (tradeReal.length > 0) {
                         r_tradeRealTimestamp.value = moment(tradeReal[0].time).format('DD/MM/YYYY HH:mm:ss');
                     }
-                    r_accountBalance.value = accountBalance ? Math.round(accountBalance.balance) : 0;
-                    r_accountMargin.value = accountBalance ? Math.round(accountBalance.availableBalance) : 0;
+                    r_accountBalance.value = accountInfo ? Math.round(accountInfo.totalWalletBalance) : 0;
+                    r_accountMargin.value = accountInfo ? Math.round(accountInfo.availableBalance) : 0;
+                    r_AccountUnrealizedPnL.value = accountInfo ? Math.round(accountInfo.totalUnrealizedProfit) : 0;
                     if (firstLoad) {
                         firstLoad = false;
                         const timeframeSelected = [...new Set(sortedData.map(order => order.timeframe))];
@@ -308,6 +312,7 @@ export default defineComponent({
             r_tradeRealTimestamp,
             r_accountBalance,
             r_accountMargin,
+            r_AccountUnrealizedPnL,
             r_tradereal_profit,
             timeframes,
             brokers,

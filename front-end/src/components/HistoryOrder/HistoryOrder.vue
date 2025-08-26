@@ -40,8 +40,12 @@
     </div>
     <div class="grid grid-cols-4 gap-2 p-2">
         <div class="flex-auto">
-            Lãi real: <strong :style="{ color: r_tradereal_profit >= 0 ? 'green' : 'red' }">{{
+            Đã chốt Real: <strong :style="{ color: r_tradereal_profit >= 0 ? 'green' : 'red' }">{{
                 +(r_tradereal_profit).toFixed(2) }} $</strong> (từ {{ r_tradeRealTimestamp }})
+        </div>
+        <div class="flex-auto">
+            Chưa chốt Real: <strong :style="{ color: r_AccountUnrealizedPnL >= 0 ? 'green' : 'red' }">{{
+                +(r_AccountUnrealizedPnL).toFixed(2) }} $</strong>
         </div>
         <div class="flex-auto">
             balance: {{ r_accountBalance }} $
@@ -67,8 +71,7 @@
     <BalanceChart :data="r_balanceData" />
     <div>
         <h3 v-if="r_isLoading">Đang load, đợi tí...</h3>
-        <DataTable :value="r_orderList" tableStyle="min-width: 50rem" scrollable scrollHeight="90vh"
-            :virtualScrollerOptions="{ itemSize: 50 }" stripedRows>
+        <DataTable :value="r_orderList" tableStyle="min-width: 50rem"  stripedRows>
             <Column :header="`STT (${r_orderList.length})`">
                 <template #body="order">
                     {{ order.index + 1 }}
