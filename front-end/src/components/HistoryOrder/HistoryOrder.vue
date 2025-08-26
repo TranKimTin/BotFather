@@ -38,7 +38,7 @@
             Drawdown: <span v-if="r_maxDD > 0">-</span> {{ r_maxDD }} $
         </div>
     </div>
-    <div class="grid grid-cols-2 gap-2 p-2">
+    <div class="grid grid-cols-3 gap-2 p-2">
         <div class="flex-auto">
             Lãi real: <strong :style="{ color: r_tradereal_profit >= 0 ? 'green' : 'red' }">{{
                 +(r_tradereal_profit).toFixed(2) }} $</strong> (từ {{ r_tradeRealTimestamp }})
