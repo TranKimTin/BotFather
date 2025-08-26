@@ -187,7 +187,7 @@ export async function getHistoryOrder(botName: string, filterBroker: Array<strin
                 }
             }
 
-            accountBalance = (await client.futuresAccountBalance()).find(item => item.asset === 'USDT');;
+            accountBalance = (await client.futuresAccountBalance()).find(item => item.asset === 'USDT');
         }
     }
     tradeReal.sort((a, b) => a.time - b.time);

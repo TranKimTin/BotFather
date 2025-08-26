@@ -69,6 +69,7 @@ export default defineComponent({
         const r_orderList = ref<Array<Order>>([]);
         const r_gain = ref<number>(0);
         const r_loss = ref<number>(0);
+        const r_tradereal_profit = ref<number>(0);
         const r_unrealizedGain = ref<number>(0);
         const r_unrealizedLoss = ref<number>(0);
         const r_cntGain = ref<number>(0);
@@ -200,7 +201,7 @@ export default defineComponent({
                         balanceData.push({ timestamp: moment(tradeReal[idxTradeReal - 1].time).format("YYYY-MM-DD HH:mm"), balance: gain + loss - totalFee, balanceNoFee: gain + loss, balanceReal });
                     }
 
-                    console.log({gain, feeGain, loss, feeLoss, unrealizedGain, unrealizedLoss, cntGain, cntLoss, cntOpening})
+                    console.log({ gain, feeGain, loss, feeLoss, unrealizedGain, unrealizedLoss, cntGain, cntLoss, cntOpening })
 
                     r_orderList.value = orders;
                     r_gain.value = parseFloat((gain - feeGain).toFixed(2));
@@ -213,10 +214,11 @@ export default defineComponent({
                     r_cntOpening.value = cntOpening;
                     r_isLoading.value = false;
                     r_balanceData.value = balanceData;
+                    r_tradereal_profit.value = balanceReal;
                     if (tradeReal.length > 0) {
                         r_tradeRealTimestamp.value = moment(tradeReal[0].time).format('DD/MM/YYYY HH:mm:ss');
                     }
-                    r_accountBalance.value = accountBalance ? `Balance: ${accountBalance.balance} ${accountBalance.asset} - Margin còn lại: ${accountBalance.availableBalance} ${accountBalance.asset}` : 'Không có dữ liệu tài khoản';
+                    r_accountBalance.value = accountBalance ? `Balance: ${Math.round(accountBalance.balance)} ${accountBalance.asset} - Margin còn lại: ${Math.round(accountBalance.availableBalance)} ${accountBalance.asset}` : 'Không có dữ liệu tài khoản';
                     if (firstLoad) {
                         firstLoad = false;
                         const timeframeSelected = [...new Set(sortedData.map(order => order.timeframe))];
@@ -303,6 +305,7 @@ export default defineComponent({
             r_botName,
             r_tradeRealTimestamp,
             r_accountBalance,
+            r_tradereal_profit,
             timeframes,
             brokers,
             clearHistory

@@ -40,10 +40,11 @@
     </div>
     <div class="grid grid-cols-2 gap-2 p-2">
         <div class="flex-auto">
-            Cập nhật trade real từ {{ r_tradeRealTimestamp }}
+            Lãi real: <strong :style="{ color: r_tradereal_profit >= 0 ? 'green' : 'red' }">{{
+                +(r_tradereal_profit).toFixed(2) }} $</strong>
         </div>
         <div class="flex-auto">
-            {{ r_accountBalance }}
+            {{ r_accountBalance }} (từ {{ r_tradeRealTimestamp }})
         </div>
         
     </div>
