@@ -124,7 +124,15 @@
                                 </th>
                                 <th
                                     class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                                    Chi phí / ngày
+                                    Balance real
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
+                                    Margin còn lại
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
+                                    Tổng PnL chưa chốt
                                 </th>
                                 <th class="px-6 py-3 border-b border-gray-200 bg-gray-50">
                                 </th>
@@ -174,7 +182,8 @@
                                 <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
                                     <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
                                         :class="u.unrealizedProfit >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'">{{
-                                            u.unrealizedProfit.toLocaleString() }} </span> / {{ u.volumeOpening.toLocaleString() }} $
+                                            u.unrealizedProfit.toLocaleString() }} </span> / {{
+                                            u.volumeOpening.toLocaleString() }} $
                                 </td>
 
                                 <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
@@ -185,13 +194,25 @@
 
                                 <td
                                     class="px-6 py-4 text-sm leading-5 text-gray-500 border-b border-gray-200 whitespace-nowrap">
-                                    {{ u.cost.toLocaleString() }}đ
+                                    {{ Math.round(u.accountInfo.totalWalletBalance) }} $
+                                </td>
+                                <td
+                                    class="px-6 py-4 text-sm leading-5 text-gray-500 border-b border-gray-200 whitespace-nowrap">
+                                    <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
+                                        :class="(u.accountInfo.availableBalance / u.accountInfo.totalWalletBalance * 100) >= 10 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'">{{
+                                            Math.round(u.accountInfo.availableBalance) }} $</span>
+                                </td>
+                                <td
+                                    class="px-6 py-4 text-sm leading-5 text-gray-500 border-b border-gray-200 whitespace-nowrap">
+                                    <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
+                                        :class="u.accountInfo.totalUnrealizedProfit >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'">{{
+                                            Math.round(u.accountInfo.totalUnrealizedProfit) }} $</span>
                                 </td>
 
                                 <td
                                     class="px-6 py-4 text-sm font-medium leading-5 border-b border-gray-200 whitespace-nowrap">
-                                    <a :href="`/history/${u.botName}`" target="_blank" class="text-indigo-600 hover:text-indigo-900"><i
-                                            class="pi pi-cog"></i></a>
+                                    <a :href="`/history/${u.botName}`" target="_blank"
+                                        class="text-indigo-600 hover:text-indigo-900"><i class="pi pi-cog"></i></a>
                                 </td>
                             </tr>
                         </tbody>
