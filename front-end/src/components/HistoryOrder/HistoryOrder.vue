@@ -47,7 +47,8 @@
             balance: {{ r_accountBalance }} $
         </div>
         <div class="flex-auto">
-            Margin còn lại: {{ r_accountMargin }} $
+            Margin còn lại: <strong :style="{ color: (r_accountMargin / r_accountBalance * 100) >= 10 ? 'green' : 'red' }">{{
+                +(r_accountMargin).toFixed(2) }} $</strong>
         </div>
         
     </div>
