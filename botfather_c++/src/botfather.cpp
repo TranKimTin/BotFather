@@ -16,7 +16,7 @@ vector<SocketData *> exchanges;
 vector<thread> threads;
 shared_ptr<vector<shared_ptr<Bot>>> botList;
 
-#define TEST
+// #define TEST
 
 #ifdef TEST
 #include "telegram.h"
@@ -49,8 +49,11 @@ void test()
     string iv = generateRandomIV();
     string apiKey = encryptAES(env["API_KEY"], env["ENCRYP_KEY"], iv);
     string secretKey = encryptAES(env["SECRET_KEY"], env["ENCRYP_KEY"], iv);
-    IExchange* exchange = new BinanceFuture(apiKey, secretKey, iv, 31);
-    exchange->buyLimit("BTCUSDT", "0.01", "113000", "115000", "110000", "");
+    IExchange *exchange = new BinanceFuture(apiKey, secretKey, iv, 31);
+
+    string id = exchange->buyLimit("LTCUSDT", "50", "112.5", "", "", "");
+    // exchange->sellMarket("LTCUSDT", "100", "", "", false);
+    exchange->cancelOrderByClientId("LTCUSDT", id);
 
     SLEEP_FOR(1000000);
 }

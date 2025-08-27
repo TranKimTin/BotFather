@@ -517,10 +517,10 @@ string BinanceFuture::sendOrder(map<string, string> &params)
     catch (RequestException &e)
     {
         LOGE("Error sending order to Binance Future: code: {}, {}", e.errorCode(), e.what());
-        LOGI("Retry order");
         int errorCode = e.errorCode();
         if (errorCode == -2021) // Order would immediately trigger
         {
+            LOGI("Retry order");
             string &type = params["type"];
 
             if (type == STOP || type == TAKE_PROFIT)
@@ -599,6 +599,22 @@ string BinanceFuture::cancelOrderByClientId(const string &symbol, const string &
         LOGI("Cancelling order by client ID on Binance Future: {}", url);
         string res = Axios::del(url, {"X-MBX-APIKEY: " + apiKey});
         LOGI("Response from Binance Future: {}", res);
+
+        json j = json::parse(res);
+        if (j.contains("status") && j["status"].get<string>() == "CANCELED")
+        {
+            string executedQty = j["executedQty"].get<string>();
+
+            if (stod(executedQty) > 0)
+            {
+                LOGE("order partially filled {}. Try to close position", stod(executedQty));
+                string side = j["side"].get<string>();
+                string result = side == BUY ? sellMarket(symbol, executedQty, "", "", true) : buyMarket(symbol, executedQty, "", "", true);
+                LOGI("Response from Binance Future: {}", result);
+                return result;
+            }
+        }
+
         return res;
     }
     catch (const exception &e)
