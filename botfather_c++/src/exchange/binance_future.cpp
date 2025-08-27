@@ -499,7 +499,7 @@ string BinanceFuture::sendTPorSL(const string &symbol, const string &side, const
     return sendOrder(params);
 }
 
-string BinanceFuture::sendOrder(const map<string, string> &params)
+string BinanceFuture::sendOrder(map<string, string> &params)
 {
     string query = buildQuery(params);
     string signature = sign(query);
@@ -514,11 +514,43 @@ string BinanceFuture::sendOrder(const map<string, string> &params)
         LOGI("Response from Binance Future: {}", res);
         return res;
     }
+    catch (RequestException &e)
+    {
+        LOGE("Error sending order to Binance Future: code: {}, {}", e.errorCode(), e.what());
+        int errorCode = e.errorCode();
+        if (errorCode == -2021) // Order would immediately trigger
+        {
+            LOGI("Retry order");
+            string &type = params["type"];
+
+            if (type == STOP || type == TAKE_PROFIT)
+            {
+                params["type"] = LIMIT;
+                params["timestamp"] = to_string(getCurrentTime());
+                params["timeInForce"] = "GTC";
+                params.erase("stopPrice");
+                return sendOrder(params);
+            }
+            else if (type == STOP_MARKET || type == TAKE_PROFIT_MARKET)
+            {
+                params["type"] = MARKET;
+                params["timestamp"] = to_string(getCurrentTime());
+                params["timeInForce"] = "GTC";
+                params.erase("stopPrice");
+                return sendOrder(params);
+            }
+            else
+            {
+                return "";
+            }
+        }
+    }
     catch (const exception &e)
     {
         LOGE("Error sending order to Binance Future: {}", e.what());
         return "";
     }
+    return "";
 }
 
 string BinanceFuture::buildQuery(const map<string, string> &params)
@@ -567,6 +599,22 @@ string BinanceFuture::cancelOrderByClientId(const string &symbol, const string &
         LOGI("Cancelling order by client ID on Binance Future: {}", url);
         string res = Axios::del(url, {"X-MBX-APIKEY: " + apiKey});
         LOGI("Response from Binance Future: {}", res);
+
+        json j = json::parse(res);
+        if (j.contains("status") && j["status"].get<string>() == "CANCELED")
+        {
+            string executedQty = j["executedQty"].get<string>();
+
+            if (stod(executedQty) > 0)
+            {
+                LOGE("order partially filled {}. Try to close position", stod(executedQty));
+                string side = j["side"].get<string>();
+                string result = side == BUY ? sellMarket(symbol, executedQty, "", "", true) : buyMarket(symbol, executedQty, "", "", true);
+                LOGI("Response from Binance Future: {}", result);
+                return result;
+            }
+        }
+
         return res;
     }
     catch (const exception &e)
@@ -574,6 +622,7 @@ string BinanceFuture::cancelOrderByClientId(const string &symbol, const string &
         LOGE("Error cancelling order by client ID on Binance Future: {}", e.what());
         return "";
     }
+    return "";
 }
 
 string BinanceFuture::getOrderStatus(const string &symbol, const string &orderId)
@@ -600,6 +649,7 @@ string BinanceFuture::getOrderStatus(const string &symbol, const string &orderId
         LOGE("Error getting order status from Binance Future: {}", e.what());
         return "";
     }
+    return "";
 }
 
 int BinanceFuture::insertOrderToDB(const string &symbol, const string clientOrderId, const string tpID, const string slID)
@@ -654,6 +704,7 @@ bool BinanceFuture::changeLeverage(const string &symbol, int leverage)
         LOGE("Error changing leverage on Binance Future: {}", e.what());
         return false;
     }
+    return false;
 }
 
 bool BinanceFuture::changeMarginType(const string &symbol, const string &marginType)
@@ -683,6 +734,7 @@ bool BinanceFuture::changeMarginType(const string &symbol, const string &marginT
         LOGE("Error changing margin type on Binance Future: {}", e.what());
         return false;
     }
+    return false;
 }
 
 int BinanceFuture::getOpenAlgoOrdersCount(const string &symbol)
@@ -727,4 +779,5 @@ int BinanceFuture::getOpenAlgoOrdersCount(const string &symbol)
         LOGE("Error getting open algo orders: {}", e.what());
         return -1;
     }
+    return -1;
 }

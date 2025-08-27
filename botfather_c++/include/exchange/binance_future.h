@@ -24,8 +24,8 @@ private:
     string apiKey;
     string secretKey;
     int botID;
-    const string BASE_URL = "https://fapi.binance.com";
-    // string BASE_URL = "https://testnet.binancefuture.com";
+    // const string BASE_URL = "https://fapi.binance.com";
+    string BASE_URL = "https://testnet.binancefuture.com";
 
     const int MAX_NUM_ALGO_ORDERS = 10;
     const string SELL = "SELL";
@@ -38,7 +38,7 @@ private:
     const string TAKE_PROFIT_MARKET = "TAKE_PROFIT_MARKET";
     const string TRAILING_STOP_MARKET = "TRAILING_STOP_MARKET";
 
-    string sendOrder(const map<string, string> &params);
+    string sendOrder(map<string, string> &params);
     string buildQuery(const map<string, string> &params);
     string sign(const string &query);
 
