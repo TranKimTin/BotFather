@@ -16,7 +16,7 @@ vector<SocketData *> exchanges;
 vector<thread> threads;
 shared_ptr<vector<shared_ptr<Bot>>> botList;
 
-// #define TEST
+#define TEST
 
 #ifdef TEST
 #include "telegram.h"
@@ -46,12 +46,12 @@ void test()
     vector<double> volume(rateData.volume.begin(), rateData.volume.end());
     vector<long long> startTime(rateData.startTime.begin(), rateData.startTime.end());
 
-    boost::unordered_flat_map<long long, vector<double>> cached;
-    boost::unordered_flat_map<long long, unique_ptr<SparseTable>> cachedMinMax;
+    string iv = generateRandomIV();
+    string apiKey = encryptAES(env["API_KEY"], env["ENCRYP_KEY"], iv);
+    string secretKey = encryptAES(env["SECRET_KEY"], env["ENCRYP_KEY"], iv);
+    IExchange* exchange = new BinanceFuture(apiKey, secretKey, iv, 31);
+    exchange->buyLimit("BTCUSDT", "0.01", "113000", "115000", "110000", "");
 
-    string expr = "{1 + 2}";
-
-    LOGI(calculateSubExpr(expr, broker, symbol, timeframe, open.size(), open.data(), high.data(), low.data(), close.data(), volume.data(), startTime.data(), 0.0, &cached, &cachedMinMax));
     SLEEP_FOR(1000000);
 }
 #endif

@@ -82,7 +82,7 @@ static httplib::SSLClient *getClient(const string &host)
     return cli.get();
 }
 
-static int getErrorCode(httplib::Result *res)
+static int getErrorCode(httplib::Result &res)
 {
     if (!res)
         return 1000;
