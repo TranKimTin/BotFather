@@ -24,8 +24,8 @@ private:
     string apiKey;
     string secretKey;
     int botID;
-    // const string BASE_URL = "https://fapi.binance.com";
-    string BASE_URL = "https://testnet.binancefuture.com";
+    const string BASE_URL = "https://fapi.binance.com";
+    // string BASE_URL = "https://testnet.binancefuture.com";
 
     const int MAX_NUM_ALGO_ORDERS = 10;
     const string SELL = "SELL";
