@@ -176,3 +176,22 @@ struct Digit
     int volume;
     int prices;
 };
+
+class RequestException : public exception
+{
+    int code;
+    string msg;
+
+public:
+    RequestException(int c, string m) : code(c), msg(move(m)) {}
+
+    const char *what() const noexcept override
+    {
+        return msg.c_str();
+    }
+
+    int errorCode() const noexcept
+    {
+        return code;
+    }
+};

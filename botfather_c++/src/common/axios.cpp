@@ -9,12 +9,12 @@ static void parseUrl(const string &url, string &host, string &path)
 {
     const string https_prefix = "https://";
     if (url.find(https_prefix) != 0)
-        throw invalid_argument("Only HTTPS URLs are supported.");
+        throw RequestException(1001, "Only HTTPS URLs are supported.");
 
     string host_and_path = url.substr(https_prefix.size());
     size_t slash_pos = host_and_path.find('/');
     if (slash_pos == string::npos)
-        throw invalid_argument("Invalid URL format.");
+        throw RequestException(1002, "Invalid URL format.");
 
     host = host_and_path.substr(0, slash_pos);
     path = "/" + host_and_path.substr(slash_pos + 1);
@@ -82,6 +82,18 @@ static httplib::SSLClient *getClient(const string &host)
     return cli.get();
 }
 
+static int getErrorCode(httplib::Result *res)
+{
+    if (!res)
+        return 1000;
+    json j = json::parse(res->body);
+    if (j.contains("code"))
+    {
+        return j["code"].get<int>();
+    }
+    return 1000;
+}
+
 string Axios::get(const string &url, const vector<string> &headers)
 {
     string host, path;
@@ -96,7 +108,8 @@ string Axios::get(const string &url, const vector<string> &headers)
         return res->body;
 
     LOGE("[request] GET request failed: {}. body={}, url={}", res ? res->reason : "No response", res ? res->body : "", url);
-    throw runtime_error("GET request failed.");
+
+    throw RequestException(getErrorCode(res), "GET request failed.");
 }
 
 string Axios::getHTTP(const string &url, const vector<string> &headers)
@@ -116,7 +129,7 @@ string Axios::getHTTP(const string &url, const vector<string> &headers)
         return res->body;
 
     LOGE("[request] GET request failed: {}. body={}, url={}", res ? res->reason : "No response", res ? res->body : "", url);
-    throw runtime_error("GET request failed.");
+    throw RequestException(getErrorCode(res), "GET request failed.");
 }
 
 string Axios::post(const string &url, const string &body,
@@ -132,7 +145,7 @@ string Axios::post(const string &url, const string &body,
         return res->body;
 
     LOGE("[request] POST request failed: reason: {}. body: {}. url={}", res ? res->reason : "No response", res ? res->body : "", url);
-    throw runtime_error("POST request failed.");
+    throw RequestException(getErrorCode(res), "POST request failed.");
 }
 
 string Axios::put(const string &url, const string &body,
@@ -148,7 +161,7 @@ string Axios::put(const string &url, const string &body,
         return res->body;
 
     LOGE("[request] PUT request failed: {}. url={}", res ? res->reason : "No response", url);
-    throw runtime_error("PUT request failed.");
+    throw RequestException(getErrorCode(res), "PUT request failed.");
 }
 
 string Axios::del(const string &url, const vector<string> &headers)
@@ -163,5 +176,5 @@ string Axios::del(const string &url, const vector<string> &headers)
         return res->body;
 
     LOGE("[request] DELETE request failed: {}. body={}, url={}", res ? res->reason : "No response", res ? res->body : "", url);
-    throw runtime_error("DELETE request failed.");
+    throw RequestException(getErrorCode(res), "DELETE request failed.");
 }
