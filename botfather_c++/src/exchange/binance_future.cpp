@@ -27,7 +27,7 @@ string BinanceFuture::buyMarket(const string &symbol, string quantity,
         LOGI("openOrderAlgoCount: {}", openOrderAlgoCount);
     }
 
-    string clientOrderId = StringFormat("BFBM{}{}", symbol, getCurrentTime());
+    string clientOrderId = StringFormat("BFBM{}{}_{}", symbol, getCurrentTime(), botID);
     map<string, string> params = {
         {"recvWindow", "30000"},
         {"symbol", symbol},
@@ -117,7 +117,7 @@ string BinanceFuture::sellMarket(const string &symbol, string quantity, string t
         LOGI("openOrderAlgoCount: {}", openOrderAlgoCount);
     }
 
-    string clientOrderId = StringFormat("BFSM{}{}", symbol, getCurrentTime());
+    string clientOrderId = StringFormat("BFSM{}{}_{}", symbol, getCurrentTime(), botID);
     map<string, string> params = {
         {"recvWindow", "30000"},
         {"symbol", symbol},
@@ -207,7 +207,7 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
         LOGI("openOrderAlgoCount: {}", openOrderAlgoCount);
     }
 
-    string clientOrderId = StringFormat("BFBL{}{}", symbol, getCurrentTime());
+    string clientOrderId = StringFormat("BFBL{}{}_{}", symbol, getCurrentTime(), botID);
     map<string, string> params = {
         {"recvWindow", "30000"},
         {"symbol", symbol},
@@ -344,7 +344,7 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
         LOGI("openOrderAlgoCount: {}", openOrderAlgoCount);
     }
 
-    string clientOrderId = StringFormat("BFSL{}{}", symbol, getCurrentTime());
+    string clientOrderId = StringFormat("BFSL{}{}_{}", symbol, getCurrentTime(), botID);
     map<string, string> params = {
         {"recvWindow", "30000"},
         {"symbol", symbol},
@@ -469,8 +469,8 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
 string BinanceFuture::sendTPorSL(const string &symbol, const string &side, const string &type, string quantity, string stopPrice, string limitPrice)
 {
     string clientOrderId = (type == TAKE_PROFIT_MARKET || type == STOP || type == LIMIT)
-                               ? StringFormat("BF_TP{}{}", symbol, getCurrentTime())
-                               : StringFormat("BF_SL{}{}", symbol, getCurrentTime());
+                               ? StringFormat("BF_TP{}{}_{}", symbol, getCurrentTime(), botID)
+                               : StringFormat("BF_SL{}{}_{}", symbol, getCurrentTime(), botID);
 
     map<string, string> params = {
         {"recvWindow", "30000"},
