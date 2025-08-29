@@ -25,7 +25,7 @@ BinanceFuture::BinanceFuture(const string &encryptedApiKey, const string &encryp
 string BinanceFuture::buyMarket(const string &symbol, string quantity,
                                 string takeProfit, string stopLoss, bool reduceOnly)
 {
-    if (!takeProfit.emptclientOrderIdy() || !stopLoss.empty())
+    if (!takeProfit.empty() || !stopLoss.empty())
     {
         int openOrderAlgoCount = getOpenAlgoOrdersCount(symbol);
         if (openOrderAlgoCount == -1 || openOrderAlgoCount >= MAX_NUM_ALGO_ORDERS)
