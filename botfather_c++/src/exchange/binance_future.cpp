@@ -5,6 +5,15 @@
 #include <openssl/hmac.h>
 #include <openssl/evp.h>
 
+static void adjustClientOrderId(string &clientOrderId)
+{
+    constexpr size_t MAX_LEN = 36;
+    if (clientOrderId.size() > MAX_LEN)
+    {
+        clientOrderId.resize(MAX_LEN);
+    }
+}
+
 BinanceFuture::BinanceFuture(const string &encryptedApiKey, const string &encryptedSecretKey, const string &iv, const int botID)
     : encryptedApiKey(encryptedApiKey), encryptedSecretKey(encryptedSecretKey), iv(iv), botID(botID)
 {
@@ -16,7 +25,7 @@ BinanceFuture::BinanceFuture(const string &encryptedApiKey, const string &encryp
 string BinanceFuture::buyMarket(const string &symbol, string quantity,
                                 string takeProfit, string stopLoss, bool reduceOnly)
 {
-    if (!takeProfit.empty() || !stopLoss.empty())
+    if (!takeProfit.emptclientOrderIdy() || !stopLoss.empty())
     {
         int openOrderAlgoCount = getOpenAlgoOrdersCount(symbol);
         if (openOrderAlgoCount == -1 || openOrderAlgoCount >= MAX_NUM_ALGO_ORDERS)
@@ -28,6 +37,8 @@ string BinanceFuture::buyMarket(const string &symbol, string quantity,
     }
 
     string clientOrderId = StringFormat("BFBM{}{}_{}", symbol, getCurrentTime(), botID);
+    adjustClientOrderId(clientOrderId);
+
     map<string, string> params = {
         {"recvWindow", "30000"},
         {"symbol", symbol},
@@ -118,6 +129,8 @@ string BinanceFuture::sellMarket(const string &symbol, string quantity, string t
     }
 
     string clientOrderId = StringFormat("BFSM{}{}_{}", symbol, getCurrentTime(), botID);
+    adjustClientOrderId(clientOrderId);
+
     map<string, string> params = {
         {"recvWindow", "30000"},
         {"symbol", symbol},
@@ -208,6 +221,8 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
     }
 
     string clientOrderId = StringFormat("BFBL{}{}_{}", symbol, getCurrentTime(), botID);
+    adjustClientOrderId(clientOrderId);
+
     map<string, string> params = {
         {"recvWindow", "30000"},
         {"symbol", symbol},
@@ -345,6 +360,8 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
     }
 
     string clientOrderId = StringFormat("BFSL{}{}_{}", symbol, getCurrentTime(), botID);
+    adjustClientOrderId(clientOrderId);
+
     map<string, string> params = {
         {"recvWindow", "30000"},
         {"symbol", symbol},
@@ -471,6 +488,7 @@ string BinanceFuture::sendTPorSL(const string &symbol, const string &side, const
     string clientOrderId = (type == TAKE_PROFIT_MARKET || type == STOP || type == LIMIT)
                                ? StringFormat("BF_TP{}{}_{}", symbol, getCurrentTime(), botID)
                                : StringFormat("BF_SL{}{}_{}", symbol, getCurrentTime(), botID);
+    adjustClientOrderId(clientOrderId);
 
     map<string, string> params = {
         {"recvWindow", "30000"},
