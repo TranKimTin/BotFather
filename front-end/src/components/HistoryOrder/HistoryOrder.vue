@@ -75,7 +75,7 @@
         <div class="flex justify-end">
             <InputText v-model="r_globalFilter" placeholder="Tìm kiếm..." class="p-inputtext-sm w-72" />
         </div>
-        <DataTable :value="r_orderList" :globalFilterFields="['symbol']"
+        <DataTable :value="r_orderList" :globalFilterFields="['symbol', 'status']"
             :filters="{ global: { value: r_globalFilter, matchMode: 'contains' } }" tableStyle="min-width: 50rem"
             scrollable scrollHeight="85vh" :virtualScrollerOptions="{ itemSize: 50 }" stripedRows>
             <Column :header="`STT (${r_orderList.length})`">
