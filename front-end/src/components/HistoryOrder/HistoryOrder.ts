@@ -86,6 +86,7 @@ export default defineComponent({
         const r_accountBalance = ref<number>(0);
         const r_accountMargin = ref<number>(0);
         const r_AccountUnrealizedPnL = ref<number>(0);
+        const r_globalFilter = ref<string>("");
 
         const r_botNameList = ref<Array<string>>([]);
         const r_botName = ref<string>(botName);
@@ -310,6 +311,7 @@ export default defineComponent({
             r_accountMargin,
             r_AccountUnrealizedPnL,
             r_tradereal_profit,
+            globalFilter,
             timeframes,
             brokers,
             clearHistory
