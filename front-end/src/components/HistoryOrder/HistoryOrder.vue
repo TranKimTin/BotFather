@@ -51,10 +51,11 @@
             balance: {{ r_accountBalance }} $
         </div>
         <div class="flex-auto">
-            Margin còn lại: <strong :style="{ color: (r_accountMargin / r_accountBalance * 100) >= 10 ? 'green' : 'red' }">{{
-                +(r_accountMargin).toFixed(2) }} $</strong>
+            Margin còn lại: <strong
+                :style="{ color: (r_accountMargin / r_accountBalance * 100) >= 10 ? 'green' : 'red' }">{{
+                    +(r_accountMargin).toFixed(2) }} $</strong>
         </div>
-        
+
     </div>
     <div class="grid grid-cols-2 gap-2 p-2">
         <div>
@@ -71,7 +72,8 @@
     <BalanceChart :data="r_balanceData" />
     <div>
         <h3 v-if="r_isLoading">Đang load, đợi tí...</h3>
-        <DataTable :value="r_orderList" tableStyle="min-width: 50rem"  stripedRows>
+        <DataTable :value="r_orderList" tableStyle="min-width: 50rem" scrollable scrollHeight="90vh"
+            :virtualScrollerOptions="{ itemSize: 500 }" stripedRows>
             <Column :header="`STT (${r_orderList.length})`">
                 <template #body="order">
                     {{ order.index + 1 }}
