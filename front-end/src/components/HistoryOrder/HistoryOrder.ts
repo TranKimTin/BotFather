@@ -311,7 +311,7 @@ export default defineComponent({
             r_accountMargin,
             r_AccountUnrealizedPnL,
             r_tradereal_profit,
-            globalFilter,
+            r_globalFilter,
             timeframes,
             brokers,
             clearHistory
