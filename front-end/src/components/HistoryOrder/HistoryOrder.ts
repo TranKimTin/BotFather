@@ -129,6 +129,7 @@ export default defineComponent({
                     let balanceReal = 0;
 
                     let sortedData = orders.filter(item => item.status !== ORDER_STATUS.CANCELED);
+                    console.log('order length: ', sortedData.length);
                     sortedData.sort((a, b) => {
                         let timeA = new Date(a.createdTime).getTime();
                         let timeB = new Date(a.createdTime).getTime();
