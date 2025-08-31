@@ -72,10 +72,12 @@
     <BalanceChart :data="r_balanceData" />
     <div>
         <h3 v-if="r_isLoading">Đang load, đợi tí...</h3>
-        <InputText v-model="r_globalFilter" placeholder="Tìm kiếm..." />
-        <DataTable :value="r_orderList" :globalFilterFields="['broker', 'symbol']"
+        <div class="flex justify-end">
+            <InputText v-model="r_globalFilter" placeholder="Tìm kiếm..." class="p-inputtext-sm" />
+        </div>
+        <DataTable :value="r_orderList" :globalFilterFields="['broker']"
             :filters="{ global: { value: r_globalFilter, matchMode: 'contains' } }" tableStyle="min-width: 50rem"
-            scrollable scrollHeight="90vh" :virtualScrollerOptions="{ itemSize: 100 }" stripedRows>
+            scrollable scrollHeight="85vh" :virtualScrollerOptions="{ itemSize: 100 }" stripedRows>
             <Column :header="`STT (${r_orderList.length})`">
                 <template #body="order">
                     {{ order.index + 1 }}
