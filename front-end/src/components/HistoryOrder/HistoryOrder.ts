@@ -60,7 +60,7 @@ export interface PropData {
 }
 
 export default defineComponent({
-    components: { DataTable, Column, MultiSelect, BalanceChart, Select },
+    components: { DataTable, Column, MultiSelect, BalanceChart, Select, InputText },
     setup() {
         const route = useRoute();
         const router = useRouter();
