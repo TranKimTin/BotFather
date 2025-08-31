@@ -73,7 +73,7 @@
     <div>
         <h3 v-if="r_isLoading">Đang load, đợi tí...</h3>
         <div class="flex justify-end">
-            <InputText v-model="r_globalFilter" placeholder="Tìm kiếm..." class="p-inputtext-sm" />
+            <InputText v-model="r_globalFilter" placeholder="Tìm kiếm..." class="p-inputtext-sm w-72" />
         </div>
         <DataTable :value="r_orderList" :globalFilterFields="['symbol']"
             :filters="{ global: { value: r_globalFilter, matchMode: 'contains' } }" tableStyle="min-width: 50rem"
