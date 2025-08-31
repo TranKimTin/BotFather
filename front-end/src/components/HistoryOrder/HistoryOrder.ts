@@ -128,7 +128,7 @@ export default defineComponent({
                     let idxTradeReal = 0;
                     let balanceReal = 0;
 
-                    let sortedData = [...orders];
+                    let sortedData = orders.filter(item => item.status !== ORDER_STATUS.CANCELED);
                     sortedData.sort((a, b) => {
                         let timeA = new Date(a.createdTime).getTime();
                         let timeB = new Date(a.createdTime).getTime();
@@ -142,13 +142,8 @@ export default defineComponent({
                         return timeA - timeB;
                     });
 
-                    let orderOpening: Array<Order | undefined> = [];
-
                     for (let i = 0; i < sortedData.length; i++) {
                         const order = sortedData[i];
-                        if (order.status !== ORDER_STATUS.CANCELED) {
-                            orderOpening.push(order);
-                        }
 
                         if (lastTimeUpdated === '' || (order.lastTimeUpdated && order.timeEntry && new Date(lastTimeUpdated).getTime() < new Date(order.lastTimeUpdated).getTime()))
                             lastTimeUpdated = order.lastTimeUpdated;
