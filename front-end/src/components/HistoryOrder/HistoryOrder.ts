@@ -5,6 +5,7 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import MultiSelect from 'primevue/multiselect';
 import BalanceChart from "./BalanceChart.vue";
+import InputText from 'primevue/inputtext';
 import { useConfirm } from "primevue/useconfirm";
 import * as Toast from '../../toast/toast';
 import Select from 'primevue/select';
