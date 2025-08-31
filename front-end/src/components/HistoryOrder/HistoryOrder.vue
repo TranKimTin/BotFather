@@ -73,7 +73,7 @@
     <div>
         <h3 v-if="r_isLoading">Đang load, đợi tí...</h3>
         <DataTable :value="r_orderList" tableStyle="min-width: 50rem" scrollable scrollHeight="90vh"
-            :virtualScrollerOptions="{ itemSize: 500 }" stripedRows>
+            :virtualScrollerOptions="{ itemSize: 100 }" stripedRows>
             <Column :header="`STT (${r_orderList.length})`">
                 <template #body="order">
                     {{ order.index + 1 }}
