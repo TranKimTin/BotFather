@@ -37,11 +37,11 @@ vector<string> getBybitFutureSymbolList();
 vector<string> getBybitSymbolList();
 vector<string> getOkxSymbolList();
 
-boost::unordered_flat_map<long long, Digit> getBinanceDigits();
-boost::unordered_flat_map<long long, Digit> getBinanceFutureDigits();
-boost::unordered_flat_map<long long, Digit> getBybitDigits();
-boost::unordered_flat_map<long long, Digit> getBybitFutureDigits();
-boost::unordered_flat_map<long long, Digit> getOkxDigits();
+boost::unordered_flat_map<long long, ExchangeInfo> getBinanceInfo();
+boost::unordered_flat_map<long long, ExchangeInfo> getBinanceFutureInfo();
+boost::unordered_flat_map<long long, ExchangeInfo> getBybitInfo();
+boost::unordered_flat_map<long long, ExchangeInfo> getBybitFutureInfo();
+boost::unordered_flat_map<long long, ExchangeInfo> getOkxInfo();
 
 string base64Encode(const unsigned char *data, int len);
 vector<unsigned char> base64Decode(const string &input);
@@ -50,7 +50,6 @@ string decryptAES(const string &ciphertext, const string &key, const string &iv)
 string generateRandomIV();
 
 int compareStringNumber(const string &a, const string &b);
-
 long long hashString(const string &s);
-
 int fast_stoi(const char *s);
+bool isValidPrice(double price, const ExchangeInfo &exchangeInfo);

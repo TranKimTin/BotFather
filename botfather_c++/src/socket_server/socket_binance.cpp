@@ -83,7 +83,7 @@ RateData SocketBinance::getOHLCV(const string &symbol, const string &timeframe, 
     return rateData;
 }
 
-boost::unordered_flat_map<long long, Digit> SocketBinance::getDigit()
+boost::unordered_flat_map<long long, ExchangeInfo> SocketBinance::getExchangeInfo()
 {
-    return getBinanceDigits();
+    return getBinanceInfo();
 }
