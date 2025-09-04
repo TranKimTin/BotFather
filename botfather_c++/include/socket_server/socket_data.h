@@ -13,7 +13,7 @@ protected:
     std::mutex mMutex;
     shared_ptr<vector<shared_ptr<Bot>>> botList;
     shared_ptr<boost::asio::ssl::context> on_tls_init(connection_hdl);
-    boost::unordered_flat_map<long long, Digit> digits;
+    boost::unordered_flat_map<long long, ExchangeInfo> exchangeInfo;
     boost::unordered_flat_map<long long, double> fundingRates;
     bool firstConnection;
     string uri;
@@ -31,7 +31,7 @@ protected:
 
     virtual void on_message(connection_hdl, message_ptr msg) = 0;
     virtual vector<string> getSymbolList() = 0;
-    virtual boost::unordered_flat_map<long long, Digit> getDigit() = 0;
+    virtual boost::unordered_flat_map<long long, ExchangeInfo> getExchangeInfo() = 0;
     virtual RateData getOHLCV(const string &symbol, const string &timeframe, int limit, long long since = 0) = 0; // from since, get limit candle
 
 public:

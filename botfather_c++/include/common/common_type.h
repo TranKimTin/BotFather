@@ -171,10 +171,10 @@ struct Bot
     boost::unordered_flat_set<long long> symbolExist;
 };
 
-struct Digit
+struct ExchangeInfo
 {
-    int volume;
-    int prices;
+    int digitVolume;
+    int digitPrices;
 };
 
 class RequestException : public exception

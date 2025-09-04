@@ -107,7 +107,7 @@ RateData SocketOkx::getOHLCV(const string &symbol, const string &timeframe, int 
     return rateData;
 }
 
-boost::unordered_flat_map<long long, Digit> SocketOkx::getDigit()
+boost::unordered_flat_map<long long, ExchangeInfo> SocketOkx::getExchangeInfo()
 {
-    return getOkxDigits();
+    return getOkxInfo();
 }

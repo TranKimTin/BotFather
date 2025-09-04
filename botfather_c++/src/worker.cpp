@@ -15,7 +15,7 @@ static ThreadPool tasks(thread::hardware_concurrency() * 2 + 1);
 extern thread_local VectorDoublePool vectorDoublePool;
 extern thread_local SparseTablePool sparseTablePool;
 
-void Worker::init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, Digit digit, double fundingRate)
+void Worker::init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, ExchangeInfo exchangeInfo, double fundingRate)
 {
     VectorDoublePool::getInstance().releaseLock(this->open);
     VectorDoublePool::getInstance().releaseLock(this->high);
@@ -34,7 +34,7 @@ void Worker::init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, st
     this->close = move(close);
     this->volume = move(volume);
     this->startTime = move(startTime);
-    this->digit = digit;
+    this->exchangeInfo = exchangeInfo;
     this->fundingRate = fundingRate;
 
     for (auto &pair : cachedIndicator)
@@ -156,7 +156,7 @@ bool Worker::adjustParam(NodeData &node)
             return false;
         }
 
-        node.stop = doubleToString(any_cast<double>(result), digit.prices);
+        node.stop = doubleToString(any_cast<double>(result), exchangeInfo.digitPrices);
     }
     else if (node.type == NODE_TYPE::SELL_STOP_MARKET || node.type == NODE_TYPE::SELL_STOP_LIMIT)
     {
@@ -177,7 +177,7 @@ bool Worker::adjustParam(NodeData &node)
             return false;
         }
 
-        node.stop = doubleToString(any_cast<double>(result), digit.prices);
+        node.stop = doubleToString(any_cast<double>(result), exchangeInfo.digitPrices);
     }
     else
     {
@@ -204,7 +204,7 @@ bool Worker::adjustParam(NodeData &node)
             return false;
         }
 
-        node.entry = doubleToString(any_cast<double>(result), digit.prices);
+        node.entry = doubleToString(any_cast<double>(result), exchangeInfo.digitPrices);
     }
     else if (node.type == NODE_TYPE::SELL_LIMIT || node.type == NODE_TYPE::SELL_STOP_LIMIT)
     {
@@ -225,7 +225,7 @@ bool Worker::adjustParam(NodeData &node)
             return false;
         }
 
-        node.entry = doubleToString(any_cast<double>(result), digit.prices);
+        node.entry = doubleToString(any_cast<double>(result), exchangeInfo.digitPrices);
     }
     else if (node.type == NODE_TYPE::BUY_STOP_MARKET || node.type == NODE_TYPE::SELL_STOP_MARKET)
     {
@@ -233,7 +233,7 @@ bool Worker::adjustParam(NodeData &node)
     }
     else if (node.type == NODE_TYPE::BUY_MARKET || node.type == NODE_TYPE::SELL_MARKET)
     {
-        node.entry = doubleToString(close[0], digit.prices);
+        node.entry = doubleToString(close[0], exchangeInfo.digitPrices);
     }
 
     double closePrice = close[0];
@@ -242,19 +242,19 @@ bool Worker::adjustParam(NodeData &node)
     // match entry immediately
     if (node.type == NODE_TYPE::BUY_LIMIT && closePrice <= entry)
     {
-        node.entry = doubleToString(closePrice, digit.prices);
+        node.entry = doubleToString(closePrice, exchangeInfo.digitPrices);
     }
     else if (node.type == NODE_TYPE::BUY_STOP_LIMIT && closePrice <= entry && closePrice >= stop)
     {
-        node.entry = doubleToString(closePrice, digit.prices);
+        node.entry = doubleToString(closePrice, exchangeInfo.digitPrices);
     }
     else if (node.type == NODE_TYPE::SELL_LIMIT && closePrice >= entry)
     {
-        node.entry = doubleToString(closePrice, digit.prices);
+        node.entry = doubleToString(closePrice, exchangeInfo.digitPrices);
     }
     else if (node.type == NODE_TYPE::SELL_STOP_LIMIT && closePrice >= entry && closePrice <= stop)
     {
-        node.entry = doubleToString(closePrice, digit.prices);
+        node.entry = doubleToString(closePrice, exchangeInfo.digitPrices);
     }
 
     // sl
@@ -277,7 +277,7 @@ bool Worker::adjustParam(NodeData &node)
             return false;
         }
 
-        node.sl = doubleToString(any_cast<double>(result), digit.prices);
+        node.sl = doubleToString(any_cast<double>(result), exchangeInfo.digitPrices);
     }
     else if (node.type == NODE_TYPE::SELL_MARKET || node.type == NODE_TYPE::SELL_LIMIT || node.type == NODE_TYPE::SELL_STOP_MARKET || node.type == NODE_TYPE::SELL_STOP_LIMIT)
     {
@@ -298,7 +298,7 @@ bool Worker::adjustParam(NodeData &node)
             return false;
         }
 
-        node.sl = doubleToString(any_cast<double>(result), digit.prices);
+        node.sl = doubleToString(any_cast<double>(result), exchangeInfo.digitPrices);
     }
     else
     {
@@ -329,7 +329,7 @@ bool Worker::adjustParam(NodeData &node)
             return false;
         }
 
-        node.tp = doubleToString(any_cast<double>(result), digit.prices);
+        node.tp = doubleToString(any_cast<double>(result), exchangeInfo.digitPrices);
     }
     else if (node.type == NODE_TYPE::SELL_MARKET || node.type == NODE_TYPE::SELL_LIMIT || node.type == NODE_TYPE::SELL_STOP_MARKET || node.type == NODE_TYPE::SELL_STOP_LIMIT)
     {
@@ -354,7 +354,7 @@ bool Worker::adjustParam(NodeData &node)
             return false;
         }
 
-        node.tp = doubleToString(any_cast<double>(result), digit.prices);
+        node.tp = doubleToString(any_cast<double>(result), exchangeInfo.digitPrices);
     }
     else
     {
@@ -381,7 +381,7 @@ bool Worker::adjustParam(NodeData &node)
             return false;
         }
 
-        node.volume = doubleToString(any_cast<double>(result), digit.volume);
+        node.volume = doubleToString(any_cast<double>(result), exchangeInfo.digitVolume);
     }
     else
     {
@@ -523,7 +523,7 @@ bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
         double h = high[0];
         double l = low[0];
         double c = close[0];
-        tasks.enqueue([createdTime, node, bot, broker = this->broker, symbol = this->symbol, timeframe = this->timeframe, o, h, l, c, digit = this->digit]()
+        tasks.enqueue([createdTime, node, bot, broker = this->broker, symbol = this->symbol, timeframe = this->timeframe, o, h, l, c, exchangeInfo = this->exchangeInfo]()
                       {
         int botID = bot->id;
 
@@ -532,7 +532,7 @@ bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
             node.entry, node.stop, node.tp, node.sl,
             node.volume, node.expiredTime);
         LOGI("open: {}, high: {}, low: {}, close: {}, startTime: {}, timestring: {}", o, h, l, c, createdTime, toTimeString(createdTime));
-        LOGI("digit: {}, {}", digit.prices, digit.volume);
+        LOGI("exchangeInfo: {}, {}", exchangeInfo.digitPrices, exchangeInfo.digitVolume);
 
         if (broker == "binance_future" && bot->enableRealOrder && !bot->apiKey.empty() && !bot->secretKey.empty() && !bot->iv.empty())
         {

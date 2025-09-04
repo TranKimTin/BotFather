@@ -31,8 +31,8 @@ void SocketData::init()
         //     symbolList = {"BTCUSDT"};
         // }
 
-        digits = getDigit();
-        digits.max_load_factor(0.5);
+        exchangeInfo = getExchangeInfo();
+        exchangeInfo.max_load_factor(0.5);
         fundingRates.max_load_factor(0.5);
 
         for (string &symbol : symbolList)
@@ -84,7 +84,7 @@ void SocketData::onCloseCandle(const string &symbol, string &timeframe, RateData
         startTime[i] = rateData.startTime[i];
     }
 
-    if (digits.find(hashString(symbol)) == digits.end())
+    if (exchangeInfo.find(hashString(symbol)) == exchangeInfo.end())
     {
         LOGE("No digit found for symbol {}:{}", broker, symbol);
         throw runtime_error("No digit found for symbol " + symbol);
@@ -100,10 +100,10 @@ void SocketData::onCloseCandle(const string &symbol, string &timeframe, RateData
               close = move(close),
               volume = move(volume),
               startTime = move(startTime),
-              digit = digits[hashString(symbol)],
+              exchangeInfo = exchangeInfo[hashString(symbol)],
               funding = fundingRates[hashString(symbol)]]()
              { 
-                worker.init(botList, broker, symbol, timeframe, move(open), move(high), move(low), move(close), move(volume), move(startTime), digit, funding);
+                worker.init(botList, broker, symbol, timeframe, move(open), move(high), move(low), move(close), move(volume), move(startTime), exchangeInfo, funding);
                 worker.run(); });
 
     if (timeframe == "1m" || rand() % 10 == 0)

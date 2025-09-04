@@ -10,7 +10,7 @@ protected:
     RateData getOHLCV(const string &symbol, const string &timeframe, int limit, long long since = 0) override;
     vector<string> getSymbolList() override;
     void onSocketConnected(connection_hdl hdl) override;
-    boost::unordered_flat_map<long long, Digit> getDigit() override;
+    boost::unordered_flat_map<long long, ExchangeInfo> getExchangeInfo() override;
 
 public:
     SocketBybitFuture(const int _BATCH_SIZE);

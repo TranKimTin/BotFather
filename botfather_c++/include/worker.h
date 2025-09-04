@@ -16,7 +16,7 @@ private:
     shared_ptr<vector<shared_ptr<Bot>>> botList;
     boost::unordered_flat_set<long long> visited;
     boost::unordered_flat_map<long long, any> cachedExpr;
-    Digit digit;
+    ExchangeInfo exchangeInfo;
     double fundingRate;
     boost::unordered_flat_map<long long, vector<double>> cachedIndicator;
     boost::unordered_flat_map<long long, unique_ptr<SparseTable>> cachedMinMax;
@@ -33,7 +33,7 @@ public:
         cachedIndicator.max_load_factor(0.5);
         cachedMinMax.max_load_factor(0.5);
     };
-    void init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, Digit digit, double fundingRate);
+    void init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, ExchangeInfo exchangeInfo, double fundingRate);
     void run();
     void dfs_handleLogic(Route &route, const shared_ptr<Bot> &bot);
     bool handleLogic(NodeData &node, const shared_ptr<Bot> &bot);
