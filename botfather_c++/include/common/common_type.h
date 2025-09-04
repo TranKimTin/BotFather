@@ -175,6 +175,8 @@ struct ExchangeInfo
 {
     int digitVolume;
     int digitPrices;
+    double minPrice;
+    double maxPrice; 
 };
 
 class RequestException : public exception

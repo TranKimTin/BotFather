@@ -50,7 +50,6 @@ string decryptAES(const string &ciphertext, const string &key, const string &iv)
 string generateRandomIV();
 
 int compareStringNumber(const string &a, const string &b);
-
 long long hashString(const string &s);
-
 int fast_stoi(const char *s);
+bool isValidPrice(double price, const ExchangeInfo &exchangeInfo);

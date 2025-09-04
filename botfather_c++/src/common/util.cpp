@@ -6,6 +6,8 @@
 #include <openssl/bio.h>
 #include <openssl/buffer.h>
 
+static const double INF = 1e18;
+
 string toLowerCase(string str)
 {
     for (auto &c : str)
@@ -624,6 +626,8 @@ boost::unordered_flat_map<long long, ExchangeInfo> getBinanceInfo()
             if (f["filterType"].get<string>() == "PRICE_FILTER")
             {
                 result[key].digitPrices = (int)(-log10(stod(f["tickSize"].get<string>())));
+                result[key].minPrice = stod(f["minPrice"].get<string>());
+                result[key].maxPrice = stod(f["maxPrice"].get<string>());
             }
             else if (f["filterType"].get<string>() == "LOT_SIZE")
             {
@@ -658,6 +662,8 @@ boost::unordered_flat_map<long long, ExchangeInfo> getBinanceFutureInfo()
             if (f["filterType"].get<string>() == "PRICE_FILTER")
             {
                 result[key].digitPrices = (int)(-log10(stod(f["tickSize"].get<string>())));
+                result[key].minPrice = stod(f["minPrice"].get<string>());
+                result[key].maxPrice = stod(f["maxPrice"].get<string>());
             }
             else if (f["filterType"].get<string>() == "LOT_SIZE")
             {
@@ -685,6 +691,8 @@ boost::unordered_flat_map<long long, ExchangeInfo> getBybitInfo()
         long long key = hashString(symbol);
         result[key].digitPrices = (int)(-log10(stod(s["priceFilter"]["tickSize"].get<string>())));
         result[key].digitVolume = (int)(-log10(stod(s["lotSizeFilter"]["basePrecision"].get<string>())));
+        result[key].minPrice = 0.0;
+        result[key].maxPrice = INF;
     }
 
     return result;
@@ -706,6 +714,8 @@ boost::unordered_flat_map<long long, ExchangeInfo> getBybitFutureInfo()
         long long key = hashString(symbol);
         result[key].digitPrices = (int)(-log10(stod(s["priceFilter"]["tickSize"].get<string>())));
         result[key].digitVolume = (int)(-log10(stod(s["lotSizeFilter"]["qtyStep"].get<string>())));
+        result[key].minPrice = stod(s["priceFilter"]["minPrice"].get<string>());
+        result[key].maxPrice = stod(s["priceFilter"]["maxPrice"].get<string>());
     }
 
     return result;
@@ -726,6 +736,8 @@ boost::unordered_flat_map<long long, ExchangeInfo> getOkxInfo()
         long long key = hashString(symbol);
         result[key].digitPrices = (int)(-log10(stod(s["tickSz"].get<string>())));
         result[key].digitVolume = (int)(-log10(stod(s["lotSz"].get<string>())));
+        result[key].minPrice = 0.0;
+        result[key].maxPrice = INF;
     }
     return result;
 }
@@ -908,4 +920,9 @@ int fast_stoi(const char *s)
     }
 
     return neg ? -x : x;
+}
+
+bool isValidPrice(double price, const ExchangeInfo &exchangeInfo)
+{
+    return price >= exchangeInfo.minPrice && price <= exchangeInfo.maxPrice;
 }
