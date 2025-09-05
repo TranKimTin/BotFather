@@ -177,13 +177,13 @@ export async function getHistoryOrder(botName: string, filterBroker: Array<strin
             });
 
             const history = await client.futuresIncome({
-                limit: 1000
+                limit: 1000,
+                incomeType: 'REALIZED_PNL',
+                recvWindow: 30000
             });
             for (let item of history) {
                 if (item.asset === 'USDT') {
-                    if (item.incomeType === 'REALIZED_PNL' || item.incomeType === 'FUNDING_FEE' || item.incomeType === 'COMMISSION') {
-                        tradeReal.push(item);
-                    }
+                    tradeReal.push(item);
                 }
             }
             accountInfo = await client.futuresAccountInfo();
