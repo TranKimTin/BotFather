@@ -63,6 +63,8 @@ export interface PropData {
 function getMinBalanceRequired(orders: Array<Order>): number {
     let minBalanceRequired = 0;
     let list: Array<{ timestamp: number, volumeInUSD: number }> = [];
+    let timeMin = 0;
+
     for (let item of orders) {
         list.push({ timestamp: new Date(item.createdTime).getTime(), volumeInUSD: item.volumeInUSD });
 
@@ -76,8 +78,13 @@ function getMinBalanceRequired(orders: Array<Order>): number {
     let currentBalance = 0;
     for (let item of list) {
         currentBalance += item.volumeInUSD;
-        minBalanceRequired = Math.max(minBalanceRequired, currentBalance);
+        if (minBalanceRequired < currentBalance) {
+            timeMin = item.timestamp;
+            minBalanceRequired = currentBalance;
+        }
     }
+
+    console.log('time min: ', moment(timeMin).format('YYYY-MM-DD HH:mm'), ' min balance: ', minBalanceRequired);
 
     return minBalanceRequired * 1.1;
 }
