@@ -32,7 +32,7 @@
                     +(r_gain + r_loss + r_unrealizedGain + r_unrealizedLoss).toFixed(2) }} $</strong>
         </div>
         <div class="flex-auto">
-            Profit factor: {{ +((r_gain / (-r_loss))).toFixed(2) }}
+            Vốn tối thiểu: {{ r_minBalanceRequired }} (bẩy x1)
         </div>
         <div class="flex-auto">
             Drawdown: <span v-if="r_maxDD > 0">-</span> {{ r_maxDD }} $

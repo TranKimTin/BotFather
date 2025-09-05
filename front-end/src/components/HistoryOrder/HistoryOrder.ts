@@ -60,6 +60,28 @@ export interface PropData {
     balanceReal: number
 }
 
+function getMinBalanceRequired(orders: Array<Order>): number {
+    let minBalanceRequired = 0;
+    let list: Array<{ timestamp: number, volumeInUSD: number }> = [];
+    for (let item of orders) {
+        list.push({ timestamp: new Date(item.createdTime).getTime(), volumeInUSD: item.volumeInUSD });
+
+        if (item.timeTP || item.timeSL || item.status === ORDER_STATUS.CANCELED) {
+            list.push({ timestamp: new Date(item.timeTP || item.timeSL || item.expiredTime).getTime(), volumeInUSD: -item.volumeInUSD });
+        }
+    }
+
+    list.sort((a, b) => a.timestamp - b.timestamp);
+
+    let currentBalance = 0;
+    for (let item of list) {
+        currentBalance += item.volumeInUSD;
+        minBalanceRequired = Math.max(minBalanceRequired, currentBalance);
+    }
+
+    return minBalanceRequired * 1.1;
+}
+
 export default defineComponent({
     components: { DataTable, Column, MultiSelect, BalanceChart, Select, InputText },
     setup() {
@@ -88,6 +110,7 @@ export default defineComponent({
         const r_accountMargin = ref<number>(0);
         const r_AccountUnrealizedPnL = ref<number>(0);
         const r_globalFilter = ref<string>("");
+        const r_minBalanceRequired = ref<number>(0);
 
         const r_botNameList = ref<Array<string>>([]);
         const r_botName = ref<string>(botName);
@@ -129,6 +152,7 @@ export default defineComponent({
                     let lastTimeUpdated: string = '';
                     let idxTradeReal = 0;
                     let balanceReal = 0;
+                    let minBalanceRequired = getMinBalanceRequired(orders);
 
                     let sortedData = orders.filter(item => item.status !== ORDER_STATUS.CANCELED);
                     console.log('order length: ', sortedData.length);
@@ -217,6 +241,7 @@ export default defineComponent({
                     r_isLoading.value = false;
                     r_balanceData.value = balanceData;
                     r_tradereal_profit.value = balanceReal;
+                    r_minBalanceRequired.value = Math.round(minBalanceRequired);
                     if (tradeReal.length > 0) {
                         r_tradeRealTimestamp.value = moment(tradeReal[0].time).format('DD/MM/YYYY HH:mm:ss');
                     }
@@ -313,6 +338,7 @@ export default defineComponent({
             r_AccountUnrealizedPnL,
             r_tradereal_profit,
             r_globalFilter,
+            r_minBalanceRequired,
             timeframes,
             brokers,
             clearHistory
