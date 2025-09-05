@@ -501,6 +501,10 @@ string BinanceFuture::sendTPorSL(const string &symbol, const string &side, const
         {"newClientOrderId", clientOrderId},
         {"timestamp", to_string(getCurrentTime())}};
 
+    if (type == STOP_MARKET)
+    {
+        params["reduceOnly"] = "true";
+    }
     if (type == LIMIT)
     {
         params["timeInForce"] = "GTC";
