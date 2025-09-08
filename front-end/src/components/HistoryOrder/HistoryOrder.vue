@@ -45,7 +45,7 @@
         </div>
         <div class="flex-auto">
             Chưa chốt Real: <strong :style="{ color: r_AccountUnrealizedPnL >= 0 ? 'green' : 'red' }">{{
-                +(r_AccountUnrealizedPnL).toFixed(2) }} $</strong>
+                +(r_AccountUnrealizedPnL).toFixed(2) }} $</strong> (volume {{ r_volumeRealOpening }} $)
         </div>
         <div class="flex-auto">
             balance: {{ r_accountBalance }} $

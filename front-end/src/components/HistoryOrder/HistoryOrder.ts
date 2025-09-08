@@ -118,6 +118,7 @@ export default defineComponent({
         const r_AccountUnrealizedPnL = ref<number>(0);
         const r_globalFilter = ref<string>("");
         const r_minBalanceRequired = ref<number>(0);
+        const r_volumeRealOpening = ref<number>(0);
 
         const r_botNameList = ref<Array<string>>([]);
         const r_botName = ref<string>(botName);
@@ -142,18 +143,6 @@ export default defineComponent({
 
                     console.log({ accountInfo });
 
-                    if (accountInfo) {
-                        tradeReal.push({
-                            symbol: 'USDT',
-                            incomeType: 'UNREALIZED_PnL',
-                            income: accountInfo.totalUnrealizedProfit,
-                            info: '',
-                            time: new Date().getTime(),
-                            tranId: '',
-                            tradeId: '',
-                        });
-                    }
-
                     let gain = 0;
                     let loss = 0;
                     let unrealizedGain = 0;
@@ -172,6 +161,22 @@ export default defineComponent({
                     let idxTradeReal = 0;
                     let balanceReal = 0;
                     let minBalanceRequired = getMinBalanceRequired(orders);
+                    let volumeRealOpenning = 0;
+
+                    if (accountInfo) {
+                        for (let item of accountInfo.positions) {
+                            volumeRealOpenning += parseFloat(item.entryPrice) * parseFloat(item.positionAmt);
+                        }
+                        tradeReal.push({
+                            symbol: 'USDT',
+                            incomeType: 'UNREALIZED_PnL',
+                            income: accountInfo.totalUnrealizedProfit,
+                            info: '',
+                            time: new Date().getTime(),
+                            tranId: '',
+                            tradeId: '',
+                        });
+                    }
 
                     let sortedData = orders.filter(item => item.status !== ORDER_STATUS.CANCELED);
                     console.log('order length: ', sortedData.length);
@@ -261,6 +266,8 @@ export default defineComponent({
                     r_balanceData.value = balanceData;
                     r_tradereal_profit.value = balanceReal;
                     r_minBalanceRequired.value = Math.round(minBalanceRequired);
+                    r_volumeRealOpening.value = Math.round(volumeRealOpenning);
+
                     if (tradeReal.length > 0) {
                         r_tradeRealTimestamp.value = moment(tradeReal[0].time).format('DD/MM/YYYY HH:mm:ss');
                     }
@@ -358,6 +365,7 @@ export default defineComponent({
             r_tradereal_profit,
             r_globalFilter,
             r_minBalanceRequired,
+            r_volumeRealOpening,
             timeframes,
             brokers,
             clearHistory
