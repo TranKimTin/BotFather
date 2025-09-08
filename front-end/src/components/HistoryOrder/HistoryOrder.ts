@@ -176,7 +176,6 @@ export default defineComponent({
                             tranId: '',
                             tradeId: '',
                         });
-                        balanceReal -= accountInfo.totalUnrealizedProfit;
                     }
 
                     let sortedData = orders.filter(item => item.status !== ORDER_STATUS.CANCELED);
@@ -250,6 +249,10 @@ export default defineComponent({
                             idxTradeReal++;
                         }
                         balanceData.push({ timestamp: moment(tradeReal[idxTradeReal - 1].time).format("YYYY-MM-DD HH:mm"), balance: gain + loss - totalFee, balanceNoFee: gain + loss, balanceReal });
+                    }
+
+                    if (accountInfo) {
+                        balanceReal -= accountInfo.totalUnrealizedProfit;
                     }
 
                     console.log({ gain, feeGain, loss, feeLoss, unrealizedGain, unrealizedLoss, cntGain, cntLoss, cntOpening })
