@@ -150,7 +150,9 @@ export async function getHistoryOrder(botName: string, filterBroker: Array<strin
                                             AND o.timeframe IN (?)
                                         ORDER BY o.createdTime DESC`, [botName, filterBroker, filterTimeframe]);
 
-    for (let order of orders) {
+    const startTime = orders.length > 0 ? orders.at(-1).createdTime : moment().subtract(30, 'day').valueOf();
+
+    for (const order of orders) {
         order.createdTime = order.createdTime ? moment(order.createdTime).format('YYYY-MM-DD HH:mm') : '';
         order.expiredTime = order.expiredTime ? moment(order.expiredTime).format('YYYY-MM-DD HH:mm') : '';
         order.timeStop = order.timeStop ? moment(order.timeStop).format('YYYY-MM-DD HH:mm') : '';
@@ -179,6 +181,7 @@ export async function getHistoryOrder(botName: string, filterBroker: Array<strin
             const history = await client.futuresIncome({
                 limit: 1000,
                 incomeType: 'REALIZED_PNL',
+                startTime: startTime,
                 endTime: new Date().getTime(),
                 recvWindow: 30000
             });
