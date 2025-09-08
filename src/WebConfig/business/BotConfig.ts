@@ -179,6 +179,7 @@ export async function getHistoryOrder(botName: string, filterBroker: Array<strin
             const history = await client.futuresIncome({
                 limit: 1000,
                 incomeType: 'REALIZED_PNL',
+                endTime: new Date().getTime(),
                 recvWindow: 30000
             });
             for (let item of history) {
