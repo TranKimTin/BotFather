@@ -176,6 +176,7 @@ export default defineComponent({
                             tranId: '',
                             tradeId: '',
                         });
+                        balanceReal -= accountInfo.totalUnrealizedProfit;
                     }
 
                     let sortedData = orders.filter(item => item.status !== ORDER_STATUS.CANCELED);
