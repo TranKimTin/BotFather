@@ -142,6 +142,18 @@ export default defineComponent({
 
                     console.log({ accountInfo });
 
+                    if (accountInfo) {
+                        tradeReal.push({
+                            symbol: 'USDT',
+                            incomeType: 'UNREALIZED_PnL',
+                            income: accountInfo.totalUnrealizedProfit,
+                            info: '',
+                            time: new Date().getTime(),
+                            tranId: '',
+                            tradeId: '',
+                        });
+                    }
+
                     let gain = 0;
                     let loss = 0;
                     let unrealizedGain = 0;
