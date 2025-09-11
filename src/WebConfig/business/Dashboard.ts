@@ -26,7 +26,7 @@ export async function getBotInfo(userData: UserTokenInfo) {
 
     for (const item of data) {
         if (item.apiKey && item.secretKey && item.iv) {
-            const apiKey = util.decryptAES(item.apiKey, process.env.ENCRYP_KEY!, item.iv);
+            const apiKey = item.apiKey;
             if (!accountInfo[apiKey]) {
                 const secretKey = util.decryptAES(item.secretKey, process.env.ENCRYP_KEY!, item.iv);
                 let client = Binance({

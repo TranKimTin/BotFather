@@ -27,12 +27,12 @@ static void checkOrderStatus()
         string tpID = res->getString("tpID");
         string slID = res->getString("slID");
         string symbol = res->getString("symbol");
-        string encryptedApiKey = res->getString("apiKey");
+        string apiKey = res->getString("apiKey");
         string encryptedSecretKey = res->getString("secretKey");
         string iv = res->getString("iv");
         int botID = res->getInt("botID");
 
-        shared_ptr<IExchange> exchange = make_shared<BinanceFuture>(encryptedApiKey, encryptedSecretKey, iv, botID);
+        shared_ptr<IExchange> exchange = make_shared<BinanceFuture>(apiKey, encryptedSecretKey, iv, botID);
 
         semaphore.wait();
         threads.emplace_back([=, &db, &semaphore, &dbMutex]()

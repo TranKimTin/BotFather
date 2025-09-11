@@ -6,7 +6,7 @@
 class BinanceFuture : public IExchange
 {
 public:
-    BinanceFuture(const string &encryptedApiKey, const string &encryptedSecretKey, const string &iv, const int botID);
+    BinanceFuture(const string &apiKey, const string &encryptedSecretKey, const string &iv, const int botID);
 
     string buyMarket(const string &symbol, string quantity, string takeProfit = "", string stopLoss = "", bool reduceOnly = false) override;
     string sellMarket(const string &symbol, string quantity, string takeProfit = "", string stopLoss = "", bool reduceOnly = false) override;
@@ -18,7 +18,6 @@ public:
     bool changeMarginType(const string &symbol, const string &marginType) override; // marginType: "CROSSED" or "ISOLATED"
 
 private:
-    string encryptedApiKey;
     string encryptedSecretKey;
     string iv;
     string apiKey;
