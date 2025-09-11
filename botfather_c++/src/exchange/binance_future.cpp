@@ -662,6 +662,7 @@ string BinanceFuture::getOrderStatus(const string &symbol, const string &orderId
 
     try
     {
+        LOGI("Get Order status with key: {}", apiKey);
         string res = Axios::get(url, {"X-MBX-APIKEY: " + apiKey});
         return res;
     }
