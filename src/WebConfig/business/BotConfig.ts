@@ -270,7 +270,7 @@ export async function saveBot(data: BotInfo, userData: UserTokenInfo) {
             apiSecret: data.secretKey!
         });
         try {
-            const account = await client.accountInfo();
+            const account = await client.futuresAccountInfo();
             if (!account) {
                 throw "api key không hợp lệ";
             }
