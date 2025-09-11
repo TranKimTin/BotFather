@@ -274,7 +274,7 @@ export async function saveBot(data: BotInfo, userData: UserTokenInfo) {
             if (!account) {
                 throw "api key không hợp lệ";
             }
-            console.log('account', account);
+            console.log('account.availableBalance: ', account.availableBalance);
         } catch (error: any) {
             throw `api key không hợp lệ. ${error.message}`;
         }
