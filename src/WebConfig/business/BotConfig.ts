@@ -171,6 +171,7 @@ export async function getHistoryOrder(botName: string, filterBroker: Array<strin
         let { apiKey, secretKey, iv } = bot[0];
         if (apiKey && secretKey && iv) {
             const key = process.env.ENCRYP_KEY || '';
+            apiKey = util.decryptAES(apiKey, key, iv);
             secretKey = util.decryptAES(secretKey, key, iv);
             let client = Binance({
                 apiKey: apiKey,
@@ -258,7 +259,7 @@ export async function saveBot(data: BotInfo, userData: UserTokenInfo) {
             const { iv, apiKey, secretKey } = res[0];
             if (data.apiKey === apiKey && data.secretKey === secretKey) {
                 const key = process.env.ENCRYP_KEY || '';
-                data.apiKey = apiKey;
+                data.apiKey = util.decryptAES(apiKey, key, iv);
                 data.secretKey = util.decryptAES(secretKey, key, iv);
                 IV = iv;
             }
@@ -290,7 +291,7 @@ export async function saveBot(data: BotInfo, userData: UserTokenInfo) {
         const sql = `INSERT INTO Bot(botName, idTelegram, route, symbolList, timeframes, treeData, userID, apiKey, secretKey, iv, enableRealOrder) VALUES(?,?,?,?,?,?,?,?,?,?,?)`;
         const iv = IV || util.generateRandomIV();
         const key = process.env.ENCRYP_KEY || '';
-        const apiKey = data.apiKey || '';
+        const apiKey = data.apiKey ? util.encryptAES(data.apiKey, key, iv) : '';
         const secretKey = data.secretKey ? util.encryptAES(data.secretKey, key, iv) : '';
         await mysql.query(sql,
             [
@@ -311,7 +312,7 @@ export async function saveBot(data: BotInfo, userData: UserTokenInfo) {
         console.log(' Update bot', data.botName);
         const iv = IV || util.generateRandomIV();
         const key = process.env.ENCRYP_KEY || '';
-        const apiKey = data.apiKey || '';
+        const apiKey = data.apiKey ? util.encryptAES(data.apiKey, key, iv) : '';
         const secretKey = data.secretKey ? util.encryptAES(data.secretKey, key, iv) : '';
 
         const sql = `UPDATE Bot
@@ -388,9 +389,10 @@ export async function getOrder(botName: string, orderID: string) {
     }
 
     const key = process.env.ENCRYP_KEY || '';
+    const decryptedApiKey = util.decryptAES(apiKey, key, iv);
     const decryptedSecretKey = util.decryptAES(secretKey, key, iv);
     const client = Binance({
-        apiKey: apiKey,
+        apiKey: decryptedApiKey,
         apiSecret: decryptedSecretKey
     });
     try {

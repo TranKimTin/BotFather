@@ -47,7 +47,7 @@ void test()
     vector<long long> startTime(rateData.startTime.begin(), rateData.startTime.end());
 
     string iv = generateRandomIV();
-    string apiKey = env["API_KEY"];
+    string apiKey = encryptAES(env["API_KEY"], env["ENCRYP_KEY"], iv);
     string secretKey = encryptAES(env["SECRET_KEY"], env["ENCRYP_KEY"], iv);
     IExchange *exchange = new BinanceFuture(apiKey, secretKey, iv, 31);
 

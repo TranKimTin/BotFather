@@ -14,10 +14,11 @@ static void adjustClientOrderId(string &clientOrderId)
     }
 }
 
-BinanceFuture::BinanceFuture(const string &apiKey, const string &encryptedSecretKey, const string &iv, const int botID)
-    : apiKey(apiKey), encryptedSecretKey(encryptedSecretKey), iv(iv), botID(botID)
+BinanceFuture::BinanceFuture(const string &encryptedApiKey, const string &encryptedSecretKey, const string &iv, const int botID)
+    : encryptedApiKey(encryptedApiKey), encryptedSecretKey(encryptedSecretKey), iv(iv), botID(botID)
 {
     boost::unordered_flat_map<string, string> env = readEnvFile();
+    apiKey = decryptAES(encryptedApiKey, env["ENCRYP_KEY"], iv);
     secretKey = decryptAES(encryptedSecretKey, env["ENCRYP_KEY"], iv);
 }
 
@@ -683,7 +684,7 @@ int BinanceFuture::insertOrderToDB(const string &symbol, const string clientOrde
         clientOrderId,
         tpID,
         slID,
-        apiKey,
+        encryptedApiKey,
         encryptedSecretKey,
         iv,
         botID};
