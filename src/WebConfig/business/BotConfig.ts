@@ -254,7 +254,6 @@ export async function saveBot(data: BotInfo, userData: UserTokenInfo) {
     if (data.apiKey || data.secretKey) {
         const query = `SELECT iv, apiKey, secretKey FROM Bot WHERE botName = ?`;
         const res = await mysql.query(query, [botName]);
-        console.log(data.apiKey, data.secretKey)
         if (res.length) {
             const { iv, apiKey, secretKey } = res[0];
             if (data.apiKey === apiKey && data.secretKey === secretKey) {
@@ -275,6 +274,7 @@ export async function saveBot(data: BotInfo, userData: UserTokenInfo) {
             if (!account) {
                 throw "api key không hợp lệ";
             }
+            console.log('account', account);
         } catch (error: any) {
             throw `api key không hợp lệ. ${error.message}`;
         }
