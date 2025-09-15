@@ -104,6 +104,19 @@ static void checkOrderStatus()
                 if (entryStatus != "NEW" && (tpStatus != "NEW" || slStatus != "NEW"))
                 {
                     LOGI("Order {} is completed. entryID: {}, tpID: {}, slID: {}", id, entryID, tpID, slID);
+
+                    if (entryStatus == "CANCELED")
+                    {
+                        double executedQty = entryJson["executedQty"].get<double>();
+                        if (executedQty > 0)
+                        {
+                            LOGE("Order {} is partially filled. Try to close position", entryJson.dump());
+                            string side = entryJson["side"].get<string>();
+                            string result = (side == "BUY") ? exchange->sellMarket(symbol, to_string(executedQty), "", "", true) : exchange->buyMarket(symbol, to_string(executedQty), "", "", true);
+                            LOGI("Response from Binance Future: {}", result);
+                        }
+                    }
+
                     db.executeUpdate("DELETE FROM RealOrders WHERE id = ?", {id});
                 }
             }
