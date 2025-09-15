@@ -630,7 +630,7 @@ string BinanceFuture::cancelOrderByClientId(const string &symbol, const string &
             {
                 LOGE("order partially filled {}. Try to close position", stod(executedQty));
                 string side = j["side"].get<string>();
-                string result = side == BUY ? sellMarket(symbol, executedQty, "", "", true) : buyMarket(symbol, executedQty, "", "", true);
+                string result = (side == BUY) ? sellMarket(symbol, executedQty, "", "", true) : buyMarket(symbol, executedQty, "", "", true);
                 LOGI("Response from Binance Future: {}", result);
                 return result;
             }
