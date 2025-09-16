@@ -165,11 +165,15 @@ export async function clearHistory(req: any, res: any) {
     }
 }
 
-export async function getOrder(req: any, res: any) {
+export async function getOrders(req: any, res: any) {
     try {
         const botName: string = req.query.botName;
-        const orderID: string = req.query.orderID;
+
         const userData: UserTokenInfo = req.user;
+
+        if (!botName) {
+            throw 'botName không hợp lệ';
+        }
 
         const isOwnBot = await BotConfig.requireOwnBot(botName, userData);
         if (!isOwnBot) {
@@ -177,7 +181,7 @@ export async function getOrder(req: any, res: any) {
             return;
         }
 
-        const data = await BotConfig.getOrder(botName, orderID);
+        const data = await BotConfig.getOrders(req.query);
         res.json({ code: 200, message: "Get order success", data: data });
     }
     catch (err: any) {

@@ -12,7 +12,7 @@ interface Response {
     message: string
 }
 
-// const URL = 'https://botfather.tech:8080/api';
+// const URL = 'https://botfather.tech/api';
 const URL = '/api';
 
 const headers = {

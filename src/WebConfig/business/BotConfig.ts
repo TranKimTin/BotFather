@@ -375,7 +375,8 @@ export async function requireOwnBot(botName: string, userData: UserTokenInfo) {
     return false;
 }
 
-export async function getOrder(botName: string, orderID: string) {
+export async function getOrders(args: any) {
+    const { botName, symbol, orderId, startTime, endTime, limit = 100 } = args;
     const sql = `SELECT apiKey, secretKey, iv FROM Bot WHERE botName = ?`;
     const bot = await mysql.query(sql, [botName]);
     if (bot.length === 0) {
@@ -394,14 +395,18 @@ export async function getOrder(botName: string, orderID: string) {
         apiSecret: decryptedSecretKey
     });
     try {
-        const order = await client.futuresGetOrder({
-            symbol: orderID.slice(4, orderID.indexOf('USDT') + 4),
-            origClientOrderId: orderID
+        const order = await client.futuresAllOrders({
+            symbol,
+            orderId,
+            startTime,
+            endTime,
+            limit,
+            recvWindow: 30000
         });
         return order;
     } catch (error: any) {
         if (error.code === -2011) {
-            throw `Không tìm thấy lệnh ${orderID}`;
+            throw `Không tìm thấy lệnh ${orderId}`;
         }
         throw error.message || 'Lỗi khi lấy trạng thái lệnh';
     }
