@@ -14,12 +14,13 @@ export default defineComponent({
         onMounted(() => {
             const route = useRoute();
             const botName = route.query.botName as string || undefined;
+            const symbol = route.query.symbol as string || undefined;
             const orderId = route.query.orderId as string || undefined;
             const startTime = route.query.startTime as string || undefined;
             const endTime = route.query.endTime as string || undefined;
             const limit = route.query.limit as string || undefined;
 
-            const args = JSON.parse(JSON.stringify({ botName, orderId, startTime, endTime, limit }));
+            const args = JSON.parse(JSON.stringify({ botName, symbol, orderId, startTime, endTime, limit }));
 
             axios.get('/test/getOrders', args).then(data => {
                 r_data.value = JSON.stringify(data, null, 4);
