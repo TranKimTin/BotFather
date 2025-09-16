@@ -6,6 +6,7 @@ import Calculator from '../components/Calculator/Calculator.vue';
 import Login from '../components/Login/Login.vue';
 import Admin from '../components/Admin/Admin.vue';
 import Guide from '../components/Guide/Guide.vue';
+import Test from '../components/Test/Test.vue';
 
 const routes = [
     { path: '/', component: Dashboard },
@@ -15,6 +16,7 @@ const routes = [
     { path: '/login', component: Login, meta: { layout: 'empty' } },
     { path: '/admin', component: Admin },
     { path: '/guide', component: Guide },
+    { path: '/test/getOrders', component: Test },
 ];
 
 const router = createRouter({
