@@ -395,14 +395,8 @@ export async function getOrders(args: any) {
         apiSecret: decryptedSecretKey
     });
     try {
-        const order = await client.futuresAllOrders({
-            symbol,
-            orderId,
-            startTime,
-            endTime,
-            limit,
-            recvWindow: 30000
-        });
+        const args = JSON.parse(JSON.stringify({ symbol, orderId, startTime, endTime, limit, recvWindow: 30000 }));
+        const order = await client.futuresAllOrders(args);
         return order;
     } catch (error: any) {
         if (error.code === -2011) {
