@@ -22,6 +22,7 @@ export default defineComponent({
         const botList = ref<BotInfo[]>([]);
         let totalProfit = ref<number>(0);
         let totalCost = ref<number>(0);
+        let totalBalanceReal = ref<number>(0);
         const feeRate = 0.05 / 100;
 
         axios.get(`/dashboard/statistic`).then(data => {
@@ -33,6 +34,7 @@ export default defineComponent({
                 bot.unrealizedProfit -= (feeRate * bot.volumeOpening)
                 totalProfit.value += bot.profit;
                 totalCost.value += bot.cost;
+                totalBalanceReal.value += bot.accountInfo ? bot.accountInfo.totalWalletBalance : 0;
                 bot.profit = parseFloat(bot.profit.toFixed(2));
                 bot.unrealizedProfit = parseFloat(bot.unrealizedProfit.toFixed(2));
                 bot.volumeOpening = parseFloat(bot.volumeOpening.toFixed(2));
@@ -49,7 +51,8 @@ export default defineComponent({
         return {
             botList,
             totalProfit,
-            totalCost
+            totalCost,
+            totalBalanceReal
         };
     }
 });
