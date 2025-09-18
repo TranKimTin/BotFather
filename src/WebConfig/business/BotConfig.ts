@@ -6,6 +6,7 @@ import moment from 'moment';
 import dotenv from 'dotenv';
 import axios from 'axios';
 import Binance from 'binance-api-node';
+import * as redis from '../../common/redis';
 
 dotenv.config({ path: `${__dirname}/../../../.env` });
 
@@ -178,15 +179,27 @@ export async function getHistoryOrder(botName: string, filterBroker: Array<strin
             });
 
             while (1) {
-                const history = await client.futuresIncome({
-                    limit: 1000,
-                    incomeType: 'REALIZED_PNL',
-                    startTime: startTime,
-                    endTime: new Date().getTime(),
-                    recvWindow: 30000
-                });
+                const key = `futuresIncome_${apiKey}_${startTime}`;
+                const cached = await redis.get(key);
+                let history: Awaited<ReturnType<typeof client.futuresIncome>> = cached ? JSON.parse(cached) : [];
+                console.log(`${moment(startTime).format("YYYY-MM-YY HH:mm:ss")} cached futuresIncome length = ${history.length}.`);
+
+                if (history.length == 0) {
+                    history = await client.futuresIncome({
+                        limit: 1000,
+                        // incomeType: 'REALIZED_PNL',
+                        startTime: startTime,
+                        endTime: new Date().getTime(),
+                        recvWindow: 30000
+                    });
+
+                    if (history.length == 1000) {
+                        await redis.set(key, JSON.stringify(history));
+                    }
+                }
+
                 for (let item of history) {
-                    if (item.asset === 'USDT') {
+                    if (item.asset === 'USDT' && ['REALIZED_PNL', 'FUNDING_FEE', 'COMMISSION'].includes(item.incomeType)) {
                         tradeReal.push(item);
                     }
                 }
