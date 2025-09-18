@@ -150,7 +150,7 @@ export async function getHistoryOrder(botName: string, filterBroker: Array<strin
                                             AND o.timeframe IN (?)
                                         ORDER BY o.createdTime DESC`, [botName, filterBroker, filterTimeframe]);
 
-    const startTime = orders.length > 0 ? orders.at(-1).createdTime : moment().subtract(30, 'day').valueOf();
+    let startTime = orders.length > 0 ? orders.at(-1).createdTime : moment().subtract(30, 'day').valueOf();
 
     for (const order of orders) {
         order.createdTime = order.createdTime ? moment(order.createdTime).format('YYYY-MM-DD HH:mm') : '';
@@ -177,18 +177,24 @@ export async function getHistoryOrder(botName: string, filterBroker: Array<strin
                 apiSecret: secretKey
             });
 
-            const history = await client.futuresIncome({
-                limit: 1000,
-                incomeType: 'REALIZED_PNL',
-                startTime: startTime,
-                endTime: new Date().getTime(),
-                recvWindow: 30000
-            });
-            for (let item of history) {
-                if (item.asset === 'USDT') {
-                    tradeReal.push(item);
+            while (1) {
+                const history = await client.futuresIncome({
+                    limit: 1000,
+                    incomeType: 'REALIZED_PNL',
+                    startTime: startTime,
+                    endTime: new Date().getTime(),
+                    recvWindow: 30000
+                });
+                for (let item of history) {
+                    if (item.asset === 'USDT') {
+                        tradeReal.push(item);
+                    }
                 }
+                if (history.length < 1000) break;
+                startTime = history[history.length - 1].time + 1;
             }
+
+
             accountInfo = await client.futuresAccountInfo();
             accountInfo.positions = accountInfo.positions.filter(item => item.initialMargin != '0');
             accountInfo.positions.sort((a, b) => (+a.unrealizedProfit) - (+b.unrealizedProfit));
