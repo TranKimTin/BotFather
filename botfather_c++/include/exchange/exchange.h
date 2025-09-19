@@ -16,4 +16,6 @@ public:
     virtual string cancelOrderByClientId(const string &symbol, const string &clientOrderId) = 0;
     virtual bool changeLeverage(const string &symbol, int leverage) = 0;
     virtual bool changeMarginType(const string &symbol, const string &marginType) = 0; 
+    virtual string placeBuyTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId) = 0;
+    virtual string placeSellTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId) = 0;
 };

@@ -26,13 +26,18 @@ string BinanceFuture::buyMarket(const string &symbol, string quantity,
 {
     if (!takeProfit.empty() || !stopLoss.empty())
     {
-        int openOrderAlgoCount = getOpenAlgoOrdersCount(symbol);
-        if (openOrderAlgoCount == -1 || openOrderAlgoCount >= MAX_NUM_ALGO_ORDERS)
+        auto orderCount = getOpenAlgoOrdersCount(symbol);
+        if (orderCount.algo == -1 || orderCount.algo >= MAX_NUM_ALGO_ORDERS)
         {
-            LOGE("Max number of algo orders reached ({}). Do nothing.", openOrderAlgoCount);
+            LOGE("Max number of algo orders reached ({}). Do nothing.", orderCount.algo);
             return "";
         }
-        LOGI("openOrderAlgoCount: {}", openOrderAlgoCount);
+        if (orderCount.sell > 0)
+        {
+            LOGE("There are sell algo orders ({}). Do nothing.", orderCount.sell);
+            return "";
+        }
+        LOGI("openOrderAlgoCount: {}", orderCount.algo);
     }
 
     string clientOrderId = StringFormat("BFBM{}{}_{}", symbol, getCurrentTime(), botID);
@@ -59,58 +64,56 @@ string BinanceFuture::buyMarket(const string &symbol, string quantity,
         return res;
     }
 
-    SLEEP_FOR(1000);
+    if (!takeProfit.empty() || !stopLoss.empty())
+    {
+        insertOrderToDB(symbol, clientOrderId, BUY, quantity, takeProfit, stopLoss);
+    }
 
-    return placeBuyMarketTPSL(symbol, quantity, takeProfit, stopLoss, clientOrderId);
+    return clientOrderId;
 }
 
-string BinanceFuture::placeBuyMarketTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId)
+string BinanceFuture::placeBuyTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId)
 {
     string tpID;
+    string resTP = sendTPorSL(symbol, SELL, LIMIT, quantity, takeProfit, takeProfit);
+    if (resTP.empty())
+    {
+        LOGI("Place TP error. Close position");
+        SLEEP_FOR(1000);
+        removeOrderToDB(clientOrderId);
+        return sellMarket(symbol, quantity, "", "", true);
+    }
+    else
+    {
+        json j = json::parse(resTP);
+        tpID = j["clientOrderId"].get<string>();
+        LOGI("TP order id: {}", tpID);
+    }
 
-    if (!takeProfit.empty())
-    {
-        string resTP = sendTPorSL(symbol, SELL, LIMIT, quantity, takeProfit, takeProfit);
-        if (resTP.empty())
-        {
-            LOGI("Place TP error. Close position");
-            SLEEP_FOR(1000);
-            return sellMarket(symbol, quantity, "", "", true);
-        }
-        else
-        {
-            json j = json::parse(resTP);
-            tpID = j["clientOrderId"].get<string>();
-            LOGI("TP order id: {}", tpID);
-        }
-    }
     string slID;
-    if (!stopLoss.empty())
+    string resSL = sendTPorSL(symbol, SELL, STOP_MARKET, quantity, stopLoss);
+    if (resSL.empty())
     {
-        string resSL = sendTPorSL(symbol, SELL, STOP_MARKET, quantity, stopLoss);
-        if (resSL.empty())
+        LOGI("Place SL error");
+        if (!tpID.empty())
         {
-            LOGI("Place SL error");
-            if (!tpID.empty())
-            {
-                LOGI("Cancel TP order {}", tpID);
-                cancelOrderByClientId(symbol, tpID);
-            }
-            LOGI("Close position");
-            SLEEP_FOR(1000);
-            return sellMarket(symbol, quantity, "", "", true);
+            LOGI("Cancel TP order {}", tpID);
+            cancelOrderByClientId(symbol, tpID);
         }
-        else
-        {
-            json j = json::parse(resSL);
-            slID = j["clientOrderId"].get<string>();
-            LOGI("SL order id: {}", slID);
-        }
+        LOGI("Close position");
+        SLEEP_FOR(1000);
+        removeOrderToDB(clientOrderId);
+        return sellMarket(symbol, quantity, "", "", true);
     }
-    if (!tpID.empty() && !slID.empty())
+    else
     {
-        insertOrderToDB(symbol, clientOrderId, tpID, slID);
+        json j = json::parse(resSL);
+        slID = j["clientOrderId"].get<string>();
+        LOGI("SL order id: {}", slID);
     }
+
+    updateOrderToDB(clientOrderId, tpID, slID);
+
     return clientOrderId;
 }
 
@@ -118,13 +121,18 @@ string BinanceFuture::sellMarket(const string &symbol, string quantity, string t
 {
     if (!takeProfit.empty() || !stopLoss.empty())
     {
-        int openOrderAlgoCount = getOpenAlgoOrdersCount(symbol);
-        if (openOrderAlgoCount == -1 || openOrderAlgoCount >= MAX_NUM_ALGO_ORDERS)
+        auto orderCount = getOpenAlgoOrdersCount(symbol);
+        if (orderCount.algo == -1 || orderCount.algo >= MAX_NUM_ALGO_ORDERS)
         {
-            LOGE("Max number of algo orders reached ({}). Do nothing.", openOrderAlgoCount);
+            LOGE("Max number of algo orders reached ({}). Do nothing.", orderCount.algo);
             return "";
         }
-        LOGI("openOrderAlgoCount: {}", openOrderAlgoCount);
+        if (orderCount.buy > 0)
+        {
+            LOGE("There are buy algo orders ({}). Do nothing.", orderCount.buy);
+            return "";
+        }
+        LOGI("openOrderAlgoCount: {}", orderCount.algo);
     }
 
     string clientOrderId = StringFormat("BFSM{}{}_{}", symbol, getCurrentTime(), botID);
@@ -151,58 +159,55 @@ string BinanceFuture::sellMarket(const string &symbol, string quantity, string t
         return res;
     }
 
-    SLEEP_FOR(1000);
-
-    return placeSellMarketTPSL(symbol, quantity, takeProfit, stopLoss, clientOrderId);
+    if (!takeProfit.empty() || !stopLoss.empty())
+    {
+        insertOrderToDB(symbol, clientOrderId, SELL, quantity, takeProfit, stopLoss);
+    }
+    return clientOrderId;
 }
 
-string BinanceFuture::placeSellMarketTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId)
+string BinanceFuture::placeSellTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId)
 {
     string tpID;
-    if (!takeProfit.empty())
+    string resTP = sendTPorSL(symbol, BUY, LIMIT, quantity, takeProfit, takeProfit);
+    if (resTP.empty())
     {
-        string resTP = sendTPorSL(symbol, BUY, LIMIT, quantity, takeProfit, takeProfit);
-        if (resTP.empty())
-        {
-            LOGI("Place TP error. Close position");
-            SLEEP_FOR(1000);
-            return buyMarket(symbol, quantity, "", "", true);
-        }
-        else
-        {
-            json j = json::parse(resTP);
-            tpID = j["clientOrderId"].get<string>();
-            LOGI("TP order id: {}", tpID);
-        }
+        LOGI("Place TP error. Close position");
+        SLEEP_FOR(1000);
+        removeOrderToDB(clientOrderId);
+        return buyMarket(symbol, quantity, "", "", true);
+    }
+    else
+    {
+        json j = json::parse(resTP);
+        tpID = j["clientOrderId"].get<string>();
+        LOGI("TP order id: {}", tpID);
     }
 
     string slID;
-    if (!stopLoss.empty())
+    string resSL = sendTPorSL(symbol, BUY, STOP_MARKET, quantity, stopLoss);
+    if (resSL.empty())
     {
-        string resSL = sendTPorSL(symbol, BUY, STOP_MARKET, quantity, stopLoss);
-        if (resSL.empty())
+        LOGI("Place SL error");
+        if (!tpID.empty())
         {
-            LOGI("Place SL error");
-            if (!tpID.empty())
-            {
-                LOGI("Cancel TP order {}", tpID);
-                cancelOrderByClientId(symbol, tpID);
-            }
-            LOGI("Close position");
-            SLEEP_FOR(1000);
-            return buyMarket(symbol, quantity, "", "", true);
+            LOGI("Cancel TP order {}", tpID);
+            cancelOrderByClientId(symbol, tpID);
         }
-        else
-        {
-            json j = json::parse(resSL);
-            slID = j["clientOrderId"].get<string>();
-            LOGI("SL order id: {}", slID);
-        }
+        LOGI("Close position");
+        SLEEP_FOR(1000);
+        removeOrderToDB(clientOrderId);
+        return buyMarket(symbol, quantity, "", "", true);
     }
-    if (!tpID.empty() && !slID.empty())
+    else
     {
-        insertOrderToDB(symbol, clientOrderId, tpID, slID);
+        json j = json::parse(resSL);
+        slID = j["clientOrderId"].get<string>();
+        LOGI("SL order id: {}", slID);
     }
+
+    updateOrderToDB(clientOrderId, tpID, slID);
+
     return clientOrderId;
 }
 
@@ -210,13 +215,18 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
 {
     if (!takeProfit.empty() || !stopLoss.empty())
     {
-        int openOrderAlgoCount = getOpenAlgoOrdersCount(symbol);
-        if (openOrderAlgoCount == -1 || openOrderAlgoCount >= MAX_NUM_ALGO_ORDERS - 1)
+        auto orderCount = getOpenAlgoOrdersCount(symbol);
+        if (orderCount.algo == -1 || orderCount.algo >= MAX_NUM_ALGO_ORDERS - 1)
         {
-            LOGE("Max number of algo orders reached ({}). Do nothing.", openOrderAlgoCount);
+            LOGE("Max number of algo orders reached ({}). Do nothing.", orderCount.algo);
             return "";
         }
-        LOGI("openOrderAlgoCount: {}", openOrderAlgoCount);
+        if (orderCount.sell > 0)
+        {
+            LOGE("There are sell algo orders ({}). Do nothing.", orderCount.sell);
+            return "";
+        }
+        LOGI("openOrderAlgoCount: {}", orderCount.algo);
     }
 
     string clientOrderId = StringFormat("BFBL{}{}_{}", symbol, getCurrentTime(), botID);
@@ -230,6 +240,7 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
         {"quantity", quantity},
         {"price", price},
         {"timeInForce", "GTC"},
+        // {"selfTradePreventionMode", "NONE"},
         {"newClientOrderId", clientOrderId},
         {"timestamp", to_string(getCurrentTime())}};
 
@@ -238,11 +249,10 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
         params["timeInForce"] = "GTD";
         params["goodTillDate"] = expiredTime;
     }
-
-    // if (takeProfit.empty() && stopLoss.empty())
-    // {
-    //     params["reduceOnly"] = "true";
-    // }
+    if (takeProfit.empty() && stopLoss.empty())
+    {
+        params["reduceOnly"] = "true";
+    }
 
     string res = sendOrder(params);
     if (res.empty())
@@ -251,97 +261,10 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
         return res;
     }
 
-    SLEEP_FOR(1000);
-
-    string resEntry = getOrderStatus(symbol, clientOrderId);
-    if (!resEntry.empty())
+    if (!takeProfit.empty() || !stopLoss.empty())
     {
-        json entryJson = json::parse(resEntry);
-        string entryStatus = entryJson["status"].get<string>();
-        if (entryStatus != "NEW")
-        {
-            LOGI("Entry match immediately {}", entryStatus);
-            return placeBuyMarketTPSL(symbol, quantity, takeProfit, stopLoss, clientOrderId);
-        }
+        insertOrderToDB(symbol, clientOrderId, BUY, quantity, takeProfit, stopLoss);
     }
-
-    string tpID;
-
-    if (!takeProfit.empty())
-    {
-        string resTP = sendTPorSL(symbol, SELL, STOP, quantity, price, takeProfit);
-        if (resTP.empty())
-        {
-            SLEEP_FOR(1000);
-            string resEntry = getOrderStatus(symbol, clientOrderId);
-            if (resEntry.empty())
-                return sellMarket(symbol, quantity, "", "", true);
-
-            json entryJson = json::parse(resEntry);
-            string entryStatus = entryJson["status"].get<string>();
-            if (entryStatus != "NEW")
-            {
-                LOGI("Entry match immediately. {}", entryStatus);
-                return placeBuyMarketTPSL(symbol, quantity, takeProfit, stopLoss, clientOrderId);
-            }
-            else
-            {
-                LOGI("Place TP error. Close position");
-                SLEEP_FOR(1000);
-                string resCancel = cancelOrderByClientId(symbol, clientOrderId);
-                if (resCancel.empty())
-                {
-                    LOGI("Cancel order {} error", clientOrderId);
-                    LOGI("Close position");
-                    SLEEP_FOR(1000);
-                    return sellMarket(symbol, quantity, "", "", true);
-                }
-            }
-            return resTP;
-        }
-        else
-        {
-            json j = json::parse(resTP);
-            tpID = j["clientOrderId"].get<string>();
-            LOGI("TP order id: {}", tpID);
-        }
-    }
-
-    string slID;
-    if (!stopLoss.empty())
-    {
-        string resSL = sendTPorSL(symbol, SELL, STOP_MARKET, quantity, stopLoss);
-        if (resSL.empty())
-        {
-            LOGI("Place SL error");
-            if (!tpID.empty())
-            {
-                LOGI("Cancel TP order {}", tpID);
-                cancelOrderByClientId(symbol, tpID);
-            }
-
-            LOGI("Close position");
-            SLEEP_FOR(1000);
-            string resCancel = cancelOrderByClientId(symbol, clientOrderId);
-            if (resCancel.empty())
-            {
-                LOGI("Cancel order {} error", clientOrderId);
-                return sellMarket(symbol, quantity, "", "", true);
-            }
-        }
-        else
-        {
-            json j = json::parse(resSL);
-            slID = j["clientOrderId"].get<string>();
-            LOGI("SL order id: {}", slID);
-        }
-    }
-
-    if (!tpID.empty() && !slID.empty())
-    {
-        insertOrderToDB(symbol, clientOrderId, tpID, slID);
-    }
-
     return clientOrderId;
 }
 
@@ -349,13 +272,18 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
 {
     if (!takeProfit.empty() || !stopLoss.empty())
     {
-        int openOrderAlgoCount = getOpenAlgoOrdersCount(symbol);
-        if (openOrderAlgoCount == -1 || openOrderAlgoCount >= MAX_NUM_ALGO_ORDERS)
+        auto orderCount = getOpenAlgoOrdersCount(symbol);
+        if (orderCount.algo == -1 || orderCount.algo >= MAX_NUM_ALGO_ORDERS)
         {
-            LOGE("Max number of algo orders reached ({}). Do nothing.", openOrderAlgoCount);
+            LOGE("Max number of algo orders reached ({}). Do nothing.", orderCount.algo);
             return "";
         }
-        LOGI("openOrderAlgoCount: {}", openOrderAlgoCount);
+        if (orderCount.buy > 0)
+        {
+            LOGE("There are buy algo orders ({}). Do nothing.", orderCount.buy);
+            return "";
+        }
+        LOGI("openOrderAlgoCount: {}", orderCount.algo);
     }
 
     string clientOrderId = StringFormat("BFSL{}{}_{}", symbol, getCurrentTime(), botID);
@@ -369,6 +297,7 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
         {"quantity", quantity},
         {"price", price},
         {"timeInForce", "GTC"},
+        // {"selfTradePreventionMode", "NONE"},
         {"newClientOrderId", clientOrderId},
         {"timestamp", to_string(getCurrentTime())}};
 
@@ -377,11 +306,10 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
         params["timeInForce"] = "GTD";
         params["goodTillDate"] = expiredTime;
     }
-
-    // if (takeProfit.empty() && stopLoss.empty())
-    // {
-    //     params["reduceOnly"] = "true";
-    // }
+    if (takeProfit.empty() && stopLoss.empty())
+    {
+        params["reduceOnly"] = "true";
+    }
 
     string res = sendOrder(params);
     if (res.empty())
@@ -390,94 +318,9 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
         return res;
     }
 
-    SLEEP_FOR(1000);
-
-    string resEntry = getOrderStatus(symbol, clientOrderId);
-    if (!resEntry.empty())
+    if (!takeProfit.empty() || !stopLoss.empty())
     {
-        json entryJson = json::parse(resEntry);
-        string entryStatus = entryJson["status"].get<string>();
-        if (entryStatus != "NEW")
-        {
-            LOGI("Entry match immediately {}", entryStatus);
-            return placeSellMarketTPSL(symbol, quantity, takeProfit, stopLoss, clientOrderId);
-        }
-    }
-
-    string tpID;
-
-    if (!takeProfit.empty())
-    {
-        string resTP = sendTPorSL(symbol, BUY, STOP, quantity, price, takeProfit);
-        if (resTP.empty())
-        {
-            SLEEP_FOR(1000);
-            string resEntry = getOrderStatus(symbol, clientOrderId);
-            if (resEntry.empty())
-                return buyMarket(symbol, quantity, "", "", true);
-
-            json entryJson = json::parse(resEntry);
-            string entryStatus = entryJson["status"].get<string>();
-            if (entryStatus != "NEW")
-            {
-                LOGI("Entry match immediately. {}", entryStatus);
-                return placeSellMarketTPSL(symbol, quantity, takeProfit, stopLoss, clientOrderId);
-            }
-            else
-            {
-                LOGI("Place TP error. Close position");
-                SLEEP_FOR(1000);
-                string resCancel = cancelOrderByClientId(symbol, clientOrderId);
-                if (resCancel.empty())
-                {
-                    LOGI("Cancel order {} error", clientOrderId);
-                    LOGI("Close position");
-                    SLEEP_FOR(1000);
-                    return buyMarket(symbol, quantity, "", "", true);
-                }
-                return resTP;
-            }
-        }
-        else
-        {
-            json j = json::parse(resTP);
-            tpID = j["clientOrderId"].get<string>();
-            LOGI("TP order id: {}", tpID);
-        }
-    }
-
-    string slID;
-    if (!stopLoss.empty())
-    {
-        string resSL = sendTPorSL(symbol, BUY, STOP_MARKET, quantity, stopLoss);
-        if (resSL.empty())
-        {
-            LOGI("Place SL error");
-            if (!tpID.empty())
-            {
-                LOGI("Cancel TP order {}", tpID);
-                cancelOrderByClientId(symbol, tpID);
-            }
-
-            LOGI("Close position");
-            SLEEP_FOR(1000);
-            string resCancel = cancelOrderByClientId(symbol, clientOrderId);
-            if (resCancel.empty())
-            {
-                LOGI("Cancel order {} error", clientOrderId);
-                return buyMarket(symbol, quantity, "", "", true);
-            }
-        }
-        else
-        {
-            json j = json::parse(resSL);
-            slID = j["clientOrderId"].get<string>();
-            LOGI("SL order id: {}", slID);
-        }
-    }
-    if (!tpID.empty() && !slID.empty())
-    {
-        insertOrderToDB(symbol, clientOrderId, tpID, slID);
+        insertOrderToDB(symbol, clientOrderId, SELL, quantity, takeProfit, stopLoss);
     }
     return clientOrderId;
 }
@@ -495,19 +338,20 @@ string BinanceFuture::sendTPorSL(const string &symbol, const string &side, const
         {"side", side},
         {"type", type},
         {"closePosition", "false"},
-        // {"reduceOnly", "true"},
+        {"reduceOnly", "true"},
         {"quantity", quantity},
         {"newClientOrderId", clientOrderId},
         {"timestamp", to_string(getCurrentTime())}};
 
-    if (type == STOP_MARKET)
-    {
-        params["reduceOnly"] = "true";
-    }
+    // if (type == STOP_MARKET)
+    // {
+    //     params["reduceOnly"] = "true";
+    // }
     if (type == LIMIT)
     {
         params["timeInForce"] = "GTC";
         params["price"] = limitPrice;
+        // params["selfTradePreventionMode"] = "NONE";
     }
     if (type != LIMIT)
     {
@@ -556,7 +400,6 @@ string BinanceFuture::sendOrder(map<string, string> &params)
             {
                 params["type"] = MARKET;
                 params["timestamp"] = to_string(getCurrentTime());
-                params["timeInForce"] = "GTC";
                 params.erase("stopPrice");
                 return sendOrder(params);
             }
@@ -673,28 +516,32 @@ string BinanceFuture::getOrderStatus(const string &symbol, const string &orderId
     return "";
 }
 
-int BinanceFuture::insertOrderToDB(const string &symbol, const string clientOrderId, const string tpID, const string slID)
+int BinanceFuture::insertOrderToDB(const string &symbol, const string clientOrderId, const string side, const string volume, const string tp, const string sl)
 {
     auto &db = MySQLConnector::getInstance();
-    string query = "INSERT INTO RealOrders(broker, symbol, entryID, tpID, slID, apiKey, secretKey, iv, botID) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    string query = "INSERT INTO RealOrders(broker, symbol, entryID, tpID, slID, apiKey, secretKey, iv, botID, side, volume, tp, sl) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     vector<any> params = {
         "binance_future",
         symbol,
         clientOrderId,
-        tpID,
-        slID,
+        "",
+        "",
         apiKey,
         encryptedSecretKey,
         iv,
-        botID};
+        botID,
+        side,
+        volume,
+        tp,
+        sl};
     int res = db.executeUpdate(query, params);
     if (res <= 0)
     {
-        LOGE("Insert order to database error");
+        LOGE("Insert order to database error {} {} {} {}", clientOrderId, volume, tp, sl);
     }
     else
     {
-        LOGI("Insert order to database success {} {} {}", clientOrderId, tpID, slID);
+        LOGI("Insert order to database success {} {} {} {}", clientOrderId, volume, tp, sl);
     }
     return res;
 }
@@ -758,7 +605,7 @@ bool BinanceFuture::changeMarginType(const string &symbol, const string &marginT
     return false;
 }
 
-int BinanceFuture::getOpenAlgoOrdersCount(const string &symbol)
+OrderCount BinanceFuture::getOpenAlgoOrdersCount(const string &symbol)
 {
     map<string, string> params = {
         {"symbol", symbol},
@@ -773,32 +620,100 @@ int BinanceFuture::getOpenAlgoOrdersCount(const string &symbol)
 
     try
     {
+        OrderCount result = {0, 0, 0};
+
         LOGI("Fetching open orders from Binance Future: {}", url);
         string res = Axios::get(url, {"X-MBX-APIKEY: " + apiKey});
         LOGI("Response from Binance Future: {}", res);
 
         auto json = nlohmann::json::parse(res);
-        int count = 0;
 
         for (const auto &order : json)
         {
             string type = order["origType"].get<string>();
+            bool reduceOnly = order["reduceOnly"].get<bool>();
+            string side = order["side"].get<string>();
             if (type == STOP ||
                 type == STOP_MARKET ||
                 type == TAKE_PROFIT ||
                 type == TAKE_PROFIT_MARKET ||
                 type == TRAILING_STOP_MARKET)
             {
-                ++count;
+                result.algo++;
+            }
+            else if (type == LIMIT && reduceOnly == false)
+            {
+                result.algo++;
+            }
+
+            if (side == BUY)
+            {
+                if (reduceOnly)
+                {
+                    result.sell++;
+                }
+                else
+                {
+                    result.buy++;
+                }
+            }
+            else if (side == SELL)
+            {
+                if (reduceOnly)
+                {
+                    result.buy++;
+                }
+                else
+                {
+                    result.sell++;
+                }
             }
         }
 
-        return count;
+        return result;
     }
     catch (const exception &e)
     {
         LOGE("Error getting open algo orders: {}", e.what());
-        return -1;
+        return {-1, -1, -1};
     }
-    return -1;
+    return {-1, -1, -1};
+}
+
+int BinanceFuture::updateOrderToDB(const string &clientOrderId, const string &tpID, const string &slID)
+{
+    auto &db = MySQLConnector::getInstance();
+    string query = "UPDATE RealOrders SET tpID = ?, slID = ? WHERE entryID = ?";
+    vector<any> params = {
+        tpID,
+        slID,
+        clientOrderId};
+    int res = db.executeUpdate(query, params);
+    if (res <= 0)
+    {
+        LOGE("Update order to database error {} {} {}", clientOrderId, tpID, slID);
+    }
+    else
+    {
+        LOGI("Update order to database success {} {} {}", clientOrderId, tpID, slID);
+    }
+    return res;
+}
+
+int BinanceFuture::removeOrderToDB(const string &clientOrderId)
+{
+    auto &db = MySQLConnector::getInstance();
+    string query = "DELETE FROM RealOrders WHERE entryID = ?";
+    vector<any> params = {
+        clientOrderId};
+    int res = db.executeUpdate(query, params);
+    if (res <= 0)
+    {
+        LOGE("Remove order from database error {}", clientOrderId);
+    }
+    else
+    {
+        LOGI("Remove order from database success {}", clientOrderId);
+    }
+    return res;
 }

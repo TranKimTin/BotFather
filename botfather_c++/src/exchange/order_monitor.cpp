@@ -7,7 +7,7 @@
 static void checkOrderStatus()
 {
     auto &db = MySQLConnector::getInstance();
-    string query = "SELECT id, symbol, entryID, tpID, slID, apiKey, secretKey, iv, botID FROM RealOrders";
+    string query = "SELECT id, symbol, entryID, tpID, slID, apiKey, secretKey, iv, botID, side, volume, tp, sl FROM RealOrders";
     auto res = db.executeQuery(query, {});
     if (!res)
     {
@@ -31,19 +31,64 @@ static void checkOrderStatus()
         string encryptedSecretKey = res->getString("secretKey");
         string iv = res->getString("iv");
         int botID = res->getInt("botID");
+        string side = res->getString("side");
+        string volume = res->getString("volume");
+        string tp = res->getString("tp");
+        string sl = res->getString("sl");
 
         shared_ptr<IExchange> exchange = make_shared<BinanceFuture>(apiKey, encryptedSecretKey, iv, botID);
 
         semaphore.wait();
-        threads.emplace_back([=, &db, &semaphore, &dbMutex]()
+        threads.emplace_back([=, &db, &semaphore, &dbMutex]() mutable 
                              {
             try
             {
                 string entryStatus = exchange->getOrderStatus(symbol, entryID);
+                if (entryStatus.empty())
+                {
+                    LOGE("Failed to get order status for entryID: {} ({}))", entryID, entryStatus);
+                    semaphore.post();
+                    return;
+                }
+
+                if (tpID.empty() && slID.empty())
+                {
+                    // pending order
+                    LOGI("Pending order. entryID: {}", entryID);
+                    json entryJson = json::parse(entryStatus);
+                    string status = entryJson["status"].get<string>();
+
+                    // cancel, filled partially, filled, expired, 
+                    if (status == "CANCELED" || status == "EXPIRED") {
+                        double executedQty = stod(entryJson["executedQty"].get<string>());
+                        if (executedQty > 0)
+                        {
+                            LOGE("Order {} is partially filled. Try to close position.", entryJson.dump());
+                            string side = entryJson["side"].get<string>();
+                            string result = (side == "BUY") ? exchange->sellMarket(symbol, to_string(executedQty), "", "", true) : exchange->buyMarket(symbol, to_string(executedQty), "", "", true);
+                            LOGI("Response from Binance Future: {}", result);
+                        }
+                        db.executeUpdate("DELETE FROM RealOrders WHERE id = ?", {id});
+                    }
+                    else if (status == "FILLED") {
+                        LOGI("Order {} is filled. Place TP/SL orders.", entryJson.dump());
+                        if(side == "BUY") 
+                        {
+                            exchange->placeBuyTPSL(symbol, volume, tp, sl, entryID);
+                        } 
+                        else 
+                        {
+                            exchange->placeSellTPSL(symbol, volume, tp, sl, entryID);
+                        }
+                    }
+                    semaphore.post();
+                    return;
+                }
+
                 string tpStatus = exchange->getOrderStatus(symbol, tpID);
                 string slStatus = exchange->getOrderStatus(symbol, slID);
 
-                if (entryStatus.empty() || tpStatus.empty() || slStatus.empty())
+                if (tpStatus.empty() || slStatus.empty())
                 {
                     LOGE("Failed to get order status for entryID: {} ({}), tpID: {} ({}), slID: {} ({})", entryID, entryStatus, tpID, tpStatus, slID, slStatus);
                     semaphore.post();
@@ -107,7 +152,7 @@ static void checkOrderStatus()
 
                     if (entryStatus == "CANCELED")
                     {
-                        double executedQty = entryJson["executedQty"].get<double>();
+                        double executedQty = stod(entryJson["executedQty"].get<string>());
                         if (executedQty > 0)
                         {
                             LOGE("Order {} is partially filled. Try to close position", entryJson.dump());
