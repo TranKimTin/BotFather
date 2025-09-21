@@ -39,7 +39,7 @@ static void checkOrderStatus()
         shared_ptr<IExchange> exchange = make_shared<BinanceFuture>(apiKey, encryptedSecretKey, iv, botID);
 
         semaphore.wait();
-        threads.emplace_back([=, &db, &semaphore, &dbMutex]() mutable 
+        threads.emplace_back([=, &db, &semaphore, &dbMutex]() mutable
                              {
             try
             {
@@ -57,21 +57,22 @@ static void checkOrderStatus()
                     LOGI("Pending order. entryID: {}", entryID);
                     json entryJson = json::parse(entryStatus);
                     string status = entryJson["status"].get<string>();
+                    string executedQty = entryJson["executedQty"].get<string>();
+                    string origQty = entryJson["origQty"].get<string>();
 
                     // cancel, filled partially, filled, expired, 
                     if (status == "CANCELED" || status == "EXPIRED") {
-                        double executedQty = stod(entryJson["executedQty"].get<string>());
-                        if (executedQty > 0)
+                        if (stod(executedQty) > 0)
                         {
                             LOGE("Order {} is partially filled. Try to close position.", entryJson.dump());
                             string side = entryJson["side"].get<string>();
-                            string result = (side == "BUY") ? exchange->sellMarket(symbol, to_string(executedQty), "", "", true) : exchange->buyMarket(symbol, to_string(executedQty), "", "", true);
+                            string result = (side == "BUY") ? exchange->sellMarket(symbol, executedQty, "", "", true) : exchange->buyMarket(symbol, executedQty, "", "", true);
                             LOGI("Response from Binance Future: {}", result);
                         }
                         db.executeUpdate("DELETE FROM RealOrders WHERE id = ?", {id});
                     }
-                    else if (status == "FILLED") {
-                        LOGI("Order {} is filled. Place TP/SL orders.", entryJson.dump());
+                    else if (status == "FILLED" && executedQty == origQty) {
+                        LOGI("Order {} is filled. Place TP/SL orders.", entryStatus);
                         if(side == "BUY") 
                         {
                             exchange->placeBuyTPSL(symbol, volume, tp, sl, entryID);
@@ -103,7 +104,7 @@ static void checkOrderStatus()
                 tpStatus = tpJson["status"].get<string>();
                 slStatus = slJson["status"].get<string>();
 
-                if(entryStatus == "FILLED" && tpStatus == "EXPIRED" && slStatus == "NEW") {
+                if (entryStatus == "FILLED" && tpStatus == "EXPIRED" && slStatus == "NEW") {
                     LOGE("tp is expired, but sl is not filled yet. entryID: {}, tpID: {}, slID: {}", entryID, tpID, slID);
                     LOGE("tpJSON: {}", tpJson.dump());
 
@@ -123,6 +124,12 @@ static void checkOrderStatus()
                     else
                     {
                         clientOrderId = exchange->sellLimit(symbol, volume, limitPrice);
+                    }
+                    if (clientOrderId.empty()) 
+                    {
+                        LOGE("Failed to create new limit order. entryID: {}, tpID: {}, slID: {}", entryID, tpID, slID);
+                        semaphore.post();
+                        return;                        
                     }
 
                     LOGE("New limit order created. clientOrderId: {}", clientOrderId);

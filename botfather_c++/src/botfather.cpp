@@ -51,7 +51,10 @@ void test()
     string secretKey = encryptAES(env["SECRET_KEY"], env["ENCRYP_KEY"], iv);
     IExchange *exchange = new BinanceFuture(apiKey, secretKey, iv, 31);
 
-    string id = exchange->buyLimit("BTCUSDT", "0.01", doubleToString(open[0], 0), doubleToString(open[0] * 1.001, 0), doubleToString(open[0] * 0.999, 0), "");
+    double p = 0.05 / 100.0;
+
+    // string id = exchange->buyLimit("BTCUSDT", "0.01", doubleToString(close[0], 0), doubleToString(close[0] * (1 + p), 0), doubleToString(close[0] * (1 - p), 0), "");
+    string id = exchange->buyMarket("BTCUSDT", "0.01", doubleToString(close[0] * (1 + p), 0), doubleToString(close[0] * (1 - p), 0), false);
 
     // string id = exchange->buyLimit("BTCUSDT", "0.01", "117000", "121000", "111000", "");
     // string id = exchange->buyMarket("BTCUSDT", "0.01", "120000", "110000", false);

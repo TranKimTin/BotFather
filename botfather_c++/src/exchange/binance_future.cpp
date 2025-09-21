@@ -27,7 +27,7 @@ string BinanceFuture::buyMarket(const string &symbol, string quantity,
     if (!takeProfit.empty() || !stopLoss.empty())
     {
         auto orderCount = getOpenAlgoOrdersCount(symbol);
-        if (orderCount.algo == -1 || orderCount.algo >= MAX_NUM_ALGO_ORDERS)
+        if (orderCount.algo == -1 || orderCount.algo > MAX_NUM_ALGO_ORDERS - 2)
         {
             LOGE("Max number of algo orders reached ({}). Do nothing.", orderCount.algo);
             return "";
@@ -75,7 +75,7 @@ string BinanceFuture::buyMarket(const string &symbol, string quantity,
 string BinanceFuture::placeBuyTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId)
 {
     string tpID;
-    string resTP = sendTPorSL(symbol, SELL, LIMIT, quantity, takeProfit, takeProfit);
+    string resTP = sendTPorSL(symbol, SELL, TAKE_PROFIT_MARKET, quantity, takeProfit, takeProfit);
     if (resTP.empty())
     {
         LOGI("Place TP error. Close position");
@@ -122,7 +122,7 @@ string BinanceFuture::sellMarket(const string &symbol, string quantity, string t
     if (!takeProfit.empty() || !stopLoss.empty())
     {
         auto orderCount = getOpenAlgoOrdersCount(symbol);
-        if (orderCount.algo == -1 || orderCount.algo >= MAX_NUM_ALGO_ORDERS)
+        if (orderCount.algo == -1 || orderCount.algo > MAX_NUM_ALGO_ORDERS - 2)
         {
             LOGE("Max number of algo orders reached ({}). Do nothing.", orderCount.algo);
             return "";
@@ -169,7 +169,7 @@ string BinanceFuture::sellMarket(const string &symbol, string quantity, string t
 string BinanceFuture::placeSellTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId)
 {
     string tpID;
-    string resTP = sendTPorSL(symbol, BUY, LIMIT, quantity, takeProfit, takeProfit);
+    string resTP = sendTPorSL(symbol, BUY, TAKE_PROFIT_MARKET, quantity, takeProfit, takeProfit);
     if (resTP.empty())
     {
         LOGI("Place TP error. Close position");
@@ -216,7 +216,7 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
     if (!takeProfit.empty() || !stopLoss.empty())
     {
         auto orderCount = getOpenAlgoOrdersCount(symbol);
-        if (orderCount.algo == -1 || orderCount.algo >= MAX_NUM_ALGO_ORDERS - 1)
+        if (orderCount.algo == -1 || orderCount.algo > MAX_NUM_ALGO_ORDERS - 2)
         {
             LOGE("Max number of algo orders reached ({}). Do nothing.", orderCount.algo);
             return "";
@@ -273,7 +273,7 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
     if (!takeProfit.empty() || !stopLoss.empty())
     {
         auto orderCount = getOpenAlgoOrdersCount(symbol);
-        if (orderCount.algo == -1 || orderCount.algo >= MAX_NUM_ALGO_ORDERS)
+        if (orderCount.algo == -1 || orderCount.algo > MAX_NUM_ALGO_ORDERS - 2)
         {
             LOGE("Max number of algo orders reached ({}). Do nothing.", orderCount.algo);
             return "";
@@ -343,10 +343,6 @@ string BinanceFuture::sendTPorSL(const string &symbol, const string &side, const
         {"newClientOrderId", clientOrderId},
         {"timestamp", to_string(getCurrentTime())}};
 
-    // if (type == STOP_MARKET)
-    // {
-    //     params["reduceOnly"] = "true";
-    // }
     if (type == LIMIT)
     {
         params["timeInForce"] = "GTC";
@@ -357,7 +353,7 @@ string BinanceFuture::sendTPorSL(const string &symbol, const string &side, const
     {
         params["stopPrice"] = stopPrice;
     }
-    if (type == STOP)
+    if (type == STOP || type == TAKE_PROFIT)
     {
         params["price"] = limitPrice;
     }
@@ -643,7 +639,7 @@ OrderCount BinanceFuture::getOpenAlgoOrdersCount(const string &symbol)
             }
             else if (type == LIMIT && reduceOnly == false)
             {
-                result.algo++;
+                result.algo += 2;
             }
 
             if (side == BUY)
