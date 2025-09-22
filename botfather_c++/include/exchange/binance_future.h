@@ -24,6 +24,7 @@ public:
     bool changeMarginType(const string &symbol, const string &marginType) override; // marginType: "CROSSED" or "ISOLATED"
     string placeBuyTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId) override;
     string placeSellTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId) override;
+    string getPositionRisk() override;
 
 private:
     string encryptedSecretKey;

@@ -188,11 +188,84 @@ static void checkOrderStatus()
         }
     }
 }
+static void checkPositionClosedByManual()
+{
+    auto &db = MySQLConnector::getInstance();
+    string query = R"(
+        SELECT r.apiKey, r.secretKey, r.iv
+        FROM RealOrders r
+        JOIN (
+            SELECT apiKey, MAX(id) AS max_id
+            FROM RealOrders
+            GROUP BY apiKey
+        ) t
+            ON r.apiKey = t.apiKey
+        AND r.id = t.max_id;
+        )";
+    auto res = db.executeQuery(query, {});
+    if (!res)
+    {
+        LOGE("Failed to fetch real orders from database");
+        return;
+    }
+    while (res->next())
+    {
+        string apiKey = res->getString("apiKey");
+        string encryptedSecretKey = res->getString("secretKey");
+        string iv = res->getString("iv");
 
+        IExchange *exchange = new BinanceFuture(apiKey, encryptedSecretKey, iv, 0);
+        string s = exchange->getPositionRisk();
+        if (s.empty())
+        {
+            LOGE("Failed to get position risk");
+            continue;
+        }
+        json positionRisk = json::parse(s);
+        LOGI("Position risk: {}", s);
+
+        vector<string> symbols;
+        for (const auto &item : positionRisk)
+        {
+            string symbol = item["symbol"].get<string>();
+            string positionAmt = item["positionAmt"].get<string>();
+            if (stod(positionAmt) != 0)
+            {
+                symbols.push_back(symbol);
+            }
+        }
+        string query = "SELECT id, symbol, entryID, tpID, slID FROM RealOrders WHERE apiKey = ? AND tpID <> '' AND slID <> ''";
+        auto res2 = db.executeQuery(query, {apiKey});
+        if (!res2)
+        {
+            LOGE("Failed to fetch real orders from database");
+            continue;
+        }
+        while (res2->next())
+        {
+            int id = res2->getInt("id");
+            string entryID = res2->getString("entryID");
+            string tpID = res2->getString("tpID");
+            string slID = res2->getString("slID");
+            string symbol = res2->getString("symbol");
+
+            if (find(symbols.begin(), symbols.end(), symbol) == symbols.end())
+            {
+                exchange->cancelOrderByClientId(symbol, entryID);
+                exchange->cancelOrderByClientId(symbol, tpID);
+                exchange->cancelOrderByClientId(symbol, slID);
+                LOGI("Position for symbol {} is closed manually. Remove order from database. entryID: {}, tpID: {}, slID: {}", symbol, entryID, tpID, slID);
+                db.executeUpdate("DELETE FROM RealOrders WHERE id = ?", {id});
+            }
+        }
+    }
+}
 static void run()
 {
     while (true)
     {
+        checkPositionClosedByManual();
+        SLEEP_FOR(1000);
         checkOrderStatus();
         SLEEP_FOR(10000);
     }

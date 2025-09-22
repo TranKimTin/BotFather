@@ -18,4 +18,5 @@ public:
     virtual bool changeMarginType(const string &symbol, const string &marginType) = 0; 
     virtual string placeBuyTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId) = 0;
     virtual string placeSellTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId) = 0;
+    virtual string getPositionRisk() = 0;
 };

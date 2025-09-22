@@ -713,3 +713,27 @@ int BinanceFuture::removeOrderToDB(const string &clientOrderId)
     }
     return res;
 }
+
+string BinanceFuture::getPositionRisk()
+{
+    map<string, string> params = {
+        {"recvWindow", "30000"},
+        {"timestamp", to_string(getCurrentTime())}};
+
+    string query = buildQuery(params);
+    string signature = sign(query);
+    query += "&signature=" + signature;
+
+    string url = StringFormat("{}/fapi/v3/positionRisk?{}", BASE_URL, query);
+
+    try
+    {
+        return Axios::get(url, {"X-MBX-APIKEY: " + apiKey});
+    }
+    catch (const exception &e)
+    {
+        LOGE("Error getting position risk from Binance Future: {}", e.what());
+        return "";
+    }
+    return "";
+}
