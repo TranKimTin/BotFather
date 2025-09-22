@@ -214,7 +214,7 @@ static void checkPositionClosedByManual()
         string encryptedSecretKey = res->getString("secretKey");
         string iv = res->getString("iv");
 
-        IExchange *exchange = new BinanceFuture(apiKey, encryptedSecretKey, iv, 0);
+        shared_ptr<IExchange> exchange = make_shared<BinanceFuture>(apiKey, encryptedSecretKey, iv, 0);
         string s = exchange->getPositionRisk();
         if (s.empty())
         {
