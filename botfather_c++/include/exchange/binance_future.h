@@ -32,8 +32,9 @@ private:
     string apiKey;
     string secretKey;
     int botID;
-    // const string BASE_URL = "https://fapi.binance.com";
-    string BASE_URL = "https://demo-fapi.binance.com";
+    const string BASE_URL = "https://fapi.binance.com";
+    
+    // string BASE_URL = "https://demo-fapi.binance.com";
     // https://demo-fapi.binance.com
     // https://demo-dapi.binance.com
     // wss://fstream.binancefuture.com
