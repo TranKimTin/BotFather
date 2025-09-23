@@ -54,7 +54,6 @@ static void checkOrderStatus()
                 if (tpID.empty() && slID.empty())
                 {
                     // pending order
-                    LOGI("Pending order. entryID: {}", entryID);
                     json entryJson = json::parse(entryStatus);
                     string status = entryJson["status"].get<string>();
                     string executedQty = entryJson["executedQty"].get<string>();
@@ -251,11 +250,28 @@ static void checkPositionClosedByManual()
 
             if (find(symbols.begin(), symbols.end(), symbol) == symbols.end())
             {
-                exchange->cancelOrderByClientId(symbol, entryID);
-                exchange->cancelOrderByClientId(symbol, tpID);
-                exchange->cancelOrderByClientId(symbol, slID);
-                LOGI("Position for symbol {} is closed manually. Remove order from database. entryID: {}, tpID: {}, slID: {}", symbol, entryID, tpID, slID);
-                db.executeUpdate("DELETE FROM RealOrders WHERE id = ?", {id});
+                string entry = exchange->getOrderStatus(symbol, entryID);
+                string tp = exchange->getOrderStatus(symbol, tpID);
+                string sl = exchange->getOrderStatus(symbol, slID);
+
+                if (entry.empty() || tp.empty() || sl.empty())
+                {
+                    LOGE("Failed to get order status for entryID: {} ({}), tpID: {} ({}), slID: {} ({})", entryID, entry, tpID, tp, slID, sl);
+                    continue;
+                }
+
+                json entryJson = json::parse(entry);
+                json tpJson = json::parse(tp);
+                json slJson = json::parse(sl);
+
+                if (entryJson["status"] == "FILLED" && (tpJson["status"] == "NEW" || slJson["status"] == "NEW"))
+                {
+                    exchange->cancelOrderByClientId(symbol, entryID);
+                    exchange->cancelOrderByClientId(symbol, tpID);
+                    exchange->cancelOrderByClientId(symbol, slID);
+                    LOGI("Position for symbol {} is closed manually. Remove order from database. entryID: {}, tpID: {}, slID: {}", symbol, entryID, tpID, slID);
+                    db.executeUpdate("DELETE FROM RealOrders WHERE id = ?", {id});
+                }
             }
         }
     }
