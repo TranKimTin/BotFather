@@ -3,6 +3,12 @@
 #include "common_type.h"
 #include "exchange.h"
 
+struct OrderCount{
+    int buy;
+    int sell;
+    int algo;
+};
+
 class BinanceFuture : public IExchange
 {
 public:
@@ -16,6 +22,9 @@ public:
     string cancelOrderByClientId(const string &symbol, const string &clientOrderId) override;
     bool changeLeverage(const string &symbol, int leverage) override;
     bool changeMarginType(const string &symbol, const string &marginType) override; // marginType: "CROSSED" or "ISOLATED"
+    string placeBuyTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId) override;
+    string placeSellTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId) override;
+    string getPositionRisk() override;
 
 private:
     string encryptedSecretKey;
@@ -24,7 +33,14 @@ private:
     string secretKey;
     int botID;
     const string BASE_URL = "https://fapi.binance.com";
-    // string BASE_URL = "https://testnet.binancefuture.com";
+    
+    // string BASE_URL = "https://demo-fapi.binance.com";
+    // https://demo-fapi.binance.com
+    // https://demo-dapi.binance.com
+    // wss://fstream.binancefuture.com
+    // wss://dstream.binancefuture.com
+    // wss://testnet.binancefuture.com/ws-fapi/v1
+    // wss://testnet.binancefuture.com/ws-dapi/v1
 
     const int MAX_NUM_ALGO_ORDERS = 10;
     const string SELL = "SELL";
@@ -42,9 +58,9 @@ private:
     string sign(const string &query);
 
     string sendTPorSL(const string &symbol, const string &side, const string &type, string quantity, string stopPrice, string limitPrice = "");
-    string placeBuyMarketTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId);
-    string placeSellMarketTPSL(const string &symbol, string &quantity, string &takeProfit, string &stopLoss, string &clientOrderId);
 
-    int insertOrderToDB(const string &symbol, const string clientOrderId, const string tpID, const string slID);
-    int getOpenAlgoOrdersCount(const string &symbol);
+    int insertOrderToDB(const string &symbol, const string clientOrderId, const string side, const string volume, const string tp, const string sl);
+    int updateOrderToDB(const string &clientOrderId, const string &tpID, const string &slID);
+    int removeOrderToDB(const string &clientOrderId);
+    OrderCount getOpenAlgoOrdersCount(const string &symbol);
 };

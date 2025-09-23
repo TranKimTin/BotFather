@@ -145,7 +145,7 @@ int MySQLConnector::executeUpdate(const string &query, const vector<any> &params
         return affected;
     }
     catch (sql::SQLException &e)
-    {
+    { 
         LOGE("MySQL error: {} (SQLState: {}, ErrorCode: {})",
              e.what(), e.getSQLStateCStr(), e.getErrorCode());
         return -1;

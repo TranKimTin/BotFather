@@ -33,11 +33,11 @@ void test()
     string symbol = "BTCUSDT";
     string timeframe = "1h";
     RateData rateData = getBinanceFuturetOHLCV(symbol, timeframe, 600);
-    rateData.open.pop_front();
-    rateData.high.pop_front();
-    rateData.low.pop_front();
-    rateData.close.pop_front();
-    rateData.startTime.pop_front();
+    // rateData.open.pop_front();
+    // rateData.high.pop_front();
+    // rateData.low.pop_front();
+    // rateData.close.pop_front();
+    // rateData.startTime.pop_front();
 
     vector<double> open(rateData.open.begin(), rateData.open.end());
     vector<double> high(rateData.high.begin(), rateData.high.end());
@@ -51,9 +51,16 @@ void test()
     string secretKey = encryptAES(env["SECRET_KEY"], env["ENCRYP_KEY"], iv);
     IExchange *exchange = new BinanceFuture(apiKey, secretKey, iv, 31);
 
-    string id = exchange->buyLimit("LTCUSDT", "50", "112.5", "", "", "");
-    // exchange->sellMarket("LTCUSDT", "100", "", "", false);
-    exchange->cancelOrderByClientId("LTCUSDT", id);
+    double p = 0.5 / 100.0;
+
+    // string id = exchange->buyLimit("BTCUSDT", "0.01", doubleToString(close[0], 0), doubleToString(close[0] * (1 + p), 0), doubleToString(close[0] * (1 - p), 0), "");
+    string id = exchange->buyMarket("BTCUSDT", "0.01", doubleToString(close[0] * (1 + p), 0), doubleToString(close[0] * (1 - p), 0), false);
+
+    // string id = exchange->buyLimit("BTCUSDT", "0.01", "117000", "121000", "111000", "");
+    // string id = exchange->buyMarket("BTCUSDT", "0.01", "120000", "110000", false);
+
+    // string id = exchange->sellLimit("BTCUSDT", "0.01", "117500", "115000", "121500", "");
+    // string id = exchange->sellMarket("BTCUSDT", "0.01", "115000", "121500", false);
 
     SLEEP_FOR(1000000);
 }

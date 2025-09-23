@@ -86,7 +86,7 @@ function getMinBalanceRequired(orders: Array<Order>): number {
 
     console.log('time min: ', moment(timeMin).format('YYYY-MM-DD HH:mm'), ' min balance: ', minBalanceRequired);
 
-    return minBalanceRequired * 2.1;
+    return minBalanceRequired * 1.1;
 }
 
 export default defineComponent({
