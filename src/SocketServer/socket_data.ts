@@ -314,7 +314,7 @@ export class SocketData {
             await delay(delayTime);
         }
 
-        console.log(`socket ${this.broker} init done ${this.symbolList.length}`);
+        console.log(`========================socket ${this.broker} init done ${this.symbolList.length}========================`);
 
 
         const timeInterval = 10 * 60 * 1000;
