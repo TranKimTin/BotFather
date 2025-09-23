@@ -221,7 +221,6 @@ static void checkPositionClosedByManual()
             continue;
         }
         json positionRisk = json::parse(s);
-        LOGI("Position risk: {}", s);
 
         vector<string> symbols;
         for (const auto &item : positionRisk)
