@@ -55,18 +55,21 @@ list(APPEND SOURCES "main.cpp")
 
 add_executable(botfather ${SOURCES})
 
-get_target_property(_ossType OpenSSL::Crypto TYPE)
-message(STATUS "OpenSSL::Crypto TYPE = ${_ossType}")  # EXPECT: SHARED or STATIC
 set_source_files_properties(src/exchange/binance_future.cpp
     PROPERTIES COMPILE_FLAGS "-O3 -fno-strict-aliasing -fno-lto"
 )
 
 message(STATUS "ANTLR4_LIB=${ANTLR4_LIB}")
 
+# remove optimize for OpenSSL::Crypto
+add_library(OpenSSL_Crypto_NoLTO INTERFACE IMPORTED)
+target_link_libraries(OpenSSL_Crypto_NoLTO INTERFACE OpenSSL::Crypto)
+set_property(TARGET OpenSSL_Crypto_NoLTO PROPERTY INTERFACE_INTERPROCEDURAL_OPTIMIZATION FALSE)
+
 target_link_libraries(botfather
     Boost::system
     OpenSSL::SSL
-    OpenSSL::Crypto
+    OpenSSL_Crypto_NoLTO
     pthread
     tbb
     -lhiredis
@@ -76,6 +79,8 @@ target_link_libraries(botfather
     ${SIOCLIENT_LIB}
     ${SIOCLIENT_TLS_LIB}
 )
+
+
 
 file(GLOB_RECURSE HEADER_DIRS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
 set(INCLUDE_DIRS "")
