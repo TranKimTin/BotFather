@@ -55,6 +55,7 @@ list(APPEND SOURCES "main.cpp")
 
 add_executable(botfather ${SOURCES})
 
+get_target_property(_ossType OpenSSL::Crypto TYPE)
 message(STATUS "OpenSSL::Crypto TYPE = ${_ossType}")  # EXPECT: SHARED or STATIC
 set_source_files_properties(src/exchange/binance_future.cpp
     PROPERTIES COMPILE_FLAGS "-O3 -fno-strict-aliasing -fno-lto"
