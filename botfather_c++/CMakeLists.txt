@@ -21,7 +21,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fsanitize=address")
 elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
     message(STATUS "Build type: Release")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g -O3 -funroll-loops -march=native -DNDEBUG -fno-omit-frame-pointer")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g -Ofast -flto -funroll-loops -march=native -DNDEBUG -fno-omit-frame-pointer")
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
@@ -55,21 +55,12 @@ list(APPEND SOURCES "main.cpp")
 
 add_executable(botfather ${SOURCES})
 
-set_source_files_properties(src/exchange/binance_future.cpp
-    PROPERTIES COMPILE_FLAGS "-O3 -fno-strict-aliasing -fno-lto"
-)
-
 message(STATUS "ANTLR4_LIB=${ANTLR4_LIB}")
-
-# remove optimize for OpenSSL::Crypto
-add_library(OpenSSL_Crypto_NoLTO INTERFACE IMPORTED)
-target_link_libraries(OpenSSL_Crypto_NoLTO INTERFACE OpenSSL::Crypto)
-set_property(TARGET OpenSSL_Crypto_NoLTO PROPERTY INTERFACE_INTERPROCEDURAL_OPTIMIZATION FALSE)
 
 target_link_libraries(botfather
     Boost::system
     OpenSSL::SSL
-    OpenSSL_Crypto_NoLTO
+    OpenSSL::Crypto
     pthread
     tbb
     -lhiredis
@@ -79,8 +70,6 @@ target_link_libraries(botfather
     ${SIOCLIENT_LIB}
     ${SIOCLIENT_TLS_LIB}
 )
-
-
 
 file(GLOB_RECURSE HEADER_DIRS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
 set(INCLUDE_DIRS "")
