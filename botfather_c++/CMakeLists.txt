@@ -55,6 +55,10 @@ list(APPEND SOURCES "main.cpp")
 
 add_executable(botfather ${SOURCES})
 
+set_source_files_properties(src/exchange/binance_future.cpp
+    PROPERTIES COMPILE_FLAGS "-O3 -fno-strict-aliasing -fno-lto"
+)
+
 message(STATUS "ANTLR4_LIB=${ANTLR4_LIB}")
 
 target_link_libraries(botfather
