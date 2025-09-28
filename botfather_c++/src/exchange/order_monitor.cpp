@@ -189,8 +189,10 @@ static void checkOrderStatus()
 }
 static void checkPositionClosedByManual()
 {
-    auto &db = MySQLConnector::getInstance();
-    string query = R"(
+    try
+    {
+        auto &db = MySQLConnector::getInstance();
+        string query = R"(
         SELECT r.apiKey, r.secretKey, r.iv
         FROM RealOrders r
         JOIN (
@@ -201,78 +203,83 @@ static void checkPositionClosedByManual()
             ON r.apiKey = t.apiKey
         AND r.id = t.max_id;
         )";
-    auto res = db.executeQuery(query, {});
-    if (!res)
-    {
-        LOGE("Failed to fetch real orders from database");
-        return;
-    }
-    while (res->next())
-    {
-        string apiKey = res->getString("apiKey");
-        string encryptedSecretKey = res->getString("secretKey");
-        string iv = res->getString("iv");
-
-        shared_ptr<IExchange> exchange = make_shared<BinanceFuture>(apiKey, encryptedSecretKey, iv, 0);
-        string s = exchange->getPositionRisk();
-        if (s.empty())
-        {
-            LOGE("Failed to get position risk");
-            continue;
-        }
-        json positionRisk = json::parse(s);
-
-        vector<string> symbols;
-        for (const auto &item : positionRisk)
-        {
-            string symbol = item["symbol"].get<string>();
-            string positionAmt = item["positionAmt"].get<string>();
-            if (stod(positionAmt) != 0)
-            {
-                symbols.push_back(symbol);
-            }
-        }
-        string query = "SELECT id, symbol, entryID, tpID, slID FROM RealOrders WHERE apiKey = ? AND tpID <> '' AND slID <> ''";
-        auto res2 = db.executeQuery(query, {apiKey});
-        if (!res2)
+        auto res = db.executeQuery(query, {});
+        if (!res)
         {
             LOGE("Failed to fetch real orders from database");
-            continue;
+            return;
         }
-        while (res2->next())
+        while (res->next())
         {
-            int id = res2->getInt("id");
-            string entryID = res2->getString("entryID");
-            string tpID = res2->getString("tpID");
-            string slID = res2->getString("slID");
-            string symbol = res2->getString("symbol");
+            string apiKey = res->getString("apiKey");
+            string encryptedSecretKey = res->getString("secretKey");
+            string iv = res->getString("iv");
 
-            if (find(symbols.begin(), symbols.end(), symbol) == symbols.end())
+            shared_ptr<IExchange> exchange = make_shared<BinanceFuture>(apiKey, encryptedSecretKey, iv, 0);
+            string s = exchange->getPositionRisk();
+            if (s.empty())
             {
-                string entry = exchange->getOrderStatus(symbol, entryID);
-                string tp = exchange->getOrderStatus(symbol, tpID);
-                string sl = exchange->getOrderStatus(symbol, slID);
+                LOGE("Failed to get position risk");
+                continue;
+            }
+            json positionRisk = json::parse(s);
 
-                if (entry.empty() || tp.empty() || sl.empty())
+            vector<string> symbols;
+            for (const auto &item : positionRisk)
+            {
+                string symbol = item["symbol"].get<string>();
+                string positionAmt = item["positionAmt"].get<string>();
+                if (stod(positionAmt) != 0)
                 {
-                    LOGE("Failed to get order status for entryID: {} ({}), tpID: {} ({}), slID: {} ({})", entryID, entry, tpID, tp, slID, sl);
-                    continue;
+                    symbols.push_back(symbol);
                 }
+            }
+            string query = "SELECT id, symbol, entryID, tpID, slID FROM RealOrders WHERE apiKey = ? AND tpID <> '' AND slID <> ''";
+            auto res2 = db.executeQuery(query, {apiKey});
+            if (!res2)
+            {
+                LOGE("Failed to fetch real orders from database");
+                continue;
+            }
+            while (res2->next())
+            {
+                int id = res2->getInt("id");
+                string entryID = res2->getString("entryID");
+                string tpID = res2->getString("tpID");
+                string slID = res2->getString("slID");
+                string symbol = res2->getString("symbol");
 
-                json entryJson = json::parse(entry);
-                json tpJson = json::parse(tp);
-                json slJson = json::parse(sl);
-
-                if (entryJson["status"] == "FILLED" && (tpJson["status"] == "NEW" || slJson["status"] == "NEW"))
+                if (find(symbols.begin(), symbols.end(), symbol) == symbols.end())
                 {
-                    exchange->cancelOrderByClientId(symbol, entryID);
-                    exchange->cancelOrderByClientId(symbol, tpID);
-                    exchange->cancelOrderByClientId(symbol, slID);
-                    LOGI("Position for symbol {} is closed manually. Remove order from database. entryID: {}, tpID: {}, slID: {}", symbol, entryID, tpID, slID);
-                    db.executeUpdate("DELETE FROM RealOrders WHERE id = ?", {id});
+                    string entry = exchange->getOrderStatus(symbol, entryID);
+                    string tp = exchange->getOrderStatus(symbol, tpID);
+                    string sl = exchange->getOrderStatus(symbol, slID);
+
+                    if (entry.empty() || tp.empty() || sl.empty())
+                    {
+                        LOGE("Failed to get order status for entryID: {} ({}), tpID: {} ({}), slID: {} ({})", entryID, entry, tpID, tp, slID, sl);
+                        continue;
+                    }
+
+                    json entryJson = json::parse(entry);
+                    json tpJson = json::parse(tp);
+                    json slJson = json::parse(sl);
+
+                    if (entryJson["status"] == "FILLED" && (tpJson["status"] == "NEW" || slJson["status"] == "NEW"))
+                    {
+                        exchange->cancelOrderByClientId(symbol, entryID);
+                        exchange->cancelOrderByClientId(symbol, tpID);
+                        exchange->cancelOrderByClientId(symbol, slID);
+                        LOGI("Position for symbol {} is closed manually. Remove order from database. entryID: {}, tpID: {}, slID: {}", symbol, entryID, tpID, slID);
+                        db.executeUpdate("DELETE FROM RealOrders WHERE id = ?", {id});
+                    }
                 }
             }
         }
+    }
+    catch (const exception &err)
+    {
+        LOGE("Exception in checkPositionClosedByManual: {}", err.what());
     }
 }
 static void run()
