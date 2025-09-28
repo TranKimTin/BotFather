@@ -286,10 +286,18 @@ static void run()
 {
     while (true)
     {
-        checkPositionClosedByManual();
-        SLEEP_FOR(1000);
-        checkOrderStatus();
-        SLEEP_FOR(10000);
+        try
+        {
+            checkPositionClosedByManual();
+            SLEEP_FOR(1000);
+            checkOrderStatus();
+            SLEEP_FOR(10000);
+        }
+        catch (const exception &err)
+        {
+            LOGE("Exception in order monitor: {}", err.what());
+            SLEEP_FOR(10000);
+        }
     }
 }
 
