@@ -242,7 +242,7 @@ export default defineComponent({
                         if (order.profit) order.profit -= fee;
                     }
 
-                    console.log({ tradeReal });
+                    console.log({ tradeReal: tradeReal.filter(item => item.incomeType === 'REALIZED_PNL') });
                     if (idxTradeReal < tradeReal.length) {
                         while (idxTradeReal < tradeReal.length) {
                             balanceReal += parseFloat(tradeReal[idxTradeReal].income);
