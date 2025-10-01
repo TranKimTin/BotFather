@@ -166,6 +166,7 @@ export async function getHistoryOrder(botName: string, filterBroker: Array<strin
 
     let tradeReal = [];
     let accountInfo;
+    let openOrders;
 
     const bot = await mysql.query(`SELECT apiKey, secretKey, iv FROM Bot WHERE botName = ?`, [botName]);
     if (bot.length > 0) {
@@ -211,6 +212,8 @@ export async function getHistoryOrder(botName: string, filterBroker: Array<strin
             accountInfo = await client.futuresAccountInfo();
             accountInfo.positions = accountInfo.positions.filter(item => item.initialMargin != '0');
             accountInfo.positions.sort((a, b) => (+a.unrealizedProfit) - (+b.unrealizedProfit));
+
+            openOrders = await client.futuresOpenOrders({});
         }
     }
     tradeReal.sort((a, b) => a.time - b.time);
@@ -218,7 +221,8 @@ export async function getHistoryOrder(botName: string, filterBroker: Array<strin
     return {
         orders,
         tradeReal,
-        accountInfo
+        accountInfo,
+        openOrders
     };
 }
 

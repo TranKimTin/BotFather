@@ -139,9 +139,9 @@ export default defineComponent({
                     filterTimeframe: r_timeframesSelected.value.join(',')
                 };
                 axios.get(`/getHistoryOrder`, params).then(async (result: { orders: Array<Order>, tradeReal: Array<Income>, accountInfo: any }) => {
-                    const { orders, tradeReal, accountInfo } = result;
+                    const { orders, tradeReal, accountInfo, openOrders } = result;
 
-                    console.log({ accountInfo });
+                    console.log({ accountInfo, openOrders });
 
                     let gain = 0;
                     let loss = 0;
