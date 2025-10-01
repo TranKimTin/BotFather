@@ -143,14 +143,18 @@ export default defineComponent({
 
                     console.log({ accountInfo, openOrders });
 
+                    const symbolErrors: Array<string> = [];
+
                     if (accountInfo && openOrders) {
                         for (let item of accountInfo.positions) {
                             let order = openOrders.find((o: any) => o.symbol === item.symbol);
                             if (!order) {
                                 console.log('not found order for position: ', item);
+                                symbolErrors.push(item.symbol);
                             }
                         }
                     }
+                    console.log({ symbolErrors });
 
                     let gain = 0;
                     let loss = 0;
