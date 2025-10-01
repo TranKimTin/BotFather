@@ -138,7 +138,7 @@ export default defineComponent({
                     filterBroker: r_brokerSelected.value.join(','),
                     filterTimeframe: r_timeframesSelected.value.join(',')
                 };
-                axios.get(`/getHistoryOrder`, params).then(async (result: { orders: Array<Order>, tradeReal: Array<Income>, accountInfo: any }) => {
+                axios.get(`/getHistoryOrder`, params).then(async (result: { orders: Array<Order>, tradeReal: Array<Income>, accountInfo: any, openOrders: any }) => {
                     const { orders, tradeReal, accountInfo, openOrders } = result;
 
                     console.log({ accountInfo, openOrders });
