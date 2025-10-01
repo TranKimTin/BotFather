@@ -214,6 +214,7 @@ export async function getHistoryOrder(botName: string, filterBroker: Array<strin
             accountInfo.positions.sort((a, b) => (+a.unrealizedProfit) - (+b.unrealizedProfit));
 
             openOrders = await client.futuresOpenOrders({});
+            openOrders.sort((a, b) => a.symbol.localeCompare(b.symbol));
         }
     }
     tradeReal.sort((a, b) => a.time - b.time);
