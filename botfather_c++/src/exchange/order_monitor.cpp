@@ -16,7 +16,6 @@ static void checkOrderStatus()
     }
 
     const int MAX_THREAD = 3;
-    mutex dbMutex;
     boost::interprocess::interprocess_semaphore semaphore(MAX_THREAD);
     vector<thread> threads;
 
@@ -39,7 +38,7 @@ static void checkOrderStatus()
         shared_ptr<IExchange> exchange = make_shared<BinanceFuture>(apiKey, encryptedSecretKey, iv, botID);
 
         semaphore.wait();
-        threads.emplace_back([=, &db, &semaphore, &dbMutex]() mutable
+        threads.emplace_back([=, &db, &semaphore]() mutable
                              {
             try
             {
@@ -175,6 +174,9 @@ static void checkOrderStatus()
             {
                 LOGE("Exception in thread: {}", err.what());
             }
+            catch (...) {
+                LOGE("Unknown exception type");
+            }
             semaphore.post(); 
             return; });
     }
@@ -281,11 +283,23 @@ static void checkPositionClosedByManual()
     {
         LOGE("Exception in checkPositionClosedByManual: {}", err.what());
     }
+    catch (...)
+    {
+        LOGE("Unknown exception type");
+    }
 }
 static void run()
 {
+    long long lastTime = getCurrentTime();
     while (true)
     {
+        long long now = getCurrentTime();
+        if (now - lastTime > 3600000) // 1 hour
+        {
+            LOGI("Order monitor is running...");
+            lastTime = now;
+        }
+
         try
         {
             checkPositionClosedByManual();
@@ -297,6 +311,10 @@ static void run()
         {
             LOGE("Exception in order monitor: {}", err.what());
             SLEEP_FOR(10000);
+        }
+        catch (...)
+        {
+            LOGE("Unknown exception type");
         }
     }
 }
