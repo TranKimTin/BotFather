@@ -443,21 +443,48 @@ string BinanceFuture::buildQuery(const map<string, string> &params)
 
 string BinanceFuture::sign(const string &query)
 {
-    unsigned int len = 0;
-    unsigned char digest[EVP_MAX_MD_SIZE];
+    string result;
+    unsigned char out[EVP_MAX_MD_SIZE];
+    size_t out_len = 0;
 
-    HMAC_CTX *ctx = HMAC_CTX_new();
-    HMAC_Init_ex(ctx, secretKey.c_str(), secretKey.size(), EVP_sha256(), NULL);
-    HMAC_Update(ctx, reinterpret_cast<const unsigned char *>(query.c_str()), query.size());
-    HMAC_Final(ctx, digest, &len);
-    HMAC_CTX_free(ctx);
+    EVP_MAC *mac = EVP_MAC_fetch(NULL, "HMAC", NULL); // lấy MAC = HMAC
+    EVP_MAC_CTX *ctx = EVP_MAC_CTX_new(mac);          // tạo context
 
+    OSSL_PARAM params[] = {
+        OSSL_PARAM_construct_utf8_string("digest", const_cast<char *>("SHA256"), 0),
+        OSSL_PARAM_END};
+
+    // init với secretKey
+    if (!EVP_MAC_init(ctx,
+                      reinterpret_cast<const unsigned char *>(secretKey.c_str()),
+                      secretKey.size(),
+                      params))
+    {
+        EVP_MAC_CTX_free(ctx);
+        EVP_MAC_free(mac);
+        throw runtime_error("EVP_MAC_init failed");
+    }
+
+    // update với query
+    EVP_MAC_update(ctx,
+                   reinterpret_cast<const unsigned char *>(query.c_str()),
+                   query.size());
+
+    // final
+    EVP_MAC_final(ctx, out, &out_len, sizeof(out));
+
+    // cleanup
+    EVP_MAC_CTX_free(ctx);
+    EVP_MAC_free(mac);
+
+    // convert sang hex string
     ostringstream oss;
     oss << hex << setfill('0');
-    for (unsigned int i = 0; i < len; i++)
-        oss << setw(2) << (int)digest[i];
+    for (size_t i = 0; i < out_len; i++)
+        oss << setw(2) << (int)out[i];
+    result = oss.str();
 
-    return oss.str();
+    return result;
 }
 
 string BinanceFuture::cancelOrderByClientId(const string &symbol, const string &clientOrderId)
