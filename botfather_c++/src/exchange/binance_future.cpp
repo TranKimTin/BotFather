@@ -427,17 +427,36 @@ string BinanceFuture::buildQuery(const map<string, string> &params)
     return oss.str();
 }
 
+// string BinanceFuture::sign(const string &query)
+// {
+//     unsigned char *digest;
+//     digest = HMAC(EVP_sha256(),
+//                   secretKey.c_str(), secretKey.length(),
+//                   reinterpret_cast<const unsigned char *>(query.c_str()), query.length(),
+//                   NULL, NULL);
+
+//     ostringstream oss;
+//     for (int i = 0; i < 32; ++i)
+//         oss << hex << setw(2) << setfill('0') << (int)digest[i];
+//     return oss.str();
+// }
+
 string BinanceFuture::sign(const string &query)
 {
-    unsigned char *digest;
-    digest = HMAC(EVP_sha256(),
-                  secretKey.c_str(), secretKey.length(),
-                  reinterpret_cast<const unsigned char *>(query.c_str()), query.length(),
-                  NULL, NULL);
+    unsigned int len = 0;
+    unsigned char digest[EVP_MAX_MD_SIZE];
+
+    HMAC_CTX *ctx = HMAC_CTX_new();
+    HMAC_Init_ex(ctx, secretKey.c_str(), secretKey.size(), EVP_sha256(), NULL);
+    HMAC_Update(ctx, reinterpret_cast<const unsigned char *>(query.c_str()), query.size());
+    HMAC_Final(ctx, digest, &len);
+    HMAC_CTX_free(ctx);
 
     ostringstream oss;
-    for (int i = 0; i < 32; ++i)
-        oss << hex << setw(2) << setfill('0') << (int)digest[i];
+    oss << hex << setfill('0');
+    for (unsigned int i = 0; i < len; i++)
+        oss << setw(2) << (int)digest[i];
+
     return oss.str();
 }
 
