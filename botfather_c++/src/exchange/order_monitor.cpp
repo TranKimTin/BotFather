@@ -303,7 +303,6 @@ static void run()
 
 void startOrderMonitor()
 {
-    thread t(run);
-    t.detach();
+    static thread t(run);
     LOGI("Order monitor started");
 }
