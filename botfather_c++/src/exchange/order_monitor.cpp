@@ -16,7 +16,7 @@ static void checkOrderStatus()
         return;
     }
 
-    const int MAX_THREAD = 3;
+    const int MAX_THREAD = 5;
     boost::interprocess::interprocess_semaphore semaphore(MAX_THREAD);
     vector<thread> threads;
 
@@ -43,16 +43,16 @@ static void checkOrderStatus()
                              {
             try
             {
-                string entryStatus = exchange->getOrderStatus(symbol, entryID);
-                if (entryStatus.empty())
-                {
-                    LOGE("Failed to get order status for entryID: {} ({}))", entryID, entryStatus);
-                    semaphore.post();
-                    return;
-                }
-
                 if (tpID.empty() && slID.empty())
                 {
+                    string entryStatus = exchange->getOrderStatus(symbol, entryID);
+                    if (entryStatus.empty())
+                    {
+                        LOGE("Failed to get order status for entryID: {} ({}))", entryID, entryStatus);
+                        semaphore.post();
+                        return;
+                    }
+                    
                     // pending order
                     json entryJson = json::parse(entryStatus);
                     string status = entryJson["status"].get<string>();
@@ -90,58 +90,20 @@ static void checkOrderStatus()
 
                 if (tpStatus.empty() || slStatus.empty())
                 {
-                    LOGE("Failed to get order status for entryID: {} ({}), tpID: {} ({}), slID: {} ({})", entryID, entryStatus, tpID, tpStatus, slID, slStatus);
+                    LOGE("Failed to get order status for entryID: {}, tpID: {} ({}), slID: {} ({})", entryID, tpID, tpStatus, slID, slStatus);
                     semaphore.post();
                     return;
                 }
 
-                json entryJson = json::parse(entryStatus);
                 json tpJson = json::parse(tpStatus);
                 json slJson = json::parse(slStatus);
 
-                entryStatus = entryJson["status"].get<string>();
                 tpStatus = tpJson["status"].get<string>();
                 slStatus = slJson["status"].get<string>();
 
-                if (entryStatus == "FILLED" && tpStatus == "EXPIRED" && slStatus == "NEW") {
-                    LOGE("tp is expired, but sl is not filled yet. entryID: {}, tpID: {}, slID: {}", entryID, tpID, slID);
-                    LOGE("tpJSON: {}", tpJson.dump());
-
-                    string limitPrice =  tpJson["price"].get<string>();
-                    string side = tpJson["side"].get<string>();
-                    string symbol = tpJson["symbol"].get<string>();
-                    string volume = tpJson["origQty"].get<string>();
-                    string tpClientOrderId = tpJson["clientOrderId"].get<string>();
-
-                    exchange->cancelOrderByClientId(symbol, tpClientOrderId);
-
-                    string clientOrderId;
-                    if (side == "BUY")
-                    {
-                        clientOrderId = exchange->buyLimit(symbol, volume, limitPrice);
-                    }
-                    else
-                    {
-                        clientOrderId = exchange->sellLimit(symbol, volume, limitPrice);
-                    }
-                    if (clientOrderId.empty()) 
-                    {
-                        LOGE("Failed to create new limit order. entryID: {}, tpID: {}, slID: {}", entryID, tpID, slID);
-                        semaphore.post();
-                        return;                        
-                    }
-
-                    LOGE("New limit order created. clientOrderId: {}", clientOrderId);
-                    db.executeUpdate("UPDATE RealOrders SET tpID = ? WHERE id = ?", {clientOrderId, id});
-                    tpStatus = "NEW";
-                }
-                else if (entryStatus == "CANCELED" || tpStatus == "CANCELED" || slStatus == "CANCELED" ||  tpStatus == "FILLED" || slStatus == "FILLED")
+                if (tpStatus == "CANCELED" || slStatus == "CANCELED" ||  tpStatus == "FILLED" || slStatus == "FILLED")
                 {
-                    LOGI("Cancel order. entryID={}({}), tpID={}({}), slID={}({})", entryID, entryStatus, tpID, tpStatus, slID, slStatus);
-                    if (entryStatus == "NEW")
-                    {
-                        exchange->cancelOrderByClientId(symbol, entryID);
-                    }
+                    LOGI("Cancel order. entryID={}, tpID={}({}), slID={}({})", entryID, tpID, tpStatus, slID, slStatus);
                     if (tpStatus == "NEW")
                     {
                         exchange->cancelOrderByClientId(symbol, tpID);
@@ -152,22 +114,9 @@ static void checkOrderStatus()
                     }
                 }
 
-                if (entryStatus != "NEW" && (tpStatus != "NEW" || slStatus != "NEW"))
+                if (tpStatus != "NEW" || slStatus != "NEW")
                 {
                     LOGI("Order {} is completed. entryID: {}, tpID: {}, slID: {}", id, entryID, tpID, slID);
-
-                    if (entryStatus == "CANCELED")
-                    {
-                        double executedQty = stod(entryJson["executedQty"].get<string>());
-                        if (executedQty > 0)
-                        {
-                            LOGE("Order {} is partially filled. Try to close position", entryJson.dump());
-                            string side = entryJson["side"].get<string>();
-                            string result = (side == "BUY") ? exchange->sellMarket(symbol, to_string(executedQty), "", "", true) : exchange->buyMarket(symbol, to_string(executedQty), "", "", true);
-                            LOGI("Response from Binance Future: {}", result);
-                        }
-                    }
-
                     db.executeUpdate("DELETE FROM RealOrders WHERE id = ?", {id});
                 }
             }
@@ -297,6 +246,13 @@ static void run()
     {
         long long now = getCurrentTime();
         cnt++;
+        ofstream file("output.txt");
+        if (file.is_open())
+        {
+            file << StringFormat("timestamp:{}\ncnt: {}\n", toTimeString(now), cnt);
+            file.close(); // đóng file
+        }
+
         if (now - lastTime > 3600000) // 1 hour
         {
             LOGI("Order monitor is running... {}", cnt);
