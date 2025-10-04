@@ -79,146 +79,79 @@
 
         <div class="mt-8" />
 
-        <div class="flex flex-col mt-8">
-            <div class="py-2 -my-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-                <div
-                    class="inline-block min-w-full overflow-hidden align-middle border-b border-gray-200 shadow sm:rounded-lg">
-                    <table class="min-w-full">
-                        <thead>
-                            <tr>
-                                <th
-                                    class="w-16 text-center px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                                    Tên bot
-                                </th>
-                                <!-- <th
-                                    class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                                    User
-                                </th> -->
-                                <th
-                                    class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                                    Real / Demo
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                                    Số lệnh (đã đóng)
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                                    Số lệnh (đang mở)
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                                    Lãi / volume (đã đóng)
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                                    Lãi / volume (đang mở)
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                                    Tỉ lệ thắng
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                                    Balance real
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                                    Margin còn lại
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                                    Tổng PnL chưa chốt
-                                </th>
-                                <th class="px-6 py-3 border-b border-gray-200 bg-gray-50">
-                                </th>
-                            </tr>
-                        </thead>
-
-                        <tbody class="bg-white">
-                            <tr v-for="(u, index) in botList" :key="index">
-                                <td class="w-16 text-center px-6 py-4 border-b border-gray-200 whitespace-nowrap ">
-                                    <div class="text-sm leading-5 text-gray-900">
-                                        {{ index + 1 }}
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
-                                    <div class="text-sm leading-5 text-gray-900">
-                                        {{ u.botName }}
-                                    </div>
-                                </td>
-                                <!-- <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
-                                    <div class="text-sm leading-5 text-gray-900">
-                                        {{ u.email }}
-                                    </div>
-                                </td> -->
-                                <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
-                                    <div class="text-sm leading-5 text-gray-900">
-                                        {{ u.enableRealOrder == 1 ? "Real" : "Demo" }}
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
-                                    <div class="text-sm leading-5 text-gray-900">
-                                        {{ u.tradeCountClosed.toLocaleString() }}
-                                    </div>
-                                </td>
-
-                                <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
-                                    <div class="text-sm leading-5 text-gray-900">
-                                        {{ u.tradeCountOpening.toLocaleString() }}
-                                    </div>
-                                </td>
-
-                                <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
-                                    <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
-                                        :class="u.profit >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'">{{
-                                            u.profit.toLocaleString() }} </span> / {{ u.volumeClosed.toLocaleString() }} $
-                                </td>
-
-                                <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
-                                    <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
-                                        :class="u.unrealizedProfit >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'">{{
-                                            u.unrealizedProfit.toLocaleString() }} </span> / {{
-                                            u.volumeOpening.toLocaleString() }} $
-                                </td>
-
-                                <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
-                                    <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full">
-                                        {{ u.winrate }} %
-                                    </span>
-                                </td>
-
-                                <td
-                                    class="px-6 py-4 text-sm leading-5 text-gray-500 border-b border-gray-200 whitespace-nowrap">
-                                    {{ Math.round(u.accountInfo.totalWalletBalance) }} $
-                                </td>
-                                <td
-                                    class="px-6 py-4 text-sm leading-5 text-gray-500 border-b border-gray-200 whitespace-nowrap">
-                                    <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
-                                        :class="(u.accountInfo.availableBalance / u.accountInfo.totalWalletBalance * 100) >= 10 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'">{{
-                                            Math.round(u.accountInfo.availableBalance) }} $</span>
-                                </td>
-                                <td
-                                    class="px-6 py-4 text-sm leading-5 text-gray-500 border-b border-gray-200 whitespace-nowrap">
-                                    <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
-                                        :class="u.accountInfo.totalUnrealizedProfit >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'">{{
-                                            Math.round(u.accountInfo.totalUnrealizedProfit) }} $</span>
-                                </td>
-
-                                <td
-                                    class="px-6 py-4 text-sm font-medium leading-5 border-b border-gray-200 whitespace-nowrap">
-                                    <a :href="`/history/${u.botName}`" target="_blank"
-                                        class="text-indigo-600 hover:text-indigo-900"><i class="pi pi-cog"></i></a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+        <div>
+            <div class="flex justify-end">
+                <InputText v-model="r_globalFilter" placeholder="Tìm kiếm..." class="p-inputtext-sm w-72" />
             </div>
+            <DataTable :value="botList" :globalFilterFields="['botName']"
+                :filters="{ global: { value: r_globalFilter, matchMode: 'contains' } }" tableStyle="min-width: 50rem"
+                scrollable scrollHeight="85vh" :virtualScrollerOptions="{ itemSize: 50 }" :pt="{
+                    table: { style: 'min-width: 50rem' },
+                    column: {
+                        bodycell: ({ }) => ({
+                            style: 'padding-top: 1rem; padding-bottom: 1rem'
+                        })
+                    }
+                }">
+                <Column :header="`STT (${botList.length})`">
+                    <template #body="bot">
+                        {{ bot.index + 1 }}
+                    </template>
+                </Column>
+                <Column field="botName" header="Tên bot" sortable></Column>
+                <Column field="enableRealOrder" header="Real / Demo">
+                    <template #body="bot">
+                        <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
+                            :class="bot.data.enableRealOrder ? 'text-green-800 bg-green-100' : 'text-red-800 bg-orange-100'">{{
+                                bot.data.enableRealOrder ? "Real" : "Demo" }} </span>
+                    </template>
+                </Column>
+                <Column field="tradeCountClosed" header="Số lệnh (đã đóng)"></Column>
+                <Column field="tradeCountOpening" header="Số lệnh (đang mở)"></Column>
+                <Column field="profit" header="Lãi / volume (đã đóng)">
+                    <template #body="bot">
+                        <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
+                            :class="bot.data.profit >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'">{{
+                                Math.round(bot.data.profit).toLocaleString() }} </span>
+                        / {{ Math.round(bot.data.volumeClosed).toLocaleString() }}
+                    </template>
+                </Column>
+                <Column field="unrealizedProfit" header="Lãi / volume (đang mở)">
+                    <template #body="bot">
+                        <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
+                            :class="bot.data.unrealizedProfit >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'">{{
+                                Math.round(bot.data.unrealizedProfit).toLocaleString() }} </span>
+                        / {{
+                            Math.round(bot.data.volumeOpening).toLocaleString() }}
+                    </template>
+                </Column>
+                <Column field="winrate" header="Tỉ lệ thắng"></Column>
+                <Column field="accountInfo.totalWalletBalance" header="Balance real">
+                    <template #body="bot">
+                        {{ Math.round(bot.data.accountInfo.totalWalletBalance).toLocaleString() }}
+                    </template>
+                </Column>
+                <Column field="accountInfo.availableBalance" header="Margin còn lại">
+                    <template #body="bot">
+                        <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
+                            :class="(bot.data.accountInfo.availableBalance / bot.data.accountInfo.totalWalletBalance * 100) >= 10 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'">{{
+                                Math.round(bot.data.accountInfo.availableBalance).toLocaleString() }} </span>
+                    </template>
+                </Column>
+                <Column field="accountInfo.totalUnrealizedProfit" header="Tổng PnL chưa chốt">
+                    <template #body="bot">
+                        <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
+                            :class="bot.data.accountInfo.totalUnrealizedProfit >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'">{{
+                                Math.round(bot.data.accountInfo.totalUnrealizedProfit).toLocaleString() }} </span>
+                    </template>
+                </Column>
+                <Column>
+                    <template #body="bot">
+                        <a :href="`/history/${bot.data.botName}`" target="_blank"
+                            class="text-indigo-600 hover:text-indigo-900"><i class="pi pi-cog"></i></a>
+                    </template>
+                </Column>
+            </DataTable>
         </div>
     </div>
 </template>
