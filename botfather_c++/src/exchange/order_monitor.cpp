@@ -3,7 +3,6 @@
 #include "mysql_connector.h"
 #include "binance_future.h"
 #include "exchange.h"
-#include "telegram.h"
 
 static void checkOrderStatus()
 {
@@ -246,18 +245,18 @@ static void run()
     {
         long long now = getCurrentTime();
         cnt++;
-        ofstream file("output.txt");
-        if (file.is_open())
-        {
-            file << StringFormat("timestamp:{}\ncnt: {}\n", toTimeString(now), cnt);
-            file.close(); // đóng file
-        }
 
-        if (now - lastTime > 3600000) // 1 hour
+        if (now - lastTime > 60000) // 1 minute
         {
             LOGI("Order monitor is running... {}", cnt);
             lastTime = now;
-            Telegram::getInstance().sendMessage(StringFormat("{}", cnt), "@tintk_RSI_CCI");
+
+            ofstream file("output.txt");
+            if (file.is_open())
+            {
+                file << StringFormat("timestamp:{}\ncnt: {}\n", toTimeString(now), cnt);
+                file.close(); // đóng file
+            }
         }
 
         try
