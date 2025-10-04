@@ -1,5 +1,8 @@
 import { defineComponent, ref } from 'vue';
 import * as axios from '../../axios/axios';
+import DataTable from 'primevue/datatable';
+import InputText from 'primevue/inputtext';
+import Column from 'primevue/column';
 
 interface BotInfo {
     botName: string,
@@ -17,13 +20,14 @@ interface BotInfo {
 }
 
 export default defineComponent({
-    components: {},
+    components: {DataTable, Column, InputText},
     setup() {
         const botList = ref<BotInfo[]>([]);
         let totalProfit = ref<number>(0);
         let totalCost = ref<number>(0);
         let totalBalanceReal = ref<number>(0);
         const feeRate = 0.05 / 100;
+        const r_globalFilter = ref<string>('');
 
         axios.get(`/dashboard/statistic`).then(data => {
             botList.value = data;
@@ -61,7 +65,8 @@ export default defineComponent({
             botList,
             totalProfit,
             totalCost,
-            totalBalanceReal
+            totalBalanceReal,
+            r_globalFilter
         };
     }
 });
