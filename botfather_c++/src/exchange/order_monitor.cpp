@@ -251,7 +251,7 @@ static void run()
             LOGI("Order monitor is running... {}", cnt);
             lastTime = now;
 
-            ofstream file("output.txt");
+            ofstream file("order_monitor.txt");
             if (file.is_open())
             {
                 file << StringFormat("timestamp:{}\ncnt: {}\n", toTimeString(now), cnt);
