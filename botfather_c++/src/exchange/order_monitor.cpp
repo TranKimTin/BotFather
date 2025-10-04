@@ -246,7 +246,7 @@ static void run()
         long long now = getCurrentTime();
         cnt++;
 
-        if (now - lastTime > 60000) // 1 minute
+        if (now - lastTime > 300000) // 5 minute
         {
             LOGI("Order monitor is running... {}", cnt);
             lastTime = now;
