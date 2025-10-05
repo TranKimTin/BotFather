@@ -216,12 +216,20 @@ static void checkPositionClosedByManual()
                     json tpJson = json::parse(tp);
                     json slJson = json::parse(sl);
 
-                    if (entryJson["status"] == "FILLED" && (tpJson["status"] == "NEW" || slJson["status"] == "NEW"))
+                    string tpStatus = tpJson["status"].get<string>();
+                    string slStatus = slJson["status"].get<string>();
+
+                    if (entryJson["status"] == "FILLED" && (tpStatus == "NEW" || slStatus == "NEW"))
                     {
-                        exchange->cancelOrderByClientId(symbol, entryID);
-                        exchange->cancelOrderByClientId(symbol, tpID);
-                        exchange->cancelOrderByClientId(symbol, slID);
-                        LOGI("Position for symbol {} is closed manually. Remove order from database. entryID: {}, tpID: {}, slID: {}", symbol, entryID, tpID, slID);
+                        if (tpStatus == "NEW")
+                        {
+                            exchange->cancelOrderByClientId(symbol, tpID);
+                        }
+                        if (slStatus == "NEW")
+                        {
+                            exchange->cancelOrderByClientId(symbol, slID);
+                        }
+                        LOGI("Position for symbol {} is closed manually. Remove order from database. entryID: {}, tpID: {}({}), slID: {}({})", symbol, entryID, tpID, tpStatus, slID, slStatus);
                         db.executeUpdate("DELETE FROM RealOrders WHERE id = ?", {id});
                     }
                 }
