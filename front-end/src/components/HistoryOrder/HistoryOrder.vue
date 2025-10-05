@@ -70,7 +70,7 @@
         </div>
     </div>
     <div v-if="r_isLoading" class="card flex justify-center">
-        <ProgressSpinner style="width: 30%; height: 70vh" strokeWidth="3" fill="transparent" animationDuration="3s"
+        <ProgressSpinner style="width: 30%; height: 60vh" fill="transparent" animationDuration="3s"
             aria-label="loading" />
     </div>
 
