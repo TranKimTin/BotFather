@@ -69,98 +69,106 @@
                 class="w-full md:w-80 form-control" id="timeframe" />
         </div>
     </div>
-    <BalanceChart :data="r_balanceData" />
-    <div>
-        <h3 v-if="r_isLoading">Đang load, đợi tí...</h3>
-        <div class="flex justify-end">
-            <InputText v-model="r_globalFilter" placeholder="Tìm kiếm..." class="p-inputtext-sm w-72" />
-        </div>
-        <DataTable :value="r_orderList" :globalFilterFields="['symbol', 'status']"
-            :filters="{ global: { value: r_globalFilter, matchMode: 'contains' } }" tableStyle="min-width: 50rem"
-            scrollable scrollHeight="85vh" :virtualScrollerOptions="{ itemSize: 50 }" stripedRows>
-            <Column :header="`STT (${r_orderList.length})`">
-                <template #body="order">
-                    {{ order.index + 1 }}
-                </template>
-            </Column>
-            <Column sort-field="symbol" header="Coin" sortable>
-                <template #body="order">
-                    <a v-if="order.data.broker === 'binance'"
-                        :href="`https://www.binance.com/en/trade/${order.data.symbol}?_from=markets&type=spot`"
-                        target="_blank">
-                        {{ order.data.symbol }}
-                    </a>
-                    <a v-if="order.data.broker === 'binance_future'"
-                        :href="`https://www.binance.com/en/futures/${order.data.symbol}?_from=markets`" target="_blank">
-                        {{ order.data.symbol }}
-                    </a>
-                    <a v-if="order.data.broker === 'bybit'"
-                        :href="`https://www.bybit.com/vi-VN/trade/spot/${order.data.symbol.replace('USDT', '')}/USDT`"
-                        target="_blank">
-                        {{ order.data.symbol }}
-                    </a>
-                    <a v-if="order.data.broker === 'bybit_future'"
-                        :href="`https://www.bybit.com/trade/usdt/${order.data.symbol}`" target="_blank">
-                        {{ order.data.symbol }}
-                    </a>
-                    <a v-if="order.data.broker === 'okx'"
-                        :href="`https://www.okx.com/vi/trade-spot/${order.data.symbol}`" target="_blank">
-                        {{ order.data.symbol }}
-                    </a>
-                </template>
-            </Column>
-            <Column field="broker" header="Sàn" sortable> </Column>
-            <Column field="timeframe" header="Khung" sortable></Column>
-            <Column field="createdTime" header="Thời gian mở" sortable></Column>
-            <Column header="orderType" sortable>
-                <template #body="order">
-                    <span :style="{ color: order.data.orderType.toLowerCase().includes('buy') ? 'green' : 'red' }">
-                        {{ order.data.orderType }}
-                    </span>
-                </template>
-            </Column>
-            <Column field="volume" header="Volume">
-            </Column>
-            <Column field="volumeInUSD" header="volumeInUSD">
-            </Column>
-            <Column field="stop" header="Stop"></Column>
-            <Column header="entry">
-                <template #body="order">
-                    <span :title="order.data.timeEntry">{{ order.data.entry }}</span>
-                </template>
-            </Column>
-            <Column header="TP">
-                <template #body="order">
-                    <span>{{ order.data.tp }}</span>
-                </template>
-            </Column>
-            <Column header="SL">
-                <template #body="order">
-                    <span>{{ order.data.sl }}</span>
-                </template>
-            </Column>
-            <Column sortField="status" header="Trạng thái" sortable>
-                <template #body="order">
-                    <span v-if="!order.data.timeTP && !order.data.timeSL" :title="order.data.lastTimeUpdated"
-                        style="cursor: pointer;">
-                        {{ order.data.status }}
-                        <span v-if="order.data.profit"
-                            :style="{ color: order.data.profit >= 0 ? 'green' : 'red', opacity: 0.5 }">
-                            (<span v-if="order.data.profit >= 0">+</span>{{ +order.data.profit.toFixed(2) }} $)
+    <div v-if="r_isLoading" class="card flex justify-center">
+        <ProgressSpinner style="width: 30%; height: 70vh" strokeWidth="3" fill="transparent" animationDuration="3s"
+            aria-label="loading" />
+    </div>
+
+    <div v-if="!r_isLoading">
+        <BalanceChart :data="r_balanceData" />
+        <div>
+            <div class="flex justify-end">
+                <InputText v-model="r_globalFilter" placeholder="Tìm kiếm..." class="p-inputtext-sm w-72" />
+            </div>
+            <DataTable :value="r_orderList" :globalFilterFields="['symbol', 'status']"
+                :filters="{ global: { value: r_globalFilter, matchMode: 'contains' } }" tableStyle="min-width: 50rem"
+                scrollable scrollHeight="85vh" :virtualScrollerOptions="{ itemSize: 50 }" stripedRows>
+                <Column :header="`STT (${r_orderList.length})`">
+                    <template #body="order">
+                        {{ order.index + 1 }}
+                    </template>
+                </Column>
+                <Column sort-field="symbol" header="Coin" sortable>
+                    <template #body="order">
+                        <a v-if="order.data.broker === 'binance'"
+                            :href="`https://www.binance.com/en/trade/${order.data.symbol}?_from=markets&type=spot`"
+                            target="_blank">
+                            {{ order.data.symbol }}
+                        </a>
+                        <a v-if="order.data.broker === 'binance_future'"
+                            :href="`https://www.binance.com/en/futures/${order.data.symbol}?_from=markets`"
+                            target="_blank">
+                            {{ order.data.symbol }}
+                        </a>
+                        <a v-if="order.data.broker === 'bybit'"
+                            :href="`https://www.bybit.com/vi-VN/trade/spot/${order.data.symbol.replace('USDT', '')}/USDT`"
+                            target="_blank">
+                            {{ order.data.symbol }}
+                        </a>
+                        <a v-if="order.data.broker === 'bybit_future'"
+                            :href="`https://www.bybit.com/trade/usdt/${order.data.symbol}`" target="_blank">
+                            {{ order.data.symbol }}
+                        </a>
+                        <a v-if="order.data.broker === 'okx'"
+                            :href="`https://www.okx.com/vi/trade-spot/${order.data.symbol}`" target="_blank">
+                            {{ order.data.symbol }}
+                        </a>
+                    </template>
+                </Column>
+                <Column field="broker" header="Sàn" sortable> </Column>
+                <Column field="timeframe" header="Khung" sortable></Column>
+                <Column field="createdTime" header="Thời gian mở" sortable></Column>
+                <Column header="orderType" sortable>
+                    <template #body="order">
+                        <span :style="{ color: order.data.orderType.toLowerCase().includes('buy') ? 'green' : 'red' }">
+                            {{ order.data.orderType }}
                         </span>
-                    </span>
-                    <span v-if="order.data.timeTP" :title="order.data.timeTP" style="color: green; cursor: pointer;">
-                        (+{{ +Math.abs(order.data.volume * (order.data.tp - order.data.entry)).toFixed(2) }} $)
-                        (+{{ +Math.abs((order.data.tp - order.data.entry) / order.data.entry * 100).toFixed(2) }} %)
-                    </span>
-                    <span v-if="order.data.timeSL" :title="order.data.timeSL" style="color: red; cursor: pointer;">
-                        (-{{ +Math.abs(order.data.volume * (order.data.sl - order.data.entry)).toFixed(2) }} $)
-                        (-{{ +Math.abs((order.data.sl - order.data.entry) / order.data.entry * 100).toFixed(2) }} %)
-                    </span>
-                </template>
-            </Column>
-            <Column field="expiredTime" header="Thời gian hủy"></Column>
-        </DataTable>
+                    </template>
+                </Column>
+                <Column field="volume" header="Volume">
+                </Column>
+                <Column field="volumeInUSD" header="volumeInUSD">
+                </Column>
+                <Column field="stop" header="Stop"></Column>
+                <Column header="entry">
+                    <template #body="order">
+                        <span :title="order.data.timeEntry">{{ order.data.entry }}</span>
+                    </template>
+                </Column>
+                <Column header="TP">
+                    <template #body="order">
+                        <span>{{ order.data.tp }}</span>
+                    </template>
+                </Column>
+                <Column header="SL">
+                    <template #body="order">
+                        <span>{{ order.data.sl }}</span>
+                    </template>
+                </Column>
+                <Column sortField="status" header="Trạng thái" sortable>
+                    <template #body="order">
+                        <span v-if="!order.data.timeTP && !order.data.timeSL" :title="order.data.lastTimeUpdated"
+                            style="cursor: pointer;">
+                            {{ order.data.status }}
+                            <span v-if="order.data.profit"
+                                :style="{ color: order.data.profit >= 0 ? 'green' : 'red', opacity: 0.5 }">
+                                (<span v-if="order.data.profit >= 0">+</span>{{ +order.data.profit.toFixed(2) }} $)
+                            </span>
+                        </span>
+                        <span v-if="order.data.timeTP" :title="order.data.timeTP"
+                            style="color: green; cursor: pointer;">
+                            (+{{ +Math.abs(order.data.volume * (order.data.tp - order.data.entry)).toFixed(2) }} $)
+                            (+{{ +Math.abs((order.data.tp - order.data.entry) / order.data.entry * 100).toFixed(2) }} %)
+                        </span>
+                        <span v-if="order.data.timeSL" :title="order.data.timeSL" style="color: red; cursor: pointer;">
+                            (-{{ +Math.abs(order.data.volume * (order.data.sl - order.data.entry)).toFixed(2) }} $)
+                            (-{{ +Math.abs((order.data.sl - order.data.entry) / order.data.entry * 100).toFixed(2) }} %)
+                        </span>
+                    </template>
+                </Column>
+                <Column field="expiredTime" header="Thời gian hủy"></Column>
+            </DataTable>
+        </div>
     </div>
 </template>
 
