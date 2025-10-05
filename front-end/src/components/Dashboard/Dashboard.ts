@@ -3,6 +3,7 @@ import * as axios from '../../axios/axios';
 import DataTable from 'primevue/datatable';
 import InputText from 'primevue/inputtext';
 import Column from 'primevue/column';
+import ProgressSpinner from 'primevue/progressspinner';
 
 interface BotInfo {
     botName: string,
@@ -20,7 +21,7 @@ interface BotInfo {
 }
 
 export default defineComponent({
-    components: {DataTable, Column, InputText},
+    components: {DataTable, Column, InputText, ProgressSpinner},
     setup() {
         const botList = ref<BotInfo[]>([]);
         let totalProfit = ref<number>(0);
@@ -28,6 +29,7 @@ export default defineComponent({
         let totalBalanceReal = ref<number>(0);
         const feeRate = 0.05 / 100;
         const r_globalFilter = ref<string>('');
+        const r_isLoading = ref<boolean>(true);
 
         axios.get(`/dashboard/statistic`).then(data => {
             botList.value = data;
@@ -56,7 +58,8 @@ export default defineComponent({
 
             totalBalanceReal.value = Math.round(totalBalanceReal.value);
             totalProfit.value = parseFloat(totalProfit.value.toFixed(2));
-            console.log(botList.value)
+            r_isLoading.value = false;
+            console.log(botList.value);
         });
 
 
@@ -66,7 +69,8 @@ export default defineComponent({
             totalProfit,
             totalCost,
             totalBalanceReal,
-            r_globalFilter
+            r_globalFilter,
+            r_isLoading
         };
     }
 });

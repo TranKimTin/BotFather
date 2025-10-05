@@ -79,7 +79,11 @@
 
         <div class="mt-8" />
 
-        <div>
+        <div v-if="r_isLoading" class="card flex justify-center">
+            <ProgressSpinner style="width: 30%; height: 70vh" strokeWidth="3" fill="transparent" animationDuration="3s"
+                aria-label="loading" />
+        </div>
+        <div v-if="!r_isLoading">
             <div class="flex justify-end">
                 <InputText v-model="r_globalFilter" placeholder="Tìm kiếm..." class="p-inputtext-sm w-72" />
             </div>

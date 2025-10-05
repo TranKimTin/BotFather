@@ -10,6 +10,7 @@ import { useConfirm } from "primevue/useconfirm";
 import * as Toast from '../../toast/toast';
 import Select from 'primevue/select';
 import moment from 'moment';
+import ProgressSpinner from 'primevue/progressspinner';
 
 interface Order {
     id: number,
@@ -90,7 +91,7 @@ function getMinBalanceRequired(orders: Array<Order>): number {
 }
 
 export default defineComponent({
-    components: { DataTable, Column, MultiSelect, BalanceChart, Select, InputText },
+    components: { DataTable, Column, MultiSelect, BalanceChart, Select, InputText, ProgressSpinner },
     setup() {
         const route = useRoute();
         const router = useRouter();
