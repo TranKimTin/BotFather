@@ -1,5 +1,4 @@
-import { createClient, RedisFunctions, RedisModules, RedisScripts } from 'redis';
-import { RedisClientType } from '@redis/client';
+import { createClient } from 'redis';
 import dotenv from 'dotenv';
 
 dotenv.config({ path: `${__dirname}/../../.env` });
@@ -90,8 +89,11 @@ export async function length(key: string) {
     return client.lLen(key);
 }
 
-export async function set(key: string, value: string) {
+export async function set(key: string, value: string, expireInSeconds?: number) {
     if (!client) client = await initConnection();
+    if (expireInSeconds && expireInSeconds > 0) {
+        return await client.set(key, value, { EX: expireInSeconds });
+    }
     return await client.set(key, value);
 }
 
