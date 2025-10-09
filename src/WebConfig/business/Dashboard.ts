@@ -27,6 +27,7 @@ export async function getBotInfo(userData: UserTokenInfo) {
         const data = await mysql.query(sql, [userData.id, userData.role, ROLE.ADMIN, ORDER_STATUS.MATCH_ENTRY, ORDER_STATUS.MATCH_TP, ORDER_STATUS.MATCH_SL]);
         cache = JSON.stringify(data);
         await redis.set(`getBotInfo`, cache, 1800);
+        console.log('cached getBotInfo');
     }
     const data: Array<any> = JSON.parse(cache);
 
