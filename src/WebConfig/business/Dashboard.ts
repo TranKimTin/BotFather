@@ -3,11 +3,14 @@ import * as mysql from '../lib/mysql';
 import * as util from '../../common/util';
 import Binance, { FuturesAccountInfoResult } from 'binance-api-node';
 import dotenv from 'dotenv';
+import * as redis from '../../common/redis';
 
 dotenv.config({ path: `${__dirname}/../../../.env` });
 
 export async function getBotInfo(userData: UserTokenInfo) {
-    const sql = `SELECT u.email, b.botName, b.enableRealOrder, b.apiKey, b.secretKey, b.iv,
+    let cache = await redis.get(`getBotInfo`);
+    if (!cache) {
+        const sql = `SELECT u.email, b.botName, b.enableRealOrder, b.apiKey, b.secretKey, b.iv,
                     COUNT(IF(o.status in ('Khớp TP', 'Khớp SL', 'Khớp entry'), IF(o.timeSL IS NOT NULL OR o.timeTP IS NOT NULL, 1, NULL), NULL)) AS tradeCountClosed,
                     COUNT(IF(o.status in ('Khớp TP', 'Khớp SL', 'Khớp entry'), IF(o.timeSL IS NULL AND o.timeTP IS NULL, 1, NULL), NULL)) AS tradeCountOpening,
                     SUM(IF(o.status in ('Khớp TP', 'Khớp SL', 'Khớp entry'), IF(o.timeSL IS NOT NULL OR o.timeTP IS NOT NULL, o.profit, 0), 0)) AS profit,
@@ -21,7 +24,12 @@ export async function getBotInfo(userData: UserTokenInfo) {
                 WHERE (u.id = ? OR ? = ?)
                 GROUP BY b.id
                 ORDER BY b.enableRealOrder DESC, b.botName ASC;`;
-    const data = await mysql.query(sql, [userData.id, userData.role, ROLE.ADMIN, ORDER_STATUS.MATCH_ENTRY, ORDER_STATUS.MATCH_TP, ORDER_STATUS.MATCH_SL]);
+        const data = await mysql.query(sql, [userData.id, userData.role, ROLE.ADMIN, ORDER_STATUS.MATCH_ENTRY, ORDER_STATUS.MATCH_TP, ORDER_STATUS.MATCH_SL]);
+        cache = JSON.stringify(data);
+        await redis.set(`getBotInfo`, cache, 1800);
+    }
+    const data: Array<any> = JSON.parse(cache);
+
     const accountInfo: { [key: string]: FuturesAccountInfoResult } = {};
 
     for (const item of data) {
