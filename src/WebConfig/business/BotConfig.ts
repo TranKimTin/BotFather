@@ -143,13 +143,20 @@ export async function getBotList(userData: UserTokenInfo) {
 }
 
 export async function getHistoryOrder(botName: string, filterBroker: Array<string>, filterTimeframe: Array<string>) {
-    const orders = await mysql.query(`SELECT b.id,o.symbol,o.broker,o.timeframe,o.orderType,o.volume,o.stop,o.entry,o.tp,o.sl,o.profit,o.status,o.createdTime,o.expiredTime,o.timeStop,o.timeEntry,o.timeTP,o.timeSL,o.lastTimeUpdated
-                                        FROM Orders o
-                                        JOIN Bot b ON b.id = o.botID
-                                        WHERE b.botName = ?
-                                            AND o.broker IN (?)
-                                            AND o.timeframe IN (?)
-                                        ORDER BY o.createdTime DESC`, [botName, filterBroker, filterTimeframe]);
+    let cache = await redis.get(`getHistoryOrder`);
+    if (!cache) {
+        const sql = `   SELECT b.id,o.symbol,o.broker,o.timeframe,o.orderType,o.volume,o.stop,o.entry,o.tp,o.sl,o.profit,o.status,o.createdTime,o.expiredTime,o.timeStop,o.timeEntry,o.timeTP,o.timeSL,o.lastTimeUpdated
+                        FROM Orders o
+                        JOIN Bot b ON b.id = o.botID
+                        WHERE b.botName = ?
+                            AND o.broker IN (?)
+                            AND o.timeframe IN (?)
+                        ORDER BY o.createdTime DESC`;
+        const orders = await mysql.query(sql, [botName, filterBroker, filterTimeframe]);
+        cache = JSON.stringify(orders);
+        await redis.set(`getHistoryOrder`, cache, 1800);
+    }
+    const orders = JSON.parse(cache);
 
     let startTime = orders.length > 0 ? orders.at(-1).createdTime : moment().subtract(30, 'day').valueOf();
 
