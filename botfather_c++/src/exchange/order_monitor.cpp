@@ -113,7 +113,7 @@ static void checkOrderStatus()
                     }
                 }
 
-                if (tpStatus != "NEW" || slStatus != "NEW")
+                if (tpStatus != "NEW" && slStatus != "NEW")
                 {
                     LOGI("Order {} is completed. entryID: {}, tpID: {}({}), slID: {}({})", id, entryID, tpID, tpStatus, slID, slStatus);
                     db.executeUpdate("DELETE FROM RealOrders WHERE id = ?", {id});
