@@ -155,7 +155,7 @@ export async function getHistoryOrder(botName: string, filterBroker: Array<strin
                         ORDER BY o.createdTime DESC`;
         const orders = await mysql.query(sql, [botName, filterBroker, filterTimeframe]);
         cache = JSON.stringify(orders);
-        await redis.set(key, cache, 1800);
+        await redis.set(key, cache, 300);
     }
     const orders = JSON.parse(cache);
 

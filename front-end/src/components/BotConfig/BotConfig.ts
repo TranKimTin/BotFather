@@ -72,9 +72,7 @@ export default defineComponent({
                 label: 'Xóa nút',
                 icon: 'pi pi-eraser',
                 shortcut: 'Delete',
-                command: () => {
-                    console.log('paste')
-                }
+                command: removeNode
             },
             {
                 label: 'sửa nút',
