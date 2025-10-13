@@ -8,7 +8,8 @@ import * as redis from '../../common/redis';
 dotenv.config({ path: `${__dirname}/../../../.env` });
 
 export async function getBotInfo(userData: UserTokenInfo) {
-    let cache = await redis.get(`getBotInfo`);
+    const key = `getBotInfo_${userData.id}`;
+    let cache = await redis.get(key);
     if (!cache) {
         const sql = `SELECT u.email, b.botName, b.enableRealOrder, b.apiKey, b.secretKey, b.iv,
                     COUNT(IF(o.status in ('Khớp TP', 'Khớp SL', 'Khớp entry'), IF(o.timeSL IS NOT NULL OR o.timeTP IS NOT NULL, 1, NULL), NULL)) AS tradeCountClosed,
@@ -26,7 +27,7 @@ export async function getBotInfo(userData: UserTokenInfo) {
                 ORDER BY b.enableRealOrder DESC, b.botName ASC;`;
         const data = await mysql.query(sql, [userData.id, userData.role, ROLE.ADMIN, ORDER_STATUS.MATCH_ENTRY, ORDER_STATUS.MATCH_TP, ORDER_STATUS.MATCH_SL]);
         cache = JSON.stringify(data);
-        await redis.set(`getBotInfo`, cache, 1800);
+        await redis.set(key, cache, 1800);
     }
     const data: Array<any> = JSON.parse(cache);
 
