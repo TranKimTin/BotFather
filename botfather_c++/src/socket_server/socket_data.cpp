@@ -54,7 +54,7 @@ void SocketData::init()
 void SocketData::onCloseCandle(const string &symbol, string &timeframe, RateData &rateData)
 {
     const int length = rateData.startTime.size();
-    if (length < 15)
+    if (length < 20)
         return;
 
     if (!botList)
