@@ -129,7 +129,11 @@
                             Math.round(bot.data.volumeOpening).toLocaleString() }}
                     </template>
                 </Column>
-                <Column field="winrate" header="Tỉ lệ thắng"></Column>
+                <Column field="winrate" header="Tỉ lệ thắng">
+                    <template #body="bot">
+                        {{ bot.data.winrate }} %
+                    </template>
+                </Column>
                 <Column field="accountInfo.totalWalletBalance" header="Balance real">
                     <template #body="bot">
                         {{ Math.round(bot.data.accountInfo.totalWalletBalance).toLocaleString() }}
