@@ -358,37 +358,19 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                         RateData rateData;
                         if(tf == "1m")
                         {
-                            rateData = getOHLCVFromCache(symbol, tf);
-                            if (rateData.startTime.empty() || !isValidData(rateData)) {
-                                rateData = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE);
-                            }
-                            else {
-                                RateData dataFromServer = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE, rateData.startTime[0] + 60000);
-                                if (dataFromServer.startTime.empty() || dataFromServer.startTime.back() != rateData.startTime[0] + 60000) {
-                                    rateData = RateData();
-                                    rateData.symbol = symbol;
-                                    rateData.interval = tf;
-                                }
-                                for (int i = dataFromServer.startTime.size() - 1; i >= 0; i--) {
-                                    rateData.startTime.push_front(dataFromServer.startTime[i]);
-                                    rateData.open.push_front(dataFromServer.open[i]);
-                                    rateData.high.push_front(dataFromServer.high[i]);
-                                    rateData.low.push_front(dataFromServer.low[i]);
-                                    rateData.close.push_front(dataFromServer.close[i]);
-                                    rateData.volume.push_front(dataFromServer.volume[i]);
-                                }
-                            }
-                            
-                            if(rateData.startTime.empty()) {
+                            rateData = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE);
+                            if(rateData.startTime.empty() || !isValidData(rateData)) {
                                 rateData = getOHLCV(symbol, tf, MAX_CANDLE);
                                 cnt++;
                             }
+                            string key = broker + "_" + symbol + "_" + tf;
+                            Redis::getInstance().clearList(key);
                         }
                         else {
                             rateData = getOHLCVFromCache(symbol, tf);
                             if (rateData.startTime.empty()) {
                                 rateData = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE);
-                                if(rateData.startTime.empty()) {
+                                if(rateData.startTime.empty() || !isValidData(rateData)) {
                                     rateData = getOHLCV(symbol, tf, MAX_CANDLE);
                                     cnt++;
                                 }
@@ -409,7 +391,7 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                                     int size = smaller.startTime.size();
                                     if (size == 0 || smaller.startTime.back() > rateData.startTime[0]) {
                                         rateData = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE);
-                                        if(rateData.startTime.empty()) {
+                                        if(rateData.startTime.empty() || !isValidData(rateData)) {
                                             rateData = getOHLCV(symbol, tf, MAX_CANDLE);
                                             cnt++;
                                         }
@@ -423,7 +405,7 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                                     l--;
                                     if(l >= 0 && getStartTime(tf, smaller.startTime[l]) != rateData.startTime[0]) {
                                         rateData = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE);
-                                        if(rateData.startTime.empty()) {
+                                        if(rateData.startTime.empty() || !isValidData(rateData)) {
                                             rateData = getOHLCV(symbol, tf, MAX_CANDLE);
                                             cnt++;
                                         }  
