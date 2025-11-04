@@ -12,7 +12,7 @@ void SocketBinanceFuture::on_message(connection_hdl, message_ptr msg)
 {
     const string message = msg->get_payload();
     json j = json::parse(message);
-    LOGI("{}", message);
+    // LOGI("{}", message);
     // {"stream":"slfusdt@kline_1m","data":{"e":"kline","E":1745689546800,"s":"SLFUSDT","k":{"t":1745689500000,"T":1745689559999,"s":"SLFUSDT","i":"1m","f":13562205,"L":13562210,"o":"0.20800000","c":"0.20810000","h":"0.20810000","l":"0.20800000","v":"624.60000000","n":6,"x":false,"q":"129.95848000","V":"624.60000000","Q":"129.95848000","B":"0"}}}
 
     // {"stream":"!markPrice@arr",
