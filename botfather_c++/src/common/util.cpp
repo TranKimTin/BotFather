@@ -534,6 +534,8 @@ vector<string> getBinanceFutureSymbolList()
         if (status != "TRADING" || !endsWith(symbol, "USDT") || symbol == "USDCUSDT" || symbol == "TUSDUSDT" || symbol == "DAIUSDT")
             continue;
         symbols.push_back(symbol);
+        if (symbols.size() >= 500)
+            break;
     }
     return symbols;
 }
