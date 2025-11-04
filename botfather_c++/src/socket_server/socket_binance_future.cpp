@@ -84,7 +84,7 @@ void SocketBinanceFuture::connectSocket()
     ws.set_close_handler(bind(&SocketBinanceFuture::onSocketClosed, this, placeholders::_1));
     ws.set_fail_handler(bind(&SocketBinanceFuture::onSocketClosed, this, placeholders::_1));
 
-    uri = "wss://fstream.binance.com/stream?streams=";
+    uri = "wss://fstream.binance.com/stream?streams=!markPrice@arr/";
     for (int i = 0; i < symbolList.size(); i++)
     {
         uri += (toLowerCase(symbolList[i]) + "@kline_1m");
