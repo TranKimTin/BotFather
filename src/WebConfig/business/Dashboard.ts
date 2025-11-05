@@ -32,6 +32,7 @@ export async function getBotInfo(userData: UserTokenInfo) {
     const data: Array<any> = JSON.parse(cache);
 
     const accountInfo: { [key: string]: FuturesAccountInfoResult } = {};
+    const openOrders: { [key: string]: any[] } = {};
 
     for (const item of data) {
         if (item.apiKey && item.secretKey && item.iv) {
@@ -45,15 +46,19 @@ export async function getBotInfo(userData: UserTokenInfo) {
                 accountInfo[apiKey] = await client.futuresAccountInfo();
                 accountInfo[apiKey].positions = accountInfo[apiKey].positions.filter(item => item.initialMargin != '0');
                 accountInfo[apiKey].positions.sort((a, b) => (+a.unrealizedProfit) - (+b.unrealizedProfit));
+                openOrders[apiKey] = await client.futuresOpenOrders({});
+                item.openOrders[apiKey].sort((a: any, b: any) => a.symbol.localeCompare(b.symbol));
             }
             item.accountInfo = accountInfo[apiKey];
+            item.openOrders = openOrders[apiKey];
         }
         else {
             item.accountInfo = {
                 totalWalletBalance: 0,
                 availableBalance: 0,
-                totalUnrealizedProfit: 0
+                totalUnrealizedProfit: 0,
             };
+            item.openOrders = [];
         }
         delete item.apiKey;
         delete item.secretKey;

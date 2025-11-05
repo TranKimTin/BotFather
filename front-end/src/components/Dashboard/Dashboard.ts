@@ -4,6 +4,7 @@ import DataTable from 'primevue/datatable';
 import InputText from 'primevue/inputtext';
 import Column from 'primevue/column';
 import ProgressSpinner from 'primevue/progressspinner';
+import * as Toast from '../../toast/toast';
 
 interface BotInfo {
     botName: string,
@@ -17,11 +18,12 @@ interface BotInfo {
     winrate: number
     cost: number,
     enableRealOrder: number,
-    accountInfo: any
+    accountInfo: any,
+    openOrders: any[]
 }
 
 export default defineComponent({
-    components: {DataTable, Column, InputText, ProgressSpinner},
+    components: { DataTable, Column, InputText, ProgressSpinner },
     setup() {
         const botList = ref<BotInfo[]>([]);
         let totalProfit = ref<number>(0);
@@ -52,6 +54,16 @@ export default defineComponent({
                     if (!check[balance]) {
                         check[balance] = true;
                         totalBalanceReal.value += balance;
+                    }
+                }
+
+                if (bot.accountInfo && bot.openOrders) {
+                    for (let item of bot.accountInfo.positions) {
+                        let order = bot.openOrders.find((o: any) => o.symbol === item.symbol);
+                        if (!order) {
+                            console.log('not found order for position: ', item);
+                            Toast.showError(`${bot.botName} ${item.symbol} không có TP SL!`);
+                        }
                     }
                 }
             }
