@@ -57,7 +57,7 @@ export default defineComponent({
                     }
                 }
 
-                if (bot.accountInfo && bot.openOrders) {
+                if (bot.accountInfo && bot.accountInfo.positions && bot.openOrders) {
                     for (let item of bot.accountInfo.positions) {
                         let order = bot.openOrders.find((o: any) => o.symbol === item.symbol);
                         if (!order) {
