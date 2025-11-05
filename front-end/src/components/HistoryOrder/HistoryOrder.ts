@@ -152,6 +152,7 @@ export default defineComponent({
                             if (!order) {
                                 console.log('not found order for position: ', item);
                                 symbolErrors.push(item.symbol);
+                                Toast.showError(`${item.symbol} không có TP SL!`);
                             }
                         }
                     }
