@@ -151,27 +151,24 @@ export default defineComponent({
                             let positionAmt = parseFloat(item.positionAmt);
                             if (positionAmt === 0) continue;
 
-                            let totalOpenAmtBuy = 0;
-                            let totalOpenAmtSell = 0;
+                            let totalOpenAmtTP = 0;
+                            let totalOpenAmtSL = 0;
                             for (let o of openOrders) {
                                 if (o.symbol === item.symbol && o.reduceOnly === true) {
                                     let orderAmt = parseFloat(o.origQty);
-                                    if (o.side === 'BUY') {
-                                        totalOpenAmtBuy += orderAmt;
+                                    if (o.origType === 'TAKE_PROFIT_MARKET') {
+                                        totalOpenAmtTP += orderAmt;
                                     }
-                                    if (o.side === 'SELL') {
-                                        totalOpenAmtSell += orderAmt;
+                                    if (o.origType === 'STOP_MARKET') {
+                                        totalOpenAmtSL += orderAmt;
                                     }
-                                    console.log({ o, totalOpenAmtBuy, totalOpenAmtSell });
                                 }
                             }
-                            if (totalOpenAmtSell < Math.abs(positionAmt)) {
-                                Toast.showError(`${item.symbol} thiếu ${positionAmt > 0 ? 'TP' : 'SL'}`);
-                                console.error(`${item.symbol} ${positionAmt} ${totalOpenAmtSell}`);
+                            if (totalOpenAmtTP < Math.abs(positionAmt)) {
+                                Toast.showError(`${item.symbol} thiếu TP`);
                             }
-                            if (totalOpenAmtBuy < Math.abs(positionAmt)) {
-                                Toast.showError(`${item.symbol} thiếu lệnh ${positionAmt > 0 ? 'SL' : 'TP'}`);
-                                console.error(`${item.symbol} ${positionAmt} ${totalOpenAmtBuy}`);
+                            if (totalOpenAmtSL < Math.abs(positionAmt)) {
+                                Toast.showError(`${item.symbol} thiếu SL`);
                             }
                         }
                     }

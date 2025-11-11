@@ -61,24 +61,25 @@ export default defineComponent({
                     for (let item of bot.accountInfo.positions) {
                         let positionAmt = parseFloat(item.positionAmt);
                         if (positionAmt === 0) continue;
-                        let totalOpenAmtBuy = 0;
-                        let totalOpenAmtSell = 0;
+
+                        let totalOpenAmtTP = 0;
+                        let totalOpenAmtSL = 0;
                         for (let o of bot.openOrders) {
                             if (o.symbol === item.symbol && o.reduceOnly === true) {
                                 let orderAmt = parseFloat(o.origQty);
-                                if (o.side === 'BUY') {
-                                    totalOpenAmtBuy += orderAmt;
+                                if (o.origType === 'TAKE_PROFIT_MARKET') {
+                                    totalOpenAmtTP += orderAmt;
                                 }
-                                if (o.side === 'SELL') {
-                                    totalOpenAmtSell += orderAmt;
+                                if (o.origType === 'STOP_MARKET') {
+                                    totalOpenAmtSL += orderAmt;
                                 }
                             }
                         }
-                        if (totalOpenAmtSell < Math.abs(positionAmt)) {
-                            Toast.showError(`${bot.botName} ${item.symbol} thiếu ${positionAmt > 0 ? 'TP' : 'SL'}`);
+                        if (totalOpenAmtTP < Math.abs(positionAmt)) {
+                            Toast.showError(`${item.symbol} thiếu TP`);
                         }
-                        if (totalOpenAmtBuy < Math.abs(positionAmt)) {
-                            Toast.showError(`${bot.botName} ${item.symbol} thiếu lệnh ${positionAmt > 0 ? 'SL' : 'TP'}`);
+                        if (totalOpenAmtSL < Math.abs(positionAmt)) {
+                            Toast.showError(`${item.symbol} thiếu SL`);
                         }
                     }
                 }
