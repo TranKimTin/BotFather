@@ -148,11 +148,24 @@ export default defineComponent({
 
                     if (accountInfo && openOrders) {
                         for (let item of accountInfo.positions) {
-                            let order = openOrders.find((o: any) => o.symbol === item.symbol);
-                            if (!order) {
-                                console.log('not found order for position: ', item);
-                                symbolErrors.push(item.symbol);
-                                Toast.showError(`${item.symbol} không có TP SL!`);
+                            let positionAmt = parseFloat(item.positionAmt);
+                            let totalOpenAmtBuy = 0;
+                            let totalOpenAmtSell = 0;
+                            for (let o of openOrders) {
+                                if (o.symbol === item.symbol && o.reduceOnly === true) {
+                                    let orderAmt = parseFloat(o.origQty);
+                                    if (o.side === 'BUY' && o.reduceOnly) {
+                                        totalOpenAmtBuy += orderAmt;
+                                    } else if (o.side === 'SELL') {
+                                        totalOpenAmtSell += orderAmt;
+                                    }
+                                }
+                            }
+                            if (positionAmt !== 0 && totalOpenAmtSell < positionAmt) {
+                                Toast.showError(`${item.symbol} thiếu ${positionAmt > 0 ? 'TP' : 'SL'}`);
+                            }
+                            if (positionAmt !== 0 && totalOpenAmtBuy < Math.abs(positionAmt)) {
+                                Toast.showError(`${item.symbol} thiếu lệnh ${positionAmt > 0 ? 'SL' : 'TP'}`);
                             }
                         }
                     }
