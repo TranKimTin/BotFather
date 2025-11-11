@@ -158,9 +158,15 @@ export default defineComponent({
                                     let orderAmt = parseFloat(o.origQty);
                                     if (o.origType === 'TAKE_PROFIT_MARKET') {
                                         totalOpenAmtTP += orderAmt;
+                                        if (o.closePosition === true) {
+                                            totalOpenAmtTP = Math.abs(positionAmt);
+                                        }
                                     }
                                     if (o.origType === 'STOP_MARKET') {
                                         totalOpenAmtSL += orderAmt;
+                                        if (o.closePosition === true) {
+                                            totalOpenAmtSL = Math.abs(positionAmt);
+                                        }
                                     }
                                 }
                             }
