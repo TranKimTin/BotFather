@@ -82,10 +82,10 @@ export default defineComponent({
                             }
                         }
                         if (totalOpenAmtTP < Math.abs(positionAmt)) {
-                            Toast.showError(`${item.symbol} thiếu TP (${totalOpenAmtTP} < ${Math.abs(positionAmt)})`);
+                            Toast.showError(`${bot.botName} ${item.symbol} thiếu TP (${totalOpenAmtTP} < ${Math.abs(positionAmt)})`);
                         }
                         if (totalOpenAmtSL < Math.abs(positionAmt)) {
-                            Toast.showError(`${item.symbol} thiếu SL (${totalOpenAmtSL} < ${Math.abs(positionAmt)})`);
+                            Toast.showError(`${bot.botName} ${item.symbol} thiếu SL (${totalOpenAmtSL} < ${Math.abs(positionAmt)})`);
                         }
                     }
                 }
