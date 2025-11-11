@@ -36,6 +36,7 @@ export default defineComponent({
         axios.get(`/dashboard/statistic`).then(data => {
             botList.value = data;
             let check: { [key: number]: boolean } = {};
+            let check2: { [key: number]: boolean } = {};
 
             for (let bot of botList.value) {
                 bot.cost = 0;
@@ -58,34 +59,39 @@ export default defineComponent({
                 }
 
                 if (bot.accountInfo && bot.accountInfo.positions && bot.openOrders) {
-                    for (let item of bot.accountInfo.positions) {
-                        let positionAmt = parseFloat(item.positionAmt);
-                        if (positionAmt === 0) continue;
+                    let balance: number = parseFloat(bot.accountInfo.totalWalletBalance);
+                    if (!check2[balance]) {
+                        check2[balance] = true;
 
-                        let totalOpenAmtTP = 0;
-                        let totalOpenAmtSL = 0;
-                        for (let o of bot.openOrders) {
-                            if (o.symbol === item.symbol && o.reduceOnly === true) {
-                                let orderAmt = parseFloat(o.origQty);
-                                if (o.origType === 'TAKE_PROFIT_MARKET') {
-                                    totalOpenAmtTP += orderAmt;
-                                    if (o.closePosition === true) {
-                                        totalOpenAmtTP = Math.abs(positionAmt);
+                        for (let item of bot.accountInfo.positions) {
+                            let positionAmt = parseFloat(item.positionAmt);
+                            if (positionAmt === 0) continue;
+
+                            let totalOpenAmtTP = 0;
+                            let totalOpenAmtSL = 0;
+                            for (let o of bot.openOrders) {
+                                if (o.symbol === item.symbol && o.reduceOnly === true) {
+                                    let orderAmt = parseFloat(o.origQty);
+                                    if (o.origType === 'TAKE_PROFIT_MARKET') {
+                                        totalOpenAmtTP += orderAmt;
+                                        if (o.closePosition === true) {
+                                            totalOpenAmtTP = Math.abs(positionAmt);
+                                        }
                                     }
-                                }
-                                if (o.origType === 'STOP_MARKET') {
-                                    totalOpenAmtSL += orderAmt;
-                                    if (o.closePosition === true) {
-                                        totalOpenAmtSL = Math.abs(positionAmt);
+                                    if (o.origType === 'STOP_MARKET') {
+                                        totalOpenAmtSL += orderAmt;
+                                        if (o.closePosition === true) {
+                                            totalOpenAmtSL = Math.abs(positionAmt);
+                                        }
                                     }
                                 }
                             }
-                        }
-                        if (totalOpenAmtTP < Math.abs(positionAmt)) {
-                            Toast.showError(`${bot.botName} ${item.symbol} thiếu TP (${totalOpenAmtTP} < ${Math.abs(positionAmt)})`);
-                        }
-                        if (totalOpenAmtSL < Math.abs(positionAmt)) {
-                            Toast.showError(`${bot.botName} ${item.symbol} thiếu SL (${totalOpenAmtSL} < ${Math.abs(positionAmt)})`);
+                            if (totalOpenAmtTP < Math.abs(positionAmt)) {
+                                Toast.showError(`${bot.botName} ${item.symbol} thiếu TP (${totalOpenAmtTP} < ${Math.abs(positionAmt)})`);
+                            }
+                            if (totalOpenAmtSL < Math.abs(positionAmt)) {
+                                Toast.showError(`${bot.botName} ${item.symbol} thiếu SL (${totalOpenAmtSL} < ${Math.abs(positionAmt)})`);
+                            }
                         }
                     }
                 }
