@@ -154,9 +154,10 @@ export default defineComponent({
                             for (let o of openOrders) {
                                 if (o.symbol === item.symbol && o.reduceOnly === true) {
                                     let orderAmt = parseFloat(o.origQty);
-                                    if (o.side === 'BUY' && o.reduceOnly) {
+                                    if (o.side === 'BUY') {
                                         totalOpenAmtBuy += orderAmt;
-                                    } else if (o.side === 'SELL') {
+                                    }
+                                    if (o.side === 'SELL') {
                                         totalOpenAmtSell += orderAmt;
                                     }
                                 }
