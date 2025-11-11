@@ -149,6 +149,8 @@ export default defineComponent({
                     if (accountInfo && openOrders) {
                         for (let item of accountInfo.positions) {
                             let positionAmt = parseFloat(item.positionAmt);
+                            if (positionAmt === 0) continue;
+
                             let totalOpenAmtBuy = 0;
                             let totalOpenAmtSell = 0;
                             for (let o of openOrders) {
@@ -160,13 +162,14 @@ export default defineComponent({
                                     if (o.side === 'SELL') {
                                         totalOpenAmtSell += orderAmt;
                                     }
+                                    console.log({ o, totalOpenAmtBuy, totalOpenAmtSell });
                                 }
                             }
-                            if (positionAmt !== 0 && totalOpenAmtSell < Math.abs(positionAmt)) {
+                            if (totalOpenAmtSell < Math.abs(positionAmt)) {
                                 Toast.showError(`${item.symbol} thiếu ${positionAmt > 0 ? 'TP' : 'SL'}`);
                                 console.error(`${item.symbol} ${positionAmt} ${totalOpenAmtSell}`);
                             }
-                            if (positionAmt !== 0 && totalOpenAmtBuy < Math.abs(positionAmt)) {
+                            if (totalOpenAmtBuy < Math.abs(positionAmt)) {
                                 Toast.showError(`${item.symbol} thiếu lệnh ${positionAmt > 0 ? 'SL' : 'TP'}`);
                                 console.error(`${item.symbol} ${positionAmt} ${totalOpenAmtBuy}`);
                             }
