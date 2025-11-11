@@ -171,10 +171,10 @@ export default defineComponent({
                                 }
                             }
                             if (totalOpenAmtTP < Math.abs(positionAmt)) {
-                                Toast.showError(`${item.symbol} thiếu TP (${Math.abs(positionAmt) - totalOpenAmtTP} (${Math.abs(positionAmt)} - ${totalOpenAmtTP}))`);
+                                Toast.showError(`${item.symbol} thiếu TP ${Math.abs(positionAmt) - totalOpenAmtTP} (${Math.abs(positionAmt)} - ${totalOpenAmtTP})`);
                             }
                             if (totalOpenAmtSL < Math.abs(positionAmt)) {
-                                Toast.showError(`${item.symbol} thiếu SL (${Math.abs(positionAmt) - totalOpenAmtSL} (${Math.abs(positionAmt)} - ${totalOpenAmtSL}))`);
+                                Toast.showError(`${item.symbol} thiếu SL ${Math.abs(positionAmt) - totalOpenAmtSL} (${Math.abs(positionAmt)} - ${totalOpenAmtSL})`);
                             }
                         }
                     }
