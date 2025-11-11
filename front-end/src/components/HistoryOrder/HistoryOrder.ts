@@ -166,9 +166,11 @@ export default defineComponent({
                             }
                             if (totalOpenAmtTP < Math.abs(positionAmt)) {
                                 Toast.showError(`${item.symbol} thiếu TP`);
+                                console.log(`${item.symbol} ${totalOpenAmtTP} < ${Math.abs(positionAmt)}`);
                             }
                             if (totalOpenAmtSL < Math.abs(positionAmt)) {
                                 Toast.showError(`${item.symbol} thiếu SL`);
+                                console.log(`${item.symbol} ${totalOpenAmtSL} < ${Math.abs(positionAmt)}`);
                             }
                         }
                     }
