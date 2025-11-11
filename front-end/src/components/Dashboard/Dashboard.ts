@@ -72,7 +72,7 @@ export default defineComponent({
                                 }
                             }
                         }
-                        if (positionAmt !== 0 && totalOpenAmtSell < positionAmt) {
+                        if (positionAmt !== 0 && totalOpenAmtSell < Math.abs(positionAmt)) {
                             Toast.showError(`${bot.botName} ${item.symbol} thiếu ${positionAmt > 0 ? 'TP' : 'SL'}`);
                         }
                         if (positionAmt !== 0 && totalOpenAmtBuy < Math.abs(positionAmt)) {

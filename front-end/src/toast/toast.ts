@@ -24,6 +24,7 @@ export const showError = (detail: string, life = 3000) => {
         detail: detail,
         life: life
     });
+    console.error(detail);
 };
 
 export const showWarning = (detail: string, life = 3000) => {
