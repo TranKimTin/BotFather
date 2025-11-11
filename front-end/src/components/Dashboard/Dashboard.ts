@@ -60,6 +60,7 @@ export default defineComponent({
                 if (bot.accountInfo && bot.accountInfo.positions && bot.openOrders) {
                     for (let item of bot.accountInfo.positions) {
                         let positionAmt = parseFloat(item.positionAmt);
+                        if (positionAmt === 0) continue;
                         let totalOpenAmtBuy = 0;
                         let totalOpenAmtSell = 0;
                         for (let o of bot.openOrders) {
@@ -73,10 +74,10 @@ export default defineComponent({
                                 }
                             }
                         }
-                        if (positionAmt !== 0 && totalOpenAmtSell < Math.abs(positionAmt)) {
+                        if (totalOpenAmtSell < Math.abs(positionAmt)) {
                             Toast.showError(`${bot.botName} ${item.symbol} thiếu ${positionAmt > 0 ? 'TP' : 'SL'}`);
                         }
-                        if (positionAmt !== 0 && totalOpenAmtBuy < Math.abs(positionAmt)) {
+                        if (totalOpenAmtBuy < Math.abs(positionAmt)) {
                             Toast.showError(`${bot.botName} ${item.symbol} thiếu lệnh ${positionAmt > 0 ? 'SL' : 'TP'}`);
                         }
                     }
