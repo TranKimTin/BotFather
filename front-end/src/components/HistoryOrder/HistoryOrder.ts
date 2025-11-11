@@ -163,9 +163,11 @@ export default defineComponent({
                             }
                             if (positionAmt !== 0 && totalOpenAmtSell < Math.abs(positionAmt)) {
                                 Toast.showError(`${item.symbol} thiếu ${positionAmt > 0 ? 'TP' : 'SL'}`);
+                                console.error(`${item.symbol} ${positionAmt} ${totalOpenAmtSell}`);
                             }
                             if (positionAmt !== 0 && totalOpenAmtBuy < Math.abs(positionAmt)) {
                                 Toast.showError(`${item.symbol} thiếu lệnh ${positionAmt > 0 ? 'SL' : 'TP'}`);
+                                console.error(`${item.symbol} ${positionAmt} ${totalOpenAmtBuy}`);
                             }
                         }
                     }
