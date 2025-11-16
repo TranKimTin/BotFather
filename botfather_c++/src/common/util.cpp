@@ -621,8 +621,6 @@ boost::unordered_flat_map<long long, ExchangeInfo> getBinanceInfo()
 
         string symbol = s["symbol"].get<string>();
         long long key = hashString(symbol);
-        result[key].digitPrices = s["baseAssetPrecision"].get<int>();
-        result[key].digitVolume = s["quotePrecision"].get<int>();
         for (auto &f : s["filters"])
         {
             if (f["filterType"].get<string>() == "PRICE_FILTER")
@@ -656,9 +654,6 @@ boost::unordered_flat_map<long long, ExchangeInfo> getBinanceFutureInfo()
 
         string symbol = s["symbol"].get<string>();
         long long key = hashString(symbol);
-        result[key].digitPrices = s["pricePrecision"].get<int>();
-        result[key].digitVolume = s["quantityPrecision"].get<int>();
-
         for (auto &f : s["filters"])
         {
             if (f["filterType"].get<string>() == "PRICE_FILTER")
