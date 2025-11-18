@@ -170,10 +170,10 @@ export default defineComponent({
                                     }
                                 }
                             }
-                            if (totalOpenAmtTP < Math.abs(positionAmt)) {
+                            if (totalOpenAmtTP + 0.00000001 < Math.abs(positionAmt)) {
                                 Toast.showError(`${item.symbol} thiếu TP ${Math.abs(positionAmt) - totalOpenAmtTP} (${Math.abs(positionAmt)} - ${totalOpenAmtTP})`);
                             }
-                            if (totalOpenAmtSL < Math.abs(positionAmt)) {
+                            if (totalOpenAmtSL + 0.00000001 < Math.abs(positionAmt)) {
                                 Toast.showError(`${item.symbol} thiếu SL ${Math.abs(positionAmt) - totalOpenAmtSL} (${Math.abs(positionAmt)} - ${totalOpenAmtSL})`);
                             }
                         }
