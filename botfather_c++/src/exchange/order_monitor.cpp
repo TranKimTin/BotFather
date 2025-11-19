@@ -16,8 +16,7 @@ static void checkOrderStatus()
     }
 
     const int MAX_THREAD = 5;
-    boost::interprocess::interprocess_semaphore semaphore(MAX_THREAD);
-    vector<thread> threads;
+    boost::asio::thread_pool pool(MAX_THREAD);
 
     while (res->next())
     {
@@ -37,9 +36,8 @@ static void checkOrderStatus()
 
         shared_ptr<IExchange> exchange = make_shared<BinanceFuture>(apiKey, encryptedSecretKey, iv, botID);
 
-        semaphore.wait();
-        threads.emplace_back([=, &db, &semaphore]() mutable
-                             {
+        boost::asio::post(pool, [=, &db]() mutable
+                          {
             try
             {
                 if (tpID.empty() && slID.empty())
@@ -48,7 +46,6 @@ static void checkOrderStatus()
                     if (entryStatus.empty())
                     {
                         LOGE("Failed to get order status for entryID: {} ({}))", entryID, entryStatus);
-                        semaphore.post();
                         return;
                     }
                     
@@ -80,7 +77,6 @@ static void checkOrderStatus()
                             exchange->placeSellTPSL(symbol, volume, tp, sl, entryID);
                         }
                     }
-                    semaphore.post();
                     return;
                 }
 
@@ -90,7 +86,6 @@ static void checkOrderStatus()
                 if (tpStatus.empty() || slStatus.empty())
                 {
                     LOGE("Failed to get order status for entryID: {}, tpID: {} ({}), slID: {} ({})", entryID, tpID, tpStatus, slID, slStatus);
-                    semaphore.post();
                     return;
                 }
 
@@ -119,24 +114,16 @@ static void checkOrderStatus()
                     db.executeUpdate("DELETE FROM RealOrders WHERE id = ?", {id});
                 }
             }
-            catch (const exception err)
+            catch (const exception& err)
             {
                 LOGE("Exception in thread: {}", err.what());
             }
             catch (...) {
                 LOGE("Unknown exception type");
             }
-            semaphore.post(); 
             return; });
     }
-
-    for (auto &t : threads)
-    {
-        if (t.joinable())
-        {
-            t.join();
-        }
-    }
+    pool.join();
 }
 static void checkPositionClosedByManual()
 {
