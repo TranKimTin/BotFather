@@ -43,11 +43,17 @@ export async function getBotInfo(userData: UserTokenInfo) {
                     apiKey: apiKey,
                     apiSecret: secretKey
                 });
-                accountInfo[apiKey] = await client.futuresAccountInfo();
-                accountInfo[apiKey].positions = accountInfo[apiKey].positions.filter(item => item.initialMargin != '0');
-                accountInfo[apiKey].positions.sort((a, b) => (+a.unrealizedProfit) - (+b.unrealizedProfit));
-                openOrders[apiKey] = await client.futuresOpenOrders({});
-                openOrders[apiKey].sort((a: any, b: any) => a.symbol.localeCompare(b.symbol));
+                try {
+                    accountInfo[apiKey] = await client.futuresAccountInfo();
+                    accountInfo[apiKey].positions = accountInfo[apiKey].positions.filter(item => item.initialMargin != '0');
+                    accountInfo[apiKey].positions.sort((a, b) => (+a.unrealizedProfit) - (+b.unrealizedProfit));
+                    openOrders[apiKey] = await client.futuresOpenOrders({});
+                    openOrders[apiKey].sort((a: any, b: any) => a.symbol.localeCompare(b.symbol));
+                }
+                catch (err) {
+                    console.error(item.botName, err);
+                }
+
             }
             item.accountInfo = accountInfo[apiKey];
             item.openOrders = openOrders[apiKey];
