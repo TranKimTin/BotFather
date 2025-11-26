@@ -1111,6 +1111,28 @@ export function iDoji(candle: RateData): boolean {
     return technicalindicators.doji(singleInput);
 }
 
+export async function getOHLCVFromCacheServer(broker: string, symbol: string, timeframe: string, limit: number, since?: number): Promise<Array<RateData>> {
+    const serverURL = process.env.RATE_SERVER || 'localhost';
+    const url = `http://${serverURL}:8081/api/getOHLCV?broker=${broker}&symbol=${symbol}&timeframe=${timeframe}&limit=${limit}&since=${since}`;
+    const res = await axios.get(url);
+    const data: Array<string> = res.data;
+    return data.map(item => {
+        // item: startTime_open_high_low_close_volume
+        const rate = item.split('_');
+        return {
+            symbol: symbol,
+            interval: timeframe,
+            startTime: parseInt(rate[0]),
+            open: parseFloat(rate[1]),
+            high: parseFloat(rate[2]),
+            low: parseFloat(rate[3]),
+            close: parseFloat(rate[4]),
+            volume: parseFloat(rate[5]),
+            isFinal: true
+        };
+    });
+}
+
 export async function getOHLCV(broker: string, symbol: string, timeframe: string, limit: number, since?: number): Promise<Array<RateData>> {
     // tinh tu thoi diem since, lay toi da limit candle
     // if (since)
