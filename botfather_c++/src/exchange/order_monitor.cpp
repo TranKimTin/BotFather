@@ -232,33 +232,49 @@ static void checkPositionClosedByManual()
         LOGE("Unknown exception type");
     }
 }
+
+static void writeLog(const string &message)
+{
+    LOGI("{}", message);
+    ofstream file("order_monitor.txt");
+    if (file.is_open())
+    {
+        file << StringFormat("[{}] {}\n", toTimeString(getCurrentTime()), message);
+        file.close();
+    }
+}
+
 static void run()
 {
     long long lastTime = 0;
-    int cnt = 0;
     while (true)
     {
         long long now = getCurrentTime();
-        cnt++;
 
+        bool isLog = false;
         if (now - lastTime > 300000) // 5 minute
         {
-            LOGI("Order monitor is running... {}", cnt);
+            isLog = true;
             lastTime = now;
-
-            ofstream file("order_monitor.txt");
-            if (file.is_open())
-            {
-                file << StringFormat("timestamp:{}\ncnt: {}\n", toTimeString(now), cnt);
-                file.close(); // đóng file
-            }
         }
 
         try
         {
-            checkPositionClosedByManual();
             SLEEP_FOR(1000);
+            if (isLog)
+            {
+                writeLog("Start checking orders");
+            }
+            checkPositionClosedByManual();
+            if (isLog)
+            {
+                writeLog("Checking order status");
+            }
             checkOrderStatus();
+            if (isLog)
+            {
+                writeLog("Finished checking orders");
+            }
             SLEEP_FOR(10000);
         }
         catch (const exception &err)
