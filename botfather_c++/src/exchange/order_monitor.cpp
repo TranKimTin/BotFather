@@ -252,45 +252,46 @@ static void run()
         auto now = std::chrono::steady_clock::now();
 
         bool isLog = false;
-        if (now - lastTime > 300000) // 5 minute
+        if (now - lastTime > std::chrono::minutes(5))
         {
-            isLog = true;
-            lastTime = now;
-        }
+            {
+                isLog = true;
+                lastTime = now;
+            }
 
-        try
-        {
-            SLEEP_FOR(1000);
-            if (isLog)
+            try
             {
-                writeLog("Start checking orders");
+                SLEEP_FOR(1000);
+                if (isLog)
+                {
+                    writeLog("Start checking orders");
+                }
+                checkPositionClosedByManual();
+                if (isLog)
+                {
+                    writeLog("Checking order status");
+                }
+                checkOrderStatus();
+                if (isLog)
+                {
+                    writeLog("Finished checking orders");
+                }
+                SLEEP_FOR(10000);
             }
-            checkPositionClosedByManual();
-            if (isLog)
+            catch (const exception &err)
             {
-                writeLog("Checking order status");
+                LOGE("Exception in order monitor: {}", err.what());
+                SLEEP_FOR(10000);
             }
-            checkOrderStatus();
-            if (isLog)
+            catch (...)
             {
-                writeLog("Finished checking orders");
+                LOGE("Unknown exception type");
             }
-            SLEEP_FOR(10000);
-        }
-        catch (const exception &err)
-        {
-            LOGE("Exception in order monitor: {}", err.what());
-            SLEEP_FOR(10000);
-        }
-        catch (...)
-        {
-            LOGE("Unknown exception type");
         }
     }
-}
 
-void startOrderMonitor()
-{
-    static thread t(run);
-    LOGI("Order monitor started");
-}
+    void startOrderMonitor()
+    {
+        static thread t(run);
+        LOGI("Order monitor started");
+    }
