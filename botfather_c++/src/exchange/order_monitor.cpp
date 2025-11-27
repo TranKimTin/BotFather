@@ -246,10 +246,10 @@ static void writeLog(const string &message)
 
 static void run()
 {
-    long long lastTime = 0;
+    auto lastTime = std::chrono::steady_clock::now();
     while (true)
     {
-        long long now = getCurrentTime();
+        auto now = std::chrono::steady_clock::now();
 
         bool isLog = false;
         if (now - lastTime > 300000) // 5 minute
