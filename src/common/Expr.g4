@@ -80,6 +80,7 @@ expr
     | min_macd_histogram        # iMinMACDHistogram
     | max_macd_histogram        # iMaxMACDHistogram
     | avg_macd_histogram        # iAvgMACDVHistogram
+    | random                    # iRandom
     ;
 
 hour: 'hour' '(' ')';
@@ -149,6 +150,7 @@ avg_macd_signal: 'avg_macd_signal' '(' INT ',' INT ',' INT ',' INT (',' INT)? ')
 min_macd_histogram: 'min_macd_histogram' '(' INT ',' INT ',' INT ',' INT (',' INT)? ')';
 max_macd_histogram: 'max_macd_histogram' '(' INT ',' INT ',' INT ',' INT (',' INT)? ')';
 avg_macd_histogram: 'avg_macd_histogram' '(' INT ',' INT ',' INT ',' INT (',' INT)? ')';
+random: 'random' '(' INT ',' INT ')';
 
 comparisonOp : GT | GE | LT | LE | EQ | ASSIGN ;
 

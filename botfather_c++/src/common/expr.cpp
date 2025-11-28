@@ -1279,6 +1279,20 @@ any Expr::visitAvg_macd_histogram(ExprParser::Avg_macd_histogramContext *ctx)
                     { return output.histogram; });
 }
 
+any Expr::visitRandom(ExprParser::RandomContext *ctx) override
+{
+    int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
+    int to = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str());
+
+    if (from > to)
+    {
+        swap(from, to);
+    }
+
+    int randomNumber = rand() % (to - from + 1) + from;
+    return static_cast<double>(randomNumber);
+}
+
 any Expr::visitHour(ExprParser::HourContext *ctx)
 {
     long long timestamp_ms = startTime[0];
