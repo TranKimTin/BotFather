@@ -1279,7 +1279,7 @@ any Expr::visitAvg_macd_histogram(ExprParser::Avg_macd_histogramContext *ctx)
                     { return output.histogram; });
 }
 
-any Expr::visitRandom(ExprParser::RandomContext *ctx) override
+any Expr::visitRandom(ExprParser::RandomContext *ctx)
 {
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     int to = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str());
