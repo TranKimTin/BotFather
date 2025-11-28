@@ -955,4 +955,15 @@ export default [
                 + avg_macd_histogram(12, 26, 9, 5, 10): macd histogram trung bình từ nến 5 đến nến 10
                 `
     },
+    {
+        type: 'function',
+        label: 'random',
+        detail: '(from, to)',
+        apply: 'random(1, 10)',
+        boost: 0,
+        info: ` - Sinh ngẫu nhiên một số trong khoảng từ from đến to
+                Ví dụ:
+                + random(1, 10): sinh ngẫu nhiên một số từ 1 đến 10
+                `
+    },
 ];
