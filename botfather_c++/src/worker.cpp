@@ -389,7 +389,7 @@ bool Worker::adjustParam(NodeData &node)
     }
 
     // expired time
-    if (!node.expiredTime.empty() && node.expiredTime != "0" && node.type == NODE_TYPE::BUY_LIMIT || node.type == NODE_TYPE::BUY_STOP_MARKET || node.type == NODE_TYPE::BUY_STOP_LIMIT || node.type == NODE_TYPE::SELL_LIMIT || node.type == NODE_TYPE::SELL_STOP_MARKET || node.type == NODE_TYPE::SELL_STOP_LIMIT)
+    if (!node.expiredTime.empty() && node.expiredTime != "0" && (node.type == NODE_TYPE::BUY_LIMIT || node.type == NODE_TYPE::BUY_STOP_MARKET || node.type == NODE_TYPE::BUY_STOP_LIMIT || node.type == NODE_TYPE::SELL_LIMIT || node.type == NODE_TYPE::SELL_STOP_MARKET || node.type == NODE_TYPE::SELL_STOP_LIMIT))
     {
         string expr = node.expiredTime;
         expr = calculateSub(expr);
