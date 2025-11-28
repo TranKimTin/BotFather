@@ -131,6 +131,7 @@ public:
     any visitMax_macd_histogram(ExprParser::Max_macd_histogramContext *ctx) override;
     any visitAvg_macd_histogram(ExprParser::Avg_macd_histogramContext *ctx) override;
 
+    any visitRandom(ExprParser::RandomContext *ctx) override;
 
     any visitHour(ExprParser::HourContext *ctx) override;
     any visitMinute(ExprParser::MinuteContext *ctx) override;
