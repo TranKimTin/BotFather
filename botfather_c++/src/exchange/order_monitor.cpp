@@ -246,35 +246,18 @@ static void writeLog(const string &message)
 
 static void run()
 {
-    auto lastTime = std::chrono::steady_clock::now();
     while (true)
     {
-        auto now = std::chrono::steady_clock::now();
-
-        bool isLog = false;
-        if (now - lastTime > std::chrono::minutes(5))
-        {
-            isLog = true;
-            lastTime = now;
-        }
-
         try
         {
             SLEEP_FOR(1000);
-            if (isLog)
-            {
-                writeLog("Start checking orders");
-            }
+            writeLog("Start checking orders");
             checkPositionClosedByManual();
-            if (isLog)
-            {
-                writeLog("Checking order status");
-            }
+
+            writeLog("Checking order status");
             checkOrderStatus();
-            if (isLog)
-            {
-                writeLog("Finished checking orders");
-            }
+
+            writeLog("Finished checking orders");
             SLEEP_FOR(10000);
         }
         catch (const exception &err)
