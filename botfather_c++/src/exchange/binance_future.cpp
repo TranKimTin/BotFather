@@ -27,7 +27,7 @@ string BinanceFuture::buyMarket(const string &symbol, string quantity,
     if (!takeProfit.empty() || !stopLoss.empty())
     {
         auto orderCount = getOpenAlgoOrdersCount(symbol);
-        if (orderCount.algo == -1 || orderCount.algo > MAX_NUM_ALGO_ORDERS - 2)
+        if (orderCount.algo == -1 || orderCount.algo >= MAX_NUM_ALGO_ORDERS - 2)
         {
             LOGE("Max number of algo orders reached ({}). Do nothing.", orderCount.algo);
             return "";
@@ -122,7 +122,7 @@ string BinanceFuture::sellMarket(const string &symbol, string quantity, string t
     if (!takeProfit.empty() || !stopLoss.empty())
     {
         auto orderCount = getOpenAlgoOrdersCount(symbol);
-        if (orderCount.algo == -1 || orderCount.algo > MAX_NUM_ALGO_ORDERS - 2)
+        if (orderCount.algo == -1 || orderCount.algo >= MAX_NUM_ALGO_ORDERS - 2)
         {
             LOGE("Max number of algo orders reached ({}). Do nothing.", orderCount.algo);
             return "";
@@ -216,7 +216,7 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
     if (!takeProfit.empty() || !stopLoss.empty())
     {
         auto orderCount = getOpenAlgoOrdersCount(symbol);
-        if (orderCount.algo == -1 || orderCount.algo > MAX_NUM_ALGO_ORDERS - 2)
+        if (orderCount.algo == -1 || orderCount.algo >= MAX_NUM_ALGO_ORDERS - 2)
         {
             LOGE("Max number of algo orders reached ({}). Do nothing.", orderCount.algo);
             return "";
@@ -273,7 +273,7 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
     if (!takeProfit.empty() || !stopLoss.empty())
     {
         auto orderCount = getOpenAlgoOrdersCount(symbol);
-        if (orderCount.algo == -1 || orderCount.algo > MAX_NUM_ALGO_ORDERS - 2)
+        if (orderCount.algo == -1 || orderCount.algo >= MAX_NUM_ALGO_ORDERS - 2)
         {
             LOGE("Max number of algo orders reached ({}). Do nothing.", orderCount.algo);
             return "";
