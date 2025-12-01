@@ -49,13 +49,13 @@ export async function getHistoryOrder(req: any, res: any) {
         const botName: string = req.query.botName;
         const filterBroker = req.query.filterBroker.split(',');
         const filterTimeframe = req.query.filterTimeframe.split(',');
-        const userData: UserTokenInfo = req.user;
+        // const userData: UserTokenInfo = req.user;
 
-        const isOwnBot = await BotConfig.requireOwnBot(botName, userData);
-        if (!isOwnBot) {
-            res.json({ code: 403, message: 'Không có quyền truy cập bot', data: [] });
-            return;
-        }
+        // const isOwnBot = await BotConfig.requireOwnBot(botName, userData);
+        // if (!isOwnBot) {
+        //     res.json({ code: 403, message: 'Không có quyền truy cập bot', data: [] });
+        //     return;
+        // }
 
         const data = await BotConfig.getHistoryOrder(botName, filterBroker, filterTimeframe);
         res.json({ code: 200, message: "ok", data });
