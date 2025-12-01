@@ -386,10 +386,12 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                                     RateData smaller;
                                     {
                                         lock_guard<mutex> lock(mMutex);
-                                        RateData smaller = data[hashString(symbol + "_" + timeframes[m])];
+                                        long long smallerKey = hashString(symbol + "_" + timeframes[m]);
+                                        smaller = data[smallerKey];
                                     }
                                     int size = smaller.startTime.size();
-                                    if (size == 0 || smaller.startTime.back() > rateData.startTime[0]) {
+                                    if (size == 0 || (timeframes[m] != "1m" && smaller.startTime.back() > rateData.startTime[0])) {
+                                        LOGD("Data not continuous {}:{} {}. Expected start time: {}, but got: no data", broker, symbol, tf, toTimeString(rateData.startTime[0]));
                                         rateData = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE);
                                         if(rateData.startTime.empty() || !isValidData(rateData)) {
                                             rateData = getOHLCV(symbol, tf, MAX_CANDLE);
@@ -403,7 +405,8 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                                         l++;
                                     }
                                     l--;
-                                    if(l >= 0 && getStartTime(tf, smaller.startTime[l]) != rateData.startTime[0]) {
+                                    if(l >= 0 && timeframes[m] != "1m" && getStartTime(tf, smaller.startTime[l]) != rateData.startTime[0]) {
+                                        LOGD("Data not continuous {}:{} {}. Expected start time: {}, but got: {}", broker, symbol, tf, toTimeString(rateData.startTime[0]), toTimeString(getStartTime(tf, smaller.startTime[l])));
                                         rateData = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE);
                                         if(rateData.startTime.empty() || !isValidData(rateData)) {
                                             rateData = getOHLCV(symbol, tf, MAX_CANDLE);
@@ -455,6 +458,7 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                             while(i >= 0) {
                                 mergeData(data[key], symbol, oldData.interval, oldData.interval, oldData.open[i], oldData.high[i], oldData.low[i], oldData.close[i], oldData.volume[i], oldData.startTime[i], i > 0, true);
                             }
+                            LOGD("Set data for {}:{} {} size={}, key={}", broker, symbol, tf, data[key].startTime.size(), key);
                             updateCache(data[key]);
                         }
                     }
