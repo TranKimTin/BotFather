@@ -15,7 +15,7 @@ static ThreadPool tasks(thread::hardware_concurrency() * 2 + 1);
 extern thread_local VectorDoublePool vectorDoublePool;
 extern thread_local SparseTablePool sparseTablePool;
 
-void Worker::init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, ExchangeInfo exchangeInfo, double fundingRate, const SocketData* socketData)
+void Worker::init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, ExchangeInfo exchangeInfo, double fundingRate, const SocketData *socketData)
 {
     VectorDoublePool::getInstance().releaseLock(this->open);
     VectorDoublePool::getInstance().releaseLock(this->high);
@@ -508,6 +508,15 @@ bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
             Telegram::getInstance().sendMessage(mess, id);
         }
         return true;
+    }
+
+    if (nodeData.type == NODE_TYPE::GET_SIGNAL)
+    {
+        return false;
+    }
+    if (nodeData.type == NODE_TYPE::POST_SIGNAL)
+    {
+        return false;
     }
 
     // new order
