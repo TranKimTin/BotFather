@@ -15,7 +15,7 @@ static ThreadPool tasks(thread::hardware_concurrency() * 2 + 1);
 extern thread_local VectorDoublePool vectorDoublePool;
 extern thread_local SparseTablePool sparseTablePool;
 
-void Worker::init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, ExchangeInfo exchangeInfo, double fundingRate, const SocketData *socketData)
+void Worker::init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, ExchangeInfo exchangeInfo, double fundingRate, SocketData *socketData)
 {
     VectorDoublePool::getInstance().releaseLock(this->open);
     VectorDoublePool::getInstance().releaseLock(this->high);
@@ -37,6 +37,12 @@ void Worker::init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, st
     this->exchangeInfo = exchangeInfo;
     this->fundingRate = fundingRate;
     this->socketData = socketData;
+
+    this->bots.clear();
+    for (const auto &bot : *botList)
+    {
+        this->bots[hashString(bot->botName)] = bot;
+    }
 
     for (auto &pair : cachedIndicator)
     {
@@ -441,6 +447,12 @@ bool Worker::adjustParam(NodeData &node)
 
 bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
 {
+    if (onlyCheckSignal && postedSignal)
+    {
+        // break early if only checking signal and already posted
+        return false;
+    }
+
     if (nodeData.type == NODE_TYPE::START)
         return true;
 
@@ -476,6 +488,22 @@ bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
             return false;
         }
     }
+
+    if (nodeData.type == NODE_TYPE::GET_SIGNAL)
+    {
+        return getSignal(nodeData.botName, nodeData.symbol, nodeData.timeframe);
+    }
+    if (nodeData.type == NODE_TYPE::POST_SIGNAL)
+    {
+        postedSignal = true;
+        return true;
+    }
+
+    if (onlyCheckSignal)
+    {
+        return true;
+    }
+
     if (nodeData.type == NODE_TYPE::TELEGRAM)
     {
         string content = calculateSub(nodeData.value);
@@ -508,15 +536,6 @@ bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
             Telegram::getInstance().sendMessage(mess, id);
         }
         return true;
-    }
-
-    if (nodeData.type == NODE_TYPE::GET_SIGNAL)
-    {
-        return false;
-    }
-    if (nodeData.type == NODE_TYPE::POST_SIGNAL)
-    {
-        return false;
     }
 
     // new order
@@ -650,4 +669,59 @@ bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
     }
 
     return false;
+}
+
+bool Worker::getSignal(const string &botName, const string &symbol, const string &timeframe)
+{
+    shared_ptr<Bot> bot = bots[hashString(botName)];
+    if (!bot)
+    {
+        return false;
+    }
+
+    RateData rateData = socketData->getData(symbol, timeframe);
+    const int length = rateData.startTime.size();
+
+    if (length < 20)
+    {
+        return false;
+    }
+
+    vector<double> open = VectorDoublePool::getInstance().acquireLock();
+    vector<double> high = VectorDoublePool::getInstance().acquireLock();
+    vector<double> low = VectorDoublePool::getInstance().acquireLock();
+    vector<double> close = VectorDoublePool::getInstance().acquireLock();
+    vector<double> volume = VectorDoublePool::getInstance().acquireLock();
+    vector<long long> startTime = VectorLongLongPool::getInstance().acquireLock();
+
+    open.resize(length);
+    high.resize(length);
+    low.resize(length);
+    close.resize(length);
+    volume.resize(length);
+    startTime.resize(length);
+
+    for (int i = 0; i < length; i++)
+    {
+        open[i] = rateData.open[i];
+        high[i] = rateData.high[i];
+        low[i] = rateData.low[i];
+        close[i] = rateData.close[i];
+        volume[i] = rateData.volume[i];
+        startTime[i] = rateData.startTime[i];
+    }
+
+    Worker worker;
+    worker.init(botList, broker, symbol, timeframe, move(open), move(high), move(low), move(close), move(volume), move(startTime), exchangeInfo, fundingRate, socketData);
+    return worker.isPostedSignal(bot);
+    return true;
+}
+
+bool Worker::isPostedSignal(shared_ptr<Bot> bot)
+{
+    onlyCheckSignal = true;
+    postedSignal = false;
+    visited.clear();
+    dfs_handleLogic(bot->route, bot);
+    return postedSignal;
 }

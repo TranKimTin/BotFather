@@ -15,17 +15,22 @@ private:
     vector<double> volume;
     vector<long long> startTime;
     shared_ptr<vector<shared_ptr<Bot>>> botList;
+    boost::unordered_flat_map<long long, shared_ptr<Bot>> bots;
     boost::unordered_flat_set<long long> visited;
     boost::unordered_flat_map<long long, any> cachedExpr;
     ExchangeInfo exchangeInfo;
     double fundingRate;
     boost::unordered_flat_map<long long, vector<double>> cachedIndicator;
     boost::unordered_flat_map<long long, unique_ptr<SparseTable>> cachedMinMax;
-    const SocketData* socketData;
+    SocketData* socketData;
+    bool postedSignal;
+    bool onlyCheckSignal;
 
     string calculateSub(string &expr);
     any calculate(string &expr);
     bool adjustParam(NodeData &data);
+
+    bool getSignal(const string& botName, const string& symbol, const string& timeframe);
 
 public:
     Worker()
@@ -34,10 +39,13 @@ public:
         cachedExpr.max_load_factor(0.5);
         cachedIndicator.max_load_factor(0.5);
         cachedMinMax.max_load_factor(0.5);
+        bots.max_load_factor(0.5);
         socketData = nullptr;
+        onlyCheckSignal = false;
     };
-    void init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, ExchangeInfo exchangeInfo, double fundingRate, const SocketData* socketData);
+    void init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, ExchangeInfo exchangeInfo, double fundingRate, SocketData* socketData);
     void run();
     void dfs_handleLogic(Route &route, const shared_ptr<Bot> &bot);
     bool handleLogic(NodeData &node, const shared_ptr<Bot> &bot);
+    bool isPostedSignal(shared_ptr<Bot> bot);
 };

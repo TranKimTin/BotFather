@@ -141,6 +141,9 @@ struct NodeData
     string sl;
     string volume;
     string expiredTime;
+    string botName;
+    string symbol;
+    string timeframe;
 };
 
 struct Route
