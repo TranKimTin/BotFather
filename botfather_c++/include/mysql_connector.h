@@ -18,7 +18,7 @@ public:
     std::shared_ptr<sql::Connection> acquireConnection();
     void releaseConnection(std::shared_ptr<sql::Connection> conn);
 
-    unique_ptr<sql::ResultSet> executeQuery(const string &query, const vector<any> &params);
+    vector<map<string, any>> executeQuery(const string &query, const vector<any> &params);
     int executeUpdate(const string &query, const vector<any> &params);
     void bindParams(sql::PreparedStatement *stmt, const vector<any> &params);
 

@@ -153,22 +153,22 @@ vector<shared_ptr<Bot>> getBotList(string botName, bool cachedTree)
         args.push_back(botName);
     }
 
-    auto res = db.executeQuery(mysql_query, args);
-    while (res->next())
+    vector<map<string, any>> res = db.executeQuery(mysql_query, args);
+    for (auto &row : res)
     {
         shared_ptr<Bot> bot = make_shared<Bot>();
         bot->symbolExist.max_load_factor(0.5);
 
-        bot->id = res->getInt("id");
-        bot->botName = res->getString("botName");
+        bot->id = any_cast<int>(row.at("id"));
+        bot->botName = any_cast<string>(row.at("botName"));
         // bot->treeData = res->getString("treeData");
-        bot->userID = res->getInt("userID");
-        bot->timeframes = convertJsonStringArrayToVector(res->getString("timeframes"));
-        bot->idTelegram = split(res->getString("idTelegram"), ',');
-        bot->apiKey = res->isNull("apiKey") ? "" : res->getString("apiKey");
-        bot->secretKey = res->isNull("secretKey") ? "" : res->getString("secretKey");
-        bot->iv = res->isNull("iv") ? "" : res->getString("iv");
-        bot->enableRealOrder = res->getInt("enableRealOrder") == 1 ? true : false;
+        bot->userID = any_cast<int>(row.at("userID"));
+        bot->timeframes = convertJsonStringArrayToVector(any_cast<string>(row.at("timeframes")));
+        bot->idTelegram = split(any_cast<string>(row.at("idTelegram")), ',');
+        bot->apiKey = any_cast<string>(row.at("apiKey"));
+        bot->secretKey = any_cast<string>(row.at("secretKey"));
+        bot->iv = any_cast<string>(row.at("iv"));
+        bot->enableRealOrder = any_cast<int>(row.at("enableRealOrder")) == 0 ? false : true;
 
         for (string &id : bot->idTelegram)
         {
@@ -177,7 +177,7 @@ vector<shared_ptr<Bot>> getBotList(string botName, bool cachedTree)
 
         bot->symbolList.clear();
         bot->symbolExist.clear();
-        vector<string> symbolList = convertJsonStringArrayToVector(res->getString("symbolList"));
+        vector<string> symbolList = convertJsonStringArrayToVector(any_cast<string>(row.at("symbolList")));
         for (const string &symbol : symbolList)
         {
             Symbol s;
@@ -191,7 +191,7 @@ vector<shared_ptr<Bot>> getBotList(string botName, bool cachedTree)
             bot->symbolExist.insert(hashString(symbol));
         }
 
-        string routeString = res->getString("route");
+        string routeString = any_cast<string>(row.at("route"));
         json j = json::parse(routeString);
         bot->route = getRoute(j, cachedTree);
 

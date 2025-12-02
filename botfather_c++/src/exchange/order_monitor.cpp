@@ -8,31 +8,26 @@ static void checkOrderStatus()
 {
     auto &db = MySQLConnector::getInstance();
     string query = "SELECT id, symbol, entryID, tpID, slID, apiKey, secretKey, iv, botID, side, volume, tp, sl FROM RealOrders";
-    auto res = db.executeQuery(query, {});
-    if (!res)
-    {
-        LOGE("Failed to fetch real orders from database");
-        return;
-    }
+    vector<map<string, any>> res = db.executeQuery(query, {});
 
     const int MAX_THREAD = 5;
     boost::asio::thread_pool pool(MAX_THREAD);
 
-    while (res->next())
+    for (auto &row : res)
     {
-        int id = res->getInt("id");
-        string entryID = res->getString("entryID");
-        string tpID = res->getString("tpID");
-        string slID = res->getString("slID");
-        string symbol = res->getString("symbol");
-        string apiKey = res->getString("apiKey");
-        string encryptedSecretKey = res->getString("secretKey");
-        string iv = res->getString("iv");
-        int botID = res->getInt("botID");
-        string side = res->getString("side");
-        string volume = res->getString("volume");
-        string tp = res->getString("tp");
-        string sl = res->getString("sl");
+        int id = any_cast<int>(row.at("id"));
+        string entryID = any_cast<string>(row.at("entryID"));
+        string tpID = any_cast<string>(row.at("tpID"));
+        string slID = any_cast<string>(row.at("slID"));
+        string symbol = any_cast<string>(row.at("symbol"));
+        string apiKey = any_cast<string>(row.at("apiKey"));
+        string encryptedSecretKey = any_cast<string>(row.at("secretKey"));
+        string iv = any_cast<string>(row.at("iv"));
+        int botID = any_cast<int>(row.at("botID"));
+        string side = any_cast<string>(row.at("side"));
+        string volume = any_cast<string>(row.at("volume"));
+        string tp = any_cast<string>(row.at("tp"));
+        string sl = any_cast<string>(row.at("sl"));
 
         shared_ptr<IExchange> exchange = make_shared<BinanceFuture>(apiKey, encryptedSecretKey, iv, botID);
 
@@ -141,17 +136,12 @@ static void checkPositionClosedByManual()
             ON r.apiKey = t.apiKey
         AND r.id = t.max_id;
         )";
-        auto res = db.executeQuery(query, {});
-        if (!res)
+        vector<map<string, any>> res = db.executeQuery(query, {});
+        for (auto &row : res)
         {
-            LOGE("Failed to fetch real orders from database");
-            return;
-        }
-        while (res->next())
-        {
-            string apiKey = res->getString("apiKey");
-            string encryptedSecretKey = res->getString("secretKey");
-            string iv = res->getString("iv");
+            string apiKey = any_cast<string>(row.at("apiKey"));
+            string encryptedSecretKey = any_cast<string>(row.at("secretKey"));
+            string iv = any_cast<string>(row.at("iv"));
 
             shared_ptr<IExchange> exchange = make_shared<BinanceFuture>(apiKey, encryptedSecretKey, iv, 0);
             string s = exchange->getPositionRisk();
@@ -173,19 +163,14 @@ static void checkPositionClosedByManual()
                 }
             }
             string query = "SELECT id, symbol, entryID, tpID, slID FROM RealOrders WHERE apiKey = ? AND tpID <> '' AND slID <> ''";
-            auto res2 = db.executeQuery(query, {apiKey});
-            if (!res2)
+            vector<map<string, any>> res2 = db.executeQuery(query, {apiKey});
+            for (auto &row2 : res2)
             {
-                LOGE("Failed to fetch real orders from database");
-                continue;
-            }
-            while (res2->next())
-            {
-                int id = res2->getInt("id");
-                string entryID = res2->getString("entryID");
-                string tpID = res2->getString("tpID");
-                string slID = res2->getString("slID");
-                string symbol = res2->getString("symbol");
+                int id = any_cast<int>(row2.at("id"));
+                string entryID = any_cast<string>(row2.at("entryID"));
+                string tpID = any_cast<string>(row2.at("tpID"));
+                string slID = any_cast<string>(row2.at("slID"));
+                string symbol = any_cast<string>(row2.at("symbol"));
 
                 if (find(symbols.begin(), symbols.end(), symbol) == symbols.end())
                 {
