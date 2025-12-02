@@ -78,6 +78,10 @@ static httplib::SSLClient *getClient(const string &host)
         cli = make_unique<httplib::SSLClient>(host, 443);
         cli->set_follow_location(true);
         cli->set_keep_alive(true);
+
+        cli->set_connection_timeout(10, 0); // 10 giây
+        cli->set_read_timeout(30, 0);       // 30 giây
+        cli->set_write_timeout(30, 0);      // 30 giây
     }
     return cli.get();
 }
