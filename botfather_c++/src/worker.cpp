@@ -538,6 +538,15 @@ bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
         return true;
     }
 
+    if (nodeData.type == NODE_TYPE::GET_SIGNAL)
+    {
+        return false;
+    }
+    if (nodeData.type == NODE_TYPE::POST_SIGNAL)
+    {
+        return false;
+    }
+
     // new order
     NodeData node = nodeData;
     if (!adjustParam(node))
