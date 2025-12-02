@@ -1,5 +1,6 @@
 #pragma one
 #include "common_type.h"
+#include "socket_data.h"
 
 class Worker
 {
@@ -20,6 +21,7 @@ private:
     double fundingRate;
     boost::unordered_flat_map<long long, vector<double>> cachedIndicator;
     boost::unordered_flat_map<long long, unique_ptr<SparseTable>> cachedMinMax;
+    const SocketData* socketData;
 
     string calculateSub(string &expr);
     any calculate(string &expr);
@@ -32,8 +34,9 @@ public:
         cachedExpr.max_load_factor(0.5);
         cachedIndicator.max_load_factor(0.5);
         cachedMinMax.max_load_factor(0.5);
+        socketData = nullptr;
     };
-    void init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, ExchangeInfo exchangeInfo, double fundingRate);
+    void init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, ExchangeInfo exchangeInfo, double fundingRate, const SocketData* socketData);
     void run();
     void dfs_handleLogic(Route &route, const shared_ptr<Bot> &bot);
     bool handleLogic(NodeData &node, const shared_ptr<Bot> &bot);

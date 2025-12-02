@@ -38,6 +38,8 @@ public:
     SocketData(const int _BATCH_SIZE);
     void setBotList(shared_ptr<vector<shared_ptr<Bot>>> botList);
     void init();
+    
+    RateData getData(const string &symbol, const string &timeframe);
 
     virtual void connectSocket() = 0;
 };

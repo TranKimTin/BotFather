@@ -15,7 +15,7 @@ static ThreadPool tasks(thread::hardware_concurrency() * 2 + 1);
 extern thread_local VectorDoublePool vectorDoublePool;
 extern thread_local SparseTablePool sparseTablePool;
 
-void Worker::init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, ExchangeInfo exchangeInfo, double fundingRate)
+void Worker::init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, ExchangeInfo exchangeInfo, double fundingRate, const SocketData* socketData)
 {
     VectorDoublePool::getInstance().releaseLock(this->open);
     VectorDoublePool::getInstance().releaseLock(this->high);
@@ -36,6 +36,7 @@ void Worker::init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, st
     this->startTime = move(startTime);
     this->exchangeInfo = exchangeInfo;
     this->fundingRate = fundingRate;
+    this->socketData = socketData;
 
     for (auto &pair : cachedIndicator)
     {
