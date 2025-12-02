@@ -103,6 +103,24 @@
                         v-model="r_currentNode.unitExpiredTime" :options="unitExpiredTime" optionLabel="name"
                         optionValue="value" placeholder="Đơn vị" class="flex-auto" />
                 </div>
+
+                <!-- BotName -->
+                <label v-if="r_currentNode.type == 'getSignal'" class="font-semibold" for="expiredTime">Tên bot:</label>
+                <Select v-if="r_currentNode.type == 'getSignal'" v-model="r_currentNode.botName" :options="r_allBotList"
+                    filter placeholder="Nhập tên bot" class="flex-auto" :virtualScrollerOptions="{ itemSize: 50 }" />
+
+                <!-- symbol -->
+                <label v-if="r_currentNode.type == 'getSignal'" class="font-semibold" for="expiredTime">Symbol:</label>
+                <Select v-if="r_currentNode.type == 'getSignal'" v-model="r_currentNode.symbol"
+                    :options="r_symbolList.filter(item => item.includes('binance_future')).map(item => item.split(':')[1])"
+                    filter placeholder="Symbol" class="flex-auto" :virtualScrollerOptions="{ itemSize: 50 }" />
+
+                <!-- timeframe -->
+                <label v-if="r_currentNode.type == 'getSignal'" class="font-semibold"
+                    for="expiredTime">Timeframe:</label>
+                <Select v-if="r_currentNode.type == 'getSignal'" v-model="r_currentNode.timeframe" :options="timeframes"
+                    placeholder="Khung thời gian" class="flex-auto" />
+
             </div>
             <div class="flex p-3"></div>
             <div class="flex justify-end gap-2 p-2">
@@ -117,7 +135,7 @@
                 <InputText v-model="r_apiKey" placeholder="Nhập API Key" autocomplete="off" />
 
                 <label class="font-semibold">Secret Key:</label>
-                <InputText v-model="r_secretKey" placeholder="Nhập Secret Key" autocomplete="off" type="password"/>
+                <InputText v-model="r_secretKey" placeholder="Nhập Secret Key" autocomplete="off" type="password" />
 
                 <div class="flex items-center gap-2 mt-2">
                     <Checkbox v-model="r_enableRealOrder" :binary="true" inputId="realOrder" />
@@ -137,10 +155,10 @@
             <div class="col-6">
                 <button v-for="broker in brokerList" @click="toogleAllSymbol(broker)" class="btn btn-outline-primary"
                     :title="r_symbolListSelected.filter((item: string) => item.startsWith(`${broker}:`)).length + ' / ' + r_symbolList.filter((item: string) => item.startsWith(`${broker}:`)).length">
-                    <b>{{ r_symbolList.filter((item: string) =>
+                    <b>{{r_symbolList.filter((item: string) =>
                         item.startsWith(`${broker}:`)).length
                         !== r_symbolListSelected.filter((item: string) => item.startsWith(`${broker}:`)).length ? '+' :
-                        '-' }}</b>
+                        '-'}}</b>
                     {{ broker }}</button>
                 <button @click="filterDuplicate()" class="btn btn-outline-primary">Lọc trùng</button>
                 <b> ({{ r_symbolListSelected.length }}/{{ r_symbolList.length }})</b>
@@ -150,7 +168,7 @@
         <div class="row">
             <div class="col-2">
                 <AutoComplete v-model="r_botName" :suggestions="r_botNameList" @complete="searchBot" dropdown
-                    @keydown="getBotInfo" @change="getBotInfo" placeholder="Nhập tên..." />
+                    @keydown="getBotInfo" @change="getBotInfo" placeholder="Nhập tên bot" />
             </div>
             <div class="col-2">
                 <input v-model="r_idTelegram" class="form-control" type="text" placeholder="Nhập id telegram" />
@@ -179,7 +197,7 @@
                 </a>
             </router-link>
             <a v-else v-ripple class="flex items-center" v-bind="props.action">
-                <span :class="item.icon" /> 
+                <span :class="item.icon" />
                 <span class="ml-2">{{ item.label }}</span>
                 <span v-if="item.shortcut"
                     class="ml-auto border border-surface rounded bg-emphasis text-muted-color text-xs p-1">{{
