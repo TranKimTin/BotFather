@@ -1096,9 +1096,17 @@ export function isValidCondition(data: NodeData) {
     if ([NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT, NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT, NODE_TYPE.CLOSE_ALL_ORDER, NODE_TYPE.CLOSE_ALL_POSITION].includes(data.type)) {
         return true;
     }
-    else {
-        return false;
+
+    if (data.type === NODE_TYPE.GET_SIGNAL) {
+        return (data.botName && data.symbol && data.timeframe) ? true : false;
     }
+
+    if (data.type === NODE_TYPE.POST_SIGNAL) {
+        return true;
+    }
+
+    return false;
+
 }
 
 export function calculateSubExpr(expr: string, args: ExprArgs) {

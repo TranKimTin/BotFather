@@ -19,7 +19,10 @@ export interface NodeData {
     unitEntry?: string,
     unitTP?: string,
     unitSL?: string,
-    unitExpiredTime?: string
+    unitExpiredTime?: string,
+    botName?: string,
+    symbol?: string,
+    timeframe?: string
 }
 
 export interface Elements {
@@ -161,7 +164,9 @@ export enum NODE_TYPE {
     SELL_STOP_MARKET = 'openSellStopMarket',
     SELL_STOP_LIMIT = 'openSellStopLimit',
     CLOSE_ALL_ORDER = 'closeAllOrder',
-    CLOSE_ALL_POSITION = 'closeAllPosition'
+    CLOSE_ALL_POSITION = 'closeAllPosition',
+    GET_SIGNAL = 'getSignal',
+    POST_SIGNAL = 'postSignal'
 }
 
 export interface FundingRate {
