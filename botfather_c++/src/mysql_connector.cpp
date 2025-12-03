@@ -103,9 +103,9 @@ void MySQLConnector::bindParams(sql::PreparedStatement *stmt, const vector<any> 
 
 vector<map<string, any>> MySQLConnector::executeQuery(const string &query, const vector<any> &params)
 {
+    auto conn = acquireConnection();
     try
     {
-        auto conn = acquireConnection();
         if (!conn->isValid())
         {
             conn.reset(driver->connect(host, username, password));
@@ -168,15 +168,16 @@ vector<map<string, any>> MySQLConnector::executeQuery(const string &query, const
     {
         LOGE("MySQL error: {} (SQLState: {}, ErrorCode: {})",
              e.what(), e.getSQLStateCStr(), e.getErrorCode());
+        releaseConnection(conn);
         return {};
     }
 }
 
 int MySQLConnector::executeUpdate(const string &query, const vector<any> &params)
 {
+    auto conn = acquireConnection();
     try
     {
-        auto conn = acquireConnection();
         if (!conn->isValid())
         {
             conn.reset(driver->connect(host, username, password));
@@ -205,6 +206,7 @@ int MySQLConnector::executeUpdate(const string &query, const vector<any> &params
     {
         LOGE("MySQL error: {} (SQLState: {}, ErrorCode: {})",
              e.what(), e.getSQLStateCStr(), e.getErrorCode());
+        releaseConnection(conn);
         return -1;
     }
 }
