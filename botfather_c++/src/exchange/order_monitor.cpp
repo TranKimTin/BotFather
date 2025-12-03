@@ -137,6 +137,17 @@ static void checkPositionClosedByManual()
         AND r.id = t.max_id;
         )";
         vector<map<string, any>> res = db.executeQuery(query, {});
+
+        string query2 = "SELECT id, symbol, entryID, tpID, slID, apiKey FROM RealOrders WHERE tpID <> '' AND slID <> ''";
+        vector<map<string, any>> res2 = db.executeQuery(query2, {});
+
+        LOGI("res size: {}, res2 size: {}", res.size(), res2.size());
+
+        if (res.empty() || res2.empty())
+        {
+            return;
+        }
+
         for (auto &row : res)
         {
             string apiKey = any_cast<string>(row.at("apiKey"));
@@ -144,13 +155,16 @@ static void checkPositionClosedByManual()
             string iv = any_cast<string>(row.at("iv"));
 
             shared_ptr<IExchange> exchange = make_shared<BinanceFuture>(apiKey, encryptedSecretKey, iv, 0);
+            LOGI("getPositionRisk for apiKey: {}", apiKey);
             string s = exchange->getPositionRisk();
             if (s.empty())
             {
                 LOGE("Failed to get position risk");
                 continue;
             }
+            LOGI("parse getPositionRisk");
             json positionRisk = json::parse(s);
+            LOGI("positionRisk size: {}", positionRisk.size());
 
             vector<string> symbols;
             for (const auto &item : positionRisk)
@@ -162,10 +176,15 @@ static void checkPositionClosedByManual()
                     symbols.push_back(symbol);
                 }
             }
-            string query = "SELECT id, symbol, entryID, tpID, slID FROM RealOrders WHERE apiKey = ? AND tpID <> '' AND slID <> ''";
-            vector<map<string, any>> res2 = db.executeQuery(query, {apiKey});
+
             for (auto &row2 : res2)
             {
+                string apiKey2 = any_cast<string>(row2.at("apiKey"));
+                if (apiKey2 != apiKey)
+                {
+                    continue;
+                }
+
                 int id = any_cast<int>(row2.at("id"));
                 string entryID = any_cast<string>(row2.at("entryID"));
                 string tpID = any_cast<string>(row2.at("tpID"));
@@ -206,6 +225,7 @@ static void checkPositionClosedByManual()
                     }
                 }
             }
+            LOGI("Finished checking positions for apiKey: {}", apiKey);
         }
     }
     catch (const exception &err)
@@ -236,7 +256,7 @@ static void run()
         try
         {
             SLEEP_FOR(1000);
-            writeLog("Start checking orders");
+            writeLog("Start checkPositionClosedByManual");
             checkPositionClosedByManual();
 
             writeLog("Checking order status");
