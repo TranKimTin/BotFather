@@ -680,11 +680,23 @@ bool Worker::getSignal(const string &botName, const string &symbol, const string
     }
 
     RateData rateData = socketData->getData(symbol, timeframe);
-    const int length = rateData.startTime.size();
+    int length = rateData.startTime.size();
 
     if (length < 20)
     {
         return false;
+    }
+
+    long long now = getCurrentTime();
+    if (now - rateData.startTime[0] < 30000)
+    {
+        rateData.startTime.pop_front();
+        rateData.open.pop_front();
+        rateData.high.pop_front();
+        rateData.low.pop_front();
+        rateData.close.pop_front();
+        rateData.volume.pop_front();
+        length--;
     }
 
     vector<double> open = VectorDoublePool::getInstance().acquireLock();

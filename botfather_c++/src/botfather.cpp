@@ -107,6 +107,12 @@ static Route getRoute(const json &j, bool cachedTree)
             route.data.sl = jData["sl"].get<string>();
         if (jData.contains("volume"))
             route.data.volume = jData["volume"].get<string>();
+        if (jData.contains("botName"))
+            route.data.botName = jData["botName"].get<string>();
+        if (jData.contains("symbol"))
+            route.data.symbol = jData["symbol"].get<string>();
+        if (jData.contains("timeframe"))
+            route.data.timeframe = jData["timeframe"].get<string>();
     }
 
     if (route.data.type != NODE_TYPE::TELEGRAM)
