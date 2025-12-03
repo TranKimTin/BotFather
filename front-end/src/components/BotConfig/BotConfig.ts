@@ -360,7 +360,7 @@ export default defineComponent({
                 node.data('display', label);
             }
             else if (type === 'postSignal') {
-                let label = `Bắn tín hiệu ra Bot cho bot khác`;
+                let label = `Bắn tín hiệu ra cho bot khác`;
                 node.data('display', label);
             }
         }
