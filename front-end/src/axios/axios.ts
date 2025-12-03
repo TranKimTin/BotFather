@@ -12,7 +12,7 @@ interface Response {
     message: string
 }
 
-// const URL = 'https://botfather.tech/api';
+// const URL = 'http://mybotmaker.com/api';
 const URL = '/api';
 
 const headers = {

@@ -110,6 +110,8 @@ struct NODE_TYPE
     inline static const string SELL_STOP_LIMIT = "openSellStopLimit";
     inline static const string CLOSE_ALL_ORDER = "closeAllOrder";
     inline static const string CLOSE_ALL_POSITION = "closeAllPosition";
+    inline static const string GET_SIGNAL = "getSignal";
+    inline static const string POST_SIGNAL = "postSignal";
 };
 
 struct ORDER_STATUS
@@ -139,6 +141,9 @@ struct NodeData
     string sl;
     string volume;
     string expiredTime;
+    string botName;
+    string symbol;
+    string timeframe;
 };
 
 struct Route

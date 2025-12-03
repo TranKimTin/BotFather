@@ -34,6 +34,9 @@ interface NodeData {
     unitTP?: string,
     unitSL?: string,
     unitExpiredTime?: string
+    botName?: string,
+    symbol?: string,
+    timeframe?: string
 }
 
 interface NodeCopy {
@@ -59,6 +62,7 @@ export default defineComponent({
         const r_apiKey = ref<string>("");
         const r_secretKey = ref<string>("");
         const r_enableRealOrder = ref<boolean>(false);
+        const r_allBotList = ref<Array<string>>([]);
 
         const menu = ref();
         const items = ref([
@@ -137,21 +141,22 @@ export default defineComponent({
             { name: 'Báo tín hiệu telegram', value: 'telegram' },
             { name: 'Mở lệnh BUY Market', value: 'openBuyMarket' },
             { name: 'Mở lệnh BUY Limit', value: 'openBuyLimit' },
-            { name: 'Mở lệnh BUY Stop Market', value: 'openBuyStopMarket' },
-            { name: 'Mở lệnh BUY Stop Limit', value: 'openBuyStopLimit' },
+            // { name: 'Mở lệnh BUY Stop Market', value: 'openBuyStopMarket' },
+            // { name: 'Mở lệnh BUY Stop Limit', value: 'openBuyStopLimit' },
             { name: 'Mở lệnh SELL Market', value: 'openSellMarket' },
             { name: 'Mở lệnh SELL Limit', value: 'openSellLimit' },
-            { name: 'Mở lệnh SELL Stop Market', value: 'openSellStopMarket' },
-            { name: 'Mở lệnh SELL Stop Limit', value: 'openSellStopLimit' },
-            { name: 'Đóng toàn bộ lệnh chưa khớp entry', value: 'closeAllOrder' },
-            { name: 'Đóng toàn bộ vị thế', value: 'closeAllPosition' }
+            // { name: 'Mở lệnh SELL Stop Market', value: 'openSellStopMarket' },
+            // { name: 'Mở lệnh SELL Stop Limit', value: 'openSellStopLimit' },
+            // { name: 'Đóng toàn bộ lệnh chưa khớp entry', value: 'closeAllOrder' },
+            // { name: 'Đóng toàn bộ vị thế', value: 'closeAllPosition' },
+            { name: 'Nhận tín hiệu từ bot khác', value: 'getSignal' },
+            { name: 'Bắn tín hiệu ra cho bot khác', value: 'postSignal' }
         ];
         const unitsEntry = [{ name: 'Theo giá', value: 'price' }, { name: '%', value: 'percent' }];
         const unitTP = [...unitsEntry, { name: 'Risk-Reward', value: 'rr' }];
         const unitsVulume = [{ name: 'USD', value: 'usd' }, { name: 'token', value: 'token' }];
         const unitExpiredTime = [{ name: 'Nến', value: 'candle' }, { name: 'Phút', value: 'minute' }];
 
-        let allBotList: Array<string> = [];
         let cy: Core;
         let eh: edgehandles.EdgeHandlesInstance;
 
@@ -189,6 +194,20 @@ export default defineComponent({
                     selector: 'node[type="openSellMarket"], node[type="openSellLimit"], node[type="openSellStopMarket"], node[type="openSellStopLimit"]',
                     style: {
                         'background-color': '#ff0000',
+                        'label': 'data(display)',
+                    },
+                },
+                {
+                    selector: 'node[type="getSignal"]',
+                    style: {
+                        'background-color': '#80ff00',
+                        'label': 'data(display)',
+                    },
+                },
+                {
+                    selector: 'node[type="postSignal"]',
+                    style: {
+                        'background-color': '#00ffbf',
                         'label': 'data(display)',
                     },
                 },
@@ -336,6 +355,14 @@ export default defineComponent({
                 label += `SL=${sl} (${getUnit(unitSL)})`;
                 node.data('display', label);
             }
+            else if (type === 'getSignal') {
+                let label = `Nhận tín hiệu từ Bot ${data.botName} - ${data.symbol} - ${data.timeframe}`;
+                node.data('display', label);
+            }
+            else if (type === 'postSignal') {
+                let label = `Bắn tín hiệu ra Bot cho bot khác`;
+                node.data('display', label);
+            }
         }
 
         async function loadData() {
@@ -425,7 +452,7 @@ export default defineComponent({
 
         function searchBot(event: any) {
             const inputValue = event.query;
-            r_botNameList.value = allBotList.filter(suggestion =>
+            r_botNameList.value = r_allBotList.value.filter(suggestion =>
                 removeVietnameseTones(suggestion).includes(removeVietnameseTones(inputValue))
             );
         }
@@ -795,7 +822,7 @@ export default defineComponent({
             });
 
             axios.get('/getBotList').then(result => {
-                allBotList = result;
+                r_allBotList.value = result;
             });
 
             loadData();
@@ -848,6 +875,7 @@ export default defineComponent({
             r_apiKey,
             r_secretKey,
             r_enableRealOrder,
+            r_allBotList,
             brokerList,
             nodeTypes,
             unitsEntry,

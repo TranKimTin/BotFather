@@ -51,6 +51,13 @@ void SocketData::init()
     connectSocket();
 }
 
+RateData SocketData::getData(const string &symbol, const string &timeframe)
+{
+    long long key = hashString(symbol + "_" + timeframe);
+    lock_guard<mutex> lock(mMutex);
+    return data[key];
+}
+
 void SocketData::onCloseCandle(const string &symbol, string &timeframe, RateData &rateData)
 {
     const int length = rateData.startTime.size();
@@ -101,9 +108,10 @@ void SocketData::onCloseCandle(const string &symbol, string &timeframe, RateData
               volume = move(volume),
               startTime = move(startTime),
               exchangeInfo = exchangeInfo[hashString(symbol)],
-              funding = fundingRates[hashString(symbol)]]()
+              funding = fundingRates[hashString(symbol)],
+              socketData = this]()
              { 
-                worker.init(botList, broker, symbol, timeframe, move(open), move(high), move(low), move(close), move(volume), move(startTime), exchangeInfo, funding);
+                worker.init(botList, broker, symbol, timeframe, move(open), move(high), move(low), move(close), move(volume), move(startTime), exchangeInfo, funding, socketData);
                 worker.run(); });
 
     if (timeframe == "1m")
