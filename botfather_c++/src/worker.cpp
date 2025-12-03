@@ -688,8 +688,9 @@ bool Worker::getSignal(const string &botName, const string &symbol, const string
     }
 
     long long now = getCurrentTime();
-    if (now - rateData.startTime[0] < 30000)
+    if (rateData.startTime[0] + timeframeToNumberMiliseconds(timeframe) > now + 10000)
     {
+        // remove the last candle if not closed yet
         rateData.startTime.pop_front();
         rateData.open.pop_front();
         rateData.high.pop_front();
