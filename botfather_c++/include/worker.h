@@ -22,6 +22,7 @@ private:
     double fundingRate;
     boost::unordered_flat_map<long long, vector<double>> cachedIndicator;
     boost::unordered_flat_map<long long, unique_ptr<SparseTable>> cachedMinMax;
+    boost::unordered_flat_map<long long, bool> cachedSignal;
     SocketData* socketData;
     bool postedSignal;
     bool onlyCheckSignal;

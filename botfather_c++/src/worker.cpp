@@ -58,6 +58,7 @@ void Worker::init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, st
     this->cachedExpr.clear();
     this->cachedIndicator.clear();
     this->cachedMinMax.clear();
+    this->cachedSignal.clear();
 }
 void Worker::run()
 {
@@ -680,12 +681,22 @@ bool Worker::getSignal(const string &botName, const string &symbol, const string
         return false;
     }
 
+    long long key = hashString(StringFormat("{}_{}_{}", botName, symbol, timeframe));
+
+    if (cachedSignal.count(key) > 0)
+    {
+        return cachedSignal[key];
+    }
+
+    bool &res = cachedSignal[key];
+
     RateData rateData = socketData->getData(symbol, timeframe);
     int length = rateData.startTime.size();
 
     if (length < 20)
     {
-        return false;
+        res = false;
+        return res;
     }
 
     long long now = getCurrentTime();
@@ -727,8 +738,8 @@ bool Worker::getSignal(const string &botName, const string &symbol, const string
 
     Worker worker;
     worker.init(botList, broker, symbol, timeframe, move(open), move(high), move(low), move(close), move(volume), move(startTime), exchangeInfo, fundingRate, socketData);
-    return worker.isPostedSignal(bot);
-    return true;
+    res = worker.isPostedSignal(bot);
+    return res;
 }
 
 bool Worker::isPostedSignal(shared_ptr<Bot> bot)
