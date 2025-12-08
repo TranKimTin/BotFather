@@ -491,7 +491,7 @@ bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
 
     if (nodeData.type == NODE_TYPE::GET_SIGNAL)
     {
-        string s = noteData.symbol == "Symbol hiện tại" ? symbol : nodeData.symbol;
+        string s = nodeData.symbol == "Symbol hiện tại" ? symbol : nodeData.symbol;
         return getSignal(nodeData.botName, s, nodeData.timeframe);
     }
     if (nodeData.type == NODE_TYPE::POST_SIGNAL)
