@@ -10,6 +10,8 @@ static void checkOrderStatus()
     string query = "SELECT id, symbol, entryID, tpID, slID, apiKey, secretKey, iv, botID, side, volume, tp, sl FROM RealOrders";
     vector<map<string, any>> res = db.executeQuery(query, {});
 
+    LOGI("checkOrderStatus res size: {}", res.size());
+
     const int MAX_THREAD = 5;
     boost::asio::thread_pool pool(MAX_THREAD);
 
