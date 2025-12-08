@@ -112,7 +112,7 @@
                 <!-- symbol -->
                 <label v-if="r_currentNode.type == 'getSignal'" class="font-semibold" for="expiredTime">Symbol:</label>
                 <Select v-if="r_currentNode.type == 'getSignal'" v-model="r_currentNode.symbol"
-                    :options="r_symbolList.filter(item => item.includes('binance_future')).map(item => item.split(':')[1])"
+                    :options="r_symbolSignalList"
                     filter placeholder="Symbol" class="flex-auto" :virtualScrollerOptions="{ itemSize: 50 }" />
 
                 <!-- timeframe -->

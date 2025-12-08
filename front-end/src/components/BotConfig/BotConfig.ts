@@ -54,6 +54,7 @@ export default defineComponent({
         const r_timeframesSelected = ref<Array<string>>([]);
         const r_symbolList = ref<Array<string>>([]);
         const r_symbolListSelected = ref<Array<string>>([]);
+        const r_symbolSignalList = ref<Array<string>>([]);
         const r_botNameList = ref<Array<string>>([]);
         const r_visible = ref<boolean>(false);
         const r_currentNode = ref<NodeData>({ id: '', type: '' });
@@ -819,6 +820,8 @@ export default defineComponent({
 
             axios.get('/getSymbolList').then(result => {
                 r_symbolList.value = result;
+                r_symbolSignalList.value = r_symbolList.value.filter(item => item.includes('binance_future')).map(item => item.split(':')[1]);
+                r_symbolSignalList.value.unshift('Symbol hiện tại');
             });
 
             axios.get('/getBotList').then(result => {
@@ -876,6 +879,7 @@ export default defineComponent({
             r_secretKey,
             r_enableRealOrder,
             r_allBotList,
+            r_symbolSignalList,
             brokerList,
             nodeTypes,
             unitsEntry,
