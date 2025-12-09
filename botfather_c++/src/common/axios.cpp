@@ -73,7 +73,7 @@ static httplib::Headers convertHeaders(const vector<string> &headerStrings)
 static httplib::SSLClient *getClient(const string &host)
 {
     auto &cli = clients[host];
-    if (!cli)
+    if (!cli || !cli->is_socket_open())
     {
         cli = make_unique<httplib::SSLClient>(host, 443);
         cli->set_follow_location(true);
