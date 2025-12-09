@@ -31,6 +31,7 @@ interface Order {
 };
 
 let validSymbols: { [key: string]: boolean } = {};
+let cachedOHLCV: { [key: string]: Array<RateData> };
 
 function isValidRates(rates: Array<RateData>): boolean {
     if (rates.length <= 1) return true;
@@ -45,6 +46,11 @@ function isValidRates(rates: Array<RateData>): boolean {
 }
 
 async function getOHLCV(broker: string, symbol: string, timeframe: string, limit: number, since?: number): Promise<Array<RateData>> {
+    const cacheKey = `${broker}_${symbol}_${timeframe}_${limit}_${since}`;
+    if (cachedOHLCV[cacheKey] && cachedOHLCV[cacheKey].length !== 0) {
+        return cachedOHLCV[cacheKey];
+    }
+
     const key = `${broker}_${symbol}_${timeframe}`;
     let data: Array<RateData> = (await redis.getArray(key)).map(item => {
         // item: startTime_open_high_low_close_volume
@@ -66,6 +72,7 @@ async function getOHLCV(broker: string, symbol: string, timeframe: string, limit
         data.pop();
     }
     if (isValidRates(data) && data.length > 0) {
+        cachedOHLCV[cacheKey] = data;
         return data;
     }
 
@@ -75,11 +82,13 @@ async function getOHLCV(broker: string, symbol: string, timeframe: string, limit
         data.pop();
     }
     if (isValidRates(data) && data.length > 0) {
+        cachedOHLCV[cacheKey] = data;
         return data;
     }
 
     console.log(`Data invalid: ${data.length}. Get OHLCV from util: ${broker} ${symbol} ${timeframe} ${limit} ${since} (since=${moment(since).format('YYYY-MM-DD HH:mm')})`);
-    return util.getOHLCV(broker, symbol, timeframe, limit, since)
+    cachedOHLCV[cacheKey] = await util.getOHLCV(broker, symbol, timeframe, limit, since);
+    return cachedOHLCV[cacheKey];
 }
 
 async function handleOrder(order: Order) {
@@ -230,6 +239,8 @@ async function main() {
         ]);
 
         validSymbols = {};
+        cachedOHLCV = {};
+
         for (const symbol of binanceSymbolList) {
             validSymbols[`binance_${symbol}`] = true;
         }
