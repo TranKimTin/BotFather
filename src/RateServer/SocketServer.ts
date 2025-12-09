@@ -14,27 +14,27 @@ const exchange: { [key: string]: SocketData } = {};
 (async () => {
     const binanceSymbolList = await util.getBinanceSymbolList();
     const binanceFutureSymbolList = await util.getBinanceFutureSymbolList();
-    const bybitSymbolList = await util.getBybitSymbolList();
-    const bybitFutureSymbolList = await util.getBybitFutureSymbolList();
-    const okxSymbolList = await util.getOkxSymbolList();
+    // const bybitSymbolList = await util.getBybitSymbolList();
+    // const bybitFutureSymbolList = await util.getBybitFutureSymbolList();
+    // const okxSymbolList = await util.getOkxSymbolList();
 
     console.log(`Binance symbols: ${binanceSymbolList.length}`);
     console.log(`Binance Future symbols: ${binanceFutureSymbolList.length}`);
-    console.log(`Bybit symbols: ${bybitSymbolList.length}`);
-    console.log(`Bybit Future symbols: ${bybitFutureSymbolList.length}`);
-    console.log(`Okx symbols: ${okxSymbolList.length}`);
+    // console.log(`Bybit symbols: ${bybitSymbolList.length}`);
+    // console.log(`Bybit Future symbols: ${bybitFutureSymbolList.length}`);
+    // console.log(`Okx symbols: ${okxSymbolList.length}`);
 
     exchange['binance'] = new BinanceSocket(() => { }, binanceSymbolList);
     exchange['binance_future'] = new BinanceFutureSocket(() => { }, binanceFutureSymbolList);
-    exchange['bybit'] = new BybitSocket(() => { }, bybitSymbolList);
-    exchange['bybit_future'] = new BybitFutureSocket(() => { }, bybitFutureSymbolList);
-    exchange['okx'] = new OkxSocket(() => { }, okxSymbolList);
+    // exchange['bybit'] = new BybitSocket(() => { }, bybitSymbolList);
+    // exchange['bybit_future'] = new BybitFutureSocket(() => { }, bybitFutureSymbolList);
+    // exchange['okx'] = new OkxSocket(() => { }, okxSymbolList);
 
     exchange['binance'].initData();
     exchange['binance_future'].initData();
-    exchange['bybit'].initData();
-    exchange['bybit_future'].initData();
-    exchange['okx'].initData();
+    // exchange['bybit'].initData();
+    // exchange['bybit_future'].initData();
+    // exchange['okx'].initData();
 
     const queue: {
         broker: string;
