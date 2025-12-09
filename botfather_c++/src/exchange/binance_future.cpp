@@ -86,7 +86,7 @@ string BinanceFuture::placeBuyTPSL(const string &symbol, string &quantity, strin
     else
     {
         json j = json::parse(resTP);
-        tpID = j["clientOrderId"].get<string>();
+        tpID = j["clientAlgoId"].get<string>();
         LOGI("TP order id: {}", tpID);
     }
 
@@ -108,7 +108,7 @@ string BinanceFuture::placeBuyTPSL(const string &symbol, string &quantity, strin
     else
     {
         json j = json::parse(resSL);
-        slID = j["clientOrderId"].get<string>();
+        slID = j["clientAlgoId"].get<string>();
         LOGI("SL order id: {}", slID);
     }
 
@@ -180,7 +180,7 @@ string BinanceFuture::placeSellTPSL(const string &symbol, string &quantity, stri
     else
     {
         json j = json::parse(resTP);
-        tpID = j["clientOrderId"].get<string>();
+        tpID = j["clientAlgoId"].get<string>();
         LOGI("TP order id: {}", tpID);
     }
 
@@ -202,7 +202,7 @@ string BinanceFuture::placeSellTPSL(const string &symbol, string &quantity, stri
     else
     {
         json j = json::parse(resSL);
-        slID = j["clientOrderId"].get<string>();
+        slID = j["clientAlgoId"].get<string>();
         LOGI("SL order id: {}", slID);
     }
 
@@ -327,31 +327,26 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
 
 string BinanceFuture::sendTPorSL(const string &symbol, const string &side, const string &type, string quantity, string stopPrice, string limitPrice)
 {
-    string clientOrderId = (type == TAKE_PROFIT_MARKET || type == STOP || type == LIMIT)
-                               ? StringFormat("BF_TP{}{}_{}", symbol, getCurrentTime(), botID)
-                               : StringFormat("BF_SL{}{}_{}", symbol, getCurrentTime(), botID);
-    adjustClientOrderId(clientOrderId);
+    string clientAlgoId = (type == TAKE_PROFIT_MARKET || type == STOP || type == LIMIT)
+                              ? StringFormat("BF_TP{}{}_{}", symbol, getCurrentTime(), botID)
+                              : StringFormat("BF_SL{}{}_{}", symbol, getCurrentTime(), botID);
+    adjustClientOrderId(clientAlgoId);
 
     map<string, string> params = {
         {"recvWindow", "30000"},
+        {"algoType", "CONDITIONAL"},
         {"symbol", symbol},
         {"side", side},
         {"type", type},
         {"closePosition", "false"},
         {"reduceOnly", "true"},
         {"quantity", quantity},
-        {"newClientOrderId", clientOrderId},
+        {"clientAlgoId", clientAlgoId},
         {"timestamp", to_string(getCurrentTime())}};
 
-    if (type == LIMIT)
-    {
-        params["timeInForce"] = "GTC";
-        params["price"] = limitPrice;
-        // params["selfTradePreventionMode"] = "NONE";
-    }
     if (type != LIMIT)
     {
-        params["stopPrice"] = stopPrice;
+        params["triggerPrice"] = stopPrice;
     }
     if (type == STOP || type == TAKE_PROFIT)
     {
@@ -366,7 +361,9 @@ string BinanceFuture::sendOrder(map<string, string> &params)
     string signature = sign(query);
     query += "&signature=" + signature;
 
-    string url = StringFormat("{}/fapi/v1/order?{}", BASE_URL, query);
+    bool isAlgo = params.find("algoType") != params.end();
+
+    string url = isAlgo ? StringFormat("{}/fapi/v1/algoOrder?{}", BASE_URL, query) : StringFormat("{}/fapi/v1/order?{}", BASE_URL, query);
 
     try
     {
@@ -389,14 +386,16 @@ string BinanceFuture::sendOrder(map<string, string> &params)
                 params["type"] = LIMIT;
                 params["timestamp"] = to_string(getCurrentTime());
                 params["timeInForce"] = "GTC";
-                params.erase("stopPrice");
+                params.erase("triggerPrice");
+                params.erase("algoType");
                 return sendOrder(params);
             }
             else if (type == STOP_MARKET || type == TAKE_PROFIT_MARKET)
             {
                 params["type"] = MARKET;
                 params["timestamp"] = to_string(getCurrentTime());
-                params.erase("stopPrice");
+                params.erase("triggerPrice");
+                params.erase("algoType");
                 return sendOrder(params);
             }
             else
@@ -489,16 +488,26 @@ string BinanceFuture::sign(const string &query)
 
 string BinanceFuture::cancelOrderByClientId(const string &symbol, const string &clientOrderId)
 {
+    bool isAlgo = isAlgoOrder(clientOrderId);
+
     map<string, string> params = {
         {"symbol", symbol},
-        {"origClientOrderId", clientOrderId},
         {"timestamp", to_string(getCurrentTime())}};
+
+    if (isAlgo)
+    {
+        params["clientalgoid"] = clientOrderId;
+    }
+    else
+    {
+        params["origClientOrderId"] = clientOrderId;
+    }
 
     string query = buildQuery(params);
     string signature = sign(query);
     query += "&signature=" + signature;
 
-    string url = StringFormat("{}/fapi/v1/order?{}", BASE_URL, query);
+    string url = isAlgo ? StringFormat("{}/fapi/v1/algoOrder?{}", BASE_URL, query) : StringFormat("{}/fapi/v1/order?{}", BASE_URL, query);
 
     try
     {
@@ -533,17 +542,27 @@ string BinanceFuture::cancelOrderByClientId(const string &symbol, const string &
 
 string BinanceFuture::getOrderStatus(const string &symbol, const string &orderId)
 {
+    bool isAlgo = isAlgoOrder(orderId);
+
     map<string, string> params = {
         {"recvWindow", "30000"},
         {"symbol", symbol},
-        {"origClientOrderId", orderId},
         {"timestamp", to_string(getCurrentTime())}};
+
+    if (isAlgo)
+    {
+        params["clientAlgoId"] = orderId;
+    }
+    else
+    {
+        params["origClientOrderId"] = orderId;
+    }
 
     string query = buildQuery(params);
     string signature = sign(query);
     query += "&signature=" + signature;
 
-    string url = StringFormat("{}/fapi/v1/order?{}", BASE_URL, query);
+    string url = isAlgo ? StringFormat("{}/fapi/v1/algoOrder?{}", BASE_URL, query) : StringFormat("{}/fapi/v1/order?{}", BASE_URL, query);
 
     try
     {
@@ -649,77 +668,28 @@ bool BinanceFuture::changeMarginType(const string &symbol, const string &marginT
 
 OrderCount BinanceFuture::getOpenAlgoOrdersCount(const string &symbol)
 {
-    map<string, string> params = {
-        {"symbol", symbol},
-        {"recvWindow", "30000"},
-        {"timestamp", to_string(getCurrentTime())}};
-
-    string query = buildQuery(params);
-    string signature = sign(query);
-    query += "&signature=" + signature;
-
-    string url = StringFormat("{}/fapi/v1/openOrders?{}", BASE_URL, query);
-
-    try
+    OrderCount result = {0, 0, 0};
+    string sql = "SELECT side FROM RealOrders WHERE broker = ? AND symbol = ? AND apiKey = ?";
+    auto &db = MySQLConnector::getInstance();
+    vector<any> params = {
+        "binance_future",
+        symbol,
+        apiKey};
+    auto res = db.executeQuery(sql, params);
+    for (auto &row : res)
     {
-        OrderCount result = {0, 0, 0};
-
-        LOGI("Fetching open orders from Binance Future: {}", url);
-        string res = Axios::get(url, {"X-MBX-APIKEY: " + apiKey});
-        LOGI("Response from Binance Future: {}", res);
-
-        auto json = nlohmann::json::parse(res);
-
-        for (const auto &order : json)
+        string side = any_cast<string>(row.at("side"));
+        if (side == BUY)
         {
-            string type = order["origType"].get<string>();
-            bool reduceOnly = order["reduceOnly"].get<bool>();
-            string side = order["side"].get<string>();
-            if (type == STOP ||
-                type == STOP_MARKET ||
-                type == TAKE_PROFIT ||
-                type == TAKE_PROFIT_MARKET ||
-                type == TRAILING_STOP_MARKET)
-            {
-                result.algo++;
-            }
-            else if (type == LIMIT && reduceOnly == false)
-            {
-                result.algo += 2;
-            }
-
-            if (side == BUY)
-            {
-                if (reduceOnly)
-                {
-                    result.sell++;
-                }
-                else
-                {
-                    result.buy++;
-                }
-            }
-            else if (side == SELL)
-            {
-                if (reduceOnly)
-                {
-                    result.buy++;
-                }
-                else
-                {
-                    result.sell++;
-                }
-            }
+            result.buy++;
         }
-
-        return result;
+        else if (side == SELL)
+        {
+            result.sell++;
+        }
+        result.algo += 2;
     }
-    catch (const exception &e)
-    {
-        LOGE("Error getting open algo orders: {}", e.what());
-        return {-1, -1, -1};
-    }
-    return {-1, -1, -1};
+    return result;
 }
 
 int BinanceFuture::updateOrderToDB(const string &clientOrderId, const string &tpID, const string &slID)
@@ -782,4 +752,9 @@ string BinanceFuture::getPositionRisk()
         return "";
     }
     return "";
+}
+
+bool BinanceFuture::isAlgoOrder(const string &clientOrderId)
+{
+    return clientOrderId[2] == '_'; // BF_TP or BF_SL
 }
