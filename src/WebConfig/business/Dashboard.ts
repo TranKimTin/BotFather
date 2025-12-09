@@ -1,7 +1,7 @@
 import { ORDER_STATUS, ROLE, UserTokenInfo } from '../../common/Interface';
 import * as mysql from '../lib/mysql';
 import * as util from '../../common/util';
-import Binance, { FuturesAccountInfoResult } from 'binance-api-node';
+import Binance from 'binance-api-node';
 import dotenv from 'dotenv';
 import * as redis from '../../common/redis';
 
@@ -31,7 +31,7 @@ export async function getBotInfo(userData: UserTokenInfo) {
     }
     const data: Array<any> = JSON.parse(cache);
 
-    const accountInfo: { [key: string]: FuturesAccountInfoResult } = {};
+    const accountInfo: { [key: string]: any } = {};
     const openOrders: { [key: string]: any[] } = {};
 
     for (const item of data) {
@@ -45,8 +45,8 @@ export async function getBotInfo(userData: UserTokenInfo) {
                 });
                 try {
                     accountInfo[apiKey] = await client.futuresAccountInfo();
-                    accountInfo[apiKey].positions = accountInfo[apiKey].positions.filter(item => item.initialMargin != '0');
-                    accountInfo[apiKey].positions.sort((a, b) => (+a.unrealizedProfit) - (+b.unrealizedProfit));
+                    accountInfo[apiKey].positions = accountInfo[apiKey].positions.filter((item: any) => item.initialMargin != '0');
+                    accountInfo[apiKey].positions.sort((a: any, b: any) => (+a.unrealizedProfit) - (+b.unrealizedProfit));
                     openOrders[apiKey] = await client.futuresOpenOrders({});
                     openOrders[apiKey].sort((a: any, b: any) => a.symbol.localeCompare(b.symbol));
                 }

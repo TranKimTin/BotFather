@@ -191,8 +191,7 @@ export async function getHistoryOrder(botName: string, filterBroker: Array<strin
                         limit: 1000,
                         // incomeType: 'REALIZED_PNL',
                         startTime: startTime,
-                        endTime: new Date().getTime(),
-                        recvWindow: 30000
+                        endTime: new Date().getTime()
                     });
 
                     if (history.length == 1000) {
@@ -211,8 +210,8 @@ export async function getHistoryOrder(botName: string, filterBroker: Array<strin
 
 
             accountInfo = await client.futuresAccountInfo();
-            accountInfo.positions = accountInfo.positions.filter(item => item.initialMargin != '0');
-            accountInfo.positions.sort((a, b) => (+a.unrealizedProfit) - (+b.unrealizedProfit));
+            accountInfo.positions = accountInfo.positions.filter((item: any) => item.initialMargin != '0');
+            accountInfo.positions.sort((a: any, b: any) => (+a.unrealizedProfit) - (+b.unrealizedProfit));
 
             openOrders = await client.futuresOpenOrders({});
             openOrders.sort((a, b) => a.symbol.localeCompare(b.symbol));
