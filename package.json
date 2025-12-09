@@ -48,7 +48,7 @@
     "@types/socket.io": "^3.0.2",
     "antlr4ng": "^3.0.5",
     "axios": "^1.7.7",
-    "binance-api-node": "^0.12.9",
+    "binance-api-node": "^0.13.5",
     "body-parser": "^1.20.2",
     "bootstrap": "^5.3.3",
     "bs58": "^6.0.0",

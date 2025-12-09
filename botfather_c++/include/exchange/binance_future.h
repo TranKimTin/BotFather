@@ -63,4 +63,5 @@ private:
     int updateOrderToDB(const string &clientOrderId, const string &tpID, const string &slID);
     int removeOrderToDB(const string &clientOrderId);
     OrderCount getOpenAlgoOrdersCount(const string &symbol);
+    bool isAlgoOrder(const string& clientOrderId);
 };

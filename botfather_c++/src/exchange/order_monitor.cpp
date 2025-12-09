@@ -89,10 +89,10 @@ static void checkOrderStatus()
                 json tpJson = json::parse(tpStatus);
                 json slJson = json::parse(slStatus);
 
-                tpStatus = tpJson["status"].get<string>();
-                slStatus = slJson["status"].get<string>();
+                tpStatus = tpJson["algoStatus"].get<string>();
+                slStatus = slJson["algoStatus"].get<string>();
 
-                if (tpStatus == "CANCELED" || slStatus == "CANCELED" ||  tpStatus == "FILLED" || slStatus == "FILLED")
+                if (tpStatus == "CANCELED" || slStatus == "CANCELED" ||  tpStatus == "FINISHED" || slStatus == "FINISHED" || tpStatus == "REJECTED" || slStatus == "REJECTED")
                 {
                     LOGI("Cancel order. entryID={}, tpID={}({}), slID={}({})", entryID, tpID, tpStatus, slID, slStatus);
                     if (tpStatus == "NEW")
@@ -209,8 +209,8 @@ static void checkPositionClosedByManual()
                     json tpJson = json::parse(tp);
                     json slJson = json::parse(sl);
 
-                    string tpStatus = tpJson["status"].get<string>();
-                    string slStatus = slJson["status"].get<string>();
+                    string tpStatus = tpJson["algoStatus"].get<string>();
+                    string slStatus = slJson["algoStatus"].get<string>();
 
                     if (entryJson["status"] == "FILLED" && (tpStatus == "NEW" || slStatus == "NEW"))
                     {
