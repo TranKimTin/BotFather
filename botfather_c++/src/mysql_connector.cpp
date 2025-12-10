@@ -174,22 +174,27 @@ vector<map<string, any>> MySQLConnector::executeQuery(
     }
     catch (sql::SQLException &e)
     {
-        LOGE("MySQL error: {} (SQLState: {}, ErrorCode: {})",
-             e.what(), e.getSQLStateCStr(), e.getErrorCode());
+        LOGE("MySQL error: {} (SQLState: {}, ErrorCode: {})", e.what(), e.getSQLStateCStr(), e.getErrorCode());
         releaseConnection(conn);
         return {};
     }
 }
 
-int MySQLConnector::executeUpdate(const string &query, const vector<any> &params)
+int MySQLConnector::executeUpdate(
+    const string &query,
+    const vector<any> &params)
 {
     auto conn = acquireConnection();
     try
     {
-        sql::PreparedStatement *pstmt = conn->prepareStatement(query);
-        bindParams(pstmt, params);
-        int affected = pstmt->executeUpdate();
-        delete pstmt;
+        int affected = 0;
+
+        {
+            std::unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement(query));
+            bindParams(pstmt.get(), params);
+            affected = pstmt->executeUpdate();
+        }
+
         releaseConnection(conn);
 
         if (affected <= 0)
@@ -202,8 +207,7 @@ int MySQLConnector::executeUpdate(const string &query, const vector<any> &params
     }
     catch (sql::SQLException &e)
     {
-        LOGE("MySQL error: {} (SQLState: {}, ErrorCode: {})",
-             e.what(), e.getSQLStateCStr(), e.getErrorCode());
+        LOGE("MySQL error: {} (SQLState: {}, ErrorCode: {})", e.what(), e.getSQLStateCStr(), e.getErrorCode());
         releaseConnection(conn);
         return -1;
     }
