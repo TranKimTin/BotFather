@@ -48,7 +48,7 @@ function isValidRates(rates: Array<RateData>): boolean {
 async function getOHLCV(broker: string, symbol: string, timeframe: string, limit: number, since?: number): Promise<Array<RateData>> {
     const cacheKey = `${broker}_${symbol}_${timeframe}_${limit}_${since}`;
     if (cachedOHLCV[cacheKey] && cachedOHLCV[cacheKey].length !== 0) {
-        return cachedOHLCV[cacheKey];
+        return [...cachedOHLCV[cacheKey]];
     }
 
     const key = `${broker}_${symbol}_${timeframe}`;
@@ -73,7 +73,7 @@ async function getOHLCV(broker: string, symbol: string, timeframe: string, limit
     }
     if (isValidRates(data) && data.length > 0) {
         cachedOHLCV[cacheKey] = data;
-        return data;
+        return [...data];
     }
 
     data = await util.getOHLCVFromCacheServer(broker, symbol, timeframe, limit, since);
@@ -83,12 +83,12 @@ async function getOHLCV(broker: string, symbol: string, timeframe: string, limit
     }
     if (isValidRates(data) && data.length > 0) {
         cachedOHLCV[cacheKey] = data;
-        return data;
+        return [...data];
     }
 
     console.log(`Data invalid: ${data.length}. Get OHLCV from util: ${broker} ${symbol} ${timeframe} ${limit} ${since} (since=${moment(since).format('YYYY-MM-DD HH:mm')})`);
     cachedOHLCV[cacheKey] = await util.getOHLCV(broker, symbol, timeframe, limit, since);
-    return cachedOHLCV[cacheKey];
+    return [...cachedOHLCV[cacheKey]];
 }
 
 async function handleOrder(order: Order) {
