@@ -48,6 +48,9 @@ export async function getBotInfo(userData: UserTokenInfo) {
                     accountInfo[apiKey].positions = accountInfo[apiKey].positions.filter((item: any) => item.initialMargin != '0');
                     accountInfo[apiKey].positions.sort((a: any, b: any) => (+a.unrealizedProfit) - (+b.unrealizedProfit));
                     openOrders[apiKey] = await client.futuresOpenOrders({});
+                    const algoOpenOrder = await client.futuresGetOpenAlgoOrders({}) as any;
+                    openOrders[apiKey].push(...algoOpenOrder);
+
                     openOrders[apiKey].sort((a: any, b: any) => a.symbol.localeCompare(b.symbol));
                 }
                 catch (err) {
