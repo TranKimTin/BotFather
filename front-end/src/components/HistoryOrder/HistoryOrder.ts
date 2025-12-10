@@ -155,14 +155,14 @@ export default defineComponent({
                             let totalOpenAmtSL = 0;
                             for (let o of openOrders) {
                                 if (o.symbol === item.symbol && o.reduceOnly === true) {
-                                    let orderAmt = parseFloat(o.origQty);
-                                    if (o.origType === 'TAKE_PROFIT_MARKET') {
+                                    let orderAmt = parseFloat(o.origQty || o.quantity);
+                                    if (o.origType === 'TAKE_PROFIT_MARKET' || o.orderType === 'TAKE_PROFIT_MARKET') {
                                         totalOpenAmtTP += orderAmt;
                                         if (o.closePosition === true) {
                                             totalOpenAmtTP = Math.abs(positionAmt);
                                         }
                                     }
-                                    if (o.origType === 'STOP_MARKET') {
+                                    if (o.origType === 'STOP_MARKET' || o.orderType === 'STOP_MARKET') {
                                         totalOpenAmtSL += orderAmt;
                                         if (o.closePosition === true) {
                                             totalOpenAmtSL = Math.abs(positionAmt);
