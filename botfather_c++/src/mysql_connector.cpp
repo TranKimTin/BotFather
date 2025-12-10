@@ -59,6 +59,19 @@ shared_ptr<sql::Connection> MySQLConnector::acquireConnection()
 
     auto conn = pool.front();
     pool.pop();
+
+    if (!conn || !conn->isValid())
+    {
+        LOGE("MySQL connection is invalid. Reconnecting...");
+        conn = shared_ptr<sql::Connection>(driver->connect(host, username, password));
+
+        conn->setClientOption("OPT_CONNECT_TIMEOUT", "10");
+        conn->setClientOption("OPT_READ_TIMEOUT", "20");
+        conn->setClientOption("OPT_WRITE_TIMEOUT", "20");
+        conn->setClientOption("OPT_RECONNECT", "true");
+        conn->setSchema(database);
+    }
+
     return conn;
 }
 
@@ -101,66 +114,61 @@ void MySQLConnector::bindParams(sql::PreparedStatement *stmt, const vector<any> 
     }
 }
 
-vector<map<string, any>> MySQLConnector::executeQuery(const string &query, const vector<any> &params)
+vector<map<string, any>> MySQLConnector::executeQuery(
+    const string &query,
+    const vector<any> &params)
 {
     auto conn = acquireConnection();
     try
     {
-        if (!conn->isValid())
-        {
-            conn.reset(driver->connect(host, username, password));
-            conn->setClientOption("OPT_CONNECT_TIMEOUT", "10");
-            conn->setClientOption("OPT_READ_TIMEOUT", "20");
-            conn->setClientOption("OPT_WRITE_TIMEOUT", "20");
-            conn->setClientOption("OPT_RECONNECT", "true");
-            conn->setSchema(database);
-        }
-
-        sql::PreparedStatement *pstmt = conn->prepareStatement(query);
-        bindParams(pstmt, params);
-        unique_ptr<sql::ResultSet> result(pstmt->executeQuery());
-
         vector<map<string, any>> rows;
-        sql::ResultSetMetaData *meta = result->getMetaData();
-        int colCount = meta->getColumnCount();
 
-        while (result->next())
         {
-            map<string, any> row;
-            for (int i = 1; i <= colCount; ++i)
-            {
-                string colName = meta->getColumnLabel(i);
-                string colType = meta->getColumnTypeName(i);
+            std::unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement(query));
+            bindParams(pstmt.get(), params);
 
-                if (result->isNull(i))
+            std::unique_ptr<sql::ResultSet> result(pstmt->executeQuery());
+
+            sql::ResultSetMetaData *meta = result->getMetaData();
+            int colCount = meta->getColumnCount();
+
+            while (result->next())
+            {
+                map<string, any> row;
+                for (int i = 1; i <= colCount; ++i)
                 {
-                    row[colName] = string("");
+                    string colName = meta->getColumnLabel(i);
+                    string colType = meta->getColumnTypeName(i);
+
+                    if (result->isNull(i))
+                    {
+                        row[colName] = string("");
+                    }
+                    else if (colType == "BIGINT" || colType == "LONG")
+                    {
+                        row[colName] = static_cast<long long>(result->getInt64(i));
+                    }
+                    else if (colType == "INT")
+                    {
+                        row[colName] = static_cast<int>(result->getInt(i));
+                    }
+                    else if (colType == "DOUBLE" || colType == "FLOAT" || colType == "DECIMAL")
+                    {
+                        row[colName] = static_cast<double>(result->getDouble(i));
+                    }
+                    else if (colType == "BOOLEAN")
+                    {
+                        row[colName] = result->getBoolean(i);
+                    }
+                    else
+                    {
+                        row[colName] = static_cast<string>(result->getString(i));
+                    }
                 }
-                else if (colType == "BIGINT" || colType == "LONG")
-                {
-                    row[colName] = static_cast<long long>(result->getInt64(i));
-                }
-                else if (colType == "INT")
-                {
-                    row[colName] = static_cast<int>(result->getInt(i));
-                }
-                else if (colType == "DOUBLE" || colType == "FLOAT" || colType == "DECIMAL")
-                {
-                    row[colName] = static_cast<double>(result->getDouble(i));
-                }
-                else if (colType == "BOOLEAN")
-                {
-                    row[colName] = result->getBoolean(i);
-                }
-                else
-                {
-                    row[colName] = static_cast<string>(result->getString(i));
-                }
+                rows.push_back(std::move(row));
             }
-            rows.push_back(row);
         }
 
-        delete pstmt;
         releaseConnection(conn);
         return rows;
     }
@@ -178,16 +186,6 @@ int MySQLConnector::executeUpdate(const string &query, const vector<any> &params
     auto conn = acquireConnection();
     try
     {
-        if (!conn->isValid())
-        {
-            conn.reset(driver->connect(host, username, password));
-            conn->setClientOption("OPT_CONNECT_TIMEOUT", "10");
-            conn->setClientOption("OPT_READ_TIMEOUT", "20");
-            conn->setClientOption("OPT_WRITE_TIMEOUT", "20");
-            conn->setClientOption("OPT_RECONNECT", "true");
-            conn->setSchema(database);
-        }
-
         sql::PreparedStatement *pstmt = conn->prepareStatement(query);
         bindParams(pstmt, params);
         int affected = pstmt->executeUpdate();
