@@ -31,8 +31,6 @@ void SocketData::init()
         //     symbolList = {"BTCUSDT"};
         // }
 
-        symbolList = {"ATUSDT"};
-
         exchangeInfo = getExchangeInfo();
         exchangeInfo.max_load_factor(0.5);
         fundingRates.max_load_factor(0.5);
@@ -62,7 +60,7 @@ RateData SocketData::getData(const string &symbol, const string &timeframe)
 
 void SocketData::onCloseCandle(const string &symbol, string &timeframe, RateData &rateData)
 {
-    LOGI("On close candle {}:{} {}. size={}", broker, symbol, timeframe, rateData.startTime.size());
+    // LOGI("On close candle {}:{} {}. size={}", broker, symbol, timeframe, rateData.startTime.size());
     const int length = rateData.startTime.size();
     if (length < 20)
         return;
