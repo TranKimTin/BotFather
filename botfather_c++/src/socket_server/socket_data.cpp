@@ -115,11 +115,8 @@ void SocketData::onCloseCandle(const string &symbol, string &timeframe, RateData
                 worker.init(botList, broker, symbol, timeframe, move(open), move(high), move(low), move(close), move(volume), move(startTime), exchangeInfo, funding, socketData);
                 worker.run(); });
 
-    if (timeframe == "1m")
-    {
-        long long key = hashString(symbol + "_" + timeframe);
-        this->updateCache(this->data[key]);
-    }
+    long long key = hashString(symbol + "_" + timeframe);
+    this->updateCache(this->data[key]);
 }
 
 void SocketData::mergeData(RateData &rateData, const string &symbol, string &timeframe, string &currentTF, double open, double high, double low, double close, double volume, long long startTime, bool isFinal, bool ignoreClose)
