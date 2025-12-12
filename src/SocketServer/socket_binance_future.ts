@@ -28,6 +28,7 @@ export class BinanceFutureSocket extends SocketData {
 
         rws.addEventListener('message', (event) => {
             const mess = event.data;
+            console.log(`${BinanceFutureSocket.broker}: Message received`);
             const { data } = JSON.parse(mess.toString());
             const kline = data.k;
             const candle: RateData = {
