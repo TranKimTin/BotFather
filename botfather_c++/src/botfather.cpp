@@ -259,7 +259,7 @@ void runApp()
 
 #ifndef TEST
 
-    // exchanges.push_back(new SocketBinance(5));
+    exchanges.push_back(new SocketBinance(5));
     exchanges.push_back(new SocketBinanceFuture(5));
     // exchanges.push_back(new SocketBybit(5));
     // exchanges.push_back(new SocketBybitFuture(5));
