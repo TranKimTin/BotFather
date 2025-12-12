@@ -363,29 +363,17 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                     int cnt = 0;
                     for(int k = 0; k < timeframes.size(); k++)
                     {
-                        if (symbol == "ATUSDT") {
-                            LOGI("Loading data for {}:{} {}", broker, symbol, timeframes[k]);
-                        }
                         string tf = timeframes[k];
                         RateData rateData;
                         if(tf == "1m")
                         {
                             rateData = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE);
-                            if (symbol == "ATUSDT"){ 
-                                LOGI("Get from rate server {}:{} {} - {} items", broker, symbol, tf, rateData.startTime.size());
-                            }
                             if(rateData.startTime.empty() || !isValidData(rateData)) {
-                                if (symbol == "ATUSDT"){
-                                    LOGI("Get from exchange {}:{} {}", broker, symbol, tf);
-                                }
                                 rateData = getOHLCV(symbol, tf, MAX_CANDLE);
                                 cnt++;
                             }
                             string key = broker + "_" + symbol + "_" + tf;
                             Redis::getInstance().clearList(key);
-                            if (symbol == "ATUSDT"){ 
-                                LOGI("Get from exchange {}:{} {} - {} items", broker, symbol, tf, rateData.startTime.size());
-                            }
                         }
                         else {
                             rateData = getOHLCVFromCache(symbol, tf);
@@ -461,14 +449,25 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                             }
                         }
 
-                        
+                        if (symbol == "ATUSDT") {
+                            LOGD("Init data for {}:{} {} size={}", broker, symbol, tf, rateData.startTime.size());
+                        }
                         long long key = hashString(symbol + "_" + tf);
 
                         {
+                            if (symbol == "ATUSDT") {
+                                LOGD("Before set data for {}:{} {} size={}", broker, symbol, tf, rateData.startTime.size());
+                            }
                             lock_guard<mutex> lock(mMutex);
+                            if (symbol == "ATUSDT") {
+                                LOGD("Set data for {}:{} {} size={}", broker, symbol, tf, rateData.startTime.size());
+                            }
                             auto oldData = data[key];
                             data[key] = rateData;
                             int i = 0;
+                            if (symbol == "ATUSDT"){
+                                LOGD("Merging old data for {}:{} {} size={}", broker, symbol, tf, oldData.startTime.size());
+                            }
                             while (i < oldData.startTime.size() && oldData.startTime[i] > rateData.startTime[0])
                             {
                                 i++;
@@ -476,7 +475,13 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                             if (i == oldData.startTime.size()) {
                                 i--;
                             }
+                            if (symbol == "ATUSDT"){
+                                LOGD("Merging old data for {}:{} {} from index {} size={}", broker, symbol, tf, i, oldData.startTime.size());
+                            }
                             while(i >= 0) {
+                                if (symbol == "ATUSDT"){
+                                    LOGD("Merging old data for i={} {}:{} {} at {}", i, broker, symbol, tf, toTimeString(oldData.startTime[i]));
+                                }
                                 mergeData(data[key], symbol, oldData.interval, oldData.interval, oldData.open[i], oldData.high[i], oldData.low[i], oldData.close[i], oldData.volume[i], oldData.startTime[i], i > 0, true);
                             }
                             LOGD("Set data for {}:{} {} size={}, key={}", broker, symbol, tf, data[key].startTime.size(), key);
