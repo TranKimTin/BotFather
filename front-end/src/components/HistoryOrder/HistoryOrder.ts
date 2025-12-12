@@ -286,7 +286,7 @@ export default defineComponent({
                             idxTradeReal++;
                         }
                     }
-                    balanceData.push({ timestamp: moment(tradeReal[idxTradeReal - 1].time).format("YYYY-MM-DD HH:mm"), balance: gain + loss + unrealizedGain + unrealizedLoss - totalFee, balanceNoFee: gain + loss, balanceReal });
+                    balanceData.push({ timestamp: moment(new Date().getTime()).format("YYYY-MM-DD HH:mm"), balance: gain + loss + unrealizedGain + unrealizedLoss - totalFee, balanceNoFee: gain + loss, balanceReal });
 
 
                     if (accountInfo) {

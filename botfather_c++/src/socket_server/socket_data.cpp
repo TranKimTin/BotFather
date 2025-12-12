@@ -480,6 +480,7 @@ void SocketData::onSocketConnected(connection_hdl hdl)
             for (auto &f : futures){
                 try {
                     cnt += f.get();
+                    SLEEP_FOR(10);
                 } 
                 catch (const exception& e) {
                     cout << "Init data error: " << e.what() << "\n";
