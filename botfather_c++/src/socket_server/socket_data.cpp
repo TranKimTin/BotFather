@@ -31,6 +31,8 @@ void SocketData::init()
         //     symbolList = {"BTCUSDT"};
         // }
 
+        symbolList = {"BTCUSDT"};
+
         exchangeInfo = getExchangeInfo();
         exchangeInfo.max_load_factor(0.5);
         fundingRates.max_load_factor(0.5);
