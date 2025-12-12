@@ -495,6 +495,7 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                                     LOGD("Merging old data for i={} {}:{} {} at {}", i, broker, symbol, tf, toTimeString(oldData.startTime[i]));
                                 }
                                 mergeData(data[key], symbol, oldData.interval, oldData.interval, oldData.open[i], oldData.high[i], oldData.low[i], oldData.close[i], oldData.volume[i], oldData.startTime[i], i > 0, true);
+                                i++;
                             }
                             LOGD("Set data for {}:{} {} size={}, key={}", broker, symbol, tf, data[key].startTime.size(), key);
                             updateCache(data[key]);
