@@ -361,8 +361,11 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                 futures.emplace_back(async(launch::async, [this, symbol]()
                                                 {
                     int cnt = 0;
-                    for(int k=0; k<timeframes.size(); k++)
+                    for(int k = 0; k < timeframes.size(); k++)
                     {
+                        if (symbol == "ATUSDT") {
+                            LOGI("Loading data for {}:{} {}", broker, symbol, timeframes[k]);
+                        }
                         string tf = timeframes[k];
                         RateData rateData;
                         if(tf == "1m")
@@ -388,6 +391,9 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                             }
                             else{
                                 for(int m = k-1; m >= 0; m--) {
+                                     if (symbol == "ATUSDT"){
+                                        LOGD("Merge data for {}:{} {} from smaller {}", broker, symbol, tf, timeframes[m]);
+                                     }
                                     if(timeframeToNumberMinutes(tf) % timeframeToNumberMinutes(timeframes[m]) != 0){
                                         continue;
                                     }
