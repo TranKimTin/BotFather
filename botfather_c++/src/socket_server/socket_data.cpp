@@ -342,6 +342,139 @@ shared_ptr<boost::asio::ssl::context> SocketData::on_tls_init(connection_hdl)
     return ctx;
 }
 
+int SocketData::fetchData(const string &symbol)
+{
+    int cnt = 0;
+    for (int k = 0; k < timeframes.size(); k++)
+    {
+        string tf = timeframes[k];
+        RateData rateData;
+        if (tf == "1m")
+        {
+            rateData = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE);
+            if (rateData.startTime.empty() || !isValidData(rateData))
+            {
+                rateData = getOHLCV(symbol, tf, MAX_CANDLE);
+                cnt++;
+            }
+            string key = broker + "_" + symbol + "_" + tf;
+            Redis::getInstance().clearList(key);
+        }
+        else
+        {
+            rateData = getOHLCVFromCache(symbol, tf);
+            if (rateData.startTime.empty())
+            {
+                rateData = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE);
+                if (rateData.startTime.empty() || !isValidData(rateData))
+                {
+                    rateData = getOHLCV(symbol, tf, MAX_CANDLE);
+                    cnt++;
+                }
+                string key = broker + "_" + symbol + "_" + tf;
+                Redis::getInstance().clearList(key);
+            }
+            else
+            {
+                for (int m = k - 1; m >= 0; m--)
+                {
+                    if (timeframeToNumberMinutes(tf) % timeframeToNumberMinutes(timeframes[m]) != 0)
+                    {
+                        continue;
+                    }
+
+                    RateData smaller;
+                    {
+                        lock_guard<mutex> lock(mMutex);
+                        long long smallerKey = hashString(symbol + "_" + timeframes[m]);
+                        smaller = data[smallerKey];
+                    }
+                    int size = smaller.startTime.size();
+                    if (size == 0 || (timeframes[m] != "1m" && smaller.startTime.back() > rateData.startTime[0]))
+                    {
+                        LOGD("Data not continuous {}:{} {}. Expected start time: {}, but got: no data", broker, symbol, tf, toTimeString(rateData.startTime[0]));
+                        rateData = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE);
+                        if (rateData.startTime.empty() || !isValidData(rateData))
+                        {
+                            rateData = getOHLCV(symbol, tf, MAX_CANDLE);
+                            cnt++;
+                        }
+                        break;
+                    }
+
+                    int l = 0;
+                    while (l < size && getStartTime(tf, smaller.startTime[l]) >= rateData.startTime[0])
+                    {
+                        l++;
+                    }
+                    l--;
+                    if (l >= 0 && timeframes[m] != "1m" && getStartTime(tf, smaller.startTime[l]) != rateData.startTime[0])
+                    {
+                        LOGD("Data not continuous {}:{} {}. Expected start time: {}, but got: {}", broker, symbol, tf, toTimeString(rateData.startTime[0]), toTimeString(getStartTime(tf, smaller.startTime[l])));
+                        rateData = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE);
+                        if (rateData.startTime.empty() || !isValidData(rateData))
+                        {
+                            rateData = getOHLCV(symbol, tf, MAX_CANDLE);
+                            cnt++;
+                        }
+                        break;
+                    }
+
+                    while (l >= 0)
+                    {
+                        long long startTime = smaller.startTime[l];
+                        double open = smaller.open[l];
+                        double high = smaller.high[l];
+                        double low = smaller.low[l];
+                        double close = smaller.close[l];
+                        double volume = smaller.volume[l];
+                        mergeData(rateData, symbol, tf, timeframes[m], open, high, low, close, volume, startTime, l > 0, true);
+                        l--;
+                    }
+                }
+                adjustData(rateData);
+                if (!isValidData(rateData))
+                {
+                    rateData = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE);
+                    if (rateData.startTime.empty() || isValidData(rateData))
+                    {
+                        LOGE("Invalid data for {}:{} {}", broker, symbol, tf);
+                        rateData = getOHLCV(symbol, tf, MAX_CANDLE);
+                        cnt++;
+                    }
+                    string key = broker + "_" + symbol + "_" + tf;
+                    Redis::getInstance().clearList(key);
+                }
+            }
+        }
+
+        long long key = hashString(symbol + "_" + tf);
+
+        {
+            lock_guard<mutex> lock(mMutex);
+            auto oldData = data[key];
+            data[key] = rateData;
+            int i = 0;
+            while (i < oldData.startTime.size() && oldData.startTime[i] > rateData.startTime[0])
+            {
+                i++;
+            }
+            if (i == oldData.startTime.size())
+            {
+                i--;
+            }
+            while (i >= 0)
+            {
+                mergeData(data[key], symbol, oldData.interval, oldData.interval, oldData.open[i], oldData.high[i], oldData.low[i], oldData.close[i], oldData.volume[i], oldData.startTime[i], i > 0, true);
+                i--;
+            }
+            LOGD("Set data for {}:{} {} size={}, key={}", broker, symbol, tf, data[key].startTime.size(), key);
+            updateCache(data[key]);
+        }
+    }
+    return cnt;
+}
+
 void SocketData::onSocketConnected(connection_hdl hdl)
 {
     if (firstConnection)
@@ -362,122 +495,10 @@ void SocketData::onSocketConnected(connection_hdl hdl)
 
                 futures.emplace_back(async(launch::async, [this, symbol]()
                                                 {
-                    int cnt = 0;
-                    for(int k = 0; k < timeframes.size(); k++)
-                    {
-                        string tf = timeframes[k];
-                        RateData rateData;
-                        if(tf == "1m")
-                        {
-                            rateData = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE);
-                            if(rateData.startTime.empty() || !isValidData(rateData)) {
-                                rateData = getOHLCV(symbol, tf, MAX_CANDLE);
-                                cnt++;
-                            }
-                            string key = broker + "_" + symbol + "_" + tf;
-                            Redis::getInstance().clearList(key);
-                        }
-                        else {
-                            rateData = getOHLCVFromCache(symbol, tf);
-                            if (rateData.startTime.empty()) {
-                                rateData = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE);
-                                if(rateData.startTime.empty() || !isValidData(rateData)) {
-                                    rateData = getOHLCV(symbol, tf, MAX_CANDLE);
-                                    cnt++;
-                                }
-                                string key = broker + "_" + symbol + "_" + tf;
-                                Redis::getInstance().clearList(key);
-                            }
-                            else{
-                                for(int m = k-1; m >= 0; m--) {
-                                    if(timeframeToNumberMinutes(tf) % timeframeToNumberMinutes(timeframes[m]) != 0){
-                                        continue;
-                                    }
-
-                                    RateData smaller;
-                                    {
-                                        lock_guard<mutex> lock(mMutex);
-                                        long long smallerKey = hashString(symbol + "_" + timeframes[m]);
-                                        smaller = data[smallerKey];
-                                    }
-                                    int size = smaller.startTime.size();
-                                    if (size == 0 || (timeframes[m] != "1m" && smaller.startTime.back() > rateData.startTime[0])) {
-                                        LOGD("Data not continuous {}:{} {}. Expected start time: {}, but got: no data", broker, symbol, tf, toTimeString(rateData.startTime[0]));
-                                        rateData = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE);
-                                        if(rateData.startTime.empty() || !isValidData(rateData)) {
-                                            rateData = getOHLCV(symbol, tf, MAX_CANDLE);
-                                            cnt++;
-                                        }
-                                        break;
-                                    }
-
-                                    int l = 0;
-                                    while(l < size && getStartTime(tf, smaller.startTime[l]) >= rateData.startTime[0]) {
-                                        l++;
-                                    }
-                                    l--;
-                                    if(l >= 0 && timeframes[m] != "1m" && getStartTime(tf, smaller.startTime[l]) != rateData.startTime[0]) {
-                                        LOGD("Data not continuous {}:{} {}. Expected start time: {}, but got: {}", broker, symbol, tf, toTimeString(rateData.startTime[0]), toTimeString(getStartTime(tf, smaller.startTime[l])));
-                                        rateData = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE);
-                                        if(rateData.startTime.empty() || !isValidData(rateData)) {
-                                            rateData = getOHLCV(symbol, tf, MAX_CANDLE);
-                                            cnt++;
-                                        }  
-                                        break;
-                                    }
-
-                                    while(l >= 0){
-                                        long long startTime = smaller.startTime[l];
-                                        double open = smaller.open[l];
-                                        double high = smaller.high[l];
-                                        double low = smaller.low[l];
-                                        double close = smaller.close[l];
-                                        double volume = smaller.volume[l];
-                                        mergeData(rateData, symbol, tf, timeframes[m], open, high, low, close, volume, startTime, l > 0, true);
-                                        l--;
-                                    }
-                                }
-                                adjustData(rateData);
-                                if (!isValidData(rateData)) {
-                                    rateData = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE);
-                                    if(rateData.startTime.empty() || isValidData(rateData)) {
-                                        LOGE("Invalid data for {}:{} {}", broker, symbol, tf);
-                                        rateData = getOHLCV(symbol, tf, MAX_CANDLE);
-                                        cnt++;
-                                    }
-                                    string key = broker + "_" + symbol + "_" + tf;
-                                    Redis::getInstance().clearList(key);
-                                }
-                            }
-                        }
-
-                        long long key = hashString(symbol + "_" + tf);
-
-                        {
-                            lock_guard<mutex> lock(mMutex);
-                            auto oldData = data[key];
-                            data[key] = rateData;
-                            int i = 0;
-                            while (i < oldData.startTime.size() && oldData.startTime[i] > rateData.startTime[0])
-                            {
-                                i++;
-                            }
-                            if (i == oldData.startTime.size()) {
-                                i--;
-                            }
-                            while(i >= 0) {
-                                mergeData(data[key], symbol, oldData.interval, oldData.interval, oldData.open[i], oldData.high[i], oldData.low[i], oldData.close[i], oldData.volume[i], oldData.startTime[i], i > 0, true);
-                                i--;
-                            }
-                            LOGD("Set data for {}:{} {} size={}, key={}", broker, symbol, tf, data[key].startTime.size(), key);
-                            updateCache(data[key]);
-                        }
-                    }
-                    return cnt;
+                    return this->fetchData(symbol);
                  }));
             }
 
-            // Chờ batch này xong
             int cnt = 0;
             for (auto &f : futures){
                 try {

@@ -22,6 +22,7 @@ protected:
     void reconnectSocket();
     void onSocketClosed(connection_hdl hdl);
 
+    int fetchData(const string &symbol);
     void onCloseCandle(const string &symbol, string &timeframe, RateData &data);
     void adjustData(RateData &rateData);
     void updateCache(const RateData &rateData);
