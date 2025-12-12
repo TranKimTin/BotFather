@@ -367,13 +367,22 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                         RateData rateData;
                         if(tf == "1m")
                         {
+                            if (symbol == "ATUSDT"){
+                                LOGD("Init data for {}:{} {}", broker, symbol, tf);
+                            }
                             rateData = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE);
                             if(rateData.startTime.empty() || !isValidData(rateData)) {
                                 rateData = getOHLCV(symbol, tf, MAX_CANDLE);
                                 cnt++;
                             }
+                            if (symbol == "ATUSDT"){
+                                LOGD("Init data for {}:{} {} size={}", broker, symbol, tf, rateData.startTime.size());
+                            }
                             string key = broker + "_" + symbol + "_" + tf;
                             Redis::getInstance().clearList(key);
+                            if (symbol == "ATUSDT"){
+                                LOGD("Cleared redis cache for {}:{} {}", broker, symbol, tf);
+                            }
                         }
                         else {
                             rateData = getOHLCVFromCache(symbol, tf);
