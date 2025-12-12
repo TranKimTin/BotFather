@@ -360,6 +360,7 @@ void SocketData::onSocketConnected(connection_hdl hdl)
 
                 futures.emplace_back(async(launch::async, [this, symbol]()
                                                 {
+                    LOGI("Load data for {}:{}", broker, symbol);
                     int cnt = 0;
                     for(int k=0; k<timeframes.size(); k++)
                     {
@@ -471,6 +472,7 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                             updateCache(data[key]);
                         }
                     }
+                    LOGI("Load data completed for {}:{}", broker, symbol);
                     return cnt;
                  }));
             }
