@@ -10,8 +10,6 @@ static void checkOrderStatus()
     string query = "SELECT id, symbol, entryID, tpID, slID, apiKey, secretKey, iv, botID, side, volume, tp, sl FROM RealOrders";
     vector<map<string, any>> res = db.executeQuery(query, {});
 
-    LOGI("checkOrderStatus res size: {}", res.size());
-
     const int MAX_THREAD = 5;
     boost::asio::thread_pool pool(MAX_THREAD);
 
@@ -59,7 +57,6 @@ static void checkOrderStatus()
                             LOGE("Order {} is partially filled. Try to close position.", entryJson.dump());
                             string side = entryJson["side"].get<string>();
                             string result = (side == "BUY") ? exchange->sellMarket(symbol, executedQty, "", "", true) : exchange->buyMarket(symbol, executedQty, "", "", true);
-                            LOGI("Response from Binance Future: {}", result);
                         }
                         db.executeUpdate("DELETE FROM RealOrders WHERE id = ?", {id});
                     }
@@ -143,8 +140,6 @@ static void checkPositionClosedByManual()
         string query2 = "SELECT id, symbol, entryID, tpID, slID, apiKey FROM RealOrders WHERE tpID <> '' AND slID <> ''";
         vector<map<string, any>> res2 = db.executeQuery(query2, {});
 
-        LOGI("res size: {}, res2 size: {}", res.size(), res2.size());
-
         if (res.empty() || res2.empty())
         {
             return;
@@ -157,16 +152,13 @@ static void checkPositionClosedByManual()
             string iv = any_cast<string>(row.at("iv"));
 
             shared_ptr<IExchange> exchange = make_shared<BinanceFuture>(apiKey, encryptedSecretKey, iv, 0);
-            LOGI("getPositionRisk for apiKey: {}", apiKey);
             string s = exchange->getPositionRisk();
             if (s.empty())
             {
                 LOGE("Failed to get position risk");
                 continue;
             }
-            LOGI("parse getPositionRisk");
             json positionRisk = json::parse(s);
-            LOGI("positionRisk size: {}", positionRisk.size());
 
             vector<string> symbols;
             for (const auto &item : positionRisk)
@@ -227,7 +219,6 @@ static void checkPositionClosedByManual()
                     }
                 }
             }
-            LOGI("Finished checking positions for apiKey: {}", apiKey);
         }
     }
     catch (const exception &err)

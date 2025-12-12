@@ -34,5 +34,5 @@ private:
     queue<std::shared_ptr<sql::Connection>> pool;
     mutex poolMutex;
     condition_variable poolCond;
-    int poolSize = 10;
+    int poolSize = 30;
 };
