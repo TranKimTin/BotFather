@@ -371,12 +371,21 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                         if(tf == "1m")
                         {
                             rateData = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE);
+                            if (symbol == "ATUSDT"){ 
+                                LOGI("Get from rate server {}:{} {} - {} items", broker, symbol, tf, rateData.startTime.size());
+                            }
                             if(rateData.startTime.empty() || !isValidData(rateData)) {
+                                if (symbol == "ATUSDT"){
+                                    LOGI("Get from exchange {}:{} {}", broker, symbol, tf);
+                                }
                                 rateData = getOHLCV(symbol, tf, MAX_CANDLE);
                                 cnt++;
                             }
                             string key = broker + "_" + symbol + "_" + tf;
                             Redis::getInstance().clearList(key);
+                            if (symbol == "ATUSDT"){ 
+                                LOGI("Get from exchange {}:{} {} - {} items", broker, symbol, tf, rateData.startTime.size());
+                            }
                         }
                         else {
                             rateData = getOHLCVFromCache(symbol, tf);
@@ -391,9 +400,6 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                             }
                             else{
                                 for(int m = k-1; m >= 0; m--) {
-                                     if (symbol == "ATUSDT"){
-                                        LOGD("Merge data for {}:{} {} from smaller {}", broker, symbol, tf, timeframes[m]);
-                                     }
                                     if(timeframeToNumberMinutes(tf) % timeframeToNumberMinutes(timeframes[m]) != 0){
                                         continue;
                                     }
