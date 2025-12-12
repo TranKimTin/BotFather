@@ -360,6 +360,7 @@ void SocketData::onSocketConnected(connection_hdl hdl)
 
                 futures.emplace_back(async(launch::async, [this, symbol]()
                                                 {
+                    if(symbol == "ATUSDT") return 0;
                     LOGI("Load data for {}:{}", broker, symbol);
                     int cnt = 0;
                     for(int k=0; k<timeframes.size(); k++)
