@@ -31,6 +31,8 @@ void SocketData::init()
         //     symbolList = {"BTCUSDT"};
         // }
 
+        symbolList = {"ATUSDT"};
+
         exchangeInfo = getExchangeInfo();
         exchangeInfo.max_load_factor(0.5);
         fundingRates.max_load_factor(0.5);
@@ -360,8 +362,6 @@ void SocketData::onSocketConnected(connection_hdl hdl)
 
                 futures.emplace_back(async(launch::async, [this, symbol]()
                                                 {
-                    if(symbol == "ATUSDT") return 0;
-                    LOGI("Load data for {}:{}", broker, symbol);
                     int cnt = 0;
                     for(int k=0; k<timeframes.size(); k++)
                     {
@@ -473,7 +473,6 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                             updateCache(data[key]);
                         }
                     }
-                    LOGI("Load data completed for {}:{}", broker, symbol);
                     return cnt;
                  }));
             }
