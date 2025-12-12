@@ -363,6 +363,9 @@ void SocketData::onSocketConnected(connection_hdl hdl)
                     int cnt = 0;
                     for(int k = 0; k < timeframes.size(); k++)
                     {
+                        if (symbol == "ATUSDT"){
+                            LOGD("Init data for {}:{} {}", broker, symbol, timeframes[k]);
+                        }
                         string tf = timeframes[k];
                         RateData rateData;
                         if(tf == "1m")
