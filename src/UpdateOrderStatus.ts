@@ -35,10 +35,22 @@ let cachedOHLCV: { [key: string]: Array<RateData> };
 
 function isValidRates(rates: Array<RateData>): boolean {
     if (rates.length <= 1) return true;
+    if (rates[0].open <= 0 || rates[0].close <= 0 || rates[0].high < rates[0].low) {
+        console.log(`Invalid rates data: ${moment(rates[0].startTime).format("YYYY-MM-DD HH:mm")} ${rates[0].open} ${rates[0].high} ${rates[0].low} ${rates[0].close}`);
+        return false;
+    }
+    if (rates[1].open <= 0 || rates[1].close <= 0 || rates[1].high < rates[1].low) {
+        console.log(`Invalid rates data: ${moment(rates[1].startTime).format("YYYY-MM-DD HH:mm")} ${rates[1].open} ${rates[1].high} ${rates[1].low} ${rates[1].close}`);
+        return false;
+    }
     const timeIntervalMiliseconds = rates[0].startTime - rates[1].startTime;
     for (let i = 2; i < rates.length; i++) {
         if (rates[i - 1].startTime - rates[i].startTime !== timeIntervalMiliseconds) {
             console.log(`Invalid rates: ${moment(rates[i - 1].startTime).format("YYYY-MM-DD HH:mm")} - ${moment(rates[i].startTime).format("YYYY-MM-DD HH:mm")} = (${rates[i - 1].startTime} - ${rates[i].startTime}}) != ${timeIntervalMiliseconds}`);
+            return false;
+        }
+        if (rates[i].open <= 0 || rates[i].close <= 0 || rates[i].high < rates[i].low) {
+            console.log(`Invalid rates data: ${moment(rates[i].startTime).format("YYYY-MM-DD HH:mm")} ${rates[i].open} ${rates[i].high} ${rates[i].low} ${rates[i].close}`);
             return false;
         }
     }
