@@ -297,7 +297,7 @@ bool SocketData::isValidData(const RateData &rateData)
     {
         return true;
     }
-    if (rateData[0].open[0] <= 0 || rateData.close[0] <= 0 || rateData.high[0] < rateData.low[0])
+    if (rateData.open[0] <= 0 || rateData.close[0] <= 0 || rateData.high[0] < rateData.low[0])
     {
         return false;
     }
