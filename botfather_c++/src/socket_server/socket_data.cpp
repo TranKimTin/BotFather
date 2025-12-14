@@ -121,6 +121,12 @@ void SocketData::onCloseCandle(const string &symbol, string &timeframe, RateData
 
 void SocketData::mergeData(RateData &rateData, const string &symbol, string &timeframe, string &currentTF, double open, double high, double low, double close, double volume, long long startTime, bool isFinal, bool ignoreClose)
 {
+    if (open <= 0 || high <= 0 || low <= 0 || close <= 0 || high < low)
+    {
+        LOGE("Invalid data {}:{} {} {} {} {} {} {} {}", broker, symbol, timeframe, currentTF, open, high, low, close, volume, startTime);
+        return;
+    }
+
     if (timeframeToNumberMinutes(timeframe) % timeframeToNumberMinutes(currentTF) != 0)
     {
         return;
