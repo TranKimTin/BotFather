@@ -297,9 +297,17 @@ bool SocketData::isValidData(const RateData &rateData)
     {
         return true;
     }
+    if (rateData[0].open[0] <= 0 || rateData.close[0] <= 0 || rateData.high[0] < rateData.low[0])
+    {
+        return false;
+    }
     long long timeIntervalMiliseconds = timeframeToNumberMiliseconds(rateData.interval);
     for (int i = 1; i < length; i++)
     {
+        if (rateData.open[i] <= 0 || rateData.close[i] <= 0 || rateData.high[i] < rateData.low[i])
+        {
+            return false;
+        }
         if (rateData.startTime[i - 1] - rateData.startTime[i] != timeIntervalMiliseconds)
         {
             return false;

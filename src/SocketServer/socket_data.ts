@@ -32,6 +32,11 @@ export class SocketData {
     protected mergeData(data: RateData, isFinalMinute: boolean) {
         if (!this.onCloseCandle) throw 'Missing function onCloseCandle';
 
+        if (data.open <= 0 || data.high <= 0 || data.low <= 0 || data.close <= 0 || data.high < data.low) {
+            console.error(`Invalid data ${this.broker}:${data.symbol} ${data.interval} ${data.startTime} ${data.open} ${data.high} ${data.low} ${data.close} ${data.volume}`);
+            return;
+        }
+
         const dataList = this.gData[data.symbol][data.interval];
         if (dataList.length === 0) {
             dataList.push(data);
@@ -164,9 +169,18 @@ export class SocketData {
 
     private isValidRates(rates: Array<RateData>): boolean {
         if (rates.length <= 1) return true;
+        if (rates[0].open <= 0 || rates[0].close <= 0 || rates[0].high < rates[0].low) {
+            return false;
+        }
+        if (rates[1].open <= 0 || rates[1].close <= 0 || rates[1].high < rates[1].low) {
+            return false;
+        }
         const timeIntervalMiliseconds = rates[0].startTime - rates[1].startTime;
         for (let i = 2; i < rates.length; i++) {
             if (rates[i - 1].startTime - rates[i].startTime !== timeIntervalMiliseconds) {
+                return false;
+            }
+            if (rates[i].open <= 0 || rates[i].close <= 0 || rates[i].high < rates[i].low) {
                 return false;
             }
         }
