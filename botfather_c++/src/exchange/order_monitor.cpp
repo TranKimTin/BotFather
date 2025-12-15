@@ -249,13 +249,14 @@ static void run()
         try
         {
             SLEEP_FOR(1000);
-            writeLog("Start checkPositionClosedByManual");
+            // writeLog("Start checkPositionClosedByManual");
             checkPositionClosedByManual();
 
-            writeLog("Checking order status");
+            SLEEP_FOR(1000);
+            // writeLog("Checking order status");
             checkOrderStatus();
 
-            writeLog("Finished checking orders");
+            // writeLog("Finished checking orders");
             SLEEP_FOR(10000);
         }
         catch (const exception &err)
