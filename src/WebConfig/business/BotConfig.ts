@@ -458,30 +458,39 @@ export async function setLeverage(botName: string, leverage: number, marginType:
         leverageMap[bracket.symbol] = bracket.brackets[0].initialLeverage; //max leverage
     }
 
+    let promistList = [];
+
     for (let symbol of symbolList) {
-        try {
-            await client.futuresMarginType({
-                symbol: symbol,
-                marginType: marginType
-            });
-        }
-        catch (err: any) {
-            if (err.code !== -4046) {
-                console.error(`Set margin type ${marginType} for ${symbol} failed: ${err.message}`);
+        promistList.push((async () => {
+            try {
+                await client.futuresMarginType({
+                    symbol: symbol,
+                    marginType: marginType
+                });
             }
-        }
-        try {
-            let effectiveLeverage = Math.min(leverage, leverageMap[symbol] || 20);
-            await client.futuresLeverage({
-                symbol: symbol,
-                leverage: effectiveLeverage
-            });
-            console.log(`Set leverage x${effectiveLeverage} for ${symbol} success`);
-        } catch (error: any) {
-            console.error(`Set leverage x${leverage} for ${symbol} failed: ${error.message}`);
-            errorMess += `${symbol}: ${error.message}\n`;
+            catch (err: any) {
+                if (err.code !== -4046) {
+                    console.error(`Set margin type ${marginType} for ${symbol} failed: ${err.message}`);
+                }
+            }
+            try {
+                let effectiveLeverage = Math.min(leverage, leverageMap[symbol] || 20);
+                await client.futuresLeverage({
+                    symbol: symbol,
+                    leverage: effectiveLeverage
+                });
+                console.log(`Set leverage x${effectiveLeverage} for ${symbol} success`);
+            } catch (error: any) {
+                console.error(`Set leverage x${leverage} for ${symbol} failed: ${error.message}`);
+                errorMess += `${symbol}: ${error.message}\n`;
+            }
+        })());
+        if (promistList.length > 50) {
+            await Promise.all(promistList);
+            promistList = [];
         }
     }
+    await Promise.all(promistList);
     if (errorMess) {
         throw errorMess;
     }
