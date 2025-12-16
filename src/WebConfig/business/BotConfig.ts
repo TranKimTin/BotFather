@@ -457,12 +457,16 @@ export async function setLeverage(botName: string, leverage: number, marginType:
     for (let bracket of futuresLeverageBracket) {
         leverageMap[bracket.symbol] = bracket.brackets[0].initialLeverage; //max leverage
     }
-    let futuresPositionRisk = await client.futuresPositionRisk();
+    let futuresPositionRisk = await client.futuresPositionRisk() as any;
     const currentLeverageMap: { [key: string]: number } = {};
+    const currentMarginTypeMap: { [key: string]: string } = {};
     for (let position of futuresPositionRisk) {
         console.log(position)
         if (position.leverage) {
             currentLeverageMap[position.symbol] = +position.leverage;
+        }
+        if (position.marginType) {
+            currentMarginTypeMap[position.symbol] = position.marginType;
         }
     }
 
@@ -470,31 +474,39 @@ export async function setLeverage(botName: string, leverage: number, marginType:
 
     for (let symbol of symbolList) {
         promistList.push((async () => {
-            try {
-                await client.futuresMarginType({
-                    symbol: symbol,
-                    marginType: marginType
-                });
+            if (marginType === currentMarginTypeMap[symbol] && leverage === currentLeverageMap[symbol]) {
+                console.log(`Margin type and Leverage for ${symbol} are already set to ${marginType} x${leverage}, skip setting.`);
             }
-            catch (err: any) {
-                if (err.code !== -4046) {
-                    console.error(`Set margin type ${marginType} for ${symbol} failed: ${err.message}`);
+            else {
+                try {
+                    await client.futuresMarginType({
+                        symbol: symbol,
+                        marginType: marginType
+                    });
+                }
+                catch (err: any) {
+                    if (err.code !== -4046) {
+                        console.error(`Set margin type ${marginType} for ${symbol} failed: ${err.message}`);
+                    }
                 }
             }
-            try {
-                let effectiveLeverage = Math.min(leverage, leverageMap[symbol] || 20);
-                if (currentLeverageMap[symbol] && currentLeverageMap[symbol] === effectiveLeverage) {
-                    console.log(`Leverage for ${symbol} is already x${effectiveLeverage}, skip setting.`);
-                    return;
+
+            let effectiveLeverage = Math.min(leverage, leverageMap[symbol] || 5);
+            if (currentLeverageMap[symbol] && currentLeverageMap[symbol] === effectiveLeverage) {
+                console.log(`Leverage for ${symbol} is already x${effectiveLeverage}, skip setting.`);
+            }
+            else {
+                try {
+
+                    await client.futuresLeverage({
+                        symbol: symbol,
+                        leverage: effectiveLeverage
+                    });
+                    console.log(`Set leverage x${effectiveLeverage} for ${symbol} success`);
+                } catch (error: any) {
+                    console.error(`Set leverage x${leverage} for ${symbol} failed: ${error.message}`);
+                    errorMess += `${symbol}: ${error.message}\n`;
                 }
-                await client.futuresLeverage({
-                    symbol: symbol,
-                    leverage: effectiveLeverage
-                });
-                console.log(`Set leverage x${effectiveLeverage} for ${symbol} success`);
-            } catch (error: any) {
-                console.error(`Set leverage x${leverage} for ${symbol} failed: ${error.message}`);
-                errorMess += `${symbol}: ${error.message}\n`;
             }
         })());
         if (promistList.length > 50) {
