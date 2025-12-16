@@ -36,6 +36,6 @@ export default defineComponent({
             });
         });
 
-        return { r_visible, r_botList, r_botName, r_leverage, setLeverage };
+        return { r_visible, r_botList, r_botName, r_leverage, r_marginType, setLeverage };
     },
 });
