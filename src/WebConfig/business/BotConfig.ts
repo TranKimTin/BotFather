@@ -431,3 +431,60 @@ export async function getOrders(args: any) {
         throw error.message || 'Lỗi khi lấy trạng thái lệnh';
     }
 }
+
+export async function setLeverage(botName: string, leverage: number, marginType: 'ISOLATED' | 'CROSSED') {
+    let errorMess: string = '';
+
+    const sql = `SELECT symbolList, apiKey, secretKey, iv FROM Bot WHERE botName = ?`;
+    const bot = await mysql.query(sql, [botName]);
+    if (bot.length === 0) {
+        throw `Không tìm thấy bot ${botName}`;
+    }
+    const { apiKey, secretKey, iv } = bot[0];
+    if (!apiKey || !secretKey || !iv) {
+        throw 'Chưa cấu hình api key';
+    }
+    const key = process.env.ENCRYP_KEY || '';
+    const decryptedSecretKey = util.decryptAES(secretKey, key, iv);
+    const client = Binance({
+        apiKey: apiKey,
+        apiSecret: decryptedSecretKey
+    });
+    const symbolList: Array<string> = (JSON.parse(bot[0].symbolList) as Array<string>).map((item) => item.split(':')).filter(item => item[0] === 'binance_future').map(item => item[1]);
+
+    const futuresLeverageBracket = await client.futuresLeverageBracket({} as any);
+    const leverageMap: { [key: string]: number } = {};
+    for (let bracket of futuresLeverageBracket) {
+        leverageMap[bracket.symbol] = leverageMap[bracket.symbol] = Math.min(
+            ...bracket.brackets.map(b => b.initialLeverage)
+        );
+    }
+
+    for (let symbol of symbolList) {
+        try {
+            await client.futuresMarginType({
+                symbol: symbol,
+                marginType: marginType
+            });
+        }
+        catch (err: any) {
+            if (err.code !== -4046) {
+                console.error(`Set margin type ${marginType} for ${symbol} failed: ${err.message}`);
+            }
+        }
+        try {
+            let effectiveLeverage = Math.min(leverage, leverageMap[symbol] || 20);
+            await client.futuresLeverage({
+                symbol: symbol,
+                leverage: effectiveLeverage
+            });
+            console.log(`Set leverage x${effectiveLeverage} for ${symbol} success`);
+        } catch (error: any) {
+            console.error(`Set leverage x${leverage} for ${symbol} failed: ${error.message}`);
+            errorMess += `${symbol}: ${error.message}\n`;
+        }
+    }
+    if (errorMess) {
+        throw errorMess;
+    }
+}

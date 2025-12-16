@@ -13,11 +13,22 @@ export default defineComponent({
         const r_botList = ref<Array<string>>([]);
         const r_botName = ref<string>('');
         const r_leverage = ref<number>(1);
+        const r_marginType = ref<string>('ISOLATED');
 
         function setLeverage() {
-            Toast.showSuccess(`Setting leverage ${r_botName.value} ${r_leverage.value}`);
+            axios.post('/setLeverage', {
+                botName: r_botName.value,
+                leverage: r_leverage.value,
+                marginType: r_marginType.value,
+            }).then(() => {
+                Toast.showSuccess(`Cài bẩy bot ${r_botName.value} x${r_leverage.value}`);
+
+            }).catch((err) => {
+                Toast.showError(err.message);
+            });
             r_visible.value = false;
         }
+
         onMounted(() => {
             axios.get('/getBotList', { real: 1 }).then(result => {
                 console.log(result);
