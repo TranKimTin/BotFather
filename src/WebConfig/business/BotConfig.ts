@@ -455,8 +455,6 @@ export async function setLeverage(botName: string, leverage: number, marginType:
     const futuresLeverageBracket = await client.futuresLeverageBracket({} as any);
     const leverageMap: { [key: string]: number } = {};
     for (let bracket of futuresLeverageBracket) {
-        console.log(bracket.symbol);
-        console.log(bracket.brackets);
         leverageMap[bracket.symbol] = bracket.brackets[0].initialLeverage; //max leverage
     }
 
