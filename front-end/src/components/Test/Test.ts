@@ -7,10 +7,7 @@ export default defineComponent({
     components: {},
     setup() {
         const r_data = ref<string>('loading...');
-
-
-
-
+        
         onMounted(() => {
             const route = useRoute();
             const botName = route.query.botName as string || undefined;

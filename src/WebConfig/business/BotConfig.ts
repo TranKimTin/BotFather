@@ -431,3 +431,89 @@ export async function getOrders(args: any) {
         throw error.message || 'Lỗi khi lấy trạng thái lệnh';
     }
 }
+
+export async function setLeverage(botName: string, leverage: number, marginType: 'ISOLATED' | 'CROSSED') {
+    let errorMess: string = '';
+
+    const sql = `SELECT symbolList, apiKey, secretKey, iv FROM Bot WHERE botName = ?`;
+    const bot = await mysql.query(sql, [botName]);
+    if (bot.length === 0) {
+        throw `Không tìm thấy bot ${botName}`;
+    }
+    const { apiKey, secretKey, iv } = bot[0];
+    if (!apiKey || !secretKey || !iv) {
+        throw 'Chưa cấu hình api key';
+    }
+    const key = process.env.ENCRYP_KEY || '';
+    const decryptedSecretKey = util.decryptAES(secretKey, key, iv);
+    const client = Binance({
+        apiKey: apiKey,
+        apiSecret: decryptedSecretKey
+    });
+    const symbolList: Array<string> = (JSON.parse(bot[0].symbolList) as Array<string>).map((item) => item.split(':')).filter(item => item[0] === 'binance_future').map(item => item[1]);
+
+    const futuresLeverageBracket = await client.futuresLeverageBracket({} as any);
+    const leverageMap: { [key: string]: number } = {};
+    for (let bracket of futuresLeverageBracket) {
+        leverageMap[bracket.symbol] = bracket.brackets[0].initialLeverage; //max leverage
+    }
+    let futuresPositionRisk = await client.futuresPositionRisk() as any;
+    const currentLeverageMap: { [key: string]: number } = {};
+    const currentMarginTypeMap: { [key: string]: string } = {};
+    for (let position of futuresPositionRisk) {
+        if (position.leverage) {
+            currentLeverageMap[position.symbol] = +position.leverage;
+        }
+        if (position.marginType) {
+            currentMarginTypeMap[position.symbol] = position.marginType === 'cross' ? 'CROSSED' : 'ISOLATED';
+        }
+    }
+
+    let promistList = [];
+
+    for (let symbol of symbolList) {
+        promistList.push((async () => {
+            if (currentMarginTypeMap[symbol] === marginType) {
+                console.log(`Margin type and Leverage for ${symbol} are already set to ${marginType}, skip setting.`);
+            }
+            else {
+                try {
+                    await client.futuresMarginType({
+                        symbol: symbol,
+                        marginType: marginType
+                    });
+                }
+                catch (err: any) {
+                    if (err.code !== -4046) {
+                        console.error(`Set margin type ${marginType} for ${symbol} failed: ${err.message}`);
+                    }
+                }
+            }
+
+            let effectiveLeverage = Math.min(leverage, leverageMap[symbol] || 5);
+            if (currentLeverageMap[symbol] === effectiveLeverage) {
+                console.log(`Leverage for ${symbol} is already x${effectiveLeverage}, skip setting.`);
+            }
+            else {
+                try {
+                    await client.futuresLeverage({
+                        symbol: symbol,
+                        leverage: effectiveLeverage
+                    });
+                    console.log(`Set leverage x${effectiveLeverage} for ${symbol} success`);
+                } catch (error: any) {
+                    console.error(`Set leverage x${leverage} for ${symbol} failed: ${error.message}`);
+                    errorMess += `${symbol}: ${error.message}\n`;
+                }
+            }
+        })());
+        if (promistList.length > 50) {
+            await Promise.all(promistList);
+            promistList = [];
+        }
+    }
+    await Promise.all(promistList);
+    if (errorMess) {
+        throw errorMess;
+    }
+}

@@ -190,3 +190,29 @@ export async function getOrders(req: any, res: any) {
         res.json({ code: 400, message: err, data: [] });
     }
 }
+
+export async function setLeverage(req: any, res: any) {
+    try {
+        const botName: string = req.body.botName;
+        const leverage: number = req.body.leverage;
+        const marginType: string = req.body.marginType;
+        const userData: UserTokenInfo = req.user;
+        const isOwnBot = await BotConfig.requireOwnBot(botName, userData);
+        if (!isOwnBot) {
+            res.json({ code: 403, message: 'Không có quyền truy cập bot', data: [] });
+            return;
+        }
+        if (leverage < 1 || leverage > 150) {
+            throw 'Đòn bẩy từ 1 đến 150';
+        }
+        if (marginType !== 'ISOLATED' && marginType !== 'CROSSED') {
+            throw 'Margin type không hợp lệ';
+        }
+        await BotConfig.setLeverage(botName, leverage, marginType);
+        res.json({ code: 200, message: "Set leverage success" });
+    }
+    catch (err: any) {
+        console.error(err);
+        res.json({ code: 400, message: err, data: [] });
+    }
+}
