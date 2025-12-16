@@ -133,10 +133,10 @@ export async function getSymbolList() {
     return symbolList;
 }
 
-export async function getBotList(userData: UserTokenInfo) {
+export async function getBotList(userData: UserTokenInfo, real: boolean) {
     const botList = await mysql.query(`SELECT botName 
                                         FROM Bot 
-                                        WHERE userID = ? OR ? = ?
+                                        WHERE (userID = ? OR ? = ?) ${real ? 'AND (enableRealOrder = 1 AND apiKey IS NOT NULL AND secretKey IS NOT NULL AND iv IS NOT NULL)' : ''}
                                         ORDER BY botName ASC`, [userData.id, userData.role, ROLE.ADMIN]);
     const data = botList.map((item: { botName: any; }) => item.botName);
     return data;

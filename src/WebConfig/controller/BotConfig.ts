@@ -35,7 +35,8 @@ export async function getSymbolList(req: any, res: any) {
 export async function getBotList(req: any, res: any) {
     try {
         const userData: UserTokenInfo = req.user;
-        const data = await BotConfig.getBotList(userData);
+        const real = req.query.real ? true : false;
+        const data = await BotConfig.getBotList(userData, real);
         res.json({ code: 200, message: "ok", data });
     }
     catch (err: any) {
