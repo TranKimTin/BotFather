@@ -474,8 +474,8 @@ export async function setLeverage(botName: string, leverage: number, marginType:
 
     for (let symbol of symbolList) {
         promistList.push((async () => {
-            if (marginType === currentMarginTypeMap[symbol] && leverage === currentLeverageMap[symbol]) {
-                console.log(`Margin type and Leverage for ${symbol} are already set to ${marginType} x${leverage}, skip setting.`);
+            if (currentMarginTypeMap[symbol] === marginType) {
+                console.log(`Margin type and Leverage for ${symbol} are already set to ${marginType}, skip setting.`);
             }
             else {
                 try {
@@ -492,12 +492,11 @@ export async function setLeverage(botName: string, leverage: number, marginType:
             }
 
             let effectiveLeverage = Math.min(leverage, leverageMap[symbol] || 5);
-            if (currentLeverageMap[symbol] && currentLeverageMap[symbol] === effectiveLeverage) {
+            if (currentLeverageMap[symbol] === effectiveLeverage) {
                 console.log(`Leverage for ${symbol} is already x${effectiveLeverage}, skip setting.`);
             }
             else {
                 try {
-
                     await client.futuresLeverage({
                         symbol: symbol,
                         leverage: effectiveLeverage
