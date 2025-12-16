@@ -10,7 +10,7 @@
                 class="flex-auto" />
 
             <label for="leverage" class="font-semibold">Bẩy:</label>
-            <InputNumber id="leverage" class="flex-auto" v-model="r_leverage" autocomplete="off" :min="1" :max="125" />
+            <InputNumber id="leverage" class="flex-auto" v-model="r_leverage" autocomplete="off" :min="1" :max="150" />
 
         </div>
         <div class="flex p-3"></div>

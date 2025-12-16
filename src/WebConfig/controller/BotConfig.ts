@@ -202,8 +202,8 @@ export async function setLeverage(req: any, res: any) {
             res.json({ code: 403, message: 'Không có quyền truy cập bot', data: [] });
             return;
         }
-        if (leverage < 1 || leverage > 125) {
-            throw 'Đòn bẩy từ 1 đến 125';
+        if (leverage < 1 || leverage > 150) {
+            throw 'Đòn bẩy từ 1 đến 150';
         }
         if (marginType !== 'ISOLATED' && marginType !== 'CROSSED') {
             throw 'Margin type không hợp lệ';

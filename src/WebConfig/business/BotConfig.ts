@@ -455,6 +455,8 @@ export async function setLeverage(botName: string, leverage: number, marginType:
     const futuresLeverageBracket = await client.futuresLeverageBracket({} as any);
     const leverageMap: { [key: string]: number } = {};
     for (let bracket of futuresLeverageBracket) {
+        console.log(bracket.symbol);
+        console.log(bracket.brackets);
         leverageMap[bracket.symbol] = leverageMap[bracket.symbol] = Math.min(
             ...bracket.brackets.map(b => b.initialLeverage)
         );
