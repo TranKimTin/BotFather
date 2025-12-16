@@ -21,12 +21,10 @@ export default defineComponent({
                 leverage: r_leverage.value,
                 marginType: r_marginType.value,
             }).then(() => {
-                Toast.showSuccess(`Cài bẩy bot ${r_botName.value} x${r_leverage.value}`);
-
-            }).catch((err) => {
-                Toast.showError(err.message);
+                Toast.showSuccess(`Cài bẩy bot ${r_botName.value} ${r_marginType.value} x${r_leverage.value}`);
             });
             r_visible.value = false;
+            Toast.showInfo(`Đang cài đặt đòn bẩy cho bot ${r_botName.value} ${r_marginType.value} x${r_leverage.value}...`);
         }
 
         onMounted(() => {
