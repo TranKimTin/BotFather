@@ -461,7 +461,6 @@ export async function setLeverage(botName: string, leverage: number, marginType:
     const currentLeverageMap: { [key: string]: number } = {};
     const currentMarginTypeMap: { [key: string]: string } = {};
     for (let position of futuresPositionRisk) {
-        console.log(position)
         if (position.leverage) {
             currentLeverageMap[position.symbol] = +position.leverage;
         }
