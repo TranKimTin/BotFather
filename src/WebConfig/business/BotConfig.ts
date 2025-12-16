@@ -457,6 +457,14 @@ export async function setLeverage(botName: string, leverage: number, marginType:
     for (let bracket of futuresLeverageBracket) {
         leverageMap[bracket.symbol] = bracket.brackets[0].initialLeverage; //max leverage
     }
+    let futuresPositionRisk = await client.futuresPositionRisk();
+    const currentLeverageMap: { [key: string]: number } = {};
+    for (let position of futuresPositionRisk) {
+        console.log(position)
+        if (position.leverage) {
+            currentLeverageMap[position.symbol] = +position.leverage;
+        }
+    }
 
     let promistList = [];
 
@@ -475,6 +483,10 @@ export async function setLeverage(botName: string, leverage: number, marginType:
             }
             try {
                 let effectiveLeverage = Math.min(leverage, leverageMap[symbol] || 20);
+                if (currentLeverageMap[symbol] && currentLeverageMap[symbol] === effectiveLeverage) {
+                    console.log(`Leverage for ${symbol} is already x${effectiveLeverage}, skip setting.`);
+                    return;
+                }
                 await client.futuresLeverage({
                     symbol: symbol,
                     leverage: effectiveLeverage
