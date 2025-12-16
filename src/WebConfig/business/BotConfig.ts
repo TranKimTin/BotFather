@@ -466,7 +466,7 @@ export async function setLeverage(botName: string, leverage: number, marginType:
             currentLeverageMap[position.symbol] = +position.leverage;
         }
         if (position.marginType) {
-            currentMarginTypeMap[position.symbol] = position.marginType;
+            currentMarginTypeMap[position.symbol] = position.marginType === 'cross' ? 'CROSSED' : 'ISOLATED';
         }
     }
 
