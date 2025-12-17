@@ -825,7 +825,7 @@ export default defineComponent({
             });
 
             axios.get('/getBotList').then(result => {
-                r_allBotList.value = result;
+                r_allBotList.value = result.map((item: any) => item.botName);
             });
 
             loadData();

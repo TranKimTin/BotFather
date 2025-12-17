@@ -5,7 +5,7 @@
             :closeOnEscape="false">
             <div class="grid grid-cols-[1fr_5fr] gap-2 p-2">
                 <label for="type" class="font-semibold">Bot</label>
-                <Select v-model="r_botName" filter :options="r_botList" placeholder="Bot" class="flex-auto" />
+                <Select v-model="r_bot" filter :options="r_botList" optionLabel="botName" placeholder="Bot" class="flex-auto" />
 
                 <label for="marginType" class="font-semibold">Loại:</label>
                 <Select v-model="r_marginType" filter :options="['CROSSED', 'ISOLATED']" placeholder="margin type"
@@ -30,25 +30,25 @@
             :closeOnEscape="false">
             <div class="grid grid-cols-[2fr_5fr] gap-2 p-2">
                 <label for="type" class="font-semibold">Bot</label>
-                <Select v-model="r_botName" filter :options="r_botList" placeholder="Bot" class="flex-auto" />
+                <Select v-model="r_bot" filter :options="r_botList" optionLabel="botName" placeholder="Bot" class="flex-auto" />
 
                 <label for="r_maxOpenOrderPerSymbolBot" class="font-semibold">Max lệnh mở / symbol / bot</label>
-                <InputNumber id="r_maxOpenOrderPerSymbolBot" class="flex-auto" v-model="r_maxOpenOrderPerSymbolBot"
+                <InputNumber id="r_maxOpenOrderPerSymbolBot" class="flex-auto" v-model="r_bot.maxOpenOrderPerSymbolBot"
                     autocomplete="off" :min="1" :max="5" />
 
                 <label for="r_maxOpenOrderAllSymbolBot" class="font-semibold">Max lệnh mở / tất cả symbol / bot</label>
-                <InputNumber id="r_maxOpenOrderAllSymbolBot" class="flex-auto" v-model="r_maxOpenOrderAllSymbolBot"
+                <InputNumber id="r_maxOpenOrderAllSymbolBot" class="flex-auto" v-model="r_bot.maxOpenOrderAllSymbolBot"
                     autocomplete="off" :min="1" :max="300" />
 
                 <label for="r_maxOpenOrderPerSymbolAccount" class="font-semibold">Max lệnh mở / symbol / tài
                     khoản</label>
                 <InputNumber id="r_maxOpenOrderPerSymbolAccount" class="flex-auto"
-                    v-model="r_maxOpenOrderPerSymbolAccount" autocomplete="off" :min="1" :max="5" />
+                    v-model="r_bot.maxOpenOrderPerSymbolAccount" autocomplete="off" :min="1" :max="5" />
 
                 <label for="r_maxOpenOrderAllSymbolAccount" class="font-semibold">Max lệnh mở / tất cả symbol / tài
                     khoản</label>
                 <InputNumber id="r_maxOpenOrderAllSymbolAccount" class="flex-auto"
-                    v-model="r_maxOpenOrderAllSymbolAccount" autocomplete="off" :min="1" :max="300" />
+                    v-model="r_bot.maxOpenOrderAllSymbolAccount" autocomplete="off" :min="1" :max="300" />
             </div>
 
             <div class="flex p-3"></div>
