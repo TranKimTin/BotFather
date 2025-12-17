@@ -7,7 +7,10 @@
 static void checkOrderStatus()
 {
     auto &db = MySQLConnector::getInstance();
-    string query = "SELECT id, symbol, entryID, tpID, slID, apiKey, secretKey, iv, botID, side, volume, tp, sl, maxOpenOrderPerSymbolBot, maxOpenOrderAllSymbolBot, maxOpenOrderPerSymbolAccount, maxOpenOrderAllSymbolAccount FROM RealOrders";
+    string query = R"(SELECT ro.id, ro.symbol, ro.entryID, ro.tpID, ro.slID, ro.apiKey, ro.secretKey, ro.iv, ro.botID, ro.side, ro.volume, ro.tp, ro.sl, 
+                    b.maxOpenOrderPerSymbolBot, b.maxOpenOrderAllSymbolBot, b.maxOpenOrderPerSymbolAccount, b.maxOpenOrderAllSymbolAccount 
+                    FROM RealOrders ro 
+                    JOIN Bot b ON b.id = ro.botID)";
     vector<map<string, any>> res = db.executeQuery(query, {});
 
     const int MAX_THREAD = 3;
