@@ -517,3 +517,15 @@ export async function setLeverage(botName: string, leverage: number, marginType:
         throw errorMess;
     }
 }
+
+export async function setMaximumOrder(botName: string, maxOpenOrderPerSymbolBot: number, maxOpenOrderAllSymbolBot: number, maxOpenOrderPerSymbolAccount: number, maxOpenOrderAllSymbolAccount: number) {
+    const sql = `UPDATE Bot set maxOpenOrderPerSymbolBot = ?, maxOpenOrderAllSymbolBot = ?, maxOpenOrderPerSymbolAccount = ?, maxOpenOrderAllSymbolAccount = ? WHERE botName = ?`;
+    const args = [
+        maxOpenOrderPerSymbolBot,
+        maxOpenOrderAllSymbolBot,
+        maxOpenOrderPerSymbolAccount,
+        maxOpenOrderAllSymbolAccount,
+        botName
+    ];
+    await mysql.query(sql, args);
+}

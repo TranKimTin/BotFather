@@ -33,15 +33,16 @@ export default defineComponent({
         }
 
         function setMaximumOrder() {
-            const payload = {
+            axios.post('/setMaximumOrder', {
                 botName: r_botName.value,
                 maxOpenOrderPerSymbolBot: r_maxOpenOrderPerSymbolBot.value,
                 maxOpenOrderAllSymbolBot: r_maxOpenOrderAllSymbolBot.value,
                 maxOpenOrderPerSymbolAccount: r_maxOpenOrderPerSymbolAccount.value,
                 maxOpenOrderAllSymbolAccount: r_maxOpenOrderAllSymbolAccount.value,
-            };
-            console.log(payload);
-            r_visibleLimitOrder.value = false;
+            }).then(() => {
+                r_visibleLimitOrder.value = false;
+                Toast.showSuccess(`Cài đặt giới hạn lệnh thành công cho bot ${r_botName.value}`);
+            });
         }
 
         onMounted(() => {

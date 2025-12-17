@@ -23,6 +23,7 @@ routes.get('/test/getOrders', requireToken, BotConfig.getOrders);
 routes.post("/save", requireToken, BotConfig.saveBot);
 routes.post("/check", requireToken, BotConfig.checkNode);
 routes.post('/setLeverage', requireToken, BotConfig.setLeverage);
+routes.post('/setMaximumOrder', requireToken, BotConfig.setMaximumOrder);
 
 routes.post("/login", User.Login);
 routes.post("/logout", requireToken, User.Logout);
