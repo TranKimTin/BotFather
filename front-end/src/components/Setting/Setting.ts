@@ -9,11 +9,16 @@ import Button from 'primevue/button';
 export default defineComponent({
     components: { Dialog, Select, InputNumber, Button },
     setup() {
-        const r_visible = ref<boolean>(false);
+        const r_visibleleverage = ref<boolean>(false);
+        const r_visibleLimitOrder = ref<boolean>(false);
         const r_botList = ref<Array<string>>([]);
         const r_botName = ref<string>('');
         const r_leverage = ref<number>(1);
         const r_marginType = ref<string>('ISOLATED');
+        const r_maxOpenOrderPerSymbolBot = ref<number>(5);
+        const r_maxOpenOrderAllSymbolBot = ref<number>(300);
+        const r_maxOpenOrderPerSymbolAccount = ref<number>(5);
+        const r_maxOpenOrderAllSymbolAccount = ref<number>(300);
 
         function setLeverage() {
             axios.post('/setLeverage', {
@@ -23,8 +28,20 @@ export default defineComponent({
             }).then(() => {
                 Toast.showSuccess(`Cài bẩy bot ${r_botName.value} ${r_marginType.value} x${r_leverage.value}`);
             });
-            r_visible.value = false;
+            r_visibleleverage.value = false;
             Toast.showInfo(`Đang cài đặt đòn bẩy cho bot ${r_botName.value} ${r_marginType.value} x${r_leverage.value}...`);
+        }
+
+        function setMaximumOrder() {
+            const payload = {
+                botName: r_botName.value,
+                maxOpenOrderPerSymbolBot: r_maxOpenOrderPerSymbolBot.value,
+                maxOpenOrderAllSymbolBot: r_maxOpenOrderAllSymbolBot.value,
+                maxOpenOrderPerSymbolAccount: r_maxOpenOrderPerSymbolAccount.value,
+                maxOpenOrderAllSymbolAccount: r_maxOpenOrderAllSymbolAccount.value,
+            };
+            console.log(payload);
+            r_visibleLimitOrder.value = false;
         }
 
         onMounted(() => {
@@ -34,6 +51,17 @@ export default defineComponent({
             });
         });
 
-        return { r_visible, r_botList, r_botName, r_leverage, r_marginType, setLeverage };
+        return {
+            r_visibleleverage,
+            r_visibleLimitOrder,
+            r_botList, r_botName,
+            r_leverage, r_marginType,
+            r_maxOpenOrderPerSymbolBot,
+            r_maxOpenOrderAllSymbolBot,
+            r_maxOpenOrderPerSymbolAccount,
+            r_maxOpenOrderAllSymbolAccount,
+            setLeverage,
+            setMaximumOrder
+        };
     },
 });
