@@ -215,7 +215,7 @@ static void checkPositionClosedByManual()
                     string tpStatus = tpJson["algoStatus"].get<string>();
                     string slStatus = slJson["algoStatus"].get<string>();
 
-                    if (entryJson["status"] == "FILLED" && (tpStatus != "NEW" || slStatus != "NEW"))
+                    if (entryJson["status"] == "FILLED" && (tpStatus == "NEW" || slStatus == "NEW"))
                     {
                         if (tpStatus == "NEW")
                         {
