@@ -174,6 +174,10 @@ struct Bot
     string secretKey;
     string iv;
     bool enableRealOrder;
+    int maxOpenOrderPerSymbolBot;
+    int maxOpenOrderAllSymbolBot;
+    int maxOpenOrderPerSymbolAccount;
+    int maxOpenOrderAllSymbolAccount;
     boost::unordered_flat_set<long long> symbolExist;
 };
 

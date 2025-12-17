@@ -14,11 +14,41 @@ static void adjustClientOrderId(string &clientOrderId)
     }
 }
 
-BinanceFuture::BinanceFuture(const string &apiKey, const string &encryptedSecretKey, const string &iv, const int botID)
-    : apiKey(apiKey), encryptedSecretKey(encryptedSecretKey), iv(iv), botID(botID)
+BinanceFuture::BinanceFuture(const string &apiKey, const string &encryptedSecretKey, const string &iv, shared_ptr<Bot> bot)
+    : apiKey(apiKey), encryptedSecretKey(encryptedSecretKey), iv(iv), bot(bot)
 {
     boost::unordered_flat_map<string, string> env = readEnvFile();
     secretKey = decryptAES(encryptedSecretKey, env["ENCRYP_KEY"], iv);
+}
+
+bool BinanceFuture::checkLimitOrder(const string &symbol, OrderCount &orderCount)
+{
+    int maxPerSymbolBot = bot->maxOpenOrderPerSymbolBot;
+    int maxAllSymbolBot = bot->maxOpenOrderAllSymbolBot;
+    int maxPerSymbolAccount = bot->maxOpenOrderPerSymbolAccount;
+    int maxAllSymbolAccount = bot->maxOpenOrderAllSymbolAccount;
+
+    if (orderCount.buyAllSymbolAccount + orderCount.sellAllSymbolAccount >= maxAllSymbolAccount)
+    {
+        LOGE("Max open order for all symbol in account reached ({}). Do nothing.", orderCount.buyAllSymbolAccount + orderCount.sellAllSymbolAccount);
+        return false;
+    }
+    if (orderCount.buyOneSymbolAccount + orderCount.sellOneSymbolAccount >= maxPerSymbolAccount)
+    {
+        LOGE("Max open order for symbol {} in account reached ({}). Do nothing.", symbol, orderCount.buyOneSymbolAccount + orderCount.sellOneSymbolAccount);
+        return false;
+    }
+    if (orderCount.buyAllSymbolBot + orderCount.sellAllSymbolBot >= maxAllSymbolBot)
+    {
+        LOGE("Max open order for all symbol in bot reached ({}). Do nothing.", orderCount.buyAllSymbolBot + orderCount.sellAllSymbolBot);
+        return false;
+    }
+    if (orderCount.buyOneSymbolBot + orderCount.sellOneSymbolBot >= maxPerSymbolBot)
+    {
+        LOGE("Max open order for symbol {} in bot reached ({}). Do nothing.", symbol, orderCount.buyOneSymbolBot + orderCount.sellOneSymbolBot);
+        return false;
+    }
+    return true;
 }
 
 string BinanceFuture::buyMarket(const string &symbol, string quantity,
@@ -26,21 +56,20 @@ string BinanceFuture::buyMarket(const string &symbol, string quantity,
 {
     if (!takeProfit.empty() || !stopLoss.empty())
     {
-        auto orderCount = getOpenAlgoOrdersCount(symbol);
-        if (orderCount.algo == -1 || orderCount.algo >= MAX_NUM_ALGO_ORDERS - 2)
+        auto orderCount = getOpenOrdersCount(symbol);
+        if (!checkLimitOrder(symbol, orderCount))
         {
-            LOGE("Max number of algo orders reached ({}). Do nothing.", orderCount.algo);
             return "";
         }
-        if (orderCount.sell > 0)
+        if (orderCount.sellAllSymbolAccount > 0)
         {
-            LOGE("There are sell algo orders ({}). Do nothing.", orderCount.sell);
+            LOGE("There are sell orders ({}). Do nothing.", orderCount.sellAllSymbolAccount);
             return "";
         }
-        LOGI("openOrderAlgoCount: {}", orderCount.algo);
+        LOGI("openOrderCount: {}", orderCount.buyAllSymbolAccount + orderCount.sellAllSymbolAccount);
     }
 
-    string clientOrderId = StringFormat("BFBM{}{}_{}", symbol, getCurrentTime(), botID);
+    string clientOrderId = StringFormat("BFBM{}{}_{}", symbol, getCurrentTime(), bot->id);
     adjustClientOrderId(clientOrderId);
 
     map<string, string> params = {
@@ -121,21 +150,20 @@ string BinanceFuture::sellMarket(const string &symbol, string quantity, string t
 {
     if (!takeProfit.empty() || !stopLoss.empty())
     {
-        auto orderCount = getOpenAlgoOrdersCount(symbol);
-        if (orderCount.algo == -1 || orderCount.algo >= MAX_NUM_ALGO_ORDERS - 2)
+        auto orderCount = getOpenOrdersCount(symbol);
+        if (!checkLimitOrder(symbol, orderCount))
         {
-            LOGE("Max number of algo orders reached ({}). Do nothing.", orderCount.algo);
             return "";
         }
-        if (orderCount.buy > 0)
+        if (orderCount.buyAllSymbolAccount > 0)
         {
-            LOGE("There are buy algo orders ({}). Do nothing.", orderCount.buy);
+            LOGE("There are buy orders ({}). Do nothing.", orderCount.sellAllSymbolAccount);
             return "";
         }
-        LOGI("openOrderAlgoCount: {}", orderCount.algo);
+        LOGI("openOrderCount: {}", orderCount.buyAllSymbolAccount + orderCount.sellAllSymbolAccount);
     }
 
-    string clientOrderId = StringFormat("BFSM{}{}_{}", symbol, getCurrentTime(), botID);
+    string clientOrderId = StringFormat("BFSM{}{}_{}", symbol, getCurrentTime(), bot->id);
     adjustClientOrderId(clientOrderId);
 
     map<string, string> params = {
@@ -215,21 +243,20 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
 {
     if (!takeProfit.empty() || !stopLoss.empty())
     {
-        auto orderCount = getOpenAlgoOrdersCount(symbol);
-        if (orderCount.algo == -1 || orderCount.algo >= MAX_NUM_ALGO_ORDERS - 2)
+        auto orderCount = getOpenOrdersCount(symbol);
+        if (!checkLimitOrder(symbol, orderCount))
         {
-            LOGE("Max number of algo orders reached ({}). Do nothing.", orderCount.algo);
             return "";
         }
-        if (orderCount.sell > 0)
+        if (orderCount.sellAllSymbolAccount > 0)
         {
-            LOGE("There are sell algo orders ({}). Do nothing.", orderCount.sell);
+            LOGE("There are sell orders ({}). Do nothing.", orderCount.sellAllSymbolAccount);
             return "";
         }
-        LOGI("openOrderAlgoCount: {}", orderCount.algo);
+        LOGI("openOrderCount: {}", orderCount.buyAllSymbolAccount + orderCount.sellAllSymbolAccount);
     }
 
-    string clientOrderId = StringFormat("BFBL{}{}_{}", symbol, getCurrentTime(), botID);
+    string clientOrderId = StringFormat("BFBL{}{}_{}", symbol, getCurrentTime(), bot->id);
     adjustClientOrderId(clientOrderId);
 
     map<string, string> params = {
@@ -272,21 +299,20 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
 {
     if (!takeProfit.empty() || !stopLoss.empty())
     {
-        auto orderCount = getOpenAlgoOrdersCount(symbol);
-        if (orderCount.algo == -1 || orderCount.algo >= MAX_NUM_ALGO_ORDERS - 2)
+        auto orderCount = getOpenOrdersCount(symbol);
+        if (!checkLimitOrder(symbol, orderCount))
         {
-            LOGE("Max number of algo orders reached ({}). Do nothing.", orderCount.algo);
             return "";
         }
-        if (orderCount.buy > 0)
+        if (orderCount.buyAllSymbolAccount > 0)
         {
-            LOGE("There are buy algo orders ({}). Do nothing.", orderCount.buy);
+            LOGE("There are buy orders ({}). Do nothing.", orderCount.sellAllSymbolAccount);
             return "";
         }
-        LOGI("openOrderAlgoCount: {}", orderCount.algo);
+        LOGI("openOrderCount: {}", orderCount.buyAllSymbolAccount + orderCount.sellAllSymbolAccount);
     }
 
-    string clientOrderId = StringFormat("BFSL{}{}_{}", symbol, getCurrentTime(), botID);
+    string clientOrderId = StringFormat("BFSL{}{}_{}", symbol, getCurrentTime(), bot->id);
     adjustClientOrderId(clientOrderId);
 
     map<string, string> params = {
@@ -328,8 +354,8 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
 string BinanceFuture::sendTPorSL(const string &symbol, const string &side, const string &type, string quantity, string stopPrice, string limitPrice)
 {
     string clientAlgoId = (type == TAKE_PROFIT_MARKET || type == STOP || type == LIMIT)
-                              ? StringFormat("BF_TP{}{}_{}", symbol, getCurrentTime(), botID)
-                              : StringFormat("BF_SL{}{}_{}", symbol, getCurrentTime(), botID);
+                              ? StringFormat("BF_TP{}{}_{}", symbol, getCurrentTime(), bot->id)
+                              : StringFormat("BF_SL{}{}_{}", symbol, getCurrentTime(), bot->id);
     adjustClientOrderId(clientAlgoId);
 
     map<string, string> params = {
@@ -590,7 +616,7 @@ int BinanceFuture::insertOrderToDB(const string &symbol, const string clientOrde
         apiKey,
         encryptedSecretKey,
         iv,
-        botID,
+        bot->id,
         side,
         volume,
         tp,
@@ -666,28 +692,72 @@ bool BinanceFuture::changeMarginType(const string &symbol, const string &marginT
     return false;
 }
 
-OrderCount BinanceFuture::getOpenAlgoOrdersCount(const string &symbol)
+OrderCount BinanceFuture::getOpenOrdersCount(const string &symbol)
 {
-    OrderCount result = {0, 0, 0};
-    string sql = "SELECT side FROM RealOrders WHERE broker = ? AND symbol = ? AND apiKey = ?";
+    OrderCount result = {0, 0, 0, 0, 0, 0, 0, 0};
+    string sql = "SELECT symbol, side, botID, apiKey FROM RealOrders WHERE broker = ? AND (botID = ? OR apiKey = ?)";
     auto &db = MySQLConnector::getInstance();
     vector<any> params = {
         "binance_future",
-        symbol,
+        bot->id,
         apiKey};
     auto res = db.executeQuery(sql, params);
     for (auto &row : res)
     {
-        string side = any_cast<string>(row.at("side"));
-        if (side == BUY)
+        string orderSymbol = any_cast<string>(row.at("symbol"));
+        string orderSide = any_cast<string>(row.at("side"));
+        int orderBotID = any_cast<int>(row.at("botID"));
+        string orderApiKey = any_cast<string>(row.at("apiKey"));
+
+        if (symbol == orderSymbol)
         {
-            result.buy++;
+            if (bot->id == orderBotID)
+            {
+                if (orderSide == BUY)
+                {
+                    result.buyOneSymbolBot++;
+                }
+                else if (orderSide == SELL)
+                {
+                    result.sellOneSymbolBot++;
+                }
+            }
+            if (apiKey == orderApiKey)
+            {
+                if (orderSide == BUY)
+                {
+                    result.buyOneSymbolAccount++;
+                }
+                else if (orderSide == SELL)
+                {
+                    result.sellOneSymbolAccount++;
+                }
+            }
         }
-        else if (side == SELL)
+
+        // all symbol
+        if (bot->id == orderBotID)
         {
-            result.sell++;
+            if (orderSide == BUY)
+            {
+                result.buyAllSymbolBot++;
+            }
+            else if (orderSide == SELL)
+            {
+                result.sellAllSymbolBot++;
+            }
         }
-        result.algo += 2;
+        if (apiKey == orderApiKey)
+        {
+            if (orderSide == BUY)
+            {
+                result.buyAllSymbolAccount++;
+            }
+            else if (orderSide == SELL)
+            {
+                result.sellAllSymbolAccount++;
+            }
+        }
     }
     return result;
 }

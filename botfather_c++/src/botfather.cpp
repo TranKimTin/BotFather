@@ -150,7 +150,7 @@ vector<shared_ptr<Bot>> getBotList(string botName, bool cachedTree)
     Timer timer("getBotList");
     vector<shared_ptr<Bot>> botList;
     auto &db = MySQLConnector::getInstance();
-    string mysql_query = "SELECT id,botName,userID,timeframes,symbolList,route,idTelegram,apiKey,secretKey,iv,enableRealOrder FROM Bot";
+    string mysql_query = "SELECT id,botName,userID,timeframes,symbolList,route,idTelegram,apiKey,secretKey,iv,enableRealOrder,maxOpenOrderPerSymbolBot,maxOpenOrderAllSymbolBot,maxOpenOrderPerSymbolAccount,maxOpenOrderAllSymbolAccount FROM Bot";
     vector<any> args;
 
     if (botName != "")
@@ -175,6 +175,10 @@ vector<shared_ptr<Bot>> getBotList(string botName, bool cachedTree)
         bot->secretKey = any_cast<string>(row.at("secretKey"));
         bot->iv = any_cast<string>(row.at("iv"));
         bot->enableRealOrder = any_cast<int>(row.at("enableRealOrder")) == 0 ? false : true;
+        bot->maxOpenOrderPerSymbolBot = any_cast<int>(row.at("maxOpenOrderPerSymbolBot"));
+        bot->maxOpenOrderAllSymbolBot = any_cast<int>(row.at("maxOpenOrderAllSymbolBot"));
+        bot->maxOpenOrderPerSymbolAccount = any_cast<int>(row.at("maxOpenOrderPerSymbolAccount"));
+        bot->maxOpenOrderAllSymbolAccount = any_cast<int>(row.at("maxOpenOrderAllSymbolAccount"));
 
         for (string &id : bot->idTelegram)
         {

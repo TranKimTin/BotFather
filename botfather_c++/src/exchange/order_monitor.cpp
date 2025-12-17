@@ -7,7 +7,7 @@
 static void checkOrderStatus()
 {
     auto &db = MySQLConnector::getInstance();
-    string query = "SELECT id, symbol, entryID, tpID, slID, apiKey, secretKey, iv, botID, side, volume, tp, sl FROM RealOrders";
+    string query = "SELECT id, symbol, entryID, tpID, slID, apiKey, secretKey, iv, botID, side, volume, tp, sl, maxOpenOrderPerSymbolBot, maxOpenOrderAllSymbolBot, maxOpenOrderPerSymbolAccount, maxOpenOrderAllSymbolAccount FROM RealOrders";
     vector<map<string, any>> res = db.executeQuery(query, {});
 
     const int MAX_THREAD = 3;
@@ -29,7 +29,14 @@ static void checkOrderStatus()
         string tp = any_cast<string>(row.at("tp"));
         string sl = any_cast<string>(row.at("sl"));
 
-        shared_ptr<IExchange> exchange = make_shared<BinanceFuture>(apiKey, encryptedSecretKey, iv, botID);
+        shared_ptr<Bot> bot = make_shared<Bot>();
+        bot->id = botID;
+        bot->maxOpenOrderAllSymbolAccount = any_cast<int>(row.at("maxOpenOrderAllSymbolAccount"));
+        bot->maxOpenOrderPerSymbolAccount = any_cast<int>(row.at("maxOpenOrderPerSymbolAccount"));
+        bot->maxOpenOrderAllSymbolBot = any_cast<int>(row.at("maxOpenOrderAllSymbolBot"));
+        bot->maxOpenOrderPerSymbolBot = any_cast<int>(row.at("maxOpenOrderPerSymbolBot"));
+
+        shared_ptr<IExchange> exchange = make_shared<BinanceFuture>(apiKey, encryptedSecretKey, iv, bot);
 
         boost::asio::post(pool, [=, &db]() mutable
                           {
@@ -151,7 +158,8 @@ static void checkPositionClosedByManual()
             string encryptedSecretKey = any_cast<string>(row.at("secretKey"));
             string iv = any_cast<string>(row.at("iv"));
 
-            shared_ptr<IExchange> exchange = make_shared<BinanceFuture>(apiKey, encryptedSecretKey, iv, 0);
+            shared_ptr<Bot> bot = make_shared<Bot>();
+            shared_ptr<IExchange> exchange = make_shared<BinanceFuture>(apiKey, encryptedSecretKey, iv, bot);
             string s = exchange->getPositionRisk();
             if (s.empty())
             {
