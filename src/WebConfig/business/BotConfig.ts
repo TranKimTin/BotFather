@@ -273,6 +273,42 @@ export async function saveBot(data: BotInfo, userData: UserTokenInfo) {
         throw 'Điều kiện vòng tròn';
     }
 
+    const visited: { [key: string]: boolean } = {};
+    let signalRounded = false;
+    visited[data.botName] = true;
+    const dfs = async (botName: string) => {
+        if (signalRounded) {
+            return;
+        }
+        if (visited[botName]) {
+            signalRounded = true;
+            return;
+        }
+        visited[botName] = true;
+
+        const sql = `SELECT treeData FROM Bot WHERE botName = ?`;
+        const res = await mysql.query(sql, [botName]);
+        if (res.length > 0) {
+            const treeData = JSON.parse(res[0].treeData);
+            const nodeList = treeData.elements.nodes?.filter((item: any) => !item.removed).map((item: any) => item.data) || [];
+            for (let node of nodeList) {
+                if (node.botName && node.type === NODE_TYPE.GET_SIGNAL) {
+                    dfs(node.botName);
+                }
+            }
+        }
+
+        visited[botName] = false;
+    }
+    for (let node of nodes) {
+        if (node.botName && node.type === NODE_TYPE.GET_SIGNAL) {
+            await dfs(node.botName);
+        }
+    }
+    if (signalRounded) {
+        throw 'Nhận tín hiệu vòng tròn';
+    }
+
     let IV: string = '';
 
     if (data.apiKey || data.secretKey) {
@@ -370,8 +406,6 @@ export async function saveBot(data: BotInfo, userData: UserTokenInfo) {
 }
 
 export async function checkNode(data: NodeData) {
-    console.log('check', data);
-
     if (!data.id || !isValidCondition(data)) {
         throw `Điều kiện không hợp lệ ${data.value}`;
     }
