@@ -61,9 +61,9 @@ string BinanceFuture::buyMarket(const string &symbol, string quantity,
         {
             return "";
         }
-        if (orderCount.sellAllSymbolAccount > 0)
+        if (orderCount.sellOneSymbolAccount > 0)
         {
-            LOGE("There are sell orders ({}). Do nothing.", orderCount.sellAllSymbolAccount);
+            LOGE("There are sell orders ({}). Do nothing.", orderCount.sellOneSymbolAccount);
             return "";
         }
         LOGI("openOrderCount: {}", orderCount.buyAllSymbolAccount + orderCount.sellAllSymbolAccount);
@@ -155,9 +155,9 @@ string BinanceFuture::sellMarket(const string &symbol, string quantity, string t
         {
             return "";
         }
-        if (orderCount.buyAllSymbolAccount > 0)
+        if (orderCount.buyOneSymbolAccount > 0)
         {
-            LOGE("There are buy orders ({}). Do nothing.", orderCount.sellAllSymbolAccount);
+            LOGE("There are buy orders ({}). Do nothing.", orderCount.buyOneSymbolAccount);
             return "";
         }
         LOGI("openOrderCount: {}", orderCount.buyAllSymbolAccount + orderCount.sellAllSymbolAccount);
@@ -248,9 +248,9 @@ string BinanceFuture::buyLimit(const string &symbol, string quantity, string pri
         {
             return "";
         }
-        if (orderCount.sellAllSymbolAccount > 0)
+        if (orderCount.sellOneSymbolAccount > 0)
         {
-            LOGE("There are sell orders ({}). Do nothing.", orderCount.sellAllSymbolAccount);
+            LOGE("There are sell orders ({}). Do nothing.", orderCount.sellOneSymbolAccount);
             return "";
         }
         LOGI("openOrderCount: {}", orderCount.buyAllSymbolAccount + orderCount.sellAllSymbolAccount);
@@ -304,9 +304,9 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
         {
             return "";
         }
-        if (orderCount.buyAllSymbolAccount > 0)
+        if (orderCount.buyOneSymbolAccount > 0)
         {
-            LOGE("There are buy orders ({}). Do nothing.", orderCount.sellAllSymbolAccount);
+            LOGE("There are buy orders ({}). Do nothing.", orderCount.sellOneSymbolAccount);
             return "";
         }
         LOGI("openOrderCount: {}", orderCount.buyAllSymbolAccount + orderCount.sellAllSymbolAccount);
