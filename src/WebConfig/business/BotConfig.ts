@@ -277,6 +277,7 @@ export async function saveBot(data: BotInfo, userData: UserTokenInfo) {
     let signalRounded = false;
     visited[data.botName] = true;
     const dfs = async (botName: string) => {
+        console.log({ botName, signalRounded });
         if (signalRounded) {
             return;
         }
