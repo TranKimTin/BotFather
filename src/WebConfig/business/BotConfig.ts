@@ -294,7 +294,7 @@ export async function saveBot(data: BotInfo, userData: UserTokenInfo) {
             const nodeList = treeData.elements.nodes?.filter((item: any) => !item.removed).map((item: any) => item.data) || [];
             for (let node of nodeList) {
                 if (node.botName && node.type === NODE_TYPE.GET_SIGNAL) {
-                    dfs(node.botName);
+                    await dfs(node.botName);
                 }
             }
         }
