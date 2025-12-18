@@ -4,15 +4,21 @@
 #include "exchange.h"
 
 struct OrderCount{
-    int buy;
-    int sell;
-    int algo;
+    int buyOneSymbolBot;
+    int sellOneSymbolBot;
+    int buyAllSymbolBot;
+    int sellAllSymbolBot;
+
+    int buyOneSymbolAccount;
+    int sellOneSymbolAccount;
+    int buyAllSymbolAccount;
+    int sellAllSymbolAccount;
 };
 
 class BinanceFuture : public IExchange
 {
 public:
-    BinanceFuture(const string &apiKey, const string &encryptedSecretKey, const string &iv, const int botID);
+    BinanceFuture(const string &apiKey, const string &encryptedSecretKey, const string &iv, shared_ptr<Bot> bot);
 
     string buyMarket(const string &symbol, string quantity, string takeProfit = "", string stopLoss = "", bool reduceOnly = false) override;
     string sellMarket(const string &symbol, string quantity, string takeProfit = "", string stopLoss = "", bool reduceOnly = false) override;
@@ -31,7 +37,7 @@ private:
     string iv;
     string apiKey;
     string secretKey;
-    int botID;
+    shared_ptr<Bot> bot;
     const string BASE_URL = "https://fapi.binance.com";
     
     // string BASE_URL = "https://demo-fapi.binance.com";
@@ -62,6 +68,7 @@ private:
     int insertOrderToDB(const string &symbol, const string clientOrderId, const string side, const string volume, const string tp, const string sl);
     int updateOrderToDB(const string &clientOrderId, const string &tpID, const string &slID);
     int removeOrderToDB(const string &clientOrderId);
-    OrderCount getOpenAlgoOrdersCount(const string &symbol);
+    OrderCount getOpenOrdersCount(const string &symbol);
     bool isAlgoOrder(const string& clientOrderId);
+    bool checkLimitOrder(const string& symbol, OrderCount& orderCount);
 };

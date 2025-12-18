@@ -379,7 +379,7 @@ export default defineComponent({
         onMounted(() => {
             loadData(false);
             axios.get('/getBotList').then(result => {
-                r_botNameList.value = result;
+                r_botNameList.value = result.map((item: any) => item.botName);
             });
         });
 

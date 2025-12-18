@@ -216,3 +216,29 @@ export async function setLeverage(req: any, res: any) {
         res.json({ code: 400, message: err, data: [] });
     }
 }
+
+export async function setMaximumOrder(req: any, res: any) {
+    try {
+        const botName: string = req.body.botName;
+        const maxOpenOrderPerSymbolBot: number = req.body.maxOpenOrderPerSymbolBot;
+        const maxOpenOrderAllSymbolBot: number = req.body.maxOpenOrderAllSymbolBot;
+        const maxOpenOrderPerSymbolAccount: number = req.body.maxOpenOrderPerSymbolAccount;
+        const maxOpenOrderAllSymbolAccount: number = req.body.maxOpenOrderAllSymbolAccount;
+        const userData: UserTokenInfo = req.user;
+        const isOwnBot = await BotConfig.requireOwnBot(botName, userData);
+        if (!isOwnBot) {
+            res.json({ code: 403, message: 'Không có quyền truy cập bot', data: [] });
+            return;
+        }
+        if (maxOpenOrderPerSymbolBot < 1 || maxOpenOrderAllSymbolBot < 1 || maxOpenOrderPerSymbolAccount < 1 || maxOpenOrderAllSymbolAccount < 1) {
+            throw 'Giới hạn lệnh phải lớn hơn 0';
+        }
+
+        await BotConfig.setMaximumOrder(botName, maxOpenOrderPerSymbolBot, maxOpenOrderAllSymbolBot, maxOpenOrderPerSymbolAccount, maxOpenOrderAllSymbolAccount);
+        res.json({ code: 200, message: "Set maximum order success" });
+    }
+    catch (err: any) {
+        console.error(err);
+        res.json({ code: 400, message: err, data: [] });
+    }
+}

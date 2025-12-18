@@ -134,12 +134,11 @@ export async function getSymbolList() {
 }
 
 export async function getBotList(userData: UserTokenInfo, real: boolean) {
-    const botList = await mysql.query(`SELECT botName 
+    const botList = await mysql.query(`SELECT botName, maxOpenOrderPerSymbolBot, maxOpenOrderAllSymbolBot, maxOpenOrderPerSymbolAccount, maxOpenOrderAllSymbolAccount 
                                         FROM Bot 
                                         WHERE (userID = ? OR ? = ?) ${real ? 'AND (enableRealOrder = 1 AND apiKey IS NOT NULL AND secretKey IS NOT NULL AND iv IS NOT NULL)' : ''}
                                         ORDER BY botName ASC`, [userData.id, userData.role, ROLE.ADMIN]);
-    const data = botList.map((item: { botName: any; }) => item.botName);
-    return data;
+    return botList;
 }
 
 export async function getHistoryOrder(botName: string, filterBroker: Array<string>, filterTimeframe: Array<string>) {
@@ -516,4 +515,16 @@ export async function setLeverage(botName: string, leverage: number, marginType:
     if (errorMess) {
         throw errorMess;
     }
+}
+
+export async function setMaximumOrder(botName: string, maxOpenOrderPerSymbolBot: number, maxOpenOrderAllSymbolBot: number, maxOpenOrderPerSymbolAccount: number, maxOpenOrderAllSymbolAccount: number) {
+    const sql = `UPDATE Bot set maxOpenOrderPerSymbolBot = ?, maxOpenOrderAllSymbolBot = ?, maxOpenOrderPerSymbolAccount = ?, maxOpenOrderAllSymbolAccount = ? WHERE botName = ?`;
+    const args = [
+        maxOpenOrderPerSymbolBot,
+        maxOpenOrderAllSymbolBot,
+        maxOpenOrderPerSymbolAccount,
+        maxOpenOrderAllSymbolAccount,
+        botName
+    ];
+    await mysql.query(sql, args);
 }

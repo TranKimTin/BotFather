@@ -576,7 +576,7 @@ bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
                 LOGE("Order price is out of range. Entry: {}, SL: {}, TP: {}, Valid range: [{}, {}]", node.entry, node.sl, node.tp, exchangeInfo.minPrice, exchangeInfo.maxPrice);
             }
             else {
-                shared_ptr<BinanceFuture> exchange = make_shared<BinanceFuture>(bot->apiKey, bot->secretKey, bot->iv, bot->id);
+                shared_ptr<BinanceFuture> exchange = make_shared<BinanceFuture>(bot->apiKey, bot->secretKey, bot->iv, bot);
 
                 if (node.type == NODE_TYPE::BUY_MARKET)
                 {
