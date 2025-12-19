@@ -152,7 +152,7 @@ max_macd_histogram: 'max_macd_histogram' '(' INT ',' INT ',' INT ',' INT (',' IN
 avg_macd_histogram: 'avg_macd_histogram' '(' INT ',' INT ',' INT ',' INT (',' INT)? ')';
 random: 'random' '(' INT ',' INT ')';
 
-comparisonOp : GT | GE | LT | LE | EQ | ASSIGN ;
+comparisonOp : GT | GE | LT | LE | EQ | NEQ | ASSIGN ;
 
 number: INT | FLOAT;
 
@@ -168,6 +168,7 @@ GE      : '>=';
 LT      : '<';
 LE      : '<=';
 EQ      : '==';
+NEQ     : '!=';
 ASSIGN  : '=';
 
 INT: '-'? [0-9]+ ;

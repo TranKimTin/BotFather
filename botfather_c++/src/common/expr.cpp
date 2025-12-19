@@ -108,7 +108,7 @@ any Expr::visitComparison(ExprParser::ComparisonContext *ctx)
 
     int type = ctx->comparisonOp()->getStart()->getType();
 
-    // comparisonOp : GT | GE | LT | LE | EQ | ASSIGN ;
+    // comparisonOp : GT | GE | LT | LE | EQ | NEQ | ASSIGN ;
 
     switch (type)
     {
@@ -122,6 +122,8 @@ any Expr::visitComparison(ExprParser::ComparisonContext *ctx)
         return l <= r ? 1.0 : 0.0;
     case ExprParser::EQ:
         return l == r ? 1.0 : 0.0;
+    case ExprParser::NEQ:
+        return l != r ? 1.0 : 0.0;
     case ExprParser::ASSIGN:
         return l == r ? 1.0 : 0.0;
     default:
