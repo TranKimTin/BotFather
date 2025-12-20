@@ -10,6 +10,9 @@ import dotenv from 'dotenv';
 import { BollingerBandsOutput } from 'technicalindicators/declarations/volatility/BollingerBands';
 import * as customIndicator from './CustomIndicator';
 import * as crypto from 'crypto';
+import { pipeline } from "stream/promises";
+import fs from "fs";
+import path from "path";
 
 dotenv.config({ path: `${__dirname}/../../.env` });
 
@@ -1220,4 +1223,72 @@ export function decryptAES(ciphertextBase64: string, key: string, iv: string): s
 export function generateRandomIV(): string {
     const iv = crypto.randomBytes(16); // 16 bytes for AES block size
     return iv.toString('hex');
+}
+
+async function sha256File(filePath: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const hash = crypto.createHash("sha256");
+        const stream = fs.createReadStream(filePath);
+
+        stream.on("data", d => hash.update(d));
+        stream.on("end", () => resolve(hash.digest("hex")));
+        stream.on("error", reject);
+    });
+}
+
+function readChecksumFile(checksumPath: string): string {
+    const text = fs.readFileSync(checksumPath, "utf8").trim();
+    return text.split(/\s+/)[0];
+}
+
+async function downloadFile(url: string, filePath: string) {
+    const res = await fetch(url);
+    if (!res.ok || !res.body) {
+        throw new Error(`Download failed: ${url}`);
+    }
+    await pipeline(res.body as any, fs.createWriteStream(filePath));
+}
+
+export async function downloadData(symbol: string, month: string, dest: string) {
+    const base = `https://data.binance.vision/data/futures/um/monthly/klines/${symbol}/1m`;
+    const fileName = `${symbol}-1m-${month}.zip`;
+
+    const zipUrl = `${base}/${fileName}`;
+    const checksumUrl = `${zipUrl}.CHECKSUM`;
+
+    fs.mkdirSync(dest, { recursive: true });
+
+    const zipPath = path.join(dest, fileName);
+    const checksumPath = `${zipPath}.CHECKSUM`;
+
+    // nếu đã có cả zip + checksum → verify offline
+    if (fs.existsSync(zipPath) && fs.existsSync(checksumPath)) {
+        const expectedHash = readChecksumFile(checksumPath);
+        const actualHash = await sha256File(zipPath);
+        if (expectedHash === actualHash) {
+            return zipPath;
+        }
+        fs.unlinkSync(zipPath);
+    }
+
+    // nếu chưa có checksum → tải checksum trước
+    if (!fs.existsSync(checksumPath)) {
+        await downloadFile(checksumUrl, checksumPath);
+    }
+
+    console.log(`Downloading ${fileName}`);
+    
+    // download zip
+    await downloadFile(zipUrl, zipPath);
+
+    // verify sau khi download
+    const expectedHash = readChecksumFile(checksumPath);
+    const actualHash = await sha256File(zipPath);
+
+    if (expectedHash !== actualHash) {
+        fs.unlinkSync(zipPath);
+        throw new Error("Checksum mismatch");
+    }
+
+    return zipPath;
 }
