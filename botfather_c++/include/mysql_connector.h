@@ -21,12 +21,11 @@ public:
     vector<map<string, any>> executeQuery(const string &query, const vector<any> &params);
     int executeUpdate(const string &query, const vector<any> &params);
     void bindParams(sql::PreparedStatement *stmt, const vector<any> &params);
+    void initializePool(int size);
 
 private:
     MySQLConnector();
     ~MySQLConnector();
-
-    void initializePool(int size);
 
     sql::Driver *driver;
     string host, username, password, database;
@@ -34,5 +33,5 @@ private:
     queue<std::shared_ptr<sql::Connection>> pool;
     mutex poolMutex;
     condition_variable poolCond;
-    int poolSize = 30;
+    int poolSize;
 };

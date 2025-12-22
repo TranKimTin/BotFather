@@ -4,7 +4,7 @@
 
 class Worker
 {
-private:
+protected:
     string broker;
     string symbol;
     string timeframe;
@@ -44,6 +44,7 @@ public:
         socketData = nullptr;
         onlyCheckSignal = false;
     };
+    virtual ~Worker() = default;
     void init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, ExchangeInfo exchangeInfo, double fundingRate, SocketData* socketData);
     void run();
     void dfs_handleLogic(Route &route, const shared_ptr<Bot> &bot);

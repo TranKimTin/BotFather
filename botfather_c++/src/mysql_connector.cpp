@@ -3,24 +3,6 @@
 
 MySQLConnector::MySQLConnector()
 {
-    try
-    {
-        auto env = readEnvFile();
-        driver = sql::mysql::get_mysql_driver_instance();
-        host = "tcp://" + env["MYSQL_HOST"] + ":3306";
-        username = env["MYSQL_USER"];
-        password = env["MYSQL_PASSWORD"];
-        database = env["MYSQL_DATABASE"];
-
-        initializePool(poolSize);
-
-        LOGI("MySQL connection pool initialized with {} connections", poolSize);
-    }
-    catch (sql::SQLException &e)
-    {
-        LOGE("MySQL pool init failed: {} (SQLState: {}, ErrorCode: {})",
-             e.what(), e.getSQLStateCStr(), e.getErrorCode());
-    }
 }
 
 MySQLConnector::~MySQLConnector()
@@ -36,6 +18,14 @@ MySQLConnector &MySQLConnector::getInstance()
 
 void MySQLConnector::initializePool(int size)
 {
+    lock_guard<mutex> lock(poolMutex);
+    poolSize = size;
+    auto env = readEnvFile();
+    driver = sql::mysql::get_mysql_driver_instance();
+    host = "tcp://" + env["MYSQL_HOST"] + ":3306";
+    username = env["MYSQL_USER"];
+    password = env["MYSQL_PASSWORD"];
+    database = env["MYSQL_DATABASE"];
     for (int i = 0; i < size; ++i)
     {
         sql::Connection *rawConn = driver->connect(host, username, password);
@@ -49,6 +39,7 @@ void MySQLConnector::initializePool(int size)
         rawConn->setSchema(database);
         pool.push(shared_ptr<sql::Connection>(rawConn));
     }
+    LOGI("MySQL connection pool initialized with {} connections", poolSize);
 }
 
 shared_ptr<sql::Connection> MySQLConnector::acquireConnection()

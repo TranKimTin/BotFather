@@ -21,9 +21,7 @@ void init()
     spdlog::flush_on(spdlog::level::err);
     spdlog::flush_every(chrono::seconds(3));
 
-    LOGI("Hello backtest!");
-
-    MySQLConnector::getInstance();
+    MySQLConnector::getInstance().initializePool(2);
 
     srand(time(NULL));
 }
@@ -31,13 +29,33 @@ void init()
 void destroy()
 {
     spdlog::shutdown();
-    LOGI("Goodbye backtest!");
 }
 
 int main()
 {
     init();
-    LOGI("Hello world");
+
+    string botName = "bot_tin_11";
+    long long startTime = 1756684800000;
+    long long endTime = getCurrentTime();
+
+    string sql = "SELECT id,botName,userID,timeframes,symbolList,route,idTelegram,apiKey,secretKey,iv,enableRealOrder,maxOpenOrderPerSymbolBot,maxOpenOrderAllSymbolBot,maxOpenOrderPerSymbolAccount,maxOpenOrderAllSymbolAccount FROM Bot WHERE botName = ?";
+    vector<any> args = {botName};
+    auto &db = MySQLConnector::getInstance();
+    vector<map<string, any>> res = db.executeQuery(sql, args);
+    if (res.size() != 1)
+    {
+        LOGE("Can't not find bot {}", botName);
+        return 0;
+    }
+    shared_ptr<Bot> bot = initBot(res[0], false);
+    vector<shared_ptr<Bot>> botList = {bot};
+
+    for (Symbol symbol : bot->symbolList)
+    {
+        LOGI("backtest {}", symbol.symbol);
+    }
+
     destroy();
     return 0;
 }

@@ -74,7 +74,7 @@ void init()
 
     LOGI("Hello BotFather!");
 
-    MySQLConnector::getInstance();
+    MySQLConnector::getInstance().initializePool(30);
     Telegram::getInstance();
     startOrderMonitor();
 

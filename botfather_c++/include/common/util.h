@@ -53,3 +53,6 @@ int compareStringNumber(const string &a, const string &b);
 long long hashString(const string &s);
 int fast_stoi(const char *s);
 bool isValidPrice(double price, const ExchangeInfo &exchangeInfo);
+
+Route getRoute(const json &j, bool cachedTree);
+shared_ptr<Bot> initBot(map<string, any> &row, bool cachedTree);
