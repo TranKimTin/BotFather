@@ -1,7 +1,7 @@
 {
     "configurations": [
         {
-            "name": "C++ Debug cmake",
+            "name": "C++ Debug BotFather",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/botfather_c++/build/botfather",
@@ -31,10 +31,70 @@
             "filterStdout": false
         },
         {
-            "name": "C++ Release cmake",
+            "name": "C++ Debug Backtest",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/botfather_c++/build/backtest",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb",
+            "preLaunchTask": "CMake: Build Debug",
+            "logging": {
+                "moduleLoad": true
+            },
+            "miDebuggerArgs": "",
+            "debugServerPath": "",
+            "debugServerArgs": "",
+            "serverStarted": "",
+            "filterStderr": false,
+            "filterStdout": false
+        },
+        {
+            "name": "C++ Release BotFather",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/botfather_c++/build/botfather",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb",
+            "preLaunchTask": "CMake: Build Release",
+            "logging": {
+                "moduleLoad": true
+            },
+            "miDebuggerArgs": "",
+            "debugServerPath": "",
+            "debugServerArgs": "",
+            "serverStarted": "",
+            "filterStderr": false,
+            "filterStdout": false
+        },
+        {
+            "name": "C++ Release Backtest",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/botfather_c++/build/backtest",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

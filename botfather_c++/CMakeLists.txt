@@ -45,19 +45,17 @@ endif()
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(OpenSSL REQUIRED)
 find_package(spdlog REQUIRED)
-find_library(
-    ANTLR4_LIB antlr4-runtime REQUIRED)
+find_library(ANTLR4_LIB antlr4-runtime REQUIRED)
 find_library(SIOCLIENT_LIB sioclient REQUIRED)
 find_library(SIOCLIENT_TLS_LIB sioclient_tls REQUIRED)
 
 file(GLOB_RECURSE SOURCES "src/*.cpp" "include/common/generated/*.cpp")
-list(APPEND SOURCES "main.cpp")
-
-add_executable(botfather ${SOURCES})
 
 message(STATUS "ANTLR4_LIB=${ANTLR4_LIB}")
 
-target_link_libraries(botfather
+add_library(botfather_core ${SOURCES})
+
+target_link_libraries(botfather_core PUBLIC
     Boost::system
     OpenSSL::SSL
     OpenSSL::Crypto
@@ -82,12 +80,19 @@ message(STATUS "INCLUDE_DIRS=${INCLUDE_DIRS}")
 
 set(LOCAL_INCLUDE_PATHS "/usr/local/include")
 
-target_include_directories(botfather PRIVATE
+target_include_directories(botfather_core PUBLIC
     ${INCLUDE_DIRS}
     ${LOCAL_INCLUDE_PATHS}
     ${LOCAL_INCLUDE_PATHS}/antlr4-runtime
 )
 
-set_target_properties(botfather PROPERTIES
-    BUILD_RPATH "${CMAKE_SOURCE_DIR}/lib"
-)
+function(add_botfather_exe name main_file)
+    add_executable(${name} ${main_file})
+    target_link_libraries(${name} botfather_core)
+    set_target_properties(${name} PROPERTIES
+        BUILD_RPATH "${CMAKE_SOURCE_DIR}/lib"
+    )
+endfunction()
+
+add_botfather_exe(botfather main.cpp)
+add_botfather_exe(backtest main_backtest.cpp)
