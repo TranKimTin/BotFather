@@ -51,9 +51,12 @@ int main()
     shared_ptr<Bot> bot = initBot(res[0], false);
     vector<shared_ptr<Bot>> botList = {bot};
 
-    for (Symbol symbol : bot->symbolList)
+    for (Symbol &symbol : bot->symbolList)
     {
-        LOGI("backtest {}", symbol.symbol);
+        for (string &timeframe : bot->timeframes)
+        {
+            LOGI("backtest {} {}", symbol.symbol, timeframe);
+        }
     }
 
     destroy();
