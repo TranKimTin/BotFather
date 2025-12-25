@@ -55,11 +55,15 @@ int main()
 
     for (Symbol &symbol : bot->symbolList)
     {
+        task.run([=]()
+                 {
         for (string &timeframe : bot->timeframes)
         {
             LOGI("backtest {} {}", symbol.symbol, timeframe);
-        }
+        } });
     }
+    
+    task.wait();
 
     destroy();
     return 0;
