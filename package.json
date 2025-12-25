@@ -13,10 +13,9 @@
     "build-antlr-c++": "antlr4ng -Dlanguage=Cpp -o botfather_c++/include/common/generated/ -visitor -no-listener -Xexact-output-dir src/common/Expr.g4",
     "build-ts": "tsc",
     "build-web": "cd ./front-end && npm run build",
-    "install-lib-c++": "sh botfather_c++/lib/install.sh",
+    "install-lib-c++": "sudo sh botfather_c++/lib/install.sh",
     "build-c++": "sh botfather_c++/build.sh",
-    "start": "node js/WebConfig/WebConfig.js",
-    "chinh": "tsc src/chinh.ts && node src/chinh.js"
+    "start": "node js/WebConfig/WebConfig.js"
   },
   "mocha": {
     "require": "ts-node/register",
