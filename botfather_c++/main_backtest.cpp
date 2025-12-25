@@ -8,8 +8,10 @@
 #include <execinfo.h> // backtrace
 #include <unistd.h>   // write
 #include <cstdlib>    // abort, exit
+#include <tbb/task_group.h>
 
 using namespace std;
+tbb::task_group task;
 
 void init()
 {

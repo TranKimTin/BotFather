@@ -60,6 +60,33 @@ void Worker::init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, st
     this->cachedMinMax.clear();
     this->cachedSignal.clear();
 }
+
+void Worker::run(const shared_ptr<Bot> &bot)
+{
+    try
+    {
+        string &key = botKey;
+        key.clear();
+        key.append(broker);
+        key.push_back(':');
+        key.append(symbol);
+
+        if (bot->symbolExist.count(hashString(key)) == 0)
+        {
+            return;
+        }
+        if (find(bot->timeframes.begin(), bot->timeframes.end(), timeframe) == bot->timeframes.end())
+        {
+            return;
+        }
+        visited.clear();
+        dfs_handleLogic(bot->route, bot);
+    }
+    catch (const exception &e)
+    {
+        LOGE("Error in bot {}: {}", bot->botName, e.what());
+    }
+}
 void Worker::run()
 {
     Timer *timer = NULL;
@@ -67,32 +94,10 @@ void Worker::run()
     {
         timer = new Timer(StringFormat("onCloseCandle {} {} {}", broker, symbol, timeframe));
     }
-    string key;
+
     for (const shared_ptr<Bot> &bot : *botList)
     {
-        try
-        {
-            key.clear();
-            key.append(broker);
-            key.push_back(':');
-            key.append(symbol);
-
-            if (bot->symbolExist.count(hashString(key)) == 0)
-            {
-                continue;
-            }
-            if (find(bot->timeframes.begin(), bot->timeframes.end(), timeframe) == bot->timeframes.end())
-            {
-                continue;
-            }
-            visited.clear();
-            dfs_handleLogic(bot->route, bot);
-        }
-        catch (const exception &e)
-        {
-            LOGE("Error in bot {}: {}", bot->botName, e.what());
-            continue;
-        }
+        return run(bot);
     }
     if (timer)
     {
@@ -446,116 +451,15 @@ bool Worker::adjustParam(NodeData &node)
     return true;
 }
 
-bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
+bool Worker::handlerNewOrder(NodeData &node, const shared_ptr<Bot> &bot)
 {
-    if (onlyCheckSignal && postedSignal)
-    {
-        // break early if only checking signal and already posted
-        return false;
-    }
-
-    if (nodeData.type == NODE_TYPE::START)
-        return true;
-
-    if (nodeData.type == NODE_TYPE::EXPR)
-    {
-        any result = calculateExpr(nodeData.value, broker, symbol, timeframe, open.size(),
-                                   open.data(), high.data(), low.data(), close.data(), volume.data(),
-                                   startTime.data(), fundingRate, &cachedIndicator, &cachedMinMax);
-
-        if (result.has_value())
-        {
-            if (result.type() == typeid(int))
-            {
-                return any_cast<int>(result) != 0;
-            }
-            else if (result.type() == typeid(double))
-            {
-                return any_cast<double>(result) != 0.0;
-            }
-            else if (result.type() == typeid(string))
-            {
-                return true;
-            }
-            else
-            {
-                LOGE("Unknown result type");
-                return false;
-            }
-        }
-        else
-        {
-            LOGD("No result. symbol: {}:{}, timeframe: {}, expr={}", broker, symbol, timeframe, nodeData.value);
-            return false;
-        }
-    }
-
-    if (nodeData.type == NODE_TYPE::GET_SIGNAL)
-    {
-        string s = nodeData.symbol == "Symbol hiện tại" ? symbol : nodeData.symbol;
-        return getSignal(nodeData.botName, s, nodeData.timeframe);
-    }
-    if (nodeData.type == NODE_TYPE::POST_SIGNAL)
-    {
-        postedSignal = true;
-        return true;
-    }
-
-    if (onlyCheckSignal)
-    {
-        return true;
-    }
-
-    if (nodeData.type == NODE_TYPE::TELEGRAM)
-    {
-        string content = calculateSub(nodeData.value);
-
-        boost::unordered_flat_map<string, string> emoji = {
-            {"binance", "🥇🥇🥇"},
-            {"bybit", ""},
-            {"okx", "🏁🏁🏁"},
-            {"binance_future", "🥇🥇🥇"},
-            {"bybit_future", ""}};
-
-        boost::unordered_flat_map<string, string> url = {
-            {"binance", "https://www.binance.com/en/trade/" + symbol + "?_from=markets&type=spot"},
-            {"bybit", "https://www.bybit.com/vi-VN/trade/spot/" + symbol.substr(0, symbol.find("USDT")) + "/USDT"},
-            {"okx", "https://www.okx.com/vi/trade-spot/" + symbol},
-            {"binance_future", "https://www.binance.com/en/futures/" + symbol + "?_from=markets"},
-            {"bybit_future", "https://www.bybit.com/trade/usdt/" + symbol}};
-
-        string mess = emoji[broker];
-        mess += StringFormat("\n<a href='https://www.botfather.tech/history/{}'><b>{}</b></a>", bot->botName, bot->botName);
-        mess += StringFormat("\n<a href='{}'><b>{}</b></a>", url[broker], symbol);
-        mess += StringFormat("\n{}", broker);
-        mess += StringFormat("\n{} {}", timeframe, toTimeString(startTime[0]));
-        mess += StringFormat("\n{}", content);
-
-        for (const string &id : bot->idTelegram)
-        {
-            if (id.empty())
-                continue;
-            Telegram::getInstance().sendMessage(mess, id);
-        }
-        return true;
-    }
-
-    // new order
-    NodeData node = nodeData;
-    if (!adjustParam(node))
-    {
-        return false;
-    }
-
-    if (find(orderTypes.begin(), orderTypes.end(), node.type) != orderTypes.end())
-    {
-        long long createdTime = startTime[0];
-        double o = open[0];
-        double h = high[0];
-        double l = low[0];
-        double c = close[0];
-        tasks.enqueue([createdTime, node, bot, broker = this->broker, symbol = this->symbol, timeframe = this->timeframe, o, h, l, c, exchangeInfo = this->exchangeInfo]()
-                      {
+    long long createdTime = startTime[0];
+    double o = open[0];
+    double h = high[0];
+    double l = low[0];
+    double c = close[0];
+    tasks.enqueue([createdTime, node, bot, broker = this->broker, symbol = this->symbol, timeframe = this->timeframe, o, h, l, c, exchangeInfo = this->exchangeInfo]()
+                  {
         int botID = bot->id;
 
         LOGI("New order - BotName: {}. BotID: {}, Type: {}, Broker: {}, Symbol: {}, Timeframe: {}, Entry: {}, Stop: {}, TP: {}, SL: {}, Volume: {}, ExpiredTime: {}",
@@ -667,7 +571,118 @@ bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
             return ;
         } });
 
+    return true;
+}
+
+bool Worker::sendTelegram(NodeData &nodeData, const shared_ptr<Bot> &bot)
+{
+    string content = calculateSub(nodeData.value);
+
+    boost::unordered_flat_map<string, string> emoji = {
+        {"binance", "🥇🥇🥇"},
+        {"bybit", ""},
+        {"okx", "🏁🏁🏁"},
+        {"binance_future", "🥇🥇🥇"},
+        {"bybit_future", ""}};
+
+    boost::unordered_flat_map<string, string> url = {
+        {"binance", "https://www.binance.com/en/trade/" + symbol + "?_from=markets&type=spot"},
+        {"bybit", "https://www.bybit.com/vi-VN/trade/spot/" + symbol.substr(0, symbol.find("USDT")) + "/USDT"},
+        {"okx", "https://www.okx.com/vi/trade-spot/" + symbol},
+        {"binance_future", "https://www.binance.com/en/futures/" + symbol + "?_from=markets"},
+        {"bybit_future", "https://www.bybit.com/trade/usdt/" + symbol}};
+
+    string mess = emoji[broker];
+    mess += StringFormat("\n<a href='https://www.botfather.tech/history/{}'><b>{}</b></a>", bot->botName, bot->botName);
+    mess += StringFormat("\n<a href='{}'><b>{}</b></a>", url[broker], symbol);
+    mess += StringFormat("\n{}", broker);
+    mess += StringFormat("\n{} {}", timeframe, toTimeString(startTime[0]));
+    mess += StringFormat("\n{}", content);
+
+    for (const string &id : bot->idTelegram)
+    {
+        if (id.empty())
+            continue;
+        Telegram::getInstance().sendMessage(mess, id);
+    }
+    return true;
+}
+
+bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
+{
+    if (onlyCheckSignal && postedSignal)
+    {
+        // break early if only checking signal and already posted
+        return false;
+    }
+
+    if (nodeData.type == NODE_TYPE::START)
         return true;
+
+    if (nodeData.type == NODE_TYPE::EXPR)
+    {
+        any result = calculateExpr(nodeData.value, broker, symbol, timeframe, open.size(),
+                                   open.data(), high.data(), low.data(), close.data(), volume.data(),
+                                   startTime.data(), fundingRate, &cachedIndicator, &cachedMinMax);
+
+        if (result.has_value())
+        {
+            if (result.type() == typeid(int))
+            {
+                return any_cast<int>(result) != 0;
+            }
+            else if (result.type() == typeid(double))
+            {
+                return any_cast<double>(result) != 0.0;
+            }
+            else if (result.type() == typeid(string))
+            {
+                return true;
+            }
+            else
+            {
+                LOGE("Unknown result type");
+                return false;
+            }
+        }
+        else
+        {
+            LOGD("No result. symbol: {}:{}, timeframe: {}, expr={}", broker, symbol, timeframe, nodeData.value);
+            return false;
+        }
+    }
+
+    if (nodeData.type == NODE_TYPE::GET_SIGNAL)
+    {
+        string s = nodeData.symbol == "Symbol hiện tại" ? symbol : nodeData.symbol;
+        return getSignal(nodeData.botName, s, nodeData.timeframe);
+    }
+    if (nodeData.type == NODE_TYPE::POST_SIGNAL)
+    {
+        postedSignal = true;
+        return true;
+    }
+
+    if (onlyCheckSignal)
+    {
+        return true;
+    }
+
+    if (nodeData.type == NODE_TYPE::TELEGRAM)
+    {
+        return sendTelegram(nodeData, bot);
+    }
+
+    // new order
+    NodeData node = nodeData;
+    if (!adjustParam(node))
+    {
+        return false;
+    }
+
+    if (find(orderTypes.begin(), orderTypes.end(), node.type) != orderTypes.end())
+    {
+        return handlerNewOrder(node, bot);
     }
 
     return false;

@@ -26,12 +26,17 @@ protected:
     SocketData* socketData;
     bool postedSignal;
     bool onlyCheckSignal;
+    string botKey;
 
     string calculateSub(string &expr);
     any calculate(string &expr);
     bool adjustParam(NodeData &data);
 
-    bool getSignal(const string& botName, const string& symbol, const string& timeframe);
+    void dfs_handleLogic(Route &route, const shared_ptr<Bot> &bot);
+    bool handleLogic(NodeData &node, const shared_ptr<Bot> &bot);
+    virtual bool getSignal(const string& botName, const string& symbol, const string& timeframe);
+    virtual bool handlerNewOrder(NodeData& node, const shared_ptr<Bot> &bot);
+    virtual bool sendTelegram(NodeData& node, const shared_ptr<Bot> &bot);
 
 public:
     Worker()
@@ -46,8 +51,7 @@ public:
     };
     virtual ~Worker() = default;
     void init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, ExchangeInfo exchangeInfo, double fundingRate, SocketData* socketData);
+    virtual bool isPostedSignal(shared_ptr<Bot> bot);
+    void run(const shared_ptr<Bot> &bot);
     void run();
-    void dfs_handleLogic(Route &route, const shared_ptr<Bot> &bot);
-    bool handleLogic(NodeData &node, const shared_ptr<Bot> &bot);
-    bool isPostedSignal(shared_ptr<Bot> bot);
 };
