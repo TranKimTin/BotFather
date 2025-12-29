@@ -207,3 +207,46 @@ public:
         return code;
     }
 };
+
+struct BacktestTime
+{
+    int year;
+    int month;
+
+    BacktestTime(int y=0, int m=0) : year(y), month(m) {}
+
+    bool operator<(const BacktestTime &t) const
+    {
+        return year < t.year || (year == t.year && month < t.month);
+    }
+    bool operator==(const BacktestTime &t) const
+    {
+        return year == t.year && month == t.month;
+    }
+    bool operator<=(const BacktestTime &t) const
+    {
+        return *this < t || *this == t;
+    }
+    BacktestTime &operator++(int)
+    {
+        month++;
+        if (month == 13)
+        {
+            month = 1;
+            year++;
+        }
+        return *this;
+    }
+
+    string toString() const
+    {
+        string s = to_string(year);
+        s.push_back('-');
+        if (month <= 9)
+        {
+            s.push_back('0');
+        }
+        s += to_string(month);
+        return s;
+    }
+};

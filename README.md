@@ -52,7 +52,9 @@ $ sudo apt-get install -y \
     libasio-dev \
     libspdlog-dev \
     linux-tools-common \
-    linux-tools-generic
+    linux-tools-generic \
+    zlib1g-dev \
+    libminizip-dev
 
 # Set timezone (optional)
 $ sudo timedatectl set-timezone Asia/Ho_Chi_Minh

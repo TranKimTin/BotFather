@@ -38,16 +38,7 @@ void init()
 {
 #ifdef LOG_FILE
     printf("Write log to file\n");
-    char exePath[PATH_MAX];
-    ssize_t len = readlink("/proc/self/exe", exePath, sizeof(exePath) - 1);
-    if (len == -1)
-    {
-        cerr << "readlink failed\n";
-        throw "readlink failed";
-    }
-    exePath[len] = '\0';
-    filesystem::path exeDir = filesystem::path(exePath).parent_path();
-    filesystem::path logDir = (exeDir / ".." / "logs").lexically_normal();
+    filesystem::path logDir = (exeDir() / ".." / "logs").lexically_normal();
     filesystem::create_directories(logDir);
 
     string logFilePath = (logDir / "botfather.log").string();

@@ -163,19 +163,22 @@ long long getCurrentTime()
     return chrono::duration_cast<chrono::milliseconds>(duration).count();
 }
 
-boost::unordered_flat_map<string, string> readEnvFile()
-{
-    char exePath[PATH_MAX];
-    ssize_t len = readlink("/proc/self/exe", exePath, sizeof(exePath) - 1);
+filesystem::path exeDir(){
+    char path[PATH_MAX];
+    ssize_t len = readlink("/proc/self/exe", path, sizeof(path) - 1);
     if (len == -1)
     {
         LOGE("readlink failed");
         throw "readlink failed";
     }
-    exePath[len] = '\0';
+    path[len] = '\0';
 
-    filesystem::path exeDir = filesystem::path(exePath).parent_path();
-    filesystem::path envPath = exeDir / ".." / ".." / ".env";
+    return filesystem::path(path).parent_path();
+}
+
+boost::unordered_flat_map<string, string> readEnvFile()
+{
+    filesystem::path envPath = exeDir() / ".." / ".." / ".env";
     envPath = envPath.lexically_normal();
 
     ifstream file(envPath);

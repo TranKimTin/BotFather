@@ -48,7 +48,7 @@
             "args": [
                 "--build",
                 "${workspaceFolder}/botfather_c++/build",
-                "--", "-j", "12"
+                "--", "-j", "16"
             ],
             "group": "build",
             "dependsOn": "CMake: Configure Debug",
@@ -64,7 +64,7 @@
             "args": [
                 "--build",
                 "${workspaceFolder}/botfather_c++/build",
-                "--", "-j", "12"
+                "--", "-j", "16"
             ],
             "group": "build",
             "dependsOn": "CMake: Configure Release",

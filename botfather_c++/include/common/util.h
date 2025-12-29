@@ -56,3 +56,4 @@ bool isValidPrice(double price, const ExchangeInfo &exchangeInfo);
 
 Route getRoute(const json &j, bool cachedTree);
 shared_ptr<Bot> initBot(map<string, any> &row, bool cachedTree);
+filesystem::path exeDir();
