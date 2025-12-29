@@ -39,8 +39,9 @@ static void onCloseCandle1m(const string &line, const string &symbol, const shar
 {
     // open_time,open,high,low,close,volume,close_time,quote_volume,count,taker_buy_volume,taker_buy_quote_volume,ignore
     // 1736351700000,95261.80,95291.60,95196.20,95223.10,180.760,1736351759999,17214864.01220,3401,124.045,11813167.63560,0
-    vector<string> candle = split(line, ',');
-    LOGI("{}",line);
+
+    // vector<string> candle = split(line, ',');
+    // LOGI("{}",line);
 }
 
 int main()
@@ -92,14 +93,14 @@ int main()
                             unzClose(zip);
                             continue;
                         }
-                        char buffer[8192];
+                        char buffer[32 *1024];
                         int bytes;
                         bool firstLine = true;
                         string leftover;
-                        
+                        string line;
+
                         while (int bytes = unzReadCurrentFile(zip, buffer, sizeof(buffer))) {
                             string chunk = leftover + string(buffer, bytes);
-                            string line;
                             size_t pos = 0;
                             while (true) {
                                 size_t newline = chunk.find('\n', pos);
