@@ -306,7 +306,7 @@ string BinanceFuture::sellLimit(const string &symbol, string quantity, string pr
         }
         if (orderCount.buyOneSymbolAccount > 0)
         {
-            LOGE("There are buy orders ({}). Do nothing.", orderCount.sellOneSymbolAccount);
+            LOGE("There are buy orders ({}). Do nothing.", orderCount.buyOneSymbolAccount);
             return "";
         }
         LOGI("openOrderCount: {}", orderCount.buyAllSymbolAccount + orderCount.sellAllSymbolAccount);
