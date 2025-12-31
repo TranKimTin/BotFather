@@ -176,24 +176,11 @@ void SocketData::mergeData(RateData &rateData, const string &symbol, string &tim
         rateData.volume.push_front(volume);
         rateData.startTime.push_front(rateStartTime);
 
-        adjustData(rateData);
+        rateData.adjustData();
     }
     else
     {
         LOGI("Merge data fail {}:{} {} {}. {} - {}", broker, symbol, timeframe, currentTF, toTimeString(rateStartTime), toTimeString(rateData.startTime[0]));
-    }
-}
-
-void SocketData::adjustData(RateData &rateData)
-{
-    if (rateData.open.size() > MAX_CANDLE)
-    {
-        rateData.open.pop_back();
-        rateData.high.pop_back();
-        rateData.low.pop_back();
-        rateData.close.pop_back();
-        rateData.volume.pop_back();
-        rateData.startTime.pop_back();
     }
 }
 
@@ -443,7 +430,7 @@ int SocketData::fetchData(const string &symbol)
                         l--;
                     }
                 }
-                adjustData(rateData);
+                rateData.adjustData();
                 if (!isValidData(rateData))
                 {
                     rateData = getOHLCVFromRateServer(broker, symbol, tf, MAX_CANDLE);

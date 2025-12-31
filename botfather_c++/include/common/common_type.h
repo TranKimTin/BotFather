@@ -77,15 +77,71 @@ struct RateData
 {
     string symbol;
     string interval;
+    deque<long long> startTime;
     deque<double> open;
     deque<double> high;
     deque<double> low;
     deque<double> close;
     deque<double> volume;
-    deque<long long> startTime;
+
+    void clear()
+    {
+        startTime.clear();
+        open.clear();
+        high.clear();
+        low.clear();
+        close.clear();
+        volume.clear();
+    }
+
+    void adjustData()
+    {
+        if (open.size() > MAX_CANDLE)
+        {
+            open.pop_back();
+            high.pop_back();
+            low.pop_back();
+            close.pop_back();
+            volume.pop_back();
+            startTime.pop_back();
+        }
+    }
 };
 
-struct Rate {
+struct RateDataV
+{
+    string symbol;
+    string interval;
+    vector<long long> startTime;
+    vector<double> open;
+    vector<double> high;
+    vector<double> low;
+    vector<double> close;
+    vector<double> volume;
+
+    void clear()
+    {
+        startTime.clear();
+        open.clear();
+        high.clear();
+        low.clear();
+        close.clear();
+        volume.clear();
+    }
+
+    void reverse()
+    {
+        std::reverse(startTime.begin(), startTime.end());
+        std::reverse(open.begin(), open.end());
+        std::reverse(high.begin(), high.end());
+        std::reverse(low.begin(), low.end());
+        std::reverse(close.begin(), close.end());
+        std::reverse(volume.begin(), volume.end());
+    }
+};
+
+struct Rate
+{
     long long startTime;
     double open;
     double high;
@@ -222,7 +278,7 @@ struct BacktestTime
     int year;
     int month;
 
-    BacktestTime(int y=0, int m=0) : year(y), month(m) {}
+    BacktestTime(int y = 0, int m = 0) : year(y), month(m) {}
 
     bool operator<(const BacktestTime &t) const
     {

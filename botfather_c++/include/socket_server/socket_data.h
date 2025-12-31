@@ -24,7 +24,6 @@ protected:
 
     int fetchData(const string &symbol);
     void onCloseCandle(const string &symbol, string &timeframe, RateData &data);
-    void adjustData(RateData &rateData);
     void updateCache(const RateData &rateData);
     void mergeData(RateData &rateData, const string &symbol, string &timeframe, string &currentTF, double open, double high, double low, double close, double volume, long long timestamp, bool isFinal, bool ignoreClose);
     bool isValidData(const RateData &rateData);
