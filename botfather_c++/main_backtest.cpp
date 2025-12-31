@@ -35,13 +35,9 @@ void destroy()
     spdlog::shutdown();
 }
 
-static void onCloseCandle1m(const string &line, const string &symbol, const shared_ptr<Bot> &bot)
+static void onCloseCandle1m(Rate &rate, const string &symbol, const shared_ptr<Bot> &bot)
 {
-    // open_time,open,high,low,close,volume,close_time,quote_volume,count,taker_buy_volume,taker_buy_quote_volume,ignore
-    // 1736351700000,95261.80,95291.60,95196.20,95223.10,180.760,1736351759999,17214864.01220,3401,124.045,11813167.63560,0
-
-    // vector<string> candle = split(line, ',');
-    // LOGI("{}",line);
+    // LOGI("{} {} {} {} {} {}", toTimeString(rate.startTime), rate.open, rate.high, rate.low, rate.close, rate.volume);
 }
 
 int main()
@@ -75,61 +71,25 @@ int main()
 
                      for (BacktestTime t = startTime; t <= endTime; t++)
                      {
-                         string zipPath = (exeDir() / ".." / ".." / "data" / StringFormat("{}-1m-{}.zip", symbol, t.toString())).lexically_normal().c_str();
-                         unzFile zip = unzOpen(zipPath.c_str());
-                         if (!zip) {
-                            LOGE("Can not open {}", zipPath);
-                            continue;
+                        string filePath = (exeDir() / ".." / ".." / "data" / StringFormat("{}-1m-{}.bin", symbol, t.toString())).lexically_normal().c_str();
+                        ifstream file(filePath, std::ios::binary | std::ios::ate);
+                        if (!file) {
+                            LOGE("Cant not open file {}", filePath);
+                            return;
+                        }
+                        size_t size = file.tellg();
+                        file.seekg(0);
+
+                        if (size % sizeof(Rate) != 0) {
+                            LOGE("File size not aligned with Rate {}", filePath);
+                            return;
                         }
 
-                        if (unzGoToFirstFile(zip) != UNZ_OK) {
-                            LOGE("{} is empty", zipPath);
-                            unzClose(zip);
-                            continue;
+                        vector<Rate> data(size / sizeof(Rate));
+                        file.read(reinterpret_cast<char*>(data.data()), size);
+                        for(Rate &rate :  data) {
+                            onCloseCandle1m(rate, symbol, bot);
                         }
-
-                        if (unzOpenCurrentFile(zip) != UNZ_OK) {
-                            LOGE("Can not open csv in {}", zipPath);
-                            unzClose(zip);
-                            continue;
-                        }
-                        char buffer[32 *1024];
-                        int bytes;
-                        bool firstLine = true;
-                        string leftover;
-                        string line;
-
-                        while (int bytes = unzReadCurrentFile(zip, buffer, sizeof(buffer))) {
-                            string chunk = leftover + string(buffer, bytes);
-                            size_t pos = 0;
-                            while (true) {
-                                size_t newline = chunk.find('\n', pos);
-                                if (newline == std::string::npos)
-                                            break;
-
-                                line = chunk.substr(pos, newline - pos);
-                                pos = newline + 1;
-
-                                if (!line.empty() && line.back() == '\r') {
-                                    line.pop_back();
-                                }
-                                    
-                                if (firstLine) {
-                                    firstLine = false;   // skip header
-                                    continue;
-                                }
-
-                                onCloseCandle1m(line, symbol, bot);
-                            }
-                            leftover = chunk.substr(pos);
-                        }
-                        if(!leftover.empty()) {
-                            // last line
-                            onCloseCandle1m(leftover, symbol, bot);
-                        }
-
-                        unzCloseCurrentFile(zip);
-                        unzClose(zip);
                      } });
     }
 

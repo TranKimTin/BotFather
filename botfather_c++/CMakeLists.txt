@@ -45,14 +45,9 @@ endif()
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(OpenSSL REQUIRED)
 find_package(spdlog REQUIRED)
-find_package(ZLIB REQUIRED)
 find_library(ANTLR4_LIB antlr4-runtime REQUIRED)
 find_library(SIOCLIENT_LIB sioclient REQUIRED)
 find_library(SIOCLIENT_TLS_LIB sioclient_tls REQUIRED)
-find_library(MINIZIP_LIB minizip)
-if (NOT MINIZIP_LIB)
-    message(FATAL_ERROR "minizip not found")
-endif()
 
 file(GLOB_RECURSE SOURCES "src/*.cpp" "include/common/generated/*.cpp")
 
@@ -69,8 +64,6 @@ target_link_libraries(botfather_core PUBLIC
     -lhiredis
     mysqlcppconn
     spdlog::spdlog
-    ZLIB::ZLIB
-    ${MINIZIP_LIB}
     ${ANTLR4_LIB}
     ${SIOCLIENT_LIB}
     ${SIOCLIENT_TLS_LIB}

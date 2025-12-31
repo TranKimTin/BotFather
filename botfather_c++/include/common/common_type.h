@@ -85,6 +85,15 @@ struct RateData
     deque<long long> startTime;
 };
 
+struct Rate {
+    long long startTime;
+    double open;
+    double high;
+    double low;
+    double close;
+    double volume;
+};
+
 struct UNIT
 {
     inline static const string PRICE = "price";

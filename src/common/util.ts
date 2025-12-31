@@ -13,6 +13,7 @@ import * as crypto from 'crypto';
 import { pipeline } from "stream/promises";
 import fs from "fs";
 import path from "path";
+import AdmZip from "adm-zip";
 
 dotenv.config({ path: `${__dirname}/../../.env` });
 
@@ -1225,70 +1226,76 @@ export function generateRandomIV(): string {
     return iv.toString('hex');
 }
 
-async function sha256File(filePath: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-        const hash = crypto.createHash("sha256");
-        const stream = fs.createReadStream(filePath);
-
-        stream.on("data", d => hash.update(d));
-        stream.on("end", () => resolve(hash.digest("hex")));
-        stream.on("error", reject);
-    });
+function sha256FromBuffer(buffer: Buffer): string {
+    return crypto.createHash("sha256").update(buffer).digest("hex");
 }
 
-function readChecksumFile(checksumPath: string): string {
-    const text = fs.readFileSync(checksumPath, "utf8").trim();
-    return text.split(/\s+/)[0];
-}
-
-async function downloadFile(url: string, filePath: string) {
+async function readChecksumFromUrl(url: string) {
     const res = await fetch(url);
-    if (!res.ok || !res.body) {
-        throw new Error(`Download failed: ${url}`);
+    if (!res.ok) {
+        throw new Error(`Failed to download checksum: ${url}`);
     }
-    await pipeline(res.body as any, fs.createWriteStream(filePath));
+    const text = await res.text();
+    return text.trim().split(/\s+/)[0];
+}
+
+async function readZipFromUrl(url: string): Promise<Buffer> {
+    const res = await fetch(url);
+    if (!res.ok) {
+        throw new Error(`Failed to download zip: ${url}`);
+    }
+    return Buffer.from(await res.arrayBuffer());
 }
 
 export async function downloadData(symbol: string, month: string, dest: string) {
-    const base = `https://data.binance.vision/data/futures/um/monthly/klines/${symbol}/1m`;
-    const fileName = `${symbol}-1m-${month}.zip`;
-
-    const zipUrl = `${base}/${fileName}`;
-    const checksumUrl = `${zipUrl}.CHECKSUM`;
-
     fs.mkdirSync(dest, { recursive: true });
 
-    const zipPath = path.join(dest, fileName);
-    const checksumPath = `${zipPath}.CHECKSUM`;
+    const base = `https://data.binance.vision/data/futures/um/monthly/klines/${symbol}/1m`;
+    const fileName = `${symbol}-1m-${month}`;
+    const zipUrl = `${base}/${fileName}.zip`;
+    const checksumUrl = `${zipUrl}.CHECKSUM`;
+    const binPath = path.join(dest, `${fileName}.bin`);
 
-    // nếu đã có cả zip + checksum → verify offline
-    if (fs.existsSync(zipPath) && fs.existsSync(checksumPath)) {
-        const expectedHash = readChecksumFile(checksumPath);
-        const actualHash = await sha256File(zipPath);
-        if (expectedHash === actualHash) {
-            return zipPath;
-        }
-        fs.unlinkSync(zipPath);
-    }
-
-    // nếu chưa có checksum → tải checksum trước
-    if (!fs.existsSync(checksumPath)) {
-        await downloadFile(checksumUrl, checksumPath);
+    if (fs.existsSync(binPath)) {
+        return;
     }
 
     console.log(`Downloading ${fileName}`);
-    
-    // download zip
-    await downloadFile(zipUrl, zipPath);
+
+    const zipBuffer = await readZipFromUrl(zipUrl);
 
     // verify sau khi download
-    const expectedHash = readChecksumFile(checksumPath);
-    const actualHash = await sha256File(zipPath);
+    const expectedHash = await readChecksumFromUrl(checksumUrl);
+    const actualHash = sha256FromBuffer(zipBuffer);
 
     if (expectedHash !== actualHash) {
-        fs.unlinkSync(zipPath);
-        throw new Error("Checksum mismatch");
+        console.error("Checksum mismatch");
+        return;
     }
 
-    return zipPath;
+    const zip = new AdmZip(zipBuffer);
+    const entry = zip.getEntries()[0];
+    const text = entry.getData().toString("utf8");
+    const lines = text.split(/\r?\n/);
+    lines.shift();
+    const rows = [];
+    for (const line of lines) {
+        if (!line) continue;
+        // open_time,open,high,low,close,volume,close_time,quote_volume,count,taker_buy_volume,taker_buy_quote_volume,ignore
+        const values = line.split(",").slice(0, 6).map(Number);
+        rows.push(values);
+    }
+    const buffer = Buffer.alloc(rows.length * rows[0].length * 8);
+    let offset = 0;
+    for (const row of rows) {
+        buffer.writeBigInt64LE(BigInt(row[0]), offset);
+        offset += 8;
+        for (let i = 1; i < row.length; i++) {
+            buffer.writeDoubleLE(row[i], offset);
+            offset += 8;
+        }
+    }
+    fs.writeFileSync(binPath, buffer);
+
+    return binPath;
 }
