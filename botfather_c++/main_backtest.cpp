@@ -9,9 +9,9 @@ using namespace std;
 tbb::task_group task;
 
 thread_local RateDataV rateData;
+thread_local WorkerBacktest workerBacktest;
 string currentTF = "1m";
 boost::unordered_flat_map<long long, ExchangeInfo> exchangeInfo;
-thread_local WorkerBacktest workerBacktest;
 
 void init()
 {
