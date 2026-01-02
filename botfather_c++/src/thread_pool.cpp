@@ -14,10 +14,10 @@ ThreadPool::ThreadPool(size_t numThreads)
                 {
                     unique_lock<mutex> lock(this->queueMutex);
                     this->condition.wait(lock, [this]() {
-                        return !this->tasks.empty();
+                        return stop || !this->tasks.empty();
                     });
 
-                    if (this->tasks.empty())
+                    if (stop && this->tasks.empty())
                         return;
 
                     task = move(this->tasks.front());
@@ -40,6 +40,10 @@ void ThreadPool::enqueue(function<void()> task)
 
 ThreadPool::~ThreadPool()
 {
+    {
+        lock_guard<mutex> lock(queueMutex);
+        stop = true;
+    }
     condition.notify_all();
     for (thread &worker : workers)
         worker.join();

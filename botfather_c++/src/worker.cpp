@@ -37,6 +37,7 @@ void Worker::init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, st
     this->exchangeInfo = exchangeInfo;
     this->fundingRate = fundingRate;
     this->socketData = socketData;
+    this->shift = 0;
 
     this->bots.clear();
     for (const auto &bot : *botList)
@@ -61,10 +62,11 @@ void Worker::init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, st
     this->cachedSignal.clear();
 }
 
-void Worker::run(const shared_ptr<Bot> &bot)
+void Worker::run(const shared_ptr<Bot> &bot, int shift)
 {
     try
     {
+        this->shift = shift;
         string &key = botKey;
         key.clear();
         key.append(broker);
@@ -72,10 +74,6 @@ void Worker::run(const shared_ptr<Bot> &bot)
         key.append(symbol);
 
         if (bot->symbolExist.count(hashString(key)) == 0)
-        {
-            return;
-        }
-        if (find(bot->timeframes.begin(), bot->timeframes.end(), timeframe) == bot->timeframes.end())
         {
             return;
         }
@@ -90,14 +88,18 @@ void Worker::run(const shared_ptr<Bot> &bot)
 void Worker::run()
 {
     Timer *timer = NULL;
-    if (timeframe == "1d")
+    if (timeframe == "1m")
     {
         timer = new Timer(StringFormat("onCloseCandle {} {} {}", broker, symbol, timeframe));
     }
 
     for (const shared_ptr<Bot> &bot : *botList)
     {
-        return run(bot);
+        if (find(bot->timeframes.begin(), bot->timeframes.end(), timeframe) == bot->timeframes.end())
+        {
+            continue;
+        }
+        run(bot, 0);
     }
     if (timer)
     {
@@ -126,25 +128,32 @@ string Worker::calculateSub(string &expr)
 {
     return calculateSubExpr(expr, broker, symbol, timeframe, open.size(),
                             open.data(), high.data(), low.data(), close.data(), volume.data(),
-                            startTime.data(), fundingRate, &cachedIndicator, &cachedMinMax);
+                            startTime.data(), fundingRate, &cachedIndicator, &cachedMinMax, shift);
 }
 
 any Worker::calculate(string &expr)
 {
-    long long key = hashString(expr);
-    auto it = cachedExpr.find(key);
-    if (it != cachedExpr.end())
+    if (shift == 0)
     {
-        return it->second;
-    }
+        long long key = hashString(expr);
+        auto it = cachedExpr.find(key);
+        if (it != cachedExpr.end())
+        {
+            return it->second;
+        }
 
-    any result = calculateExpr(
+        any result = calculateExpr(
+            expr, broker, symbol, timeframe, open.size(),
+            open.data(), high.data(), low.data(), close.data(), volume.data(),
+            startTime.data(), fundingRate, &cachedIndicator, &cachedMinMax, shift);
+
+        cachedExpr[key] = result;
+        return result;
+    }
+    return calculateExpr(
         expr, broker, symbol, timeframe, open.size(),
         open.data(), high.data(), low.data(), close.data(), volume.data(),
-        startTime.data(), fundingRate, &cachedIndicator, &cachedMinMax);
-
-    cachedExpr[key] = result;
-    return result;
+        startTime.data(), fundingRate, &cachedIndicator, &cachedMinMax, shift);
 }
 
 bool Worker::adjustParam(NodeData &node)
@@ -621,9 +630,7 @@ bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
 
     if (nodeData.type == NODE_TYPE::EXPR)
     {
-        any result = calculateExpr(nodeData.value, broker, symbol, timeframe, open.size(),
-                                   open.data(), high.data(), low.data(), close.data(), volume.data(),
-                                   startTime.data(), fundingRate, &cachedIndicator, &cachedMinMax);
+        any result = calculate(nodeData.value);
 
         if (result.has_value())
         {

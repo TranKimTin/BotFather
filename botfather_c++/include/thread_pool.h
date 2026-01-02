@@ -14,6 +14,7 @@ public:
 private:
     vector<thread> workers;
     queue<function<void()>> tasks;
+    bool stop = false;
 
     mutex queueMutex;
     condition_variable condition;

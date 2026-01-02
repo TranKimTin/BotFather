@@ -66,7 +66,7 @@ void test()
 }
 #endif
 
-vector<shared_ptr<Bot>> getBotList(string botName, bool cachedTree)
+vector<shared_ptr<Bot>> getBotList(string botName)
 {
     Timer timer("getBotList");
     vector<shared_ptr<Bot>> botList;
@@ -83,22 +83,22 @@ vector<shared_ptr<Bot>> getBotList(string botName, bool cachedTree)
     vector<map<string, any>> res = db.executeQuery(mysql_query, args);
     for (auto &row : res)
     {
-        shared_ptr<Bot> bot = initBot(row, cachedTree);
+        shared_ptr<Bot> bot = initBot(row);
         botList.push_back(bot);
     }
     return botList;
 }
 
-void setBotList(string botName, bool cacheTree)
+void setBotList(string botName)
 {
     botName = "";
     if (botName == "")
     {
-        botList = make_shared<vector<shared_ptr<Bot>>>(getBotList(botName, cacheTree));
+        botList = make_shared<vector<shared_ptr<Bot>>>(getBotList(botName));
     }
     else
     {
-        auto list = make_shared<vector<shared_ptr<Bot>>>(getBotList(botName, cacheTree));
+        auto list = make_shared<vector<shared_ptr<Bot>>>(getBotList(botName));
 
         // Xóa tất cả bot cùng tên (nếu có nhiều hơn 1)
         botList->erase(remove_if(botList->begin(), botList->end(),
@@ -130,7 +130,7 @@ void sio_on_message(string const &event, sio::message::ptr const &data, bool isA
     {
         string botName = data->get_string();
         LOGI("Update config for bot {}", botName);
-        setBotList(botName, false);
+        setBotList(botName);
     }
 }
 
@@ -159,7 +159,7 @@ void runApp()
     client.socket()->on("onUpdateConfig", sio_on_message);
     client.connect(StringFormat("{}:{}", env["HOST_WEB_SERVER"], 8080));
 
-    setBotList("", true);
+    setBotList("");
 
     for (auto &t : threads)
     {

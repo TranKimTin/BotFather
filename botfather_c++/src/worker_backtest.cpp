@@ -1,5 +1,4 @@
 #include "worker_backtest.h"
-#include "thread_pool.h"
 #include "vector_pool.h"
 #include "util.h"
 
@@ -8,13 +7,6 @@ extern thread_local SparseTablePool sparseTablePool;
 
 void WorkerBacktest::initData(string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, ExchangeInfo exchangeInfo)
 {
-    VectorDoublePool::getInstance().releaseLock(this->open);
-    VectorDoublePool::getInstance().releaseLock(this->high);
-    VectorDoublePool::getInstance().releaseLock(this->low);
-    VectorDoublePool::getInstance().releaseLock(this->close);
-    VectorDoublePool::getInstance().releaseLock(this->volume);
-    VectorLongLongPool::getInstance().releaseLock(this->startTime);
-
     this->broker = broker;
     this->symbol = symbol;
     this->timeframe = timeframe;
@@ -27,21 +19,21 @@ void WorkerBacktest::initData(string broker, string symbol, string timeframe, ve
     this->exchangeInfo = exchangeInfo;
     this->fundingRate = 0.01f;
 
-    for (auto &pair : cachedIndicator)
-    {
-        vectorDoublePool.release(pair.second);
-    }
-
-    for (auto &pair : cachedMinMax)
-    {
-        sparseTablePool.release(move(pair.second));
-    }
-
     this->visited.clear();
     this->cachedExpr.clear();
     this->cachedIndicator.clear();
     this->cachedMinMax.clear();
     this->cachedSignal.clear();
+}
+
+void WorkerBacktest::release(RateDataV &rateData)
+{
+    rateData.startTime = move(startTime);
+    rateData.open = move(open);
+    rateData.high = move(high);
+    rateData.low = move(low);
+    rateData.close = move(close);
+    rateData.volume = move(volume);
 }
 
 bool WorkerBacktest::getSignal(const string &botName, const string &symbol, const string &timeframe)

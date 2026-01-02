@@ -27,6 +27,7 @@ protected:
     bool postedSignal;
     bool onlyCheckSignal;
     string botKey;
+    int shift;
 
     string calculateSub(string &expr);
     any calculate(string &expr);
@@ -48,10 +49,11 @@ public:
         bots.max_load_factor(0.5);
         socketData = nullptr;
         onlyCheckSignal = false;
+        shift = 0;
     };
     virtual ~Worker() = default;
     void init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, ExchangeInfo exchangeInfo, double fundingRate, SocketData* socketData);
     virtual bool isPostedSignal(shared_ptr<Bot> bot);
-    void run(const shared_ptr<Bot> &bot);
+    void run(const shared_ptr<Bot> &bot, int shift);
     void run();
 };

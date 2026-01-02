@@ -931,7 +931,7 @@ bool isValidPrice(double price, const ExchangeInfo &exchangeInfo)
     return price >= exchangeInfo.minPrice && price <= exchangeInfo.maxPrice;
 }
 
-Route getRoute(const json &j, bool cachedTree)
+Route getRoute(const json &j)
 {
     // j: {"data":{"id":"1744877970451","value":"Start","type":"start"},"id":"1744877970451","next":[{"data":{"id":"1744877970452","value":"max_rsi(14, 70, 48) >= 80","type":"expr","unitVolume":"usd","unitEntry":"price","unitTP":"price","unitSL":"price","unitStop":"price","unitExpiredTime":"candle","expiredTime":"0"},"id":"1744877970452","next":[{"data":{"id":"1744877982563","value":"macd_n_dinh(12, 26, 9, 6, 8, 0, 2, 0, 5) >= 3","type":"expr","unitVolume":"usd","unitEntry":"price","unitTP":"price","unitSL":"price","unitStop":"price","unitExpiredTime":"candle","expiredTime":"0"},"id":"1744877982563","next":[{"data":{"id":"1744877970453","value":"ampl(1) >= avg_ampl(25, 0) * 1.8","type":"expr","unitVolume":"usd","unitEntry":"price","unitTP":"price","unitSL":"price","unitStop":"price","unitExpiredTime":"candle","expiredTime":"0"},"id":"1744877970453","next":[{"data":{"id":"1744877970454","value":"change(1) > 0","type":"expr","unitVolume":"usd","unitEntry":"price","unitTP":"price","unitSL":"price","unitStop":"price","unitExpiredTime":"candle","expiredTime":"0"},"id":"1744877970454","next":[{"data":{"id":"1744877970455","value":"change(0) < 0","type":"expr","unitVolume":"usd","unitEntry":"price","unitTP":"price","unitSL":"price","unitStop":"price","unitExpiredTime":"candle","expiredTime":"0"},"id":"1744877970455","next":[{"data":{"id":"1744877970456","value":"close(1) > max_high(100, 2)","type":"expr","unitVolume":"usd","unitEntry":"price","unitTP":"price","unitSL":"price","unitStop":"price","unitExpiredTime":"candle","expiredTime":"0"},"id":"1744877970456","next":[{"data":{"id":"1744877970457","value":"high(0) > max_high(100, 0)","type":"expr","unitVolume":"usd","unitEntry":"price","unitTP":"price","unitSL":"price","unitStop":"price","unitExpiredTime":"candle","expiredTime":"0"},"id":"1744877970457","next":[{"data":{"id":"1744877970458","value":"close(0) >= (open(1) + close(1))/2","type":"expr","unitVolume":"usd","unitEntry":"price","unitTP":"price","unitSL":"price","unitStop":"price","unitExpiredTime":"candle","expiredTime":"0"},"id":"1744877970458","next":[{"data":{"id":"1744877970459","value":"","type":"openSellLimit","unitVolume":"usd","unitEntry":"price","unitTP":"rr","unitSL":"price","unitStop":"price","unitExpiredTime":"candle","expiredTime":"1","volume":"5000","entry":"(close(0) + open(0))/2","sl":"high(0)","tp":"3.3","display":"Open SELL Limit. Volume=5000 (USD), Entry=(close(0) + open(0))/2 (USD), TP=3.3 (R), SL=high(0) (USD)"},"id":"1744877970459","next":[]}]}]}]}]}]}]}]}]}]}
     Route route;
@@ -995,11 +995,11 @@ Route getRoute(const json &j, bool cachedTree)
     {
         for (const auto &nextNode : j["next"])
         {
-            route.next.push_back(getRoute(nextNode, cachedTree));
+            route.next.push_back(getRoute(nextNode));
         }
     }
 
-    if (cachedTree && route.data.type != NODE_TYPE::START && route.data.type != NODE_TYPE::TELEGRAM && route.data.type != NODE_TYPE::CLOSE_ALL_ORDER && route.data.type != NODE_TYPE::CLOSE_ALL_POSITION)
+    if (route.data.type != NODE_TYPE::START && route.data.type != NODE_TYPE::TELEGRAM && route.data.type != NODE_TYPE::CLOSE_ALL_ORDER && route.data.type != NODE_TYPE::CLOSE_ALL_POSITION)
     {
         string expr = toLowerCase(route.data.value);
         if (!expr.empty())
@@ -1010,7 +1010,7 @@ Route getRoute(const json &j, bool cachedTree)
     return route;
 }
 
-shared_ptr<Bot> initBot(map<string, any> &row, bool cachedTree)
+shared_ptr<Bot> initBot(map<string, any> &row)
 {
     shared_ptr<Bot> bot = make_shared<Bot>();
     bot->symbolExist.max_load_factor(0.5);
@@ -1053,6 +1053,6 @@ shared_ptr<Bot> initBot(map<string, any> &row, bool cachedTree)
 
     string routeString = any_cast<string>(row.at("route"));
     json j = json::parse(routeString);
-    bot->route = getRoute(j, cachedTree);
+    bot->route = getRoute(j);
     return bot;
 }

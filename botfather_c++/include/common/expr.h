@@ -34,12 +34,13 @@ private:
     double fundingRate;
     boost::unordered_flat_map<long long, vector<double>> *cachedIndicator;
     boost::unordered_flat_map<long long, unique_ptr<SparseTable>>* cachedMinMax;
+    int offset;
 
 public:
     Expr(const string &broker, const string &symbol, const string &timeframe, int length,
          const double *open, const double *high, const double *low, const double *close, const double *volume,
-         long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, unique_ptr<SparseTable>>* cachedMinMax)
-        : broker(broker), symbol(symbol), timeframe(timeframe), length(length), open(open), high(high), low(low), close(close), volume(volume), startTime(startTime), fundingRate(fundingRate), cachedIndicator(cachedIndicator), cachedMinMax(cachedMinMax)
+         long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, unique_ptr<SparseTable>>* cachedMinMax, int offset)
+        : broker(broker), symbol(symbol), timeframe(timeframe), length(length), open(open), high(high), low(low), close(close), volume(volume), startTime(startTime), fundingRate(fundingRate), cachedIndicator(cachedIndicator), cachedMinMax(cachedMinMax), offset(offset)
     {
     }
 
@@ -147,10 +148,10 @@ public:
 
 any calculateExpr(const string &inputText, const string &broker, const string &symbol, const string &timeframe, int length,
                   const double *open, const double *high, const double *low, const double *close,
-                  const double *volume, long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, unique_ptr<SparseTable>>* cachedMinMax);
+                  const double *volume, long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, unique_ptr<SparseTable>>* cachedMinMax, int shift);
 
 string calculateSubExpr(string &expr, const string &broker, const string &symbol, const string &timeframe, int length,
                         const double *open, const double *high, const double *low, const double *close,
-                        const double *volume, long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, unique_ptr<SparseTable>>* cachedMinMax);
+                        const double *volume, long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, unique_ptr<SparseTable>>* cachedMinMax, int shift);
 
 void cacheParseTree(const string &key);

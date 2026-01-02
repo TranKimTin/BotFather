@@ -170,6 +170,7 @@ any Expr::visitMAX(ExprParser::MAXContext *ctx)
 any Expr::visitOpen(ExprParser::OpenContext *ctx)
 {
     int shift = (ctx->children.size() == 4) ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str()) : 0;
+    shift += offset;
 
     if (shift < 0 || shift >= length)
         return {};
@@ -180,6 +181,7 @@ any Expr::visitOpen(ExprParser::OpenContext *ctx)
 any Expr::visitHigh(ExprParser::HighContext *ctx)
 {
     int shift = (ctx->children.size() == 4) ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str()) : 0;
+    shift += offset;
 
     if (shift < 0 || shift >= length)
         return {};
@@ -190,6 +192,7 @@ any Expr::visitHigh(ExprParser::HighContext *ctx)
 any Expr::visitLow(ExprParser::LowContext *ctx)
 {
     int shift = (ctx->children.size() == 4) ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str()) : 0;
+    shift += offset;
 
     if (shift < 0 || shift >= length)
         return {};
@@ -200,6 +203,7 @@ any Expr::visitLow(ExprParser::LowContext *ctx)
 any Expr::visitClose(ExprParser::CloseContext *ctx)
 {
     int shift = (ctx->children.size() == 4) ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str()) : 0;
+    shift += offset;
 
     if (shift < 0 || shift >= length)
         return {};
@@ -210,6 +214,7 @@ any Expr::visitClose(ExprParser::CloseContext *ctx)
 any Expr::visitVolume(ExprParser::VolumeContext *ctx)
 {
     int shift = (ctx->children.size() == 4) ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str()) : 0;
+    shift += offset;
 
     if (shift < 0 || shift >= length)
         return {};
@@ -220,6 +225,7 @@ any Expr::visitVolume(ExprParser::VolumeContext *ctx)
 any Expr::visitChange(ExprParser::ChangeContext *ctx)
 {
     int shift = (ctx->children.size() == 4) ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str()) : 0;
+    shift += offset;
 
     if (shift < 0 || shift >= length)
         return {};
@@ -230,6 +236,7 @@ any Expr::visitChange(ExprParser::ChangeContext *ctx)
 any Expr::visitChangeP(ExprParser::ChangePContext *ctx)
 {
     int shift = (ctx->children.size() == 4) ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str()) : 0;
+    shift += offset;
 
     if (shift < 0 || shift >= length)
         return {};
@@ -240,6 +247,7 @@ any Expr::visitChangeP(ExprParser::ChangePContext *ctx)
 any Expr::visitAmpl(ExprParser::AmplContext *ctx)
 {
     int shift = (ctx->children.size() == 4) ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str()) : 0;
+    shift += offset;
 
     if (shift < 0 || shift >= length)
         return {};
@@ -250,6 +258,7 @@ any Expr::visitAmpl(ExprParser::AmplContext *ctx)
 any Expr::visitAmplP(ExprParser::AmplPContext *ctx)
 {
     int shift = (ctx->children.size() == 4) ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str()) : 0;
+    shift += offset;
 
     if (shift < 0 || shift >= length)
         return {};
@@ -260,6 +269,7 @@ any Expr::visitAmplP(ExprParser::AmplPContext *ctx)
 any Expr::visitUpper_shadow(ExprParser::Upper_shadowContext *ctx)
 {
     int shift = (ctx->children.size() == 4) ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str()) : 0;
+    shift += offset;
 
     if (shift < 0 || shift >= length)
         return {};
@@ -269,6 +279,7 @@ any Expr::visitUpper_shadow(ExprParser::Upper_shadowContext *ctx)
 any Expr::visitUpper_shadowP(ExprParser::Upper_shadowPContext *ctx)
 {
     int shift = (ctx->children.size() == 4) ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str()) : 0;
+    shift += offset;
 
     if (shift < 0 || shift >= length)
         return {};
@@ -280,6 +291,7 @@ any Expr::visitUpper_shadowP(ExprParser::Upper_shadowPContext *ctx)
 any Expr::visitLower_shadow(ExprParser::Lower_shadowContext *ctx)
 {
     int shift = (ctx->children.size() == 4) ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str()) : 0;
+    shift += offset;
 
     if (shift < 0 || shift >= length)
         return {};
@@ -290,6 +302,7 @@ any Expr::visitLower_shadow(ExprParser::Lower_shadowContext *ctx)
 any Expr::visitLower_shadowP(ExprParser::Lower_shadowPContext *ctx)
 {
     int shift = (ctx->children.size() == 4) ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str()) : 0;
+    shift += offset;
 
     if (shift < 0 || shift >= length)
         return {};
@@ -314,6 +327,7 @@ any Expr::visitRsi(ExprParser::RsiContext *ctx)
 {
     int period = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     int shift = ctx->children.size() > 4 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str()) : 0;
+    shift += offset;
 
     if (period <= 0 || shift < 0 || shift >= length - period)
         return {};
@@ -332,6 +346,7 @@ any Expr::visitRsi_slope(ExprParser::Rsi_slopeContext *ctx)
 {
     int period = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     int shift = ctx->children.size() > 4 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str()) : 0;
+    shift += offset;
 
     if (period <= 0 || shift < 0 || shift >= length - period - 1)
         return {};
@@ -343,6 +358,7 @@ any Expr::visitMa(ExprParser::MaContext *ctx)
 {
     int period = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     int shift = ctx->children.size() > 4 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str()) : 0;
+    shift += offset;
 
     if (period <= 0 || shift < 0 || shift >= length - period)
         return {};
@@ -354,6 +370,7 @@ any Expr::visitEma(ExprParser::EmaContext *ctx)
 {
     int period = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     int shift = ctx->children.size() > 4 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str()) : 0;
+    shift += offset;
 
     if (period <= 0 || shift < 0 || shift >= length - period)
         return {};
@@ -378,6 +395,7 @@ any Expr::visitMacd_value(ExprParser::Macd_valueContext *ctx)
     int slowPeriod = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str());
     int signalPeriod = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[6])->getSymbol()->getText().c_str());
     int shift = ctx->children.size() > 8 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[8])->getSymbol()->getText().c_str()) : 0;
+    shift += offset;
 
     if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || shift < 0 || shift >= length - slowPeriod)
         return {};
@@ -397,6 +415,7 @@ any Expr::visitMacd_signal(ExprParser::Macd_signalContext *ctx)
     int slowPeriod = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str());
     int signalPeriod = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[6])->getSymbol()->getText().c_str());
     int shift = ctx->children.size() > 8 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[8])->getSymbol()->getText().c_str()) : 0;
+    shift += offset;
 
     if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || shift < 0 || shift >= length - slowPeriod)
         return {};
@@ -416,6 +435,7 @@ any Expr::visitMacd_histogram(ExprParser::Macd_histogramContext *ctx)
     int slowPeriod = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str());
     int signalPeriod = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[6])->getSymbol()->getText().c_str());
     int shift = ctx->children.size() > 8 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[8])->getSymbol()->getText().c_str()) : 0;
+    shift += offset;
 
     const vector<double> &cached = getMACD(fastPeriod, slowPeriod, signalPeriod);
 
@@ -431,6 +451,7 @@ any Expr::visitBb_upper(ExprParser::Bb_upperContext *ctx)
     int period = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     double stdDev = stod(ctx->number()->getText());
     int shift = ctx->children.size() > 6 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[6])->getSymbol()->getText().c_str()) : 0;
+    shift += offset;
 
     if (period <= 0 || stdDev <= 0 || shift < 0 || shift >= length - period)
         return {};
@@ -443,6 +464,7 @@ any Expr::visitBb_middle(ExprParser::Bb_middleContext *ctx)
     int period = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     double stdDev = stod(ctx->number()->getText());
     int shift = ctx->children.size() > 6 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[6])->getSymbol()->getText().c_str()) : 0;
+    shift += offset;
 
     if (period <= 0 || stdDev <= 0 || shift < 0 || shift >= length - period)
         return {};
@@ -455,6 +477,7 @@ any Expr::visitBb_lower(ExprParser::Bb_lowerContext *ctx)
     int period = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     double stdDev = stod(ctx->number()->getText());
     int shift = ctx->children.size() > 6 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[6])->getSymbol()->getText().c_str()) : 0;
+    shift += offset;
 
     if (period <= 0 || stdDev <= 0 || shift < 0 || shift >= length - period)
         return {};
@@ -472,6 +495,7 @@ any Expr::visitMacd_n_dinh(ExprParser::Macd_n_dinhContext *ctx)
     int enableDivergence = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[12])->getSymbol()->getText().c_str());
     double diffCandle0 = stod(ctx->number(0)->getText());
     int shift = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[16])->getSymbol()->getText().c_str());
+    shift += offset;
 
     vector<double> diffPercents = vectorDoublePool.acquire();
 
@@ -496,6 +520,7 @@ any Expr::visitMacd_slope(ExprParser::Macd_slopeContext *ctx)
     int slowPeriod = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str());
     int signalPeriod = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[6])->getSymbol()->getText().c_str());
     int shift = ctx->children.size() > 8 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[8])->getSymbol()->getText().c_str()) : 0;
+    shift += offset;
 
     if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || shift < 0 || shift >= length - slowPeriod - 1)
         return {};
@@ -507,6 +532,9 @@ any Expr::visitAvg_open(ExprParser::Avg_openContext *ctx)
 {
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 4 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str()) : 0;
+
+    from += offset;
+    to += offset;
 
     if (to < from)
         swap(from, to);
@@ -524,6 +552,9 @@ any Expr::visitAvg_high(ExprParser::Avg_highContext *ctx)
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 4 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str()) : 0;
 
+    from += offset;
+    to += offset;
+
     if (to < from)
         swap(from, to);
 
@@ -539,6 +570,9 @@ any Expr::visitAvg_low(ExprParser::Avg_lowContext *ctx)
 {
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 4 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str()) : 0;
+
+    from += offset;
+    to += offset;
 
     if (to < from)
         swap(from, to);
@@ -556,6 +590,9 @@ any Expr::visitAvg_close(ExprParser::Avg_closeContext *ctx)
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 4 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str()) : 0;
 
+    from += offset;
+    to += offset;
+
     if (to < from)
         swap(from, to);
 
@@ -571,6 +608,9 @@ any Expr::visitAvg_ampl(ExprParser::Avg_amplContext *ctx)
 {
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 4 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str()) : 0;
+
+    from += offset;
+    to += offset;
 
     if (to < from)
         swap(from, to);
@@ -589,6 +629,9 @@ any Expr::visitAvg_amplP(ExprParser::Avg_amplPContext *ctx)
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 4 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str()) : 0;
 
+    from += offset;
+    to += offset;
+
     if (to < from)
         swap(from, to);
 
@@ -605,6 +648,9 @@ any Expr::visitMin_open(ExprParser::Min_openContext *ctx)
 {
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 4 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str()) : 0;
+
+    from += offset;
+    to += offset;
 
     if (to < from)
         swap(from, to);
@@ -630,6 +676,9 @@ any Expr::visitMin_high(ExprParser::Min_highContext *ctx)
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 4 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str()) : 0;
 
+    from += offset;
+    to += offset;
+
     if (to < from)
         swap(from, to);
 
@@ -652,6 +701,9 @@ any Expr::visitMin_low(ExprParser::Min_lowContext *ctx)
 {
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 4 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str()) : 0;
+
+    from += offset;
+    to += offset;
 
     if (to < from)
         swap(from, to);
@@ -677,6 +729,9 @@ any Expr::visitMin_close(ExprParser::Min_closeContext *ctx)
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 4 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str()) : 0;
 
+    from += offset;
+    to += offset;
+
     if (to < from)
         swap(from, to);
 
@@ -701,6 +756,9 @@ any Expr::visitMin_change(ExprParser::Min_changeContext *ctx)
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 4 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str()) : 0;
 
+    from += offset;
+    to += offset;
+
     if (to < from)
         swap(from, to);
 
@@ -717,6 +775,9 @@ any Expr::visitMin_changeP(ExprParser::Min_changePContext *ctx)
 {
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 4 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str()) : 0;
+
+    from += offset;
+    to += offset;
 
     if (to < from)
         swap(from, to);
@@ -735,6 +796,9 @@ any Expr::visitMin_ampl(ExprParser::Min_amplContext *ctx)
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 4 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str()) : 0;
 
+    from += offset;
+    to += offset;
+
     if (to < from)
         swap(from, to);
 
@@ -750,6 +814,9 @@ any Expr::visitMin_amplP(ExprParser::Min_amplPContext *ctx)
 {
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 4 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str()) : 0;
+
+    from += offset;
+    to += offset;
 
     if (to < from)
         swap(from, to);
@@ -767,6 +834,9 @@ any Expr::visitMax_open(ExprParser::Max_openContext *ctx)
 {
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 4 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str()) : 0;
+
+    from += offset;
+    to += offset;
 
     if (to < from)
         swap(from, to);
@@ -792,6 +862,9 @@ any Expr::visitMax_high(ExprParser::Max_highContext *ctx)
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 4 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str()) : 0;
 
+    from += offset;
+    to += offset;
+
     if (to < from)
         swap(from, to);
 
@@ -815,6 +888,9 @@ any Expr::visitMax_low(ExprParser::Max_lowContext *ctx)
 {
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 4 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str()) : 0;
+
+    from += offset;
+    to += offset;
 
     if (to < from)
         swap(from, to);
@@ -840,6 +916,9 @@ any Expr::visitMax_close(ExprParser::Max_closeContext *ctx)
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 4 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str()) : 0;
 
+    from += offset;
+    to += offset;
+
     if (to < from)
         swap(from, to);
 
@@ -863,6 +942,9 @@ any Expr::visitMax_change(ExprParser::Max_changeContext *ctx)
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 4 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str()) : 0;
 
+    from += offset;
+    to += offset;
+
     if (to < from)
         swap(from, to);
 
@@ -879,6 +961,9 @@ any Expr::visitMax_changeP(ExprParser::Max_changePContext *ctx)
 {
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 4 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str()) : 0;
+
+    from += offset;
+    to += offset;
 
     if (to < from)
         swap(from, to);
@@ -897,6 +982,9 @@ any Expr::visitMax_ampl(ExprParser::Max_amplContext *ctx)
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 4 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str()) : 0;
 
+    from += offset;
+    to += offset;
+
     if (to < from)
         swap(from, to);
 
@@ -913,6 +1001,9 @@ any Expr::visitMax_amplP(ExprParser::Max_amplPContext *ctx)
 {
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 4 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str()) : 0;
+
+    from += offset;
+    to += offset;
 
     if (to < from)
         swap(from, to);
@@ -931,6 +1022,9 @@ any Expr::visitMin_rsi(ExprParser::Min_rsiContext *ctx)
     int period = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 6 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[6])->getSymbol()->getText().c_str()) : 0;
+
+    from += offset;
+    to += offset;
 
     if (to < from)
         swap(from, to);
@@ -963,6 +1057,9 @@ any Expr::visitMax_rsi(ExprParser::Max_rsiContext *ctx)
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 6 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[6])->getSymbol()->getText().c_str()) : 0;
 
+    from += offset;
+    to += offset;
+
     if (to < from)
         swap(from, to);
 
@@ -994,6 +1091,9 @@ any Expr::visitMarsi(ExprParser::MarsiContext *ctx)
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[4])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 6 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[6])->getSymbol()->getText().c_str()) : 0;
 
+    from += offset;
+    to += offset;
+
     if (to < from)
         swap(from, to);
 
@@ -1011,6 +1111,9 @@ any Expr::visitMin_macd_value(ExprParser::Min_macd_valueContext *ctx)
     int signalPeriod = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[6])->getSymbol()->getText().c_str());
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[8])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 10 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[10])->getSymbol()->getText().c_str()) : 0;
+
+    from += offset;
+    to += offset;
 
     if (to < from)
         swap(from, to);
@@ -1052,6 +1155,9 @@ any Expr::visitMax_macd_value(ExprParser::Max_macd_valueContext *ctx)
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[8])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 10 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[10])->getSymbol()->getText().c_str()) : 0;
 
+    from += offset;
+    to += offset;
+
     if (to < from)
         swap(from, to);
 
@@ -1088,6 +1194,9 @@ any Expr::visitAvg_macd_value(ExprParser::Avg_macd_valueContext *ctx)
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[8])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 10 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[10])->getSymbol()->getText().c_str()) : 0;
 
+    from += offset;
+    to += offset;
+
     if (to < from)
         swap(from, to);
 
@@ -1106,6 +1215,9 @@ any Expr::visitMax_macd_signal(ExprParser::Max_macd_signalContext *ctx)
     int signalPeriod = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[6])->getSymbol()->getText().c_str());
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[8])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 10 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[10])->getSymbol()->getText().c_str()) : 0;
+
+    from += offset;
+    to += offset;
 
     if (to < from)
         swap(from, to);
@@ -1143,6 +1255,9 @@ any Expr::visitMin_macd_signal(ExprParser::Min_macd_signalContext *ctx)
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[8])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 10 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[10])->getSymbol()->getText().c_str()) : 0;
 
+    from += offset;
+    to += offset;
+
     if (to < from)
         swap(from, to);
 
@@ -1179,6 +1294,9 @@ any Expr::visitAvg_macd_signal(ExprParser::Avg_macd_signalContext *ctx)
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[8])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 10 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[10])->getSymbol()->getText().c_str()) : 0;
 
+    from += offset;
+    to += offset;
+
     if (to < from)
         swap(from, to);
 
@@ -1196,6 +1314,9 @@ any Expr::visitMin_macd_histogram(ExprParser::Min_macd_histogramContext *ctx)
     int signalPeriod = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[6])->getSymbol()->getText().c_str());
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[8])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 10 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[10])->getSymbol()->getText().c_str()) : 0;
+
+    from += offset;
+    to += offset;
 
     if (to < from)
         swap(from, to);
@@ -1233,6 +1354,9 @@ any Expr::visitMax_macd_histogram(ExprParser::Max_macd_histogramContext *ctx)
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[8])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 10 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[10])->getSymbol()->getText().c_str()) : 0;
 
+    from += offset;
+    to += offset;
+
     if (to < from)
         swap(from, to);
 
@@ -1269,6 +1393,9 @@ any Expr::visitAvg_macd_histogram(ExprParser::Avg_macd_histogramContext *ctx)
     int signalPeriod = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[6])->getSymbol()->getText().c_str());
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[8])->getSymbol()->getText().c_str());
     int to = ctx->children.size() > 10 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[10])->getSymbol()->getText().c_str()) : 0;
+
+    from += offset;
+    to += offset;
 
     if (to < from)
         swap(from, to);
@@ -1326,6 +1453,7 @@ any Expr::visitFunding_rate(ExprParser::Funding_rateContext *ctx)
 any Expr::visitBullish_engulfing(ExprParser::Bullish_engulfingContext *ctx)
 {
     int shift = (ctx->children.size() == 4) ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str()) : 0;
+    shift += offset;
 
     if (shift + 1 >= length)
     {
@@ -1346,6 +1474,7 @@ any Expr::visitBullish_engulfing(ExprParser::Bullish_engulfingContext *ctx)
 any Expr::visitBearish_engulfing(ExprParser::Bearish_engulfingContext *ctx)
 {
     int shift = (ctx->children.size() == 4) ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str()) : 0;
+    shift += offset;
 
     if (shift + 1 >= length)
     {
@@ -1367,6 +1496,7 @@ any Expr::visitBearish_engulfing(ExprParser::Bearish_engulfingContext *ctx)
 any Expr::visitBullish_hammer(ExprParser::Bullish_hammerContext *ctx)
 {
     int shift = (ctx->children.size() == 4) ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str()) : 0;
+    shift += offset;
 
     if (shift >= length)
         return {};
@@ -1393,6 +1523,7 @@ any Expr::visitBullish_hammer(ExprParser::Bullish_hammerContext *ctx)
 any Expr::visitBearish_hammer(ExprParser::Bearish_hammerContext *ctx)
 {
     int shift = (ctx->children.size() == 4) ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str()) : 0;
+    shift += offset;
 
     if (shift >= length)
         return {};
@@ -1419,6 +1550,7 @@ any Expr::visitBearish_hammer(ExprParser::Bearish_hammerContext *ctx)
 any Expr::visitDoji(ExprParser::DojiContext *ctx)
 {
     int shift = (ctx->children.size() == 4) ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str()) : 0;
+    shift += offset;
 
     if (shift >= length)
         return {};
@@ -1436,7 +1568,7 @@ any Expr::visitDoji(ExprParser::DojiContext *ctx)
 }
 
 //////////////////////////////////////////////////////////////////
-static boost::unordered_flat_map<long long, cachedIndicatorParseTree> parseCache;
+static thread_local boost::unordered_flat_map<long long, cachedIndicatorParseTree> parseCache;
 
 void cacheParseTree(const string &expr)
 {
@@ -1458,30 +1590,30 @@ void cacheParseTree(const string &expr)
 
 any calculateExpr(const string &inputText, const string &broker, const string &symbol, const string &timeframe, int length,
                   const double *open, const double *high, const double *low, const double *close,
-                  const double *volume, long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, unique_ptr<SparseTable>> *cachedMinMax)
+                  const double *volume, long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, unique_ptr<SparseTable>> *cachedMinMax, int shift)
 {
     const long long key = hashString(inputText);
-    Expr expr(broker, symbol, timeframe, length, open, high, low, close, volume, startTime, fundingRate, cachedIndicator, cachedMinMax);
-
-    auto it = parseCache.find(key);
-    if (it != parseCache.end() && it->second.tree)
+    Expr expr(broker, symbol, timeframe, length, open, high, low, close, volume, startTime, fundingRate, cachedIndicator, cachedMinMax, shift);
+    // LOGD("Calculating expr: {}", inputText);
+    auto &cache = parseCache[key];
+    if (cache.tree)
     {
-        return expr.visit(it->second.tree);
+        return expr.visit(cache.tree);
     }
     else
     {
-        ANTLRInputStream input(inputText);
-        ExprLexer lexer(&input);
-        CommonTokenStream tokens(&lexer);
-        ExprParser parser(&tokens);
-        antlr4::tree::ParseTree *tree = parser.expr();
-        return expr.visit(tree);
+        cache.input = make_unique<ANTLRInputStream>(inputText);
+        cache.lexer = make_unique<ExprLexer>(cache.input.get());
+        cache.tokens = make_unique<CommonTokenStream>(cache.lexer.get());
+        cache.parser = make_unique<ExprParser>(cache.tokens.get());
+        cache.tree = cache.parser->expr();
+        return expr.visit(cache.tree);
     }
 }
 
 string calculateSubExpr(string &expr, const string &broker, const string &symbol, const string &timeframe, int length,
                         const double *open, const double *high, const double *low, const double *close,
-                        const double *volume, long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, unique_ptr<SparseTable>> *cachedMinMax)
+                        const double *volume, long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, unique_ptr<SparseTable>> *cachedMinMax, int shift)
 {
     stack<string> st;
     string s;
@@ -1501,7 +1633,7 @@ string calculateSubExpr(string &expr, const string &broker, const string &symbol
             }
             string lastS = st.top();
             st.pop();
-            any result = calculateExpr(toLowerCase(s), broker, symbol, timeframe, length, open, high, low, close, volume, startTime, fundingRate, cachedIndicator, cachedMinMax);
+            any result = calculateExpr(toLowerCase(s), broker, symbol, timeframe, length, open, high, low, close, volume, startTime, fundingRate, cachedIndicator, cachedMinMax, shift);
             s = lastS + " ";
             if (result.type() == typeid(double))
             {

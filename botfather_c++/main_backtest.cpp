@@ -1,25 +1,14 @@
 #include "common_type.h"
 #include "util.h"
 #include "mysql_connector.h"
-#include "telegram.h"
-#include "order_monitor.h"
-#include <csignal>
-#include <execinfo.h> // backtrace
-#include <unistd.h>   // write
-#include <cstdlib>    // abort, exit
 #include <tbb/task_group.h>
 #include "timer.h"
-#include "thread_pool.h"
-#include "vector_pool.h"
 #include "worker_backtest.h"
 
 using namespace std;
 tbb::task_group task;
 
-extern thread_local VectorDoublePool vectorDoublePool;
-extern thread_local SparseTablePool sparseTablePool;
-const int MAX_TIMEFRAME = 12;
-thread_local RateDataV rates[MAX_TIMEFRAME];
+thread_local RateDataV rateData;
 string currentTF = "1m";
 boost::unordered_flat_map<long long, ExchangeInfo> exchangeInfo;
 thread_local WorkerBacktest workerBacktest;
@@ -44,53 +33,53 @@ void destroy()
     spdlog::shutdown();
 }
 
-static void backtest(const RateDataV &rateData, const string &timeframe, const shared_ptr<Bot> &bot)
+static void backtest(const shared_ptr<Bot> &bot)
 {
-    for (int i = rateData.startTime.size() - 1; i >= 0; i--)
+    LOGD("Backtest size: {}", rateData.startTime.size());
+    workerBacktest.initData("binance_future", rateData.symbol, rateData.interval, rateData.open, rateData.high, rateData.low, rateData.close, rateData.volume, rateData.startTime, exchangeInfo[hashString(rateData.symbol)]);
+    for (int i = rateData.startTime.size() - 20; i >= 0; i--)
     {
-        // LOGI("{} {}", toTimeString(rateData.startTime[i]), timeframe);
+        int shift = i;
+        workerBacktest.run(bot, shift);
+        // LOGI("{} {}", toTimeString(rateData.startTime[i]), rateData.interval);
     }
+    workerBacktest.release(rateData);
 }
 
-static void onCloseCandle1m(Rate &rate, const string &symbol, const shared_ptr<Bot> &bot)
+static void mergeCandle1m(Rate &rate, const string &symbol, const string &timeframe, const shared_ptr<Bot> &bot)
 {
-    for (int i = 0; i < bot->timeframes.size(); i++)
+    long long rateStartTime = getStartTime(timeframe, rate.startTime);
+
+    if (rateData.open.empty())
     {
-        string &timeframe = bot->timeframes[i];
-        long long rateStartTime = getStartTime(timeframe, rate.startTime);
-        RateDataV &rateData = rates[i];
+        rateData.open.push_back(rate.open);
+        rateData.high.push_back(rate.high);
+        rateData.low.push_back(rate.low);
+        rateData.close.push_back(rate.close);
+        rateData.volume.push_back(rate.volume);
+        rateData.startTime.push_back(rateStartTime);
+        return;
+    }
 
-        if (rateData.open.empty())
-        {
-            rateData.open.push_back(rate.open);
-            rateData.high.push_back(rate.high);
-            rateData.low.push_back(rate.low);
-            rateData.close.push_back(rate.close);
-            rateData.volume.push_back(rate.volume);
-            rateData.startTime.push_back(rateStartTime);
-            continue;
-        }
-
-        if (rateData.startTime.back() == rateStartTime)
-        {
-            rateData.high.back() = max(rateData.high.back(), rate.high);
-            rateData.low.back() = min(rateData.low.back(), rate.low);
-            rateData.close.back() = rate.close;
-            rateData.volume.back() += rate.volume;
-        }
-        else if (rateStartTime > rateData.startTime.back())
-        {
-            rateData.open.push_back(rate.open);
-            rateData.high.push_back(rate.high);
-            rateData.low.push_back(rate.low);
-            rateData.close.push_back(rate.close);
-            rateData.volume.push_back(rate.volume);
-            rateData.startTime.push_back(rateStartTime);
-        }
-        else
-        {
-            LOGE("merge error");
-        }
+    if (rateData.startTime.back() == rateStartTime)
+    {
+        rateData.high.back() = max(rateData.high.back(), rate.high);
+        rateData.low.back() = min(rateData.low.back(), rate.low);
+        rateData.close.back() = rate.close;
+        rateData.volume.back() += rate.volume;
+    }
+    else if (rateStartTime > rateData.startTime.back())
+    {
+        rateData.open.push_back(rate.open);
+        rateData.high.push_back(rate.high);
+        rateData.low.push_back(rate.low);
+        rateData.close.push_back(rate.close);
+        rateData.volume.push_back(rate.volume);
+        rateData.startTime.push_back(rateStartTime);
+    }
+    else
+    {
+        LOGE("merge error");
     }
 }
 
@@ -115,49 +104,53 @@ int main()
         LOGE("Can't not find bot {}", botName);
         return 0;
     }
-    shared_ptr<Bot> bot = initBot(res[0], false);
+    shared_ptr<Bot> bot = initBot(res[0]);
     vector<shared_ptr<Bot>> botList = {bot};
 
     bot->symbolList = {{"binance_future", "BTCUSDT", "binance_future:BTCUSDT"}};
-    bot->timeframes = {"15m"};
+    string timeframe = "5m";
 
     for (Symbol &s : bot->symbolList)
     {
         string symbol = s.symbol;
         task.run([=]()
                  {
-                    for(int i = 0; i < bot->timeframes.size(); i++) {
-                        rates[i].clear();
-                    }
+                    rateData.clear();
+                    rateData.symbol = symbol;
+                    rateData.interval = timeframe;
+                    vector<Rate> data;
 
-                     for (BacktestTime t = from; t <= to; t++)
-                     {
+                    for (BacktestTime t = from; t <= to; t++)
+                    {
                         string filePath = (exeDir() / ".." / ".." / "data" / StringFormat("{}-1m-{}.bin", symbol, t.toString())).lexically_normal().c_str();
                         ifstream file(filePath, std::ios::binary | std::ios::ate);
-                        if (!file) {
+                        if (!file)
+                        {
                             LOGE("Cant not open file {}", filePath);
                             return;
                         }
                         size_t size = file.tellg();
                         file.seekg(0);
 
-                        if (size % sizeof(Rate) != 0) {
+                        if (size % sizeof(Rate) != 0)
+                        {
                             LOGE("File size not aligned with Rate {}", filePath);
                             return;
                         }
 
-                        vector<Rate> data(size / sizeof(Rate));
-                        file.read(reinterpret_cast<char*>(data.data()), size);
-                        for(Rate &rate : data) {
-                            onCloseCandle1m(rate, symbol, bot);
-                        }
-                        for(int i = 0; i < bot->timeframes.size(); i++) {
-                            rates[i].reverse();
-                        }
-                        for(int i = 0; i < bot->timeframes.size(); i++) {
-                            backtest(rates[i], symbol, bot);
-                        }
-                     } });
+                        int appendSize = size / sizeof(Rate);
+                        data.resize(data.size() + appendSize);
+
+                        file.read(reinterpret_cast<char *>(data.data() + data.size() - appendSize), size);
+                        file.close();
+                    }
+
+                    for (Rate &rate : data)
+                    {
+                        mergeCandle1m(rate, symbol, timeframe, bot);
+                    }
+                    rateData.reverse();
+                    backtest(bot); });
     }
 
     task.wait();
