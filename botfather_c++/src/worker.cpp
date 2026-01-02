@@ -88,7 +88,7 @@ void Worker::run(const shared_ptr<Bot> &bot, int shift)
 void Worker::run()
 {
     Timer *timer = NULL;
-    if (timeframe == "1m")
+    if (timeframe == "1d")
     {
         timer = new Timer(StringFormat("onCloseCandle {} {} {}", broker, symbol, timeframe));
     }
