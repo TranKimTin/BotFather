@@ -255,10 +255,10 @@ bool Worker::adjustParam(NodeData &node)
     }
     else if (node.type == NODE_TYPE::BUY_MARKET || node.type == NODE_TYPE::SELL_MARKET)
     {
-        node.entry = doubleToString(close[0], exchangeInfo.digitPrices);
+        node.entry = doubleToString(close[shift], exchangeInfo.digitPrices);
     }
 
-    double closePrice = close[0];
+    double closePrice = close[shift];
     double entry = stod(node.entry);
     double stop = node.stop.empty() ? 0 : stod(node.stop);
     // match entry immediately
@@ -417,11 +417,11 @@ bool Worker::adjustParam(NodeData &node)
         expr = calculateSub(expr);
         if (node.unitExpiredTime == UNIT::MINUTE)
         {
-            expr = StringFormat("(({}) * 60000) + {}", expr, nextTime(startTime[0], timeframe));
+            expr = StringFormat("(({}) * 60000) + {}", expr, nextTime(startTime[shift], timeframe));
         }
         else if (node.unitExpiredTime == UNIT::CANDLE)
         {
-            expr = StringFormat("(({}) * 60000 * {}) + {}", expr, timeframeToNumberMinutes(timeframe), nextTime(startTime[0], timeframe));
+            expr = StringFormat("(({}) * 60000 * {}) + {}", expr, timeframeToNumberMinutes(timeframe), nextTime(startTime[shift], timeframe));
         }
 
         any result = calculate(expr);
@@ -462,11 +462,11 @@ bool Worker::adjustParam(NodeData &node)
 
 bool Worker::handlerNewOrder(NodeData &node, const shared_ptr<Bot> &bot)
 {
-    long long createdTime = startTime[0];
-    double o = open[0];
-    double h = high[0];
-    double l = low[0];
-    double c = close[0];
+    long long createdTime = startTime[shift];
+    double o = open[shift];
+    double h = high[shift];
+    double l = low[shift];
+    double c = close[shift];
     tasks.enqueue([createdTime, node, bot, broker = this->broker, symbol = this->symbol, timeframe = this->timeframe, o, h, l, c, exchangeInfo = this->exchangeInfo]()
                   {
         int botID = bot->id;
@@ -605,7 +605,7 @@ bool Worker::sendTelegram(NodeData &nodeData, const shared_ptr<Bot> &bot)
     mess += StringFormat("\n<a href='https://www.botfather.tech/history/{}'><b>{}</b></a>", bot->botName, bot->botName);
     mess += StringFormat("\n<a href='{}'><b>{}</b></a>", url[broker], symbol);
     mess += StringFormat("\n{}", broker);
-    mess += StringFormat("\n{} {}", timeframe, toTimeString(startTime[0]));
+    mess += StringFormat("\n{} {}", timeframe, toTimeString(startTime[shift]));
     mess += StringFormat("\n{}", content);
 
     for (const string &id : bot->idTelegram)
@@ -722,7 +722,7 @@ bool Worker::getSignal(const string &botName, const string &symbol, const string
     }
 
     long long now = getCurrentTime();
-    if (rateData.startTime[0] + timeframeToNumberMiliseconds(timeframe) > now + 10000)
+    if (rateData.startTime[shift] + timeframeToNumberMiliseconds(timeframe) > now + 10000)
     {
         // remove the last candle if not closed yet
         rateData.startTime.pop_front();

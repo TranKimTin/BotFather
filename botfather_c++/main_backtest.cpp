@@ -95,8 +95,8 @@ int main()
     exchangeInfo.max_load_factor(0.5);
     Timer *t = new Timer("backtest time");
 
-    string botName = "bot_tin_11";
-    BacktestTime from = BacktestTime(2025, 01);
+    string botName = "bot_tin_01";
+    BacktestTime from = BacktestTime(2025, 12);
     BacktestTime to = BacktestTime(2025, 12);
 
     string sql = "SELECT id,botName,userID,timeframes,symbolList,route,idTelegram,apiKey,secretKey,iv,enableRealOrder,maxOpenOrderPerSymbolBot,maxOpenOrderAllSymbolBot,maxOpenOrderPerSymbolAccount,maxOpenOrderAllSymbolAccount FROM Bot WHERE botName = ?";
@@ -112,7 +112,7 @@ int main()
     vector<shared_ptr<Bot>> botList = {bot};
 
     bot->symbolList = {{"binance_future", "BTCUSDT", "binance_future:BTCUSDT"}};
-    string timeframe = "5m";
+    string timeframe = "4h";
 
     for (Symbol &s : bot->symbolList)
     {
@@ -124,7 +124,7 @@ int main()
                     rateData.interval = timeframe;
                     vector<Rate> data;
 
-                    for (BacktestTime t = from - 1; t <= to; t++)
+                    for (BacktestTime t = from - 5; t <= to; t++)
                     {
                         string filePath = (exeDir() / ".." / ".." / "data" / StringFormat("{}-1m-{}.bin", symbol, t.toString())).lexically_normal().c_str();
                         ifstream file(filePath, std::ios::binary | std::ios::ate);
