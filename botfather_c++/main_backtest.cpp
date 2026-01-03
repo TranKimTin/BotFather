@@ -33,11 +33,13 @@ void destroy()
     spdlog::shutdown();
 }
 
-static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime)
+static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, vector<Rate> &data1m)
 {
+    // data1m is in ascending order
     LOGD("Backtest {} {} size: {}. from {}", rateData.symbol, rateData.interval, rateData.startTime.size(), toTimeString(backTestStartTime));
-    workerBacktest.initData("binance_future", rateData.symbol, rateData.interval, rateData.open, rateData.high, rateData.low, rateData.close, rateData.volume, rateData.startTime, exchangeInfo[hashString(rateData.symbol)]);
-    for (int i = rateData.startTime.size() - 20; i >= 0; i--)
+    vector<NodeData> orderList;
+    workerBacktest.initData("binance_future", rateData.symbol, rateData.interval, rateData.open, rateData.high, rateData.low, rateData.close, rateData.volume, rateData.startTime, exchangeInfo[hashString(rateData.symbol)], &orderList);
+    for (int i = rateData.startTime.size() - 30; i >= 0; i--)
     {
         if (rateData.startTime[i] < backTestStartTime)
         {
@@ -48,6 +50,11 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime)
         // LOGI("{} {}", toTimeString(rateData.startTime[i]), rateData.interval);
     }
     workerBacktest.release(rateData);
+    LOGD("Backtest {} {} finished. total orders: {}", rateData.symbol, rateData.interval, orderList.size());
+    for (const NodeData &order : orderList)
+    {
+        LOGD("Order: type {} volume {} entry {} tp {} sl {} createdTime {}", order.type, order.volume, order.entry, order.tp, order.sl, toTimeString(stoll(order.entry)));
+    }
 }
 
 static void mergeCandle1m(Rate &rate, const string &symbol, const string &timeframe, const shared_ptr<Bot> &bot)
@@ -124,7 +131,7 @@ int main()
                     rateData.interval = timeframe;
                     vector<Rate> data;
 
-                    for (BacktestTime t = from - 5; t <= to; t++)
+                    for (BacktestTime t = from - 3; t <= to; t++)
                     {
                         string filePath = (exeDir() / ".." / ".." / "data" / StringFormat("{}-1m-{}.bin", symbol, t.toString())).lexically_normal().c_str();
                         ifstream file(filePath, std::ios::binary | std::ios::ate);
@@ -156,7 +163,7 @@ int main()
                         mergeCandle1m(rate, symbol, timeframe, bot);
                     }
                     rateData.reverse();
-                    backtest(bot, from.toMillisecondsUTC()); });
+                    backtest(bot, from.toMillisecondsUTC(), data); });
     }
 
     task.wait();

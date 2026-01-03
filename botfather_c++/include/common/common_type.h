@@ -211,6 +211,21 @@ struct NodeData
     string timeframe;
 };
 
+struct BacktestOrder{
+    string broker;
+    string symbol;
+    string timeframe;
+    string orderType;
+    string volume;
+    string stop;
+    string entry;
+    string tp;
+    string sl;
+    string status;
+    string createdTime;
+    string expiredTime;
+};
+
 struct Route
 {
     string id;

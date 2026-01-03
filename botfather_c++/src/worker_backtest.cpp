@@ -5,7 +5,7 @@
 extern thread_local VectorDoublePool vectorDoublePool;
 extern thread_local SparseTablePool sparseTablePool;
 
-void WorkerBacktest::initData(string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, ExchangeInfo exchangeInfo)
+void WorkerBacktest::initData(string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, ExchangeInfo exchangeInfo, vector<BacktestOrder> *orderList)
 {
     this->broker = broker;
     this->symbol = symbol;
@@ -18,6 +18,8 @@ void WorkerBacktest::initData(string broker, string symbol, string timeframe, ve
     this->startTime = move(startTime);
     this->exchangeInfo = exchangeInfo;
     this->fundingRate = 0.01f;
+    this->orderList = orderList;
+    this->shift = 0;
 
     this->visited.clear();
     this->cachedExpr.clear();
@@ -48,6 +50,20 @@ bool WorkerBacktest::isPostedSignal(shared_ptr<Bot> bot)
 
 bool WorkerBacktest::handlerNewOrder(NodeData &node, const shared_ptr<Bot> &bot)
 {
+    BacktestOrder order;
+    order.broker = broker;
+    order.symbol = symbol;
+    order.timeframe = timeframe;
+    order.orderType = node.type;
+    order.volume = node.volume;
+    order.entry = node.entry;
+    order.tp = node.tp;
+    order.sl = node.sl;
+    order.status = ORDER_STATUS::OPENED;
+    order.createdTime = node.entry;
+    order.expiredTime = node.expiredTime;
+
+    this->orderList->push_back(order);
     return true;
 }
 
