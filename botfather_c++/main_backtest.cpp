@@ -37,7 +37,7 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
 {
     // data1m is in ascending order
     LOGD("Backtest {} {} size: {}. from {}", rateData.symbol, rateData.interval, rateData.startTime.size(), toTimeString(backTestStartTime));
-    vector<NodeData> orderList;
+    vector<BacktestOrder> orderList;
     workerBacktest.initData("binance_future", rateData.symbol, rateData.interval, rateData.open, rateData.high, rateData.low, rateData.close, rateData.volume, rateData.startTime, exchangeInfo[hashString(rateData.symbol)], &orderList);
     for (int i = rateData.startTime.size() - 30; i >= 0; i--)
     {
@@ -51,7 +51,7 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
     }
     workerBacktest.release(rateData);
     LOGD("Backtest {} {} finished. total orders: {}", rateData.symbol, rateData.interval, orderList.size());
-    for (const NodeData &order : orderList)
+    for (const BacktestOrder &order : orderList)
     {
         LOGD("Order: type {} volume {} entry {} tp {} sl {} createdTime {}", order.type, order.volume, order.entry, order.tp, order.sl, toTimeString(stoll(order.entry)));
     }
