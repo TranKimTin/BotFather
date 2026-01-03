@@ -53,7 +53,7 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
     LOGD("Backtest {} {} finished. total orders: {}", rateData.symbol, rateData.interval, orderList.size());
     for (const BacktestOrder &order : orderList)
     {
-        LOGD("Order: type {} volume {} entry {} tp {} sl {} createdTime {}", order.type, order.volume, order.entry, order.tp, order.sl, toTimeString(stoll(order.entry)));
+        LOGD("Order: type {} volume {} entry {} tp {} sl {} createdTime {}", order.orderType, order.volume, order.entry, order.tp, order.sl, toTimeString(stoll(order.entry)));
     }
 }
 
