@@ -303,6 +303,20 @@ struct BacktestTime
         return *this;
     }
 
+    BacktestTime operator+(int m) const
+    {
+        BacktestTime r = *this;
+        int total = r.year * 12 + (r.month - 1) + m;
+        r.year = total / 12;
+        r.month = total % 12 + 1;
+        return r;
+    }
+
+    BacktestTime operator-(int m) const
+    {
+        return *this + (-m);
+    }
+
     string toString() const
     {
         string s = to_string(year);
@@ -313,5 +327,23 @@ struct BacktestTime
         }
         s += to_string(month);
         return s;
+    }
+
+    long long toMillisecondsUTC() const
+    {
+        std::tm tm{};
+        tm.tm_year = year - 1900; // years since 1900
+        tm.tm_mon = month - 1;    // 0-based
+        tm.tm_mday = 1;
+        tm.tm_hour = 0;
+        tm.tm_min = 0;
+        tm.tm_sec = 0;
+        tm.tm_isdst = 0;
+
+        std::time_t t = timegm(&tm);
+
+        return std::chrono::duration_cast<std::chrono::milliseconds>(
+                   std::chrono::system_clock::from_time_t(t).time_since_epoch())
+            .count();
     }
 };

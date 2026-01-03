@@ -33,12 +33,16 @@ void destroy()
     spdlog::shutdown();
 }
 
-static void backtest(const shared_ptr<Bot> &bot)
+static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime)
 {
-    LOGD("Backtest size: {}", rateData.startTime.size());
+    LOGD("Backtest {} {} size: {}. from {}", rateData.symbol, rateData.interval, rateData.startTime.size(), toTimeString(backTestStartTime));
     workerBacktest.initData("binance_future", rateData.symbol, rateData.interval, rateData.open, rateData.high, rateData.low, rateData.close, rateData.volume, rateData.startTime, exchangeInfo[hashString(rateData.symbol)]);
     for (int i = rateData.startTime.size() - 20; i >= 0; i--)
     {
+        if (rateData.startTime[i] < backTestStartTime)
+        {
+            continue;
+        }
         int shift = i;
         workerBacktest.run(bot, shift);
         // LOGI("{} {}", toTimeString(rateData.startTime[i]), rateData.interval);
@@ -93,7 +97,7 @@ int main()
 
     string botName = "bot_tin_11";
     BacktestTime from = BacktestTime(2025, 01);
-    BacktestTime to = BacktestTime(2025, 11);
+    BacktestTime to = BacktestTime(2025, 12);
 
     string sql = "SELECT id,botName,userID,timeframes,symbolList,route,idTelegram,apiKey,secretKey,iv,enableRealOrder,maxOpenOrderPerSymbolBot,maxOpenOrderAllSymbolBot,maxOpenOrderPerSymbolAccount,maxOpenOrderAllSymbolAccount FROM Bot WHERE botName = ?";
     vector<any> args = {botName};
@@ -120,14 +124,16 @@ int main()
                     rateData.interval = timeframe;
                     vector<Rate> data;
 
-                    for (BacktestTime t = from; t <= to; t++)
+                    for (BacktestTime t = from - 1; t <= to; t++)
                     {
                         string filePath = (exeDir() / ".." / ".." / "data" / StringFormat("{}-1m-{}.bin", symbol, t.toString())).lexically_normal().c_str();
                         ifstream file(filePath, std::ios::binary | std::ios::ate);
                         if (!file)
                         {
-                            LOGE("Cant not open file {}", filePath);
-                            return;
+                            if(rateData.startTime.empty()){
+                                continue;
+                            }
+                            break;
                         }
                         size_t size = file.tellg();
                         file.seekg(0);
@@ -150,7 +156,7 @@ int main()
                         mergeCandle1m(rate, symbol, timeframe, bot);
                     }
                     rateData.reverse();
-                    backtest(bot); });
+                    backtest(bot, from.toMillisecondsUTC()); });
     }
 
     task.wait();
