@@ -35,6 +35,12 @@ void destroy()
 
 static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, vector<Rate> &data1m)
 {
+    if (rateData.startTime.size() < 30 || data1m.size() < 30)
+    {
+        LOGE("Not enough data for backtest {} {}", rateData.symbol, rateData.interval);
+        return;
+    }
+
     // data1m is in ascending order
     LOGD("Backtest {} {} size: {}. from {}", rateData.symbol, rateData.interval, rateData.startTime.size(), toTimeString(backTestStartTime));
     vector<BacktestOrder> orderList;
@@ -54,6 +60,11 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
     for (const BacktestOrder &order : orderList)
     {
         LOGD("Order: type {} volume {} entry {} tp {} sl {} createdTime {}", order.orderType, order.volume, order.entry, order.tp, order.sl, toTimeString(stoll(order.entry)));
+    }
+
+    for (int i = (backTestStartTime <= data1m[0].startTime ? 0 : (backTestStartTime - data1m[0].startTime) / 60000); i < data1m.size(); i++)
+    {
+        LOGD("1m Candle: {} O:{} H:{} L:{} C:{}", toTimeString(data1m[i].startTime), data1m[i].open, data1m[i].high, data1m[i].low, data1m[i].close);
     }
 }
 
