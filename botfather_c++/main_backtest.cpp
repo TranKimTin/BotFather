@@ -5,6 +5,9 @@
 #include "timer.h"
 #include "worker_backtest.h"
 
+#undef LOGI
+#define LOGI(mess, ...) spdlog::info(mess, ##__VA_ARGS__)
+
 using namespace std;
 tbb::task_group task;
 
@@ -18,12 +21,11 @@ void init()
     auto logger = spdlog::stdout_color_mt("console");
     spdlog::set_default_logger(logger);
 
-    spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%t] [%^%l%$] %v");
+    spdlog::set_pattern("%v");
     spdlog::set_level(spdlog::level::debug);
-    spdlog::flush_on(spdlog::level::err);
-    spdlog::flush_every(chrono::seconds(3));
+    spdlog::flush_on(spdlog::level::trace);
 
-    MySQLConnector::getInstance().initializePool(2);
+    MySQLConnector::getInstance().initializePool(1);
 
     srand(time(NULL));
 }
@@ -51,7 +53,6 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
         }
         int shift = i;
         workerBacktest.run(bot, shift);
-        // LOGI("{} {}", toTimeString(rateData.startTime[i]), rateData.interval);
     }
     workerBacktest.release(rateData);
 
@@ -309,12 +310,8 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
 
     for (BacktestOrder &order : result)
     {
-        LOGI("{} {} Type: {},  Status: {}, Profit: {}",
-             toTimeString(order.createdTime),
-             rateData.symbol,
-             order.orderType,
-             order.status,
-             order.profit);
+        LOGI("NewOrder_{}_{}_{}_{}_{}_{}_{}_{}_{}_{}",
+             order.orderType, order.entry, order.volume, order.tp, order.sl, order.createdTime, order.expiredTime, order.matchTime, order.profit, order.status);
     }
 }
 
@@ -351,23 +348,33 @@ static void mergeCandle1m(Rate &rate, const string &symbol, const string &timefr
     }
     else
     {
-        LOGE("merge error");
     }
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+#ifndef DEBUG_LOG
+    if (argc < 7)
+    {
+        throw std::runtime_error("Invalid arguments.");
+        return 0;
+    }
+    string botName = argv[1];
+    string timeframe = argv[2];
+
+    BacktestTime from = BacktestTime(stoi(argv[3]), stoi(argv[4]));
+    BacktestTime to = BacktestTime(stoi(argv[5]), stoi(argv[6]));
+#else
+    string botName = "003_05_12_2025_LongShort_G3_BA";
+    string timeframe = "1m";
+
+    BacktestTime from = BacktestTime(2025, 10);
+    BacktestTime to = BacktestTime(2025, 12);
+#endif
     init();
 
     exchangeInfo = getBinanceFutureInfo();
     exchangeInfo.max_load_factor(0.5);
-    Timer *t = new Timer("backtest time");
-
-    string botName = "003_05_12_2025_LongShort_G3_BA";
-    string timeframe = "2h";
-
-    BacktestTime from = BacktestTime(2025, 12);
-    BacktestTime to = BacktestTime(2025, 12);
 
     string sql = "SELECT id,botName,userID,timeframes,symbolList,route,idTelegram,apiKey,secretKey,iv,enableRealOrder,maxOpenOrderPerSymbolBot,maxOpenOrderAllSymbolBot,maxOpenOrderPerSymbolAccount,maxOpenOrderAllSymbolAccount FROM Bot WHERE botName = ?";
     vector<any> args = {botName};
@@ -375,7 +382,7 @@ int main()
     vector<map<string, any>> res = db.executeQuery(sql, args);
     if (res.size() != 1)
     {
-        LOGE("Can't not find bot {}", botName);
+        throw std::runtime_error(StringFormat("Can't not find bot {}.", botName));
         return 0;
     }
     shared_ptr<Bot> bot = initBot(res[0]);
@@ -409,7 +416,7 @@ int main()
 
                         if (size % sizeof(Rate) != 0)
                         {
-                            LOGE("File size not aligned with Rate {}", filePath);
+                            throw std::runtime_error(StringFormat("File size not aligned with Rate {}", filePath));
                             return;
                         }
 
@@ -429,7 +436,6 @@ int main()
     }
 
     task.wait();
-    delete t;
     destroy();
     return 0;
 }
