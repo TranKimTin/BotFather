@@ -211,19 +211,24 @@ struct NodeData
     string timeframe;
 };
 
-struct BacktestOrder{
-    string broker;
-    string symbol;
-    string timeframe;
+struct BacktestOrder
+{
+    int id;
+    double priority;
     string orderType;
-    string volume;
-    string stop;
-    string entry;
-    string tp;
-    string sl;
+    double entry;
+    double volume;
+    double tp;
+    double sl;
+    long long createdTime;
+    long long expiredTime;
+    long long matchTime;
     string status;
-    string createdTime;
-    string expiredTime;
+
+    bool operator<(const BacktestOrder &other) const
+    {
+        return priority < other.priority; // max-heap based on priority
+    }
 };
 
 struct Route

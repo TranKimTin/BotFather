@@ -51,17 +51,14 @@ bool WorkerBacktest::isPostedSignal(shared_ptr<Bot> bot)
 bool WorkerBacktest::handlerNewOrder(NodeData &node, const shared_ptr<Bot> &bot)
 {
     BacktestOrder order;
-    order.broker = broker;
-    order.symbol = symbol;
-    order.timeframe = timeframe;
+    order.id = this->orderList->size();
     order.orderType = node.type;
-    order.volume = node.volume;
-    order.entry = node.entry;
-    order.tp = node.tp;
-    order.sl = node.sl;
-    order.status = ORDER_STATUS::OPENED;
-    order.createdTime = node.entry;
-    order.expiredTime = node.expiredTime;
+    order.entry = stod(node.entry);
+    order.volume = stod(node.volume);
+    order.tp = stod(node.tp);
+    order.sl = stod(node.sl);
+    order.createdTime = startTime[shift] + timeframeToNumberMiliseconds(timeframe);
+    order.expiredTime = (node.expiredTime.empty() ? 0 : stoll(node.expiredTime));
 
     this->orderList->push_back(order);
     return true;

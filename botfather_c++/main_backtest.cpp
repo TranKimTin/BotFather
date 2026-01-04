@@ -56,15 +56,169 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
         // LOGI("{} {}", toTimeString(rateData.startTime[i]), rateData.interval);
     }
     workerBacktest.release(rateData);
-    LOGD("Backtest {} {} finished. total orders: {}", rateData.symbol, rateData.interval, orderList.size());
-    for (const BacktestOrder &order : orderList)
+
+    if (orderList.empty())
     {
-        LOGD("Order: type {} volume {} entry {} tp {} sl {} createdTime {}", order.orderType, order.volume, order.entry, order.tp, order.sl, toTimeString(stoll(order.entry)));
+        LOGD("Backtest {} {} finished. no orders", rateData.symbol, rateData.interval);
+        return;
     }
+
+    LOGD("Backtest {} {} finished. total orders: {}", rateData.symbol, rateData.interval, orderList.size());
+    // orderList is in ascending order
+    vector<bool> orderClosed(orderList.size(), false);
+    priority_queue<BacktestOrder> pendingBuy;
+    priority_queue<BacktestOrder> pendingSell;
+    priority_queue<BacktestOrder> pendingTPBuy;
+    priority_queue<BacktestOrder> pendingSLBuy;
+    priority_queue<BacktestOrder> pendingTPSell;
+    priority_queue<BacktestOrder> pendingSLSell;
+
+    int j = 0;
+    vector<BacktestOrder> result;
 
     for (int i = (backTestStartTime <= data1m[0].startTime ? 0 : (backTestStartTime - data1m[0].startTime) / 60000); i < data1m.size(); i++)
     {
-        LOGD("1m Candle: {} O:{} H:{} L:{} C:{}", toTimeString(data1m[i].startTime), data1m[i].open, data1m[i].high, data1m[i].low, data1m[i].close);
+        Rate &rate = data1m[i];
+        while (j < orderList.size() && orderList[j].createdTime <= rate.startTime)
+        {
+            BacktestOrder &order = orderList[j];
+
+            if (order.orderType == NODE_TYPE::BUY_MARKET)
+            {
+                order.priority = -order.tp;
+                pendingTPBuy.push(order);
+
+                order.priority = order.sl;
+                pendingSLBuy.push(order);
+            }
+            else if (order.orderType == NODE_TYPE::SELL_MARKET)
+            {
+                order.priority = order.tp;
+                pendingTPSell.push(order);
+
+                order.priority = -order.sl;
+                pendingSLSell.push(order);
+            }
+            else if (order.orderType == NODE_TYPE::BUY_LIMIT)
+            {
+                order.priority = order.entry;
+                pendingBuy.push(order);
+            }
+            else if (order.orderType == NODE_TYPE::SELL_LIMIT)
+            {
+                order.priority = -order.entry;
+                pendingSell.push(order);
+            }
+            j++;
+        }
+
+        while (!pendingBuy.empty() && pendingBuy.top().entry >= rate.low)
+        {
+            BacktestOrder order = pendingBuy.top();
+            pendingBuy.pop();
+
+            if (order.expiredTime != 0 && order.expiredTime <= rate.startTime)
+            {
+                order.status = ORDER_STATUS::CANCELED;
+                result.push_back(order);
+                continue;
+            }
+
+            order.priority = -order.tp;
+            pendingTPBuy.push(order);
+
+            order.priority = order.sl;
+            pendingSLBuy.push(order);
+        }
+        while (!pendingSell.empty() && pendingSell.top().entry <= rate.high)
+        {
+            BacktestOrder order = pendingSell.top();
+            pendingSell.pop();
+
+            if (order.expiredTime != 0 && order.expiredTime <= rate.startTime)
+            {
+                order.status = ORDER_STATUS::CANCELED;
+                result.push_back(order);
+                continue;
+            }
+
+            order.priority = order.tp;
+            pendingTPSell.push(order);
+
+            order.priority = -order.sl;
+            pendingSLSell.push(order);
+        }
+
+        while (!pendingTPBuy.empty() && pendingTPBuy.top().tp <= rate.high)
+        {
+            BacktestOrder order = pendingTPBuy.top();
+            pendingTPBuy.pop();
+            if (orderClosed[order.id])
+            {
+                continue;
+            }
+
+            orderClosed[order.id] = true;
+
+            order.status = ORDER_STATUS::MATCH_TP;
+            order.matchTime = rate.startTime;
+
+            result.push_back(order);
+        }
+        while (!pendingSLBuy.empty() && pendingSLBuy.top().sl >= rate.low)
+        {
+            BacktestOrder order = pendingSLBuy.top();
+            pendingSLBuy.pop();
+            if (orderClosed[order.id])
+            {
+                continue;
+            }
+
+            orderClosed[order.id] = true;
+
+            order.status = ORDER_STATUS::MATCH_SL;
+            order.matchTime = rate.startTime;
+
+            result.push_back(order);
+        }
+        while (!pendingTPSell.empty() && pendingTPSell.top().tp >= rate.low)
+        {
+            BacktestOrder order = pendingTPSell.top();
+            pendingTPSell.pop();
+            if (orderClosed[order.id])
+            {
+                continue;
+            }
+            orderClosed[order.id] = true;
+
+            order.status = ORDER_STATUS::MATCH_TP;
+            order.matchTime = rate.startTime;
+
+            result.push_back(order);
+        }
+        while (!pendingSLSell.empty() && pendingSLSell.top().sl <= rate.high)
+        {
+            BacktestOrder order = pendingSLSell.top();
+            pendingSLSell.pop();
+            if (orderClosed[order.id])
+            {
+                continue;
+            }
+            orderClosed[order.id] = true;
+
+            order.status = ORDER_STATUS::MATCH_SL;
+            order.matchTime = rate.startTime;
+
+            result.push_back(order);
+        }
+    }
+    for (BacktestOrder &order : result)
+    {
+        LOGI("{} Type: {},  Status: {}, MatchTime: {}",
+             toTimeString(order.createdTime),
+             order.orderType,
+             order.status,
+             order.matchTime != 0 ? toTimeString(order.matchTime) : "N/A");
     }
 }
 
@@ -113,7 +267,9 @@ int main()
     exchangeInfo.max_load_factor(0.5);
     Timer *t = new Timer("backtest time");
 
-    string botName = "bot_tin_01";
+    string botName = "003_05_12_2025_LongShort_G3_BA";
+    string timeframe = "2h";
+
     BacktestTime from = BacktestTime(2025, 12);
     BacktestTime to = BacktestTime(2025, 12);
 
@@ -129,8 +285,7 @@ int main()
     shared_ptr<Bot> bot = initBot(res[0]);
     vector<shared_ptr<Bot>> botList = {bot};
 
-    bot->symbolList = {{"binance_future", "BTCUSDT", "binance_future:BTCUSDT"}};
-    string timeframe = "4h";
+    bot->symbolList = {{"binance_future", "CLANKERUSDT", "binance_future:CLANKERUSDT"}};
 
     for (Symbol &s : bot->symbolList)
     {
