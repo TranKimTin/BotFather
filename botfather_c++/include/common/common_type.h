@@ -223,6 +223,7 @@ struct BacktestOrder
     long long createdTime;
     long long expiredTime;
     long long matchTime;
+    double profit;
     string status;
 
     bool operator<(const BacktestOrder &other) const

@@ -51,6 +51,7 @@ bool WorkerBacktest::isPostedSignal(shared_ptr<Bot> bot)
 bool WorkerBacktest::handlerNewOrder(NodeData &node, const shared_ptr<Bot> &bot)
 {
     BacktestOrder order;
+    order.status = ORDER_STATUS::OPENED;
     order.id = this->orderList->size();
     order.orderType = node.type;
     order.entry = stod(node.entry);

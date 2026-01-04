@@ -37,12 +37,10 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
 {
     if (rateData.startTime.size() < 30 || data1m.size() < 30)
     {
-        LOGE("Not enough data for backtest {} {}", rateData.symbol, rateData.interval);
         return;
     }
 
     // data1m is in ascending order
-    LOGD("Backtest {} {} size: {}. from {}", rateData.symbol, rateData.interval, rateData.startTime.size(), toTimeString(backTestStartTime));
     vector<BacktestOrder> orderList;
     workerBacktest.initData("binance_future", rateData.symbol, rateData.interval, rateData.open, rateData.high, rateData.low, rateData.close, rateData.volume, rateData.startTime, exchangeInfo[hashString(rateData.symbol)], &orderList);
     for (int i = rateData.startTime.size() - 30; i >= 0; i--)
@@ -59,11 +57,9 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
 
     if (orderList.empty())
     {
-        LOGD("Backtest {} {} finished. no orders", rateData.symbol, rateData.interval);
         return;
     }
 
-    LOGD("Backtest {} {} finished. total orders: {}", rateData.symbol, rateData.interval, orderList.size());
     // orderList is in ascending order
     vector<bool> orderClosed(orderList.size(), false);
     priority_queue<BacktestOrder> pendingBuy;
@@ -85,6 +81,8 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
 
             if (order.orderType == NODE_TYPE::BUY_MARKET)
             {
+                order.status = ORDER_STATUS::MATCH_ENTRY;
+
                 order.priority = -order.tp;
                 pendingTPBuy.push(order);
 
@@ -93,6 +91,8 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
             }
             else if (order.orderType == NODE_TYPE::SELL_MARKET)
             {
+                order.status = ORDER_STATUS::MATCH_ENTRY;
+
                 order.priority = order.tp;
                 pendingTPSell.push(order);
 
@@ -120,9 +120,12 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
             if (order.expiredTime != 0 && order.expiredTime <= rate.startTime)
             {
                 order.status = ORDER_STATUS::CANCELED;
+                order.profit = 0.0;
                 result.push_back(order);
                 continue;
             }
+
+            order.status = ORDER_STATUS::MATCH_ENTRY;
 
             order.priority = -order.tp;
             pendingTPBuy.push(order);
@@ -138,9 +141,12 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
             if (order.expiredTime != 0 && order.expiredTime <= rate.startTime)
             {
                 order.status = ORDER_STATUS::CANCELED;
+                order.profit = 0.0;
                 result.push_back(order);
                 continue;
             }
+
+            order.status = ORDER_STATUS::MATCH_ENTRY;
 
             order.priority = order.tp;
             pendingTPSell.push(order);
@@ -162,6 +168,7 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
 
             order.status = ORDER_STATUS::MATCH_TP;
             order.matchTime = rate.startTime;
+            order.profit = (order.tp - order.entry) * order.volume;
 
             result.push_back(order);
         }
@@ -178,6 +185,7 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
 
             order.status = ORDER_STATUS::MATCH_SL;
             order.matchTime = rate.startTime;
+            order.profit = (order.sl - order.entry) * order.volume;
 
             result.push_back(order);
         }
@@ -193,6 +201,7 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
 
             order.status = ORDER_STATUS::MATCH_TP;
             order.matchTime = rate.startTime;
+            order.profit = (order.entry - order.tp) * order.volume;
 
             result.push_back(order);
         }
@@ -208,17 +217,104 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
 
             order.status = ORDER_STATUS::MATCH_SL;
             order.matchTime = rate.startTime;
+            order.profit = (order.entry - order.sl) * order.volume;
 
             result.push_back(order);
         }
     }
+
+    // handle remain order
+    Rate &rate = data1m.back();
+    while (!pendingBuy.empty())
+    {
+        BacktestOrder order = pendingBuy.top();
+        pendingBuy.pop();
+        order.profit = 0.0;
+
+        if (order.expiredTime != 0 && order.expiredTime <= rate.startTime)
+        {
+            order.status = ORDER_STATUS::CANCELED;
+            result.push_back(order);
+            continue;
+        }
+
+        result.push_back(order);
+    }
+    while (!pendingSell.empty())
+    {
+        BacktestOrder order = pendingSell.top();
+        pendingSell.pop();
+
+        order.profit = 0.0;
+        if (order.expiredTime != 0 && order.expiredTime <= rate.startTime)
+        {
+            order.status = ORDER_STATUS::CANCELED;
+            result.push_back(order);
+            continue;
+        }
+
+        result.push_back(order);
+    }
+
+    while (!pendingTPBuy.empty())
+    {
+        BacktestOrder order = pendingTPBuy.top();
+        pendingTPBuy.pop();
+        if (orderClosed[order.id])
+        {
+            continue;
+        }
+
+        orderClosed[order.id] = true;
+        order.profit = (rate.close - order.entry) * order.volume;
+        result.push_back(order);
+    }
+    while (!pendingSLBuy.empty())
+    {
+        BacktestOrder order = pendingSLBuy.top();
+        pendingSLBuy.pop();
+        if (orderClosed[order.id])
+        {
+            continue;
+        }
+
+        orderClosed[order.id] = true;
+        order.profit = (rate.close - order.entry) * order.volume;
+        result.push_back(order);
+    }
+    while (!pendingTPSell.empty())
+    {
+        BacktestOrder order = pendingTPSell.top();
+        pendingTPSell.pop();
+        if (orderClosed[order.id])
+        {
+            continue;
+        }
+        orderClosed[order.id] = true;
+        order.profit = (order.entry - rate.close) * order.volume;
+        result.push_back(order);
+    }
+    while (!pendingSLSell.empty())
+    {
+        BacktestOrder order = pendingSLSell.top();
+        pendingSLSell.pop();
+        if (orderClosed[order.id])
+        {
+            continue;
+        }
+        orderClosed[order.id] = true;
+        order.profit = (order.entry - rate.close) * order.volume;
+        result.push_back(order);
+    }
+
     for (BacktestOrder &order : result)
     {
-        LOGI("{} Type: {},  Status: {}, MatchTime: {}",
+        LOGI("{} {} Type: {},  Status: {}, Profit: {}",
              toTimeString(order.createdTime),
+             rateData.symbol,
              order.orderType,
              order.status,
-             order.matchTime != 0 ? toTimeString(order.matchTime) : "N/A");
+             order.profit);
     }
 }
 
@@ -285,7 +381,7 @@ int main()
     shared_ptr<Bot> bot = initBot(res[0]);
     vector<shared_ptr<Bot>> botList = {bot};
 
-    bot->symbolList = {{"binance_future", "CLANKERUSDT", "binance_future:CLANKERUSDT"}};
+    // bot->symbolList = {{"binance_future", "CLANKERUSDT", "binance_future:CLANKERUSDT"}};
 
     for (Symbol &s : bot->symbolList)
     {
