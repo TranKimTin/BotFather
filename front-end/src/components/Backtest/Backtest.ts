@@ -103,7 +103,7 @@ export default defineComponent({
             const onFinish = () => {
                 console.log('Backtest finished');
                 Toast.showSuccess(`Backtest cho bot ${r_botName.value} xong.`);
-                r_orderList.value.sort((a, b) => a.createdTime - b.createdTime);
+                r_orderList.value.sort((a, b) => b.createdTime - a.createdTime);
                 r_loading.value = false;
             };
 
