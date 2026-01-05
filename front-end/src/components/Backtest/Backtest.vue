@@ -55,11 +55,11 @@
             {{ order.data.expiredTime ? moment(order.data.expiredTime).format('YYYY-MM-DD HH:mm') : '' }}
           </template>
         </Column>
-        <Column field="profit" header="Lãi / volume (đã đóng)">
+        <Column field="profit" header="Lãi">
           <template #body="order">
             <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
               :class="order.data.profit >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'">{{
-                Math.round(order.data.profit).toLocaleString() }} </span>
+                (parseFloat(order.data.profit.toFix(2))).toLocaleString() }} </span>
           </template>
         </Column>
         <Column field="status" header="Trạng thái"></Column>
