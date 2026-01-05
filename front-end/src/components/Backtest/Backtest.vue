@@ -20,6 +20,10 @@
     <Button label="Chạy backtest" @click="runBacktest" severity="info" />
 
   </div>
+  <div class="m-2">
+    <h3>Kết quả backtest:</h3>
+    <p>Lãi: {{ r_profit }}</p>
+  </div>
 </template>
 
 <script lang="ts" src="./Backtest.ts"></script>

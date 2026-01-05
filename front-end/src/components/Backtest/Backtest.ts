@@ -19,6 +19,7 @@ export default defineComponent({
         const r_endYear = ref<number>(2025);
         const months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
         const years = [2020, 2021, 2022, 2023, 2024, 2025, 2026];
+        const r_profit = ref<number>(0);
 
         onMounted(() => {
             axios.get('/getBotList').then(result => {
@@ -52,12 +53,15 @@ export default defineComponent({
                 es.close();
             }
 
+            r_profit.value = 0;
+
             const onMessage = (mess: string) => {
                 if (mess.startsWith('NewOrder')) {
                     // order is array [OrderType, entry, volume, tp, sl, createdTime, expiredTime, matchTime, profit, status]
                     const order = mess.split('_').slice(1);
                     const [orderType, entry, volume, tp, sl, createdTime, expiredTime, matchTime, profit, status] = order;
-                    console.log({ orderType, entry, volume, tp, sl, createdTime, expiredTime, matchTime, profit, status })
+                    console.log({ orderType, entry, volume, tp, sl, createdTime, expiredTime, matchTime, profit, status });
+                    r_profit.value += parseFloat(profit);
                 }
             };
 
@@ -79,6 +83,7 @@ export default defineComponent({
             r_startYear,
             r_endMonth,
             r_endYear,
+            r_profit,
             months,
             years
         };
