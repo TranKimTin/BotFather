@@ -53,6 +53,7 @@ export default defineComponent({
             }
 
             const onMessage = (mess: string) => {
+                console.log('Backtest message:', mess);
                 if (mess.startsWith('newOrder')) {
                     // order is array [OrderType, entry, volume, tp, sl, createdTime, expiredTime, matchTime, profit, status]
                     const order = mess.split('_').slice(1);
