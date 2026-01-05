@@ -260,6 +260,7 @@ export async function getBacktestResult(req: any, res: any) {
         res.end();
     }
     try {
+        console.log('Backtest started');
         res.status(200);
         res.setHeader("Content-Type", "text/event-stream");
         res.setHeader("Cache-Control", "no-cache");
