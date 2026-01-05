@@ -1,5 +1,7 @@
+import delay from 'delay';
 import { BotInfo, CustomRequest, NodeData, UserTokenInfo } from '../../common/Interface';
 import * as BotConfig from '../business/BotConfig';
+import * as util from '../../common/util'
 
 export async function getBotInfo(req: any, res: any) {
     try {
@@ -240,5 +242,70 @@ export async function setMaximumOrder(req: any, res: any) {
     catch (err: any) {
         console.error(err);
         res.json({ code: 400, message: err, data: [] });
+    }
+}
+
+export async function getBacktestResult(req: any, res: any) {
+    let ended = false;
+
+    function send(event: string, data: string) {
+        if (ended) return;
+        if (event) res.write(`event: ${event}\n`);
+        res.write(`data: ${data}\n\n`);
+    }
+    function end() {
+        if (ended) return;
+        ended = true;
+        res.end();
+    }
+    try {
+        res.status(200);
+        res.setHeader("Content-Type", "text/event-stream");
+        res.setHeader("Cache-Control", "no-cache");
+        res.setHeader("Connection", "keep-alive");
+        res.flushHeaders?.();
+
+        const botName: string = req.query.botName;
+        const timeframe: string = req.query.timeframe;
+        const startMonth: number = req.query.startMonth;
+        const startYear: number = req.query.startYear;
+        const endMonth: number = req.query.endMonth;
+        const endYear: number = req.query.endYear;
+        const userData: UserTokenInfo = req.user;
+
+        const isOwnBot = await BotConfig.requireOwnBot(botName, userData);
+        if (!isOwnBot) {
+            throw 'Không có quyền truy cập bot';
+        }
+
+        if (!botName) throw 'botName không hợp lệ';
+        if (!timeframe) throw 'timeframe không hợp lệ';
+        if (!startMonth || startMonth < 1 || startMonth > 12) throw 'startMonth không hợp lệ';
+        if (!endMonth || endMonth < 1 || endMonth > 12) throw 'endMonth không hợp lệ';
+        if (!startYear || startYear < 2000) throw 'startYear không hợp lệ';
+        if (!endYear || endYear < 2000) throw 'endYear không hợp lệ';
+        if (startYear > endYear || (startYear === endYear && startMonth > endMonth)) {
+            throw 'Khoảng thời gian không hợp lệ';
+        }
+
+        const proc = util.runBacktest(botName, timeframe, startYear, startMonth, endYear, endMonth, (order: Array<string>) => {
+            send('onMessage', JSON.stringify(order));
+        });
+
+        proc.on("close", (code: number) => {
+            send('onFinish', '');
+            end();
+        });
+
+        req.on("close", () => {
+            if (proc && proc.exitCode === null && !proc.killed) {
+                proc.kill();
+            }
+        });
+    }
+    catch (err: any) {
+        console.error(err);
+        send('onError', err.toString());
+        end();
     }
 }

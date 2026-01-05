@@ -1,6 +1,7 @@
 import axios from "axios";
 import * as Toast from "../toast/toast";
 import Cookies from 'js-cookie';
+import { EventSource } from "eventsource";
 
 interface Params {
     [key: string]: any
@@ -12,8 +13,8 @@ interface Response {
     message: string
 }
 
-// const URL = 'http://mybotmaker.com/api';
-const URL = '/api';
+const URL = 'http://mybotmaker.com/api';
+// const URL = '/api';
 
 const headers = {
     'content-type': 'application/json',
@@ -106,4 +107,40 @@ export async function delete_(url: string, params: Params = {}): Promise<any> {
         Toast.showError(data.message);
         throw data;
     }
+}
+
+export function getEventSource(url: string, params: Params, onMessage: (mess: string) => EventSource) {
+    const token = Cookies.get('token') || '';
+
+    const query = new URLSearchParams({
+        ...params,
+        'x-access-token': token
+    }).toString();
+
+    const es = new EventSource(`${URL}${url}?${query}`);
+
+    es.onmessage = (e: MessageEvent) => {
+        onMessage(e.data);
+    };
+
+    es.addEventListener("onMessage", (e: MessageEvent) => {
+        onMessage(e.data);
+    });
+
+    es.addEventListener("onFinish", (e: MessageEvent) => {
+        es.close();
+    });
+
+    es.addEventListener("onError", (e: MessageEvent) => {
+        Toast.showError(e.data);
+        es.close();
+    });
+
+    es.onerror = (e: ErrorEvent) => {
+        console.error('EventSource error:', e);
+        Toast.showError(e.message);
+        es.close();
+    }
+
+    return es;
 }

@@ -20,6 +20,7 @@
     "cytoscape": "^3.30.2",
     "cytoscape-edgehandles": "^4.0.1",
     "delay": "^5.0.0",
+    "eventsource": "^3.0.7",
     "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
     "primeicons": "^7.0.0",

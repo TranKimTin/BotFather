@@ -8,6 +8,7 @@ import Admin from '../components/Admin/Admin.vue';
 import Guide from '../components/Guide/Guide.vue';
 import Test from '../components/Test/Test.vue';
 import Setting from '../components/Setting/Setting.vue';
+import Backtest from '../components/Backtest/Backtest.vue';
 
 const routes = [
     { path: '/', component: Dashboard },
@@ -20,6 +21,7 @@ const routes = [
     { path: '/test/getOrders', component: Test },
     { path: '/settings', component: Setting },
     { path: '/payment', component: Calculator },
+    { path: '/backtest', component: Backtest },
 ];
 
 const router = createRouter({

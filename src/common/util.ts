@@ -1302,37 +1302,37 @@ export async function downloadData(symbol: string, month: string, dest: string) 
 }
 
 // order is array [OrderType, entry, volume, tp, sl, createdTime, expiredTime, matchTime, profit, status]
-export async function runBacktest(botName: string, timeframe: string, startYear: string, startMonth: string, endYear: string, endMonth: string, onNewOrder: (order: Array<string>) => void) {
-    return new Promise<number>((resolve, reject) => {
-        const args = [
-            botName,
-            timeframe,
-            startYear,
-            startMonth,
-            endYear,
-            endMonth
-        ];
-        const proc = spawn(`${__dirname}/../../botfather_c++/build/backtest`, args);
-        let buf = '';
+export function runBacktest(botName: string, timeframe: string, startYear: number, startMonth: number, endYear: number, endMonth: number, onNewOrder: (order: Array<string>) => void) {
+    const args = [
+        botName,
+        timeframe,
+        startYear,
+        startMonth,
+        endYear,
+        endMonth
+    ].map(item => item.toString());
 
-        proc.stdout.on("data", (chunk) => {
-            buf += chunk.toString();
-            let lines = buf.split('\n');
-            buf = lines.pop() || '';
+    const proc = spawn(`${__dirname}/../../botfather_c++/build/backtest`, args);
+    let buf = '';
 
-            for (const line of lines) {
-                if (line.startsWith("NewOrder")) {
-                    onNewOrder(line.split('_').slice(1));
-                }
+    proc.stdout.on("data", (chunk) => {
+        buf += chunk.toString();
+        let lines = buf.split('\n');
+        buf = lines.pop() || '';
+
+        for (const line of lines) {
+            if (line.startsWith("NewOrder")) {
+                onNewOrder(line.split('_').slice(1));
             }
+        }
 
-        });
-        proc.stderr.on("data", (data) => {
-            console.error("runBacktest error", data.toString());
-        });
-
-        proc.on("close", (code: number) => {
-            resolve(code);
-        });
     });
+    proc.stderr.on("data", (data) => {
+        console.error("runBacktest error", data.toString());
+    });
+
+    // proc.on("close", (code: number) => {
+    // });
+
+    return proc;
 }
