@@ -129,8 +129,8 @@ export function getEventSource(url: string, params: Params, onMessage: (mess: st
 
     es.addEventListener("onFinish", (e: MessageEvent) => {
         console.log('Backtest finished with code:', e.data);
-        es.close();
         onFinish();
+        es.close();
     });
 
     es.addEventListener("onError", (e: MessageEvent) => {

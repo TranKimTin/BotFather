@@ -18,7 +18,7 @@ export default defineComponent({
         const r_endMonth = ref<number>(12);
         const r_endYear = ref<number>(2025);
         const months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-        const years = [2025, 2026];
+        const years = [2020, 2021, 2022, 2023, 2024, 2025, 2026];
 
         onMounted(() => {
             axios.get('/getBotList').then(result => {
@@ -51,11 +51,16 @@ export default defineComponent({
             if (es) {
                 es.close();
             }
-            es = axios.getEventSource('/runBacktest', args, (mess: string) => {
+
+            const onMessage = (mess: string) => {
                 console.log('Backtest message:', mess);
-            }, () => {
+            };
+            const onFinish = () => {
+                console.log('Backtest finished');
                 Toast.showSuccess(`Backtest cho bot ${r_botName.value} xong.`);
-            });
+            };
+
+            es = axios.getEventSource('/runBacktest', args, onMessage, onFinish);
         }
 
         return {
