@@ -13,8 +13,8 @@ interface Response {
     message: string
 }
 
-const URL = 'http://mybotmaker.com/api';
-// const URL = '/api';
+// const URL = 'http://mybotmaker.com/api';
+const URL = '/api';
 
 const headers = {
     'content-type': 'application/json',
