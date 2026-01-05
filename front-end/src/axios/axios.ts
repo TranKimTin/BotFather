@@ -109,7 +109,7 @@ export async function delete_(url: string, params: Params = {}): Promise<any> {
     }
 }
 
-export function getEventSource(url: string, params: Params, onMessage: (mess: string) => void): EventSource {
+export function getEventSource(url: string, params: Params, onMessage: (mess: string) => void, onFinish: () => void): EventSource {
     const token = Cookies.get('token') || '';
 
     const query = new URLSearchParams({
@@ -129,6 +129,7 @@ export function getEventSource(url: string, params: Params, onMessage: (mess: st
 
     es.addEventListener("onFinish", (e: MessageEvent) => {
         es.close();
+        onFinish();
     });
 
     es.addEventListener("onError", (e: MessageEvent) => {

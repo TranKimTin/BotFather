@@ -53,6 +53,8 @@ export default defineComponent({
             }
             es = axios.getEventSource('/runBacktest', args, (mess: string) => {
                 console.log('Backtest message:', mess);
+            }, () => {
+                Toast.showSuccess(`Backtest cho bot ${r_botName.value} xong.`);
             });
         }
 
