@@ -254,13 +254,11 @@ export async function getBacktestResult(req: any, res: any) {
         res.write(`data: ${data}\n\n`);
     }
     function end() {
-        console.log('Backtest done');
         if (ended) return;
         ended = true;
         res.end();
     }
     try {
-        console.log('Backtest started');
         res.status(200);
         res.setHeader("Content-Type", "text/event-stream");
         res.setHeader("Cache-Control", "no-cache");
@@ -269,10 +267,10 @@ export async function getBacktestResult(req: any, res: any) {
 
         const botName: string = req.query.botName;
         const timeframe: string = req.query.timeframe;
-        const startMonth: number = req.query.startMonth;
-        const startYear: number = req.query.startYear;
-        const endMonth: number = req.query.endMonth;
-        const endYear: number = req.query.endYear;
+        const startMonth: number = +req.query.startMonth;
+        const startYear: number = +req.query.startYear;
+        const endMonth: number = +req.query.endMonth;
+        const endYear: number = +req.query.endYear;
         const userData: UserTokenInfo = req.user;
 
         const isOwnBot = await BotConfig.requireOwnBot(botName, userData);
@@ -284,8 +282,8 @@ export async function getBacktestResult(req: any, res: any) {
         if (!timeframe) throw 'timeframe không hợp lệ';
         if (!startMonth || startMonth < 1 || startMonth > 12) throw 'startMonth không hợp lệ';
         if (!endMonth || endMonth < 1 || endMonth > 12) throw 'endMonth không hợp lệ';
-        if (!startYear || startYear < 2000) throw 'startYear không hợp lệ';
-        if (!endYear || endYear < 2000) throw 'endYear không hợp lệ';
+        if (!startYear) throw 'startYear không hợp lệ';
+        if (!endYear) throw 'endYear không hợp lệ';
         if (startYear > endYear || (startYear === endYear && startMonth > endMonth)) {
             throw 'Khoảng thời gian không hợp lệ';
         }
