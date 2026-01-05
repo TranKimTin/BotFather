@@ -53,8 +53,13 @@ export default defineComponent({
             }
 
             const onMessage = (mess: string) => {
-                console.log('Backtest message:', mess);
+                if (mess.startsWith('newOrder')) {
+                    // order is array [OrderType, entry, volume, tp, sl, createdTime, expiredTime, matchTime, profit, status]
+                    const order = mess.split('_').slice(1);
+                    console.log('New order:', order);
+                }
             };
+
             const onFinish = () => {
                 console.log('Backtest finished');
                 Toast.showSuccess(`Backtest cho bot ${r_botName.value} xong.`);

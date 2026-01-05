@@ -1301,8 +1301,7 @@ export async function downloadData(symbol: string, month: string, dest: string) 
     return binPath;
 }
 
-// order is array [OrderType, entry, volume, tp, sl, createdTime, expiredTime, matchTime, profit, status]
-export function runBacktest(botName: string, timeframe: string, startYear: number, startMonth: number, endYear: number, endMonth: number, onNewOrder: (order: Array<string>) => void) {
+export function runBacktest(botName: string, timeframe: string, startYear: number, startMonth: number, endYear: number, endMonth: number, onMessage: (order: string) => void) {
     const args = [
         botName,
         timeframe,
@@ -1321,9 +1320,7 @@ export function runBacktest(botName: string, timeframe: string, startYear: numbe
         buf = lines.pop() || '';
 
         for (const line of lines) {
-            if (line.startsWith("NewOrder")) {
-                onNewOrder(line.split('_').slice(1));
-            }
+            onMessage(line);
         }
 
     });

@@ -288,8 +288,8 @@ export async function getBacktestResult(req: any, res: any) {
             throw 'Khoảng thời gian không hợp lệ';
         }
 
-        const proc = util.runBacktest(botName, timeframe, startYear, startMonth, endYear, endMonth, (order: Array<string>) => {
-            send('onMessage', JSON.stringify(order));
+        const proc = util.runBacktest(botName, timeframe, startYear, startMonth, endYear, endMonth, (mess: string) => {
+            send('onMessage', mess);
         });
 
         proc.on("close", (code: number) => {
