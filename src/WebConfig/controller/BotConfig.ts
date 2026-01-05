@@ -293,7 +293,8 @@ export async function getBacktestResult(req: any, res: any) {
         });
 
         proc.on("close", (code: number) => {
-            send('onFinish', '');
+            console.log(`Backtest process exited with code ${code}`);
+            send('onFinish', code.toString());
             end();
         });
 
