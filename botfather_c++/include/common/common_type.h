@@ -230,6 +230,8 @@ struct BacktestOrder
     {
         return priority < other.priority; // max-heap based on priority
     }
+
+    BacktestOrder() : id(0), priority(0.0), orderType(""), entry(0.0), volume(0.0), tp(0.0), sl(0.0), createdTime(0), expiredTime(0), matchTime(0), profit(0.0), status("") {}
 };
 
 struct Route

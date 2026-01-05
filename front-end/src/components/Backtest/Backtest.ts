@@ -1,13 +1,28 @@
 import { defineComponent, ref, onMounted } from 'vue';
 import * as axios from '../../axios/axios';
 import * as Toast from '../../toast/toast';
-import Dialog from 'primevue/dialog';
 import Select from 'primevue/select';
 import InputNumber from 'primevue/inputnumber';
 import Button from 'primevue/button';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import moment from 'moment';
+
+interface Order {
+    orderType: string,
+    entry: number,
+    volume: number,
+    tp: number,
+    sl: number,
+    createdTime: number,
+    expiredTime: number,
+    matchTime: number,
+    profit: number,
+    status: string
+}
 
 export default defineComponent({
-    components: { Select, InputNumber, Button },
+    components: { Select, InputNumber, Button, DataTable, Column },
     setup() {
         const r_botList = ref<Array<String>>([]);
         const r_botName = ref<string>('');
@@ -20,6 +35,8 @@ export default defineComponent({
         const months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
         const years = [2020, 2021, 2022, 2023, 2024, 2025, 2026];
         const r_profit = ref<number>(0);
+        const r_orderList = ref<Array<Order>>([]);
+        const r_loading = ref<boolean>(false);
 
         onMounted(() => {
             axios.get('/getBotList').then(result => {
@@ -54,20 +71,38 @@ export default defineComponent({
             }
 
             r_profit.value = 0;
+            r_orderList.value = [];
+            r_loading.value = true;
 
             const onMessage = (mess: string) => {
                 if (mess.startsWith('NewOrder')) {
                     // order is array [OrderType, entry, volume, tp, sl, createdTime, expiredTime, matchTime, profit, status]
                     const order = mess.split('_').slice(1);
                     const [orderType, entry, volume, tp, sl, createdTime, expiredTime, matchTime, profit, status] = order;
-                    console.log({ orderType, entry, volume, tp, sl, createdTime, expiredTime, matchTime, profit, status });
                     r_profit.value += parseFloat(profit);
+
+                    const newOrder: Order = {
+                        orderType,
+                        entry: parseFloat(entry),
+                        volume: parseFloat(volume),
+                        tp: parseFloat(tp),
+                        sl: parseFloat(sl),
+                        createdTime: parseInt(createdTime),
+                        expiredTime: parseInt(expiredTime),
+                        matchTime: parseInt(matchTime),
+                        profit: parseFloat(profit),
+                        status
+                    };
+                    r_orderList.value.push(newOrder);
+                    console.log(newOrder);
                 }
             };
 
             const onFinish = () => {
                 console.log('Backtest finished');
                 Toast.showSuccess(`Backtest cho bot ${r_botName.value} xong.`);
+                r_orderList.value.sort((a, b) => a.createdTime - b.createdTime);
+                r_loading.value = false;
             };
 
             es = axios.getEventSource('/runBacktest', args, onMessage, onFinish);
@@ -78,14 +113,17 @@ export default defineComponent({
             r_botName,
             timeframes,
             r_timeframe,
-            runBacktest,
             r_startMonth,
             r_startYear,
             r_endMonth,
             r_endYear,
             r_profit,
+            r_orderList,
+            r_loading,
             months,
-            years
+            years,
+            runBacktest,
+            moment
         };
     }
 });

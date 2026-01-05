@@ -23,6 +23,47 @@
   <div class="m-2">
     <h3>Kết quả backtest:</h3>
     <p>Lãi: {{ r_profit }}</p>
+    <p>Số lệnh: {{ r_orderList.length }}</p>
+    <div v-if="r_loading">Đang chạy backtest...</div>
+    <div v-if="!r_loading">
+      <DataTable :value="r_orderList" class="mt-2" tableStyle="min-width: 50rem" scrollable scrollHeight="85vh"
+        :virtualScrollerOptions="{ itemSize: 50 }">
+        <Column :header="`STT (${r_orderList.length})`">
+          <template #body="order">
+            {{ order.index + 1 }}
+          </template>
+        </Column>
+        <Column field="createdTime" header="Thời gian mở">
+          <template #body="order">
+            {{ moment(order.data.createdTime).format('YYYY-MM-DD HH:mm') }}
+          </template>
+        </Column>
+        <Column field="orderType" header="Loại lệnh"></Column>
+        <Column field="entry" header="Entry"></Column>
+        <Column field="volume" header="Volume"></Column>
+        <Column field="tp" header="TP"></Column>
+        <Column field="sl" header="SL"></Column>
+
+        <Column field="matchTime" header="Thời gian khớp lệnh">
+          <template #body="order">
+            {{ order.data.matchTime ? moment(order.data.matchTime).format('YYYY-MM-DD HH:mm') : '' }}
+          </template>
+        </Column>
+        <Column field="expiredTime" header="Thời gian hủy">
+          <template #body="order">
+            {{ order.data.expiredTime ? moment(order.data.expiredTime).format('YYYY-MM-DD HH:mm') : '' }}
+          </template>
+        </Column>
+        <Column field="profit" header="Lãi / volume (đã đóng)">
+          <template #body="order">
+            <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
+              :class="order.data.profit >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'">{{
+                Math.round(order.data.profit).toLocaleString() }} </span>
+          </template>
+        </Column>
+        <Column field="status" header="Trạng thái"></Column>
+      </DataTable>
+    </div>
   </div>
 </template>
 
