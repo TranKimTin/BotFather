@@ -136,7 +136,7 @@ export function getEventSource(url: string, params: Params, onMessage: (mess: st
         es.close();
     });
 
-    es.onerror = (e: ErrorEvent) => {
+    es.onerror = (e: any) => {
         console.error('EventSource error:', e);
         Toast.showError(e.message);
         es.close();
