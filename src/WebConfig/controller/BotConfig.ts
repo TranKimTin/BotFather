@@ -254,6 +254,7 @@ export async function getBacktestResult(req: any, res: any) {
         res.write(`data: ${data}\n\n`);
     }
     function end() {
+        console.log('Backtest done');
         if (ended) return;
         ended = true;
         res.end();
