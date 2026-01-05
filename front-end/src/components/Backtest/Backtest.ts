@@ -10,6 +10,7 @@ import moment from 'moment';
 
 interface Order {
     orderType: string,
+    symbol: string,
     entry: number,
     volume: number,
     tp: number,
@@ -76,12 +77,13 @@ export default defineComponent({
 
             const onMessage = (mess: string) => {
                 if (mess.startsWith('NewOrder')) {
-                    // order is array [OrderType, entry, volume, tp, sl, createdTime, expiredTime, matchTime, profit, status]
+                    // order is array [symbol, OrderType, entry, volume, tp, sl, createdTime, expiredTime, matchTime, profit, status]
                     const order = mess.split('_').slice(1);
-                    const [orderType, entry, volume, tp, sl, createdTime, expiredTime, matchTime, profit, status] = order;
+                    const [symbol, orderType, entry, volume, tp, sl, createdTime, expiredTime, matchTime, profit, status] = order;
                     r_profit.value += parseFloat(profit);
 
                     const newOrder: Order = {
+                        symbol,
                         orderType,
                         entry: parseFloat(entry),
                         volume: parseFloat(volume),

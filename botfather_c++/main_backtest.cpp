@@ -310,8 +310,8 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
 
     for (BacktestOrder &order : result)
     {
-        LOGI("NewOrder_{}_{}_{}_{}_{}_{}_{}_{}_{}_{}",
-             order.orderType, order.entry, order.volume, order.tp, order.sl, order.createdTime, order.expiredTime, order.matchTime, order.profit, order.status);
+        LOGI("NewOrder_{}_{}_{}_{}_{}_{}_{}_{}_{}_{}_{}",
+             rateData.symbol, order.orderType, order.entry, order.volume, order.tp, order.sl, order.createdTime, order.expiredTime, order.matchTime, order.profit, order.status);
     }
 }
 

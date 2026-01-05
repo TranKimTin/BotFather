@@ -33,6 +33,7 @@
             {{ order.index + 1 }}
           </template>
         </Column>
+        <Column field="symbol" header="Symbol"></Column>
         <Column field="createdTime" header="Thời gian mở">
           <template #body="order">
             {{ moment(order.data.createdTime).format('YYYY-MM-DD HH:mm') }}
