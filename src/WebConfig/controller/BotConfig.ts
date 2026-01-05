@@ -250,7 +250,6 @@ export async function getBacktestResult(req: any, res: any) {
 
     function send(event: string, data: string) {
         if (ended) return;
-        console.log(`Sending event: ${event}, data: ${data}`);
         if (event) res.write(`event: ${event}\n`);
         res.write(`data: ${data}\n\n`);
     }
