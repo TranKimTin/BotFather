@@ -81,11 +81,6 @@
               {{ order.data.matchTime ? moment(order.data.matchTime).format('YYYY-MM-DD HH:mm') : '' }}
             </template>
           </Column>
-          <Column field="expiredTime" header="Thời gian hủy">
-            <template #body="order">
-              {{ order.data.expiredTime ? moment(order.data.expiredTime).format('YYYY-MM-DD HH:mm') : '' }}
-            </template>
-          </Column>
           <Column field="profit" header="Lãi">
             <template #body="order">
               <span v-if="order.data.matchTime">
@@ -93,9 +88,14 @@
                   :class="order.data.profit >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'"><span v-if="order.data.profit >= 0">+</span>{{
                     (parseFloat(order.data.profit.toFixed(2))).toLocaleString() }} $ </span> (<span v-if="order.data.profit >= 0">+</span>{{ +(order.data.profit / (order.data.entry * order.data.volume) * 100).toFixed(2) }} %)
               </span>
-          </template>
+            </template>
           </Column>
           <Column field="status" header="Trạng thái"></Column>
+          <Column field="expiredTime" header="Thời gian hủy">
+            <template #body="order">
+              {{ order.data.expiredTime ? moment(order.data.expiredTime).format('YYYY-MM-DD HH:mm') : '' }}
+            </template>
+          </Column>
         </DataTable>
       </div>
     </div>
