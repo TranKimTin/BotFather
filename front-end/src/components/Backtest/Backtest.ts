@@ -6,6 +6,7 @@ import InputNumber from 'primevue/inputnumber';
 import Button from 'primevue/button';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import InputText from 'primevue/inputtext';
 import moment from 'moment';
 
 interface Order {
@@ -23,7 +24,7 @@ interface Order {
 }
 
 export default defineComponent({
-    components: { Select, InputNumber, Button, DataTable, Column },
+    components: { Select, InputNumber, Button, DataTable, Column, InputText },
     setup() {
         const r_botList = ref<Array<String>>([]);
         const r_botName = ref<string>('');
