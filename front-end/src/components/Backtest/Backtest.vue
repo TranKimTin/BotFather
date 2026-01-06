@@ -26,7 +26,7 @@
     <p>Số lệnh: {{ r_orderList.length }}</p>
     <p>Thắng: {{ r_win }}</p>
     <p>Thua: {{ r_lose }}</p>
-    <p>Winrate: {{ r_win / (r_win + r_lose) }}</p>
+    <p>Winrate: {{ (r_win / (r_win + r_lose) * 100).toFixed(2) }} %</p>
     
     <div v-if="r_loading">Đang chạy backtest...</div>
     <div v-if="!r_loading">
