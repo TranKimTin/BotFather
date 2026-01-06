@@ -31,7 +31,7 @@
       </div>
       <DataTable :value="r_orderList" class="mt-2" tableStyle="min-width: 50rem" scrollable scrollHeight="85vh"
         :virtualScrollerOptions="{ itemSize: 50 }" :globalFilterFields="['symbol', 'status']" 
-        :filters="{ global: { value: r_globalFilter, matchMode: 'contains' } }">
+        :filters="{ global: { value: r_globalFilter.trim(), matchMode: 'contains' } }">
         <Column :header="`STT (${r_orderList.length})`">
           <template #body="order">
             {{ order.index + 1 }}

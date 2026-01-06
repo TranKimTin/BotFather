@@ -88,7 +88,7 @@
                 <InputText v-model="r_globalFilter" placeholder="Tìm kiếm..." class="p-inputtext-sm w-72" />
             </div>
             <DataTable :value="botList" :globalFilterFields="['botName']"
-                :filters="{ global: { value: r_globalFilter, matchMode: 'contains' } }" tableStyle="min-width: 50rem"
+                :filters="{ global: { value: r_globalFilter.trim(), matchMode: 'contains' } }" tableStyle="min-width: 50rem"
                 scrollable scrollHeight="85vh" :virtualScrollerOptions="{ itemSize: 50 }" :pt="{
                     table: { style: 'min-width: 50rem' },
                     column: {
