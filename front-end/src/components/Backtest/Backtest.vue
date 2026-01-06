@@ -22,12 +22,15 @@
   </div>
   <div class="m-2">
     <h3>Kết quả backtest:</h3>
-    <p>Lãi: {{ r_profit }}</p>
-    <p>Số lệnh: {{ r_orderList.length }}</p>
-    <p>Thắng: {{ r_win }}</p>
-    <p>Thua: {{ r_lose }}</p>
-    <p>Winrate: {{ (r_win / (r_win + r_lose) * 100).toFixed(2) }} %</p>
-    
+    <div class="grid grid-cols-4 gap-2 p-2">
+      <div class="flex-auto">Lãi: {{ r_profit }}</div>
+      <div class="flex-auto">Số lệnh: {{ r_orderList.length }}</div>
+      <div class="flex-auto">Thắng: {{ r_win }}</div>
+      <div class="flex-auto">Thua: {{ r_lose }}</div>
+      <div class="flex-auto">Winrate: {{ (r_win / (r_win + r_lose) * 100).toFixed(2) }} %</div>
+      
+    </div>
+
     <div v-if="r_loading">Đang chạy backtest...</div>
     <div v-if="!r_loading">
       <BalanceChart :data="r_balanceData" />
@@ -87,7 +90,7 @@
             <template #body="order">
               <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
                 :class="order.data.profit >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'">{{
-                  (parseFloat(order.data.profit.toFixed(2))).toLocaleString() }} ({{ +((order.data.profit / (order.data.entry * order.data.volume) * 100).toFixed(2)) }} %)</span>
+                  (parseFloat(order.data.profit.toFixed(2))).toLocaleString() }} $ (<span v-if="order.data.profit >= 0">+</span>{{ +((order.data.profit / (order.data.entry * order.data.volume) * 100).toFixed(2)) }} %)</span>
             </template>
           </Column>
           <Column field="status" header="Trạng thái"></Column>
