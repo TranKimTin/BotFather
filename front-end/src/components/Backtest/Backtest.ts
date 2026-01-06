@@ -159,7 +159,7 @@ export default defineComponent({
                         balanceReal: 0
                     });
                 }
-                r_profit.value = balance - fee;
+                r_profit.value = +(balance - fee).toFixed(2);
             };
 
             es = axios.getEventSource('/runBacktest', args, onMessage, onFinish);
