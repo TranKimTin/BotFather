@@ -26,8 +26,12 @@
     <p>Số lệnh: {{ r_orderList.length }}</p>
     <div v-if="r_loading">Đang chạy backtest...</div>
     <div v-if="!r_loading">
+      <div class="flex justify-end">
+          <InputText v-model="r_globalFilter" placeholder="Tìm kiếm..." class="p-inputtext-sm w-72" />
+      </div>
       <DataTable :value="r_orderList" class="mt-2" tableStyle="min-width: 50rem" scrollable scrollHeight="85vh"
-        :virtualScrollerOptions="{ itemSize: 50 }">
+        :virtualScrollerOptions="{ itemSize: 50 }" :globalFilterFields="['symbol', 'status']" 
+        :filters="{ global: { value: r_globalFilter, matchMode: 'contains' } }">
         <Column :header="`STT (${r_orderList.length})`">
           <template #body="order">
             {{ order.index + 1 }}

@@ -38,6 +38,7 @@ export default defineComponent({
         const r_profit = ref<number>(0);
         const r_orderList = ref<Array<Order>>([]);
         const r_loading = ref<boolean>(false);
+        const r_globalFilter = ref<string>('');
 
         onMounted(() => {
             axios.get('/getBotList').then(result => {
@@ -122,6 +123,7 @@ export default defineComponent({
             r_profit,
             r_orderList,
             r_loading,
+            r_globalFilter,
             months,
             years,
             runBacktest,
