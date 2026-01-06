@@ -33,7 +33,14 @@
             {{ order.index + 1 }}
           </template>
         </Column>
-        <Column field="symbol" header="Symbol"></Column>
+        <Column sort-field="symbol" header="Coin" sortable>
+            <template #body="order">
+                <a :href="`https://www.binance.com/en/futures/${order.data.symbol}?_from=markets`"
+                    target="_blank">
+                    {{ order.data.symbol }}
+                </a>
+            </template>
+        </Column>
         <Column field="createdTime" header="Thời gian mở">
           <template #body="order">
             {{ moment(order.data.createdTime).format('YYYY-MM-DD HH:mm') }}
