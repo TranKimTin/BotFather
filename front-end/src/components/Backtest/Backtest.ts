@@ -38,8 +38,8 @@ export default defineComponent({
         const r_botList = ref<Array<String>>([]);
         const r_botName = ref<string>('');
         const timeframes = ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'];
-        const r_timeframe = ref<string>('15m');
-        const r_startMonth = ref<number>(6);
+        const r_timeframe = ref<string>('1h');
+        const r_startMonth = ref<number>(1);
         const r_startYear = ref<number>(2025);
         const r_endMonth = ref<number>(12);
         const r_endYear = ref<number>(2025);
