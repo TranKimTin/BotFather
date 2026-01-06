@@ -43,10 +43,9 @@ export default {
     },
     setup(props) {
         function getDataChart(data: Array<PropData>) {
-            return {
-                labels: data.map(item => item.timestamp),
-                datasets: [
-                    {
+            const labels =data.map(item => item.timestamp);
+            const datasets = [
+            {
                         label: 'Balance',
                         backgroundColor: '#FF9900',
                         borderColor: '#FF9900',
@@ -68,19 +67,23 @@ export default {
                         pointBackgroundColor: '#ffffff',
                         pointBorderColor: '#6699FF'
                     },
-                                        {
-                        label: 'Trade real',
-                        backgroundColor: '#34f013ff',
-                        borderColor: '#34f013ff',
-                        data: data.map(item => item.balanceReal),
-                        fill: false,
-                        pointRadius: 1,
-                        pointHoverRadius: 5,
-                        pointBackgroundColor: '#ffffff',
-                        pointBorderColor: '#34f013ff'
-                    }
-                ]
+            ];
+
+            if (data.some(item => item.balanceReal !== 0)) {
+                datasets.push({
+                    label: 'Trade real',
+                    backgroundColor: '#34f013ff',
+                    borderColor: '#34f013ff',
+                    data: data.map(item => item.balanceReal),
+                    fill: false,
+                    pointRadius: 1,
+                    pointHoverRadius: 5,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: '#34f013ff'
+                });
             }
+
+            return {labels, datasets};
         }
 
         const data = ref(getDataChart(props.data));
