@@ -39,7 +39,13 @@
             {{ moment(order.data.createdTime).format('YYYY-MM-DD HH:mm') }}
           </template>
         </Column>
-        <Column field="orderType" header="Loại lệnh"></Column>
+        <Column header="Loại lệnh" sortable>
+            <template #body="order">
+                <span :style="{ color: order.data.orderType.toLowerCase().includes('buy') ? 'green' : 'red' }">
+                    {{ order.data.orderType }}
+                </span>
+            </template>
+        </Column>
         <Column field="entry" header="Entry"></Column>
         <Column field="volume" header="Volume"></Column>
         <Column field="tp" header="TP"></Column>
