@@ -125,14 +125,28 @@ export default defineComponent({
                 let fee = 0;
                 for (const order of sortedData) {
                     balance += order.profit;
-                    fee += order.volume * order.entry * 0.2 / 100;
+                    fee += order.volume * order.entry * 0.1 / 100;
                     r_balanceData.value.push({
                         timestamp: moment(order.matchTime).format('YYYY-MM-DD HH:mm'),
                         balance: balance - fee,
                         balanceNoFee: balance,
                         balanceReal: 0
-                    })
+                    });
                 }
+                const remainData = r_orderList.value.filter(item => item.status === ORDER_STATUS.MATCH_ENTRY);
+                if (remainData.length > 0) {
+                    for (const order of remainData) {
+                        balance += order.profit;
+                        fee += order.volume * order.entry * 0.1 / 100;
+                    }
+                    r_balanceData.value.push({
+                        timestamp: moment({ year: r_endYear.value, month: r_endMonth.value - 1 }).add(1, 'month').format('YYYY-MM-DD HH:mm'),
+                        balance: balance - fee,
+                        balanceNoFee: balance,
+                        balanceReal: 0
+                    });
+                }
+
             };
 
             es = axios.getEventSource('/runBacktest', args, onMessage, onFinish);
