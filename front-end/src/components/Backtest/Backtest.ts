@@ -52,7 +52,7 @@ export default defineComponent({
         const r_balanceData = ref<Array<PropData>>([]);
         const r_win = ref<number>(0);
         const r_lose = ref<number>(0);
-
+        const r_progress = ref<number>(0);;
 
         onMounted(() => {
             axios.get('/getBotList').then(result => {
@@ -92,6 +92,7 @@ export default defineComponent({
             r_loading.value = true;
             r_win.value = 0;
             r_lose.value = 0;
+            r_progress.value = 0;
 
             const onMessage = (mess: string) => {
                 if (mess.startsWith('NewOrder')) {
@@ -123,6 +124,9 @@ export default defineComponent({
                         }
                     }
                     console.log(newOrder);
+                }
+                else if(mess.startsWith('Progress')) {
+                    r_progress.value = +mess.split('_')[1];
                 }
             };
 
@@ -184,6 +188,7 @@ export default defineComponent({
             months,
             years,
             runBacktest,
+            r_progress,
             moment
         };
     }

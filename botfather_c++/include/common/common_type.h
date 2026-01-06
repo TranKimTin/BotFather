@@ -28,6 +28,7 @@
 #include <random>
 #include <algorithm>
 #include <fstream>
+#include <atomic>
 
 #include "sparse_table.h"
 

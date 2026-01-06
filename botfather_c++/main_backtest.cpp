@@ -15,6 +15,8 @@ thread_local RateDataV rateData;
 thread_local WorkerBacktest workerBacktest;
 string currentTF = "1m";
 boost::unordered_flat_map<long long, ExchangeInfo> exchangeInfo;
+atomic<int> cnt{0};
+int totalSymbol;
 
 void init()
 {
@@ -389,6 +391,7 @@ int main(int argc, char *argv[])
     vector<shared_ptr<Bot>> botList = {bot};
 
     // bot->symbolList = {{"binance_future", "CLANKERUSDT", "binance_future:CLANKERUSDT"}};
+    totalSymbol = bot->symbolList.size();
 
     for (Symbol &s : bot->symbolList)
     {
@@ -432,7 +435,9 @@ int main(int argc, char *argv[])
                         mergeCandle1m(rate, symbol, timeframe, bot);
                     }
                     rateData.reverse();
-                    backtest(bot, from.toMillisecondsUTC(), data); });
+                    backtest(bot, from.toMillisecondsUTC(), data); 
+                    cnt++;
+                    LOGI("Progress_{}", (cnt.load() * 100) / totalSymbol); });
     }
 
     task.wait();

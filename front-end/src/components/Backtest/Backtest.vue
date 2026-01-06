@@ -31,7 +31,7 @@
       
     </div>
 
-    <div v-if="r_loading">Đang chạy backtest...</div>
+    <div v-if="r_loading">Đang chạy backtest... {{ r_progress }}%</div>
     <div v-if="!r_loading">
       <BalanceChart :data="r_balanceData" />
       <div>
