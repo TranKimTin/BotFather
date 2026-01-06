@@ -7,7 +7,9 @@ import Button from 'primevue/button';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import InputText from 'primevue/inputtext';
+import BalanceChart from "../HistoryOrder/BalanceChart.vue";
 import moment from 'moment';
+import { ORDER_STATUS } from '../HistoryOrder/HistoryOrder';
 
 interface Order {
     orderType: string,
@@ -23,8 +25,15 @@ interface Order {
     status: string
 }
 
+export interface PropData {
+    timestamp: string,
+    balance: number,
+    balanceNoFee: number,
+    balanceReal: number
+}
+
 export default defineComponent({
-    components: { Select, InputNumber, Button, DataTable, Column, InputText },
+    components: { Select, InputNumber, Button, DataTable, Column, InputText, BalanceChart },
     setup() {
         const r_botList = ref<Array<String>>([]);
         const r_botName = ref<string>('');
@@ -40,6 +49,7 @@ export default defineComponent({
         const r_orderList = ref<Array<Order>>([]);
         const r_loading = ref<boolean>(false);
         const r_globalFilter = ref<string>('');
+        const r_balanceData = ref<Array<PropData>>([]);
 
         onMounted(() => {
             axios.get('/getBotList').then(result => {
@@ -75,6 +85,7 @@ export default defineComponent({
 
             r_profit.value = 0;
             r_orderList.value = [];
+            r_balanceData.value = [];
             r_loading.value = true;
 
             const onMessage = (mess: string) => {
@@ -107,6 +118,21 @@ export default defineComponent({
                 Toast.showSuccess(`Backtest cho bot ${r_botName.value} xong.`);
                 r_orderList.value.sort((a, b) => b.createdTime - a.createdTime);
                 r_loading.value = false;
+
+                const sortedData = r_orderList.value.filter(item => item.status === ORDER_STATUS.MATCH_TP || item.status === ORDER_STATUS.MATCH_SL);
+                sortedData.sort((a, b) => a.matchTime - b.matchTime);
+                let balance = 0;
+                let fee = 0;
+                for (const order of sortedData) {
+                    balance += order.profit;
+                    fee += order.volume * order.entry * 0.2 / 100;
+                    r_balanceData.value.push({
+                        timestamp: moment(order.matchTime).format('YYYY-MM-DD HH:mm'),
+                        balance: balance - fee,
+                        balanceNoFee: balance,
+                        balanceReal: 0
+                    })
+                }
             };
 
             es = axios.getEventSource('/runBacktest', args, onMessage, onFinish);
@@ -126,6 +152,7 @@ export default defineComponent({
             r_loading,
             r_globalFilter,
             months,
+            r_balanceData,
             years,
             runBacktest,
             moment
