@@ -24,6 +24,10 @@
     <h3>Kết quả backtest:</h3>
     <p>Lãi: {{ r_profit }}</p>
     <p>Số lệnh: {{ r_orderList.length }}</p>
+    <p>Thắng: {{ r_win }}</p>
+    <p>Thua: {{ r_lose }}</p>
+    <p>Winrate: {{ r_win / (r_win + r_lose) }}</p>
+    
     <div v-if="r_loading">Đang chạy backtest...</div>
     <div v-if="!r_loading">
       <BalanceChart :data="r_balanceData" />
@@ -61,6 +65,11 @@
           </Column>
           <Column field="entry" header="Entry"></Column>
           <Column field="volume" header="Volume"></Column>
+          <Column header="VolumeInUSD">
+            <template #body="order">
+              {{ (order.data.volume * order.data.entry).toFixed(2) }}
+            </template>
+          </Column>
           <Column field="tp" header="TP"></Column>
           <Column field="sl" header="SL"></Column>
 

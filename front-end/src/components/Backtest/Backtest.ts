@@ -50,6 +50,9 @@ export default defineComponent({
         const r_loading = ref<boolean>(false);
         const r_globalFilter = ref<string>('');
         const r_balanceData = ref<Array<PropData>>([]);
+        const r_win = ref<number>(0);
+        const r_lose = ref<number>(0);
+
 
         onMounted(() => {
             axios.get('/getBotList').then(result => {
@@ -87,6 +90,8 @@ export default defineComponent({
             r_orderList.value = [];
             r_balanceData.value = [];
             r_loading.value = true;
+            r_win.value = 0;
+            r_lose.value = 0;
 
             const onMessage = (mess: string) => {
                 if (mess.startsWith('NewOrder')) {
@@ -109,6 +114,14 @@ export default defineComponent({
                         status
                     };
                     r_orderList.value.push(newOrder);
+                    if (newOrder.status == ORDER_STATUS.MATCH_TP || newOrder.status == ORDER_STATUS.MATCH_SL) {
+                        if (newOrder.profit > 0) {
+                            r_win.value++;
+                        }
+                        else {
+                            r_lose.value++;
+                        }
+                    }
                     console.log(newOrder);
                 }
             };
@@ -165,8 +178,10 @@ export default defineComponent({
             r_orderList,
             r_loading,
             r_globalFilter,
-            months,
             r_balanceData,
+            r_win,
+            r_lose,
+            months,
             years,
             runBacktest,
             moment
