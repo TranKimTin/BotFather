@@ -89,8 +89,8 @@
           <Column field="profit" header="Lãi">
             <template #body="order">
               <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
-                :class="order.data.profit >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'">{{
-                  (parseFloat(order.data.profit.toFixed(2))).toLocaleString() }} $ (<span v-if="order.data.profit >= 0">+</span>{{ +((order.data.profit / (order.data.entry * order.data.volume) * 100).toFixed(2)) }} %)</span>
+                :class="order.data.profit >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'"><span v-if="order.data.profit >= 0">+</span>{{
+                  (parseFloat(order.data.profit.toFixed(2))).toLocaleString() }} $ </span> (<span v-if="order.data.profit >= 0">+</span>{{ +((order.data.profit / (order.data.entry * order.data.volume) * 100).toFixed(2)) }} %)
             </template>
           </Column>
           <Column field="status" header="Trạng thái"></Column>
