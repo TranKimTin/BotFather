@@ -444,10 +444,10 @@ int main(int argc, char *argv[])
             if (progress > oldProgress)
             {
                 LOGI("Progress_{}", progress);
-            }
+            } });
     }
 
     task.wait();
     destroy();
     return 0;
-    }
+}
