@@ -158,23 +158,6 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
             pendingSLSell.push(order);
         }
 
-        while (!pendingTPBuy.empty() && pendingTPBuy.top().tp <= rate.high)
-        {
-            BacktestOrder order = pendingTPBuy.top();
-            pendingTPBuy.pop();
-            if (orderClosed[order.id])
-            {
-                continue;
-            }
-
-            orderClosed[order.id] = true;
-
-            order.status = ORDER_STATUS::MATCH_TP;
-            order.matchTime = rate.startTime;
-            order.profit = (order.tp - order.entry) * order.volume;
-
-            result.push_back(order);
-        }
         while (!pendingSLBuy.empty() && pendingSLBuy.top().sl >= rate.low)
         {
             BacktestOrder order = pendingSLBuy.top();
@@ -192,22 +175,25 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
 
             result.push_back(order);
         }
-        while (!pendingTPSell.empty() && pendingTPSell.top().tp >= rate.low)
+
+        while (!pendingTPBuy.empty() && pendingTPBuy.top().tp <= rate.high)
         {
-            BacktestOrder order = pendingTPSell.top();
-            pendingTPSell.pop();
+            BacktestOrder order = pendingTPBuy.top();
+            pendingTPBuy.pop();
             if (orderClosed[order.id])
             {
                 continue;
             }
+
             orderClosed[order.id] = true;
 
             order.status = ORDER_STATUS::MATCH_TP;
             order.matchTime = rate.startTime;
-            order.profit = (order.entry - order.tp) * order.volume;
+            order.profit = (order.tp - order.entry) * order.volume;
 
             result.push_back(order);
         }
+
         while (!pendingSLSell.empty() && pendingSLSell.top().sl <= rate.high)
         {
             BacktestOrder order = pendingSLSell.top();
@@ -221,6 +207,22 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
             order.status = ORDER_STATUS::MATCH_SL;
             order.matchTime = rate.startTime;
             order.profit = (order.entry - order.sl) * order.volume;
+
+            result.push_back(order);
+        }
+        while (!pendingTPSell.empty() && pendingTPSell.top().tp >= rate.low)
+        {
+            BacktestOrder order = pendingTPSell.top();
+            pendingTPSell.pop();
+            if (orderClosed[order.id])
+            {
+                continue;
+            }
+            orderClosed[order.id] = true;
+
+            order.status = ORDER_STATUS::MATCH_TP;
+            order.matchTime = rate.startTime;
+            order.profit = (order.entry - order.tp) * order.volume;
 
             result.push_back(order);
         }
