@@ -212,9 +212,8 @@ BB_Output iBB(int period, double stdDev, const double close[], int n)
     return {lower, mean, upper};
 }
 
-int macd_n_dinh(int fastPeriod, int slowPeriod, int signalPeriod, int redDepth, int depth, int enableDivergence, double diffCandle0, vector<double> &diffPercents, const double close[], const double open[], const double high[], int length, vector<double> &values)
+int macd_n_dinh(int fastPeriod, int slowPeriod, int signalPeriod, int redDepth, int depth, int enableDivergence, double diffCandle0, vector<double> &diffPercents, const double close[], const double open[], const double high[], int length, const int double values[], int valueSize)
 {
-    int valueSize = values.size() / 3;
     int i = 0;
     int cnt = 0;
     int n = 0;

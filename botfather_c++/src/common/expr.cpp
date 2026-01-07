@@ -508,7 +508,7 @@ any Expr::visitMacd_n_dinh(ExprParser::Macd_n_dinhContext *ctx)
         return {};
 
     vector<double> &cachedMACD = getMACD(fastPeriod, slowPeriod, signalPeriod);
-    int result = macd_n_dinh(fastPeriod, slowPeriod, signalPeriod, redDepth, depth, enableDivergence, diffCandle0, diffPercents, close + shift, open + shift, high + shift, length - shift, cachedMACD);
+    int result = macd_n_dinh(fastPeriod, slowPeriod, signalPeriod, redDepth, depth, enableDivergence, diffCandle0, diffPercents, close + shift, open + shift, high + shift, length - shift, cachedMACD.data() + shift * 3, (cachedMACD.size() - shift) / 3);
 
     vectorDoublePool.release(diffPercents);
     return static_cast<double>(result);
