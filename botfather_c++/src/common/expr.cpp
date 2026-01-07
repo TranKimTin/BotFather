@@ -1460,6 +1460,12 @@ any Expr::visitAvg_macd_signal(ExprParser::Avg_macd_signalContext *ctx)
     if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || from < 0 || to >= length - slowPeriod || to >= length - signalPeriod)
         return {};
 
+    vector<double> &cachedMACD = getMACD(fastPeriod, slowPeriod, signalPeriod);
+    if (from * 3 >= cachedMACD.size() || to * 3 >= cachedMACD.size())
+    {
+        return {};
+    }
+
     long long key = ID_AVG_MACD_SIGNAL | (static_cast<long long>(fastPeriod) << 10) | (static_cast<long long>(slowPeriod) << 20) | (static_cast<long long>(signalPeriod) << 30);
     if (cachedIndicator->find(key) == cachedIndicator->end())
     {
@@ -1570,6 +1576,12 @@ any Expr::visitAvg_macd_histogram(ExprParser::Avg_macd_histogramContext *ctx)
 
     if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || from < 0 || to >= length - slowPeriod || to >= length - signalPeriod)
         return {};
+
+    vector<double> &cachedMACD = getMACD(fastPeriod, slowPeriod, signalPeriod);
+    if (from * 3 >= cachedMACD.size() || to * 3 >= cachedMACD.size())
+    {
+        return {};
+    }
 
     long long key = ID_AVG_MACD_HISTOGRAM | (static_cast<long long>(fastPeriod) << 10) | (static_cast<long long>(slowPeriod) << 20) | (static_cast<long long>(signalPeriod) << 30);
     if (cachedIndicator->find(key) == cachedIndicator->end())
