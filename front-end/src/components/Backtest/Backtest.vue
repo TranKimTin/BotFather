@@ -23,7 +23,7 @@
   <div class="m-2">
     <h3>Kết quả backtest:</h3>
     <div class="grid grid-cols-4 gap-2 p-2">
-      <div class="flex-auto">Lãi: {{ r_profit }} $</div>
+      <div class="flex-auto" :style="{ color: r_profit >= 0 ? 'green' : 'red' }">Lãi: {{ +r_profit.toFixed(2) }} $</div>
       <div class="flex-auto">Số lệnh: {{ r_orderList.length }}</div>
       <div class="flex-auto">Thắng: {{ r_win }}</div>
       <div class="flex-auto">Thua: {{ r_lose }}</div>
