@@ -25,7 +25,9 @@ void init()
 
     spdlog::set_pattern("%v");
     spdlog::set_level(spdlog::level::debug);
-    spdlog::flush_on(spdlog::level::trace);
+    spdlog::flush_on(spdlog::level::err);
+    spdlog::flush_every(chrono::seconds(1));
+
 
     MySQLConnector::getInstance().initializePool(1);
 
