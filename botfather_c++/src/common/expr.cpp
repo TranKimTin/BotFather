@@ -17,6 +17,20 @@ static const long long ID_MM_RSI = 7;
 static const long long ID_MM_MACD_VALUE = 8;
 static const long long ID_MM_MACD_SIGNAL = 9;
 static const long long ID_MM_MACD_HISTOGRAM = 10;
+static const long long ID_MM_CHANGE = 11;
+static const long long ID_MM_CHANGE_P = 12;
+static const long long ID_MM_AMPL = 13;
+static const long long ID_MM_AMPL_P = 14;
+static const long long ID_AVG_OPEN = 15;
+static const long long ID_AVG_HIGH = 16;
+static const long long ID_AVG_LOW = 17;
+static const long long ID_AVG_CLOSE = 18;
+static const long long ID_AVG_AMPL = 19;
+static const long long ID_AVG_AMPL_P = 20;
+static const long long ID_AVG_RSI = 20;
+static const long long ID_AVG_MACD_VALUE = 21;
+static const long long ID_AVG_MACD_SIGNAL = 22;
+static const long long ID_AVG_MACD_HISTOGRAM = 23;
 
 any Expr::visitNumber(ExprParser::NumberContext *ctx)
 {
@@ -323,6 +337,25 @@ vector<double> &Expr::getRSI(int period)
     return it->second;
 }
 
+// avg from L to R inclusive
+double Expr::getAVG(const double arr[], int l, int r, long long key)
+{
+    auto it = cachedIndicator->find(key);
+    if (it == cachedIndicator->end())
+    {
+        vector<double> prefixSum = vectorDoublePool.acquire();
+        prefixSum.resize(length + 1);
+        prefixSum[0] = 0.0;
+        for (int i = 0; i < length; i++)
+        {
+            prefixSum[i + 1] = prefixSum[i] + arr[i];
+        }
+        it = cachedIndicator->emplace(key, prefixSum).first;
+    }
+    const vector<double> &prefixSum = it->second;
+    return (prefixSum[r + 1] - prefixSum[l]) / (r - l + 1);
+}
+
 any Expr::visitRsi(ExprParser::RsiContext *ctx)
 {
     int period = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
@@ -542,9 +575,7 @@ any Expr::visitAvg_open(ExprParser::Avg_openContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    int period = to - from + 1;
-
-    return iAvg(period, open + from, length - from);
+    return getAVG(open, from, to, ID_AVG_OPEN);
 }
 
 any Expr::visitAvg_high(ExprParser::Avg_highContext *ctx)
@@ -561,9 +592,7 @@ any Expr::visitAvg_high(ExprParser::Avg_highContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    int period = to - from + 1;
-
-    return iAvg(period, high + from, length - from);
+    return getAVG(high, from, to, ID_AVG_HIGH);
 }
 
 any Expr::visitAvg_low(ExprParser::Avg_lowContext *ctx)
@@ -580,9 +609,7 @@ any Expr::visitAvg_low(ExprParser::Avg_lowContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    int period = to - from + 1;
-
-    return iAvg(period, low + from, length - from);
+    return getAVG(low, from, to, ID_AVG_LOW);
 }
 
 any Expr::visitAvg_close(ExprParser::Avg_closeContext *ctx)
@@ -599,9 +626,7 @@ any Expr::visitAvg_close(ExprParser::Avg_closeContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    int period = to - from + 1;
-
-    return iAvg(period, close + from, length - from);
+    return getAVG(close, from, to, ID_AVG_CLOSE);
 }
 
 any Expr::visitAvg_ampl(ExprParser::Avg_amplContext *ctx)
@@ -618,10 +643,15 @@ any Expr::visitAvg_ampl(ExprParser::Avg_amplContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    int period = to - from + 1;
-
-    return iAvg(period, length - from, [this, from](int i)
-                { return this->high[from + i] - this->low[from + i]; });
+    vector<double> v = vectorDoublePool.acquire();
+    v.resize(length + 1);
+    for (int i = 0; i < length; i++)
+    {
+        v[i] = (high[i] - low[i]);
+    }
+    double result = getAVG(v.data(), from, to, ID_AVG_AMPL);
+    vectorDoublePool.release(v);
+    return result;
 }
 
 any Expr::visitAvg_amplP(ExprParser::Avg_amplPContext *ctx)
@@ -638,10 +668,15 @@ any Expr::visitAvg_amplP(ExprParser::Avg_amplPContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    int period = to - from + 1;
-
-    return iAvg(period, length - from, [this, from](int i)
-                { return (this->high[from + i] - this->low[from + i]) / this->open[from + i] * 100.0; });
+    vector<double> v = vectorDoublePool.acquire();
+    v.resize(length + 1);
+    for (int i = 0; i < length; i++)
+    {
+        v[i] = (high[i] - low[i]) / open[i] * 100.0;
+    }
+    double result = getAVG(v.data(), from, to, ID_AVG_AMPL_P);
+    vectorDoublePool.release(v);
+    return result;
 }
 
 any Expr::visitMin_open(ExprParser::Min_openContext *ctx)
@@ -765,10 +800,23 @@ any Expr::visitMin_change(ExprParser::Min_changeContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    int period = to - from + 1;
+    long long key = ID_MM_CHANGE;
 
-    return iMin(period, length - from, [this, from](int i)
-                { return this->close[from + i] - this->open[from + i]; });
+    auto it = cachedMinMax->find(key);
+    if (it == cachedMinMax->end())
+    {
+        auto st = sparseTablePool.acquire();
+        vector<double> v = vectorDoublePool.acquire();
+        v.resize(length);
+        for (int i = 0; i < length; i++)
+        {
+            v[i] = close[i] - open[i];
+        }
+        st->init(v.data(), length);
+        it = cachedMinMax->emplace(key, move(st)).first;
+        vectorDoublePool.release(v);
+    }
+    return it->second->query_min(from, to);
 }
 
 any Expr::visitMin_changeP(ExprParser::Min_changePContext *ctx)
@@ -785,10 +833,23 @@ any Expr::visitMin_changeP(ExprParser::Min_changePContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    int period = to - from + 1;
+    long long key = ID_MM_CHANGE_P;
 
-    return iMin(period, length - from, [this, from](int i)
-                { return (this->close[from + i] - this->open[from + i]) / this->open[from + i] * 100.0; });
+    auto it = cachedMinMax->find(key);
+    if (it == cachedMinMax->end())
+    {
+        auto st = sparseTablePool.acquire();
+        vector<double> v = vectorDoublePool.acquire();
+        v.resize(length);
+        for (int i = 0; i < length; i++)
+        {
+            v[i] = (close[i] - open[i]) / open[i] * 100.0;
+        }
+        st->init(v.data(), length);
+        it = cachedMinMax->emplace(key, move(st)).first;
+        vectorDoublePool.release(v);
+    }
+    return it->second->query_min(from, to);
 }
 
 any Expr::visitMin_ampl(ExprParser::Min_amplContext *ctx)
@@ -805,10 +866,23 @@ any Expr::visitMin_ampl(ExprParser::Min_amplContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    int period = to - from + 1;
+    long long key = ID_MM_AMPL;
 
-    return iMin(period, length - from, [this, from](int i)
-                { return this->high[from + i] - this->low[from + i]; });
+    auto it = cachedMinMax->find(key);
+    if (it == cachedMinMax->end())
+    {
+        auto st = sparseTablePool.acquire();
+        vector<double> v = vectorDoublePool.acquire();
+        v.resize(length);
+        for (int i = 0; i < length; i++)
+        {
+            v[i] = high[i] - low[i];
+        }
+        st->init(v.data(), length);
+        it = cachedMinMax->emplace(key, move(st)).first;
+        vectorDoublePool.release(v);
+    }
+    return it->second->query_min(from, to);
 }
 any Expr::visitMin_amplP(ExprParser::Min_amplPContext *ctx)
 {
@@ -824,10 +898,23 @@ any Expr::visitMin_amplP(ExprParser::Min_amplPContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    int period = to - from + 1;
+    long long key = ID_MM_AMPL_P;
 
-    return iMin(period, length - from, [this, from](int i)
-                { return (this->high[from + i] - this->low[from + i]) / this->open[from + i] * 100.0; });
+    auto it = cachedMinMax->find(key);
+    if (it == cachedMinMax->end())
+    {
+        auto st = sparseTablePool.acquire();
+        vector<double> v = vectorDoublePool.acquire();
+        v.resize(length);
+        for (int i = 0; i < length; i++)
+        {
+            v[i] = (high[i] - low[i]) / open[i] * 100.0;
+        }
+        st->init(v.data(), length);
+        it = cachedMinMax->emplace(key, move(st)).first;
+        vectorDoublePool.release(v);
+    }
+    return it->second->query_min(from, to);
 }
 
 any Expr::visitMax_open(ExprParser::Max_openContext *ctx)
@@ -951,10 +1038,23 @@ any Expr::visitMax_change(ExprParser::Max_changeContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    int period = to - from + 1;
+    long long key = ID_MM_CHANGE;
 
-    return iMax(period, length - from, [this, from](int i)
-                { return this->close[from + i] - this->open[from + i]; });
+    auto it = cachedMinMax->find(key);
+    if (it == cachedMinMax->end())
+    {
+        auto st = sparseTablePool.acquire();
+        vector<double> v = vectorDoublePool.acquire();
+        v.resize(length);
+        for (int i = 0; i < length; i++)
+        {
+            v[i] = close[i] - open[i];
+        }
+        st->init(v.data(), length);
+        it = cachedMinMax->emplace(key, move(st)).first;
+        vectorDoublePool.release(v);
+    }
+    return it->second->query_max(from, to);
 }
 
 any Expr::visitMax_changeP(ExprParser::Max_changePContext *ctx)
@@ -971,10 +1071,23 @@ any Expr::visitMax_changeP(ExprParser::Max_changePContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    int period = to - from + 1;
+    long long key = ID_MM_CHANGE_P;
 
-    return iMax(period, length - from, [this, from](int i)
-                { return (this->close[from + i] - this->open[from + i]) / this->open[from + i] * 100.0; });
+    auto it = cachedMinMax->find(key);
+    if (it == cachedMinMax->end())
+    {
+        auto st = sparseTablePool.acquire();
+        vector<double> v = vectorDoublePool.acquire();
+        v.resize(length);
+        for (int i = 0; i < length; i++)
+        {
+            v[i] = (close[i] - open[i]) / open[i] * 100.0;
+        }
+        st->init(v.data(), length);
+        it = cachedMinMax->emplace(key, move(st)).first;
+        vectorDoublePool.release(v);
+    }
+    return it->second->query_max(from, to);
 }
 
 any Expr::visitMax_ampl(ExprParser::Max_amplContext *ctx)
@@ -991,10 +1104,23 @@ any Expr::visitMax_ampl(ExprParser::Max_amplContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    int period = to - from + 1;
+    long long key = ID_MM_AMPL;
 
-    return iMax(period, length - from, [this, from](int i)
-                { return this->high[from + i] - this->low[from + i]; });
+    auto it = cachedMinMax->find(key);
+    if (it == cachedMinMax->end())
+    {
+        auto st = sparseTablePool.acquire();
+        vector<double> v = vectorDoublePool.acquire();
+        v.resize(length);
+        for (int i = 0; i < length; i++)
+        {
+            v[i] = high[i] - low[i];
+        }
+        st->init(v.data(), length);
+        it = cachedMinMax->emplace(key, move(st)).first;
+        vectorDoublePool.release(v);
+    }
+    return it->second->query_max(from, to);
 }
 
 any Expr::visitMax_amplP(ExprParser::Max_amplPContext *ctx)
@@ -1011,10 +1137,23 @@ any Expr::visitMax_amplP(ExprParser::Max_amplPContext *ctx)
     if (from < 0 || to >= length)
         return {};
 
-    int period = to - from + 1;
+    long long key = ID_MM_AMPL_P;
 
-    return iMax(period, length - from, [this, from](int i)
-                { return (this->high[from + i] - this->low[from + i]) / this->open[from + i] * 100.0; });
+    auto it = cachedMinMax->find(key);
+    if (it == cachedMinMax->end())
+    {
+        auto st = sparseTablePool.acquire();
+        vector<double> v = vectorDoublePool.acquire();
+        v.resize(length);
+        for (int i = 0; i < length; i++)
+        {
+            v[i] = (high[i] - low[i]) / open[i] * 100.0;
+        }
+        st->init(v.data(), length);
+        it = cachedMinMax->emplace(key, move(st)).first;
+        vectorDoublePool.release(v);
+    }
+    return it->second->query_max(from, to);
 }
 
 any Expr::visitMin_rsi(ExprParser::Min_rsiContext *ctx)
@@ -1097,11 +1236,13 @@ any Expr::visitMarsi(ExprParser::MarsiContext *ctx)
     if (to < from)
         swap(from, to);
 
-    if (period <= 0 || from < 0 || to >= length - period)
+    vector<double> &cachedRSI = getRSI(period);
+    if (from >= cachedRSI.size() || to >= cachedRSI.size())
+    {
         return {};
-
-    int k = to - from + 1;
-    return iAvgRSI(period, k, close + from, length - from);
+    }
+    long long key = ID_AVG_RSI | (static_cast<long long>(period) << 10);
+    return getAVG(cachedRSI.data(), from, to, key);
 }
 
 any Expr::visitMin_macd_value(ExprParser::Min_macd_valueContext *ctx)
@@ -1203,9 +1344,25 @@ any Expr::visitAvg_macd_value(ExprParser::Avg_macd_valueContext *ctx)
     if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || from < 0 || to >= length - slowPeriod || to >= length - signalPeriod)
         return {};
 
-    int k = to - from + 1;
-    return iAvgMACD(fastPeriod, slowPeriod, signalPeriod, k, close + from, length - from, [](MACD_Output output)
-                    { return output.macd; });
+    vector<double> &cachedMACD = getMACD(fastPeriod, slowPeriod, signalPeriod);
+    if (from * 3 >= cachedMACD.size() || to * 3 >= cachedMACD.size())
+    {
+        return {};
+    }
+    long long key = ID_AVG_MACD_VALUE | (static_cast<long long>(fastPeriod) << 10) | (static_cast<long long>(slowPeriod) << 20) | (static_cast<long long>(signalPeriod) << 30);
+    if (cachedIndicator->find(key) == cachedIndicator->end())
+    {
+        vector<double> v = vectorDoublePool.acquire();
+        v.resize(cachedMACD.size() / 3);
+        for (int i = 0; i < v.size(); ++i)
+        {
+            v[i] = cachedMACD[i * 3];
+        }
+        double result = getAVG(v.data(), from, to, key);
+        vectorDoublePool.release(v);
+        return result;
+    }
+    return getAVG(NULL, from, to, key);
 }
 
 any Expr::visitMax_macd_signal(ExprParser::Max_macd_signalContext *ctx)
@@ -1303,9 +1460,20 @@ any Expr::visitAvg_macd_signal(ExprParser::Avg_macd_signalContext *ctx)
     if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || from < 0 || to >= length - slowPeriod || to >= length - signalPeriod)
         return {};
 
-    int k = to - from + 1;
-    return iAvgMACD(fastPeriod, slowPeriod, signalPeriod, k, close + from, length - from, [](MACD_Output output)
-                    { return output.signal; });
+    long long key = ID_AVG_MACD_SIGNAL | (static_cast<long long>(fastPeriod) << 10) | (static_cast<long long>(slowPeriod) << 20) | (static_cast<long long>(signalPeriod) << 30);
+    if (cachedIndicator->find(key) == cachedIndicator->end())
+    {
+        vector<double> v = vectorDoublePool.acquire();
+        v.resize(cachedMACD.size() / 3);
+        for (int i = 0; i < v.size(); ++i)
+        {
+            v[i] = cachedMACD[i * 3 + 1];
+        }
+        double result = getAVG(v.data(), from, to, key);
+        vectorDoublePool.release(v);
+        return result;
+    }
+    return getAVG(NULL, from, to, key);
 }
 any Expr::visitMin_macd_histogram(ExprParser::Min_macd_histogramContext *ctx)
 {
@@ -1403,9 +1571,20 @@ any Expr::visitAvg_macd_histogram(ExprParser::Avg_macd_histogramContext *ctx)
     if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || from < 0 || to >= length - slowPeriod || to >= length - signalPeriod)
         return {};
 
-    int k = to - from + 1;
-    return iAvgMACD(fastPeriod, slowPeriod, signalPeriod, k, close + from, length - from, [](MACD_Output output)
-                    { return output.histogram; });
+    long long key = ID_AVG_MACD_HISTOGRAM | (static_cast<long long>(fastPeriod) << 10) | (static_cast<long long>(slowPeriod) << 20) | (static_cast<long long>(signalPeriod) << 30);
+    if (cachedIndicator->find(key) == cachedIndicator->end())
+    {
+        vector<double> v = vectorDoublePool.acquire();
+        v.resize(cachedMACD.size() / 3);
+        for (int i = 0; i < v.size(); ++i)
+        {
+            v[i] = cachedMACD[i * 3 + 2];
+        }
+        double result = getAVG(v.data(), from, to, key);
+        vectorDoublePool.release(v);
+        return result;
+    }
+    return getAVG(NULL, from, to, key);
 }
 
 any Expr::visitRandom(ExprParser::RandomContext *ctx)
