@@ -392,55 +392,62 @@ int main(int argc, char *argv[])
 
     // bot->symbolList = {{"binance_future", "CLANKERUSDT", "binance_future:CLANKERUSDT"}};
     totalSymbol = bot->symbolList.size();
+    LOGI("Progress_1");
 
     for (Symbol &s : bot->symbolList)
     {
         string symbol = s.symbol;
         task.run([=]()
                  {
-                    rateData.clear();
-                    rateData.symbol = symbol;
-                    rateData.interval = timeframe;
-                    vector<Rate> data;
+            rateData.clear();
+            rateData.symbol = symbol;
+            rateData.interval = timeframe;
+            vector<Rate> data;
 
-                    for (BacktestTime t = from - 3; t <= to; t++)
+            for (BacktestTime t = from - 3; t <= to; t++)
+            {
+                string filePath = (exeDir() / ".." / ".." / "data" / StringFormat("{}-1m-{}.bin", symbol, t.toString())).lexically_normal().c_str();
+                ifstream file(filePath, std::ios::binary | std::ios::ate);
+                if (!file)
+                {
+                    if (rateData.startTime.empty())
                     {
-                        string filePath = (exeDir() / ".." / ".." / "data" / StringFormat("{}-1m-{}.bin", symbol, t.toString())).lexically_normal().c_str();
-                        ifstream file(filePath, std::ios::binary | std::ios::ate);
-                        if (!file)
-                        {
-                            if(rateData.startTime.empty()){
-                                continue;
-                            }
-                            break;
-                        }
-                        size_t size = file.tellg();
-                        file.seekg(0);
-
-                        if (size % sizeof(Rate) != 0)
-                        {
-                            throw std::runtime_error(StringFormat("File size not aligned with Rate {}", filePath));
-                            return;
-                        }
-
-                        int appendSize = size / sizeof(Rate);
-                        data.resize(data.size() + appendSize);
-
-                        file.read(reinterpret_cast<char *>(data.data() + data.size() - appendSize), size);
-                        file.close();
+                        continue;
                     }
+                    break;
+                }
+                size_t size = file.tellg();
+                file.seekg(0);
 
-                    for (Rate &rate : data)
-                    {
-                        mergeCandle1m(rate, symbol, timeframe, bot);
-                    }
-                    rateData.reverse();
-                    backtest(bot, from.toMillisecondsUTC(), data); 
-                    cnt++;
-                    LOGI("Progress_{}", (cnt.load() * 100) / totalSymbol); });
+                if (size % sizeof(Rate) != 0)
+                {
+                    throw std::runtime_error(StringFormat("File size not aligned with Rate {}", filePath));
+                    return;
+                }
+
+                int appendSize = size / sizeof(Rate);
+                data.resize(data.size() + appendSize);
+
+                file.read(reinterpret_cast<char *>(data.data() + data.size() - appendSize), size);
+                file.close();
+            }
+
+            for (Rate &rate : data)
+            {
+                mergeCandle1m(rate, symbol, timeframe, bot);
+            }
+            rateData.reverse();
+            backtest(bot, from.toMillisecondsUTC(), data);
+            int oldProgress = (cnt.load() * 100) / totalSymbol;
+            cnt++;
+            int progress = (cnt.load() * 100) / totalSymbol;
+            if (progress > oldProgress)
+            {
+                LOGI("Progress_{}", progress);
+            }
     }
 
     task.wait();
     destroy();
     return 0;
-}
+    }
