@@ -57,7 +57,7 @@ void SocketBinance::connectSocket()
     ws.set_close_handler(bind(&SocketBinance::onSocketClosed, this, std::placeholders::_1));
     ws.set_fail_handler(bind(&SocketBinance::onSocketClosed, this, std::placeholders::_1));
 
-    uri = "wss://stream.binance.com/stream?streams=";
+    uri = "wss://stream.binance.com:9443/stream?streams=";
     for (int i = 0; i < symbolList.size(); i++)
     {
         uri += (toLowerCase(symbolList[i]) + "@kline_1m");
