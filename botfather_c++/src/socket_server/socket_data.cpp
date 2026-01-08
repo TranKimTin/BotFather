@@ -538,7 +538,15 @@ void SocketData::reconnectSocket()
 
 void SocketData::onSocketClosed(connection_hdl hdl)
 {
-    LOGE("Socket {} closed.", broker);
+    auto con = ws.get_con_from_hdl(hdl);
+
+    LOGE(
+        "Socket {} closed. state={}, code={}, reason={}, ec={}",
+        broker,
+        con->get_state(),
+        con->get_remote_close_code(),
+        con->get_remote_close_reason(),
+        con->get_ec().message());
     SLEEP_FOR(1000);
     reconnectSocket();
 }
