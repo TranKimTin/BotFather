@@ -37,88 +37,146 @@ bool endsWith(const string &str, const string &suffix)
 bool checkFinal(const string &tf, long long startTime, string &currentTF)
 {
     long long nextTime = startTime / 1000 + timeframeToNumberSeconds(currentTF);
-    if (tf == "1m")
-        return nextTime % 60 == 0;
-    if (tf == "3m")
-        return nextTime % 180 == 0;
-    if (tf == "5m")
-        return nextTime % 300 == 0;
-    if (tf == "15m")
-        return nextTime % 900 == 0;
-    if (tf == "30m")
-        return nextTime % 1800 == 0;
-    if (tf == "1h")
-        return nextTime % 3600 == 0;
-    if (tf == "2h")
-        return nextTime % 7200 == 0;
-    if (tf == "4h")
-        return nextTime % 14400 == 0;
-    if (tf == "6h")
-        return nextTime % 21600 == 0;
-    if (tf == "8h")
-        return nextTime % 28800 == 0;
-    if (tf == "12h")
-        return nextTime % 43200 == 0;
-    if (tf == "1d")
-        return nextTime % 86400 == 0;
+    switch (tf[0])
+    {
+    case '1':
+    {
+        switch (tf[1])
+        {
+        case 'm':
+            return nextTime % 60 == 0; // 1m
+        case 'h':
+            return nextTime % 3600 == 0; // 1h
+        case 'd':
+            return nextTime % 86400 == 0; // 1d
+        case '5':
+            return nextTime % 900 == 0; // 15m
+        case '2':
+            return nextTime % 43200 == 0; // 12h
+        }
+        break;
+    }
+    case '2':
+        return nextTime % 7200 == 0; // 2h
+    case '3':
+    {
+        switch (tf[1])
+        {
+        case 'm':
+            return nextTime % 180 == 0; // 3m
+        case '0':
+            return nextTime % 1800 == 0; // 30m
+        }
+        break;
+    }
+    case '4':
+        return nextTime % 14400 == 0; // 4h
+    case '5':
+        return nextTime % 300 == 0; // 5m
+    case '6':
+        return nextTime % 21600 == 0; // 6h
+    case '8':
+        return nextTime % 28800 == 0; // 8h
+    default:
+        break;
+    }
     return false;
 }
 
 long long getStartTime(const string &tf, long long currentTime)
 {
-    if (tf == "1m")
-        return currentTime - currentTime % 60000;
-    if (tf == "3m")
-        return currentTime - currentTime % 180000;
-    if (tf == "5m")
-        return currentTime - currentTime % 300000;
-    if (tf == "15m")
-        return currentTime - currentTime % 900000;
-    if (tf == "30m")
-        return currentTime - currentTime % 1800000;
-    if (tf == "1h")
-        return currentTime - currentTime % 3600000;
-    if (tf == "2h")
-        return currentTime - currentTime % 7200000;
-    if (tf == "4h")
-        return currentTime - currentTime % 14400000;
-    if (tf == "6h")
-        return currentTime - currentTime % 21600000;
-    if (tf == "8h")
-        return currentTime - currentTime % 28800000;
-    if (tf == "12h")
-        return currentTime - currentTime % 43200000;
-    if (tf == "1d")
-        return currentTime - currentTime % 86400000;
+    switch (tf[0])
+    {
+    case '1':
+    {
+        switch (tf[1])
+        {
+        case 'm':
+            return currentTime - currentTime % 60000; // 1m
+        case 'h':
+            return currentTime - currentTime % 3600000; // 1h
+        case 'd':
+            return currentTime - currentTime % 86400000; // 1d
+        case '5':
+            return currentTime - currentTime % 900000; // 15m
+        case '2':
+            return currentTime - currentTime % 43200000; // 12h
+        }
+        break;
+    }
+    case '2':
+        return currentTime - currentTime % 7200000; // 2h
+    case '3':
+    {
+        switch (tf[1])
+        {
+        case 'm':
+            return currentTime - currentTime % 180000; // 3m
+        case '0':
+            return currentTime - currentTime % 1800000; // 30m
+        }
+        break;
+    }
+    case '4':
+        return currentTime - currentTime % 14400000; // 4h
+    case '5':
+        return currentTime - currentTime % 300000; // 5m
+    case '6':
+        return currentTime - currentTime % 21600000; // 6h
+    case '8':
+        return currentTime - currentTime % 28800000; // 8h
+    default:
+        break;
+    }
     return currentTime;
 }
 
 int timeframeToNumberMinutes(const string &tf)
 {
-    if (tf == "1m")
-        return 1;
-    if (tf == "3m")
-        return 3;
-    if (tf == "5m")
-        return 5;
-    if (tf == "15m")
-        return 15;
-    if (tf == "30m")
-        return 30;
-    if (tf == "1h")
-        return 60;
-    if (tf == "2h")
-        return 120;
-    if (tf == "4h")
-        return 240;
-    if (tf == "6h")
-        return 360;
-    if (tf == "8h")
-        return 480;
-    if (tf == "12h")
-        return 720;
-    if (tf == "1d")
-        return 1440;
+    switch (tf[0])
+    {
+    case '1':
+    {
+        switch (tf[1])
+        {
+        case 'm':
+            return 1; // 1m
+        case 'h':
+            return 60; // 1h
+        case 'd':
+            return 1440; // 1d
+        case '5':
+            return 15; // 15m
+        case '2':
+            return 720; // 12h
+        }
+        break;
+    }
+    case '2':
+        return 120; // 2h
+    case '3':
+    {
+        switch (tf[1])
+        {
+        case 'm':
+            return 3; // 3m
+        case '0':
+            return 30; // 30m
+        }
+        break;
+    }
+    case '4':
+        return 240; // 4h
+    case '5':
+        return 5; // 5m
+    case '6':
+        return 360; // 6h
+    case '8':
+        return 480; // 8h
+    default:
+        break;
+    }
+
     return 1;
 }
 
@@ -163,7 +221,8 @@ long long getCurrentTime()
     return chrono::duration_cast<chrono::milliseconds>(duration).count();
 }
 
-filesystem::path exeDir(){
+filesystem::path exeDir()
+{
     char path[PATH_MAX];
     ssize_t len = readlink("/proc/self/exe", path, sizeof(path) - 1);
     if (len == -1)
