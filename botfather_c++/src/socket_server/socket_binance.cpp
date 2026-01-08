@@ -66,7 +66,6 @@ void SocketBinance::connectSocket()
             uri += "/";
         }
     }
-    LOGI(uri);
 
     reconnectSocket();
     ws.run();
