@@ -578,6 +578,8 @@ vector<string> getBinanceSymbolList()
 
         if (status != "TRADING" || !endsWith(symbol, "USDT") || symbol == "USDCUSDT" || symbol == "TUSDUSDT" || symbol == "DAIUSDT")
             continue;
+        if (symbol == "币安人生USDT")
+            continue;
         symbols.push_back(symbol);
     }
     return symbols;
@@ -598,7 +600,8 @@ vector<string> getBinanceFutureSymbolList()
             continue;
         if (symbol == "ATUSDT")
             continue;
-
+        if (symbol == "币安人生USDT")
+            continue;
         symbols.push_back(symbol);
         // if (symbols.size() >= 500)
         // break;
