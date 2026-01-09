@@ -395,12 +395,17 @@ int main(int argc, char *argv[])
     vector<shared_ptr<Bot>> botList = {bot};
 
     // bot->symbolList = {{"binance_future", "CLANKERUSDT", "binance_future:CLANKERUSDT"}};
-    totalSymbol = bot->symbolList.size();
+    vector<string> symbolList;
+    for (Symbol &s : bot->symbolList) {
+        if (s.broker == "binance_future") {
+            symbolList.push_back(s.symbol);
+        }
+    }
+    totalSymbol = symbolList.size();
     LOGI("Progress_1");
 
-    for (Symbol &s : bot->symbolList)
+    for (string symbol : symbolList)
     {
-        string symbol = s.symbol;
         task.run([=]()
                  {
             rateData.clear();
