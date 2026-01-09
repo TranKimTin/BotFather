@@ -337,7 +337,7 @@ export async function getBinanceSymbolList() {
         .filter((item: { status: string }) => item.status == 'TRADING')
         .map((item: { symbol: any; }) => item.symbol)
         .filter(item => item.endsWith('USDT'))
-        .filter(item => !['USDCUSDT', 'TUSDUSDT', 'DAIUSDT'].includes(item));
+        .filter(item => !['USDCUSDT', 'TUSDUSDT', 'DAIUSDT', '币安人生USDT'].includes(item));
 }
 
 export async function getBinanceFutureSymbolList() {
@@ -349,7 +349,7 @@ export async function getBinanceFutureSymbolList() {
         .filter((item: { status: string }) => item.status == 'TRADING')
         .map((item: { symbol: string; }) => item.symbol)
         .filter(item => item.endsWith('USDT'))
-        .filter(item => !['USDCUSDT', 'TUSDUSDT', 'DAIUSDT'].includes(item));
+        .filter(item => !['USDCUSDT', 'TUSDUSDT', 'DAIUSDT', '币安人生USDT'].includes(item));
 }
 
 export async function getBybitSymbolList() {
