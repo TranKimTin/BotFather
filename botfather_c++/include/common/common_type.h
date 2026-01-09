@@ -74,6 +74,7 @@ using message_ptr = websocketpp::config::asio_tls_client::message_type::ptr;
 using json = nlohmann::json;
 
 const int MAX_CANDLE = 600;
+const double INF = 1e18;
 struct RateData
 {
     string symbol;

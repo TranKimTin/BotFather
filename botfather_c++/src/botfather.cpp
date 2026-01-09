@@ -33,11 +33,11 @@ void test()
     string symbol = "BTCUSDT";
     string timeframe = "1h";
     RateData rateData = getBinanceFuturetOHLCV(symbol, timeframe, 600);
-    // rateData.open.pop_front();
-    // rateData.high.pop_front();
-    // rateData.low.pop_front();
-    // rateData.close.pop_front();
-    // rateData.startTime.pop_front();
+    rateData.open.pop_front();
+    rateData.high.pop_front();
+    rateData.low.pop_front();
+    rateData.close.pop_front();
+    rateData.startTime.pop_front();
 
     vector<double> open(rateData.open.begin(), rateData.open.end());
     vector<double> high(rateData.high.begin(), rateData.high.end());
@@ -46,15 +46,22 @@ void test()
     vector<double> volume(rateData.volume.begin(), rateData.volume.end());
     vector<long long> startTime(rateData.startTime.begin(), rateData.startTime.end());
 
-    string iv = generateRandomIV();
-    string apiKey = env["API_KEY"];
-    string secretKey = encryptAES(env["SECRET_KEY"], env["ENCRYP_KEY"], iv);
-    IExchange *exchange = new BinanceFuture(apiKey, secretKey, iv, 31);
+    string expr = "{min(11, 2, 3, 10, 4, 5)}";
+    boost::unordered_flat_map<long long, vector<double>> cachedIndicator;
+    boost::unordered_flat_map<long long, unique_ptr<SparseTable>> cachedMinMax;
+    int shift = 0;
+    string res = calculateSubExpr(expr, broker, symbol, timeframe, rateData.startTime.size(), open.data(), high.data(), low.data(), close.data(),
+                                  volume.data(), startTime.data(), 0.01, &cachedIndicator, &cachedMinMax, shift);
+    LOGI(res);
+    // string iv = generateRandomIV();
+    // string apiKey = env["API_KEY"];
+    // string secretKey = encryptAES(env["SECRET_KEY"], env["ENCRYP_KEY"], iv);
+    // IExchange *exchange = new BinanceFuture(apiKey, secretKey, iv, 31);
 
-    double p = 0.5 / 100.0;
+    // double p = 0.5 / 100.0;
 
     // string id = exchange->buyLimit("BTCUSDT", "0.01", doubleToString(close[0], 0), doubleToString(close[0] * (1 + p), 0), doubleToString(close[0] * (1 - p), 0), "");
-    string id = exchange->buyMarket("BTCUSDT", "0.01", doubleToString(close[0] * (1 + p), 0), doubleToString(close[0] * (1 - p), 0), false);
+    // string id = exchange->buyMarket("BTCUSDT", "0.01", doubleToString(close[0] * (1 + p), 0), doubleToString(close[0] * (1 - p), 0), false);
 
     // string id = exchange->buyLimit("BTCUSDT", "0.01", "117000", "121000", "111000", "");
     // string id = exchange->buyMarket("BTCUSDT", "0.01", "120000", "110000", false);

@@ -2,8 +2,6 @@
 #include "vector_pool.h"
 
 static const int MAX_N = 300;
-static const double INF = 1e18;
-
 extern thread_local VectorDoublePool vectorDoublePool;
 
 vector<double> iRSI(int period, const double close[], int n)

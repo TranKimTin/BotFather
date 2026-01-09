@@ -161,24 +161,24 @@ any Expr::visitABS(ExprParser::ABSContext *ctx)
 
 any Expr::visitMIN(ExprParser::MINContext *ctx)
 {
-    auto left = visit(ctx->expr(0));
-    auto right = visit(ctx->expr(1));
-
-    double l = any_cast<double>(left);
-    double r = any_cast<double>(right);
-
-    return l < r ? l : r;
+    double m = INF;
+    for (int i = 0; ctx->expr(i); i++)
+    {
+        auto v = visit(ctx->expr(i));
+        m = min(m, any_cast<double>(v));
+    }
+    return m;
 }
 
 any Expr::visitMAX(ExprParser::MAXContext *ctx)
 {
-    auto left = visit(ctx->expr(0));
-    auto right = visit(ctx->expr(1));
-
-    double l = any_cast<double>(left);
-    double r = any_cast<double>(right);
-
-    return l > r ? l : r;
+    double m = -INF;
+    for (int i = 0; ctx->expr(i); i++)
+    {
+        auto v = visit(ctx->expr(i));
+        m = max(m, any_cast<double>(v));
+    }
+    return m;
 }
 
 any Expr::visitOpen(ExprParser::OpenContext *ctx)

@@ -7,8 +7,6 @@
 #include <openssl/buffer.h>
 #include "expr.h"
 
-static const double INF = 1e18;
-
 string toLowerCase(string str)
 {
     for (auto &c : str)
