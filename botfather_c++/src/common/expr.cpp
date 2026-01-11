@@ -2833,8 +2833,7 @@ void cacheInstr(const string &inputText)
     }
 }
 
-double calculateExpr(const string &inputText, const string &broker, const string &symbol, const string &timeframe, int length,
-                     const double *open, const double *high, const double *low, const double *close,
+double calculateExpr(const string &inputText, int length, const double *open, const double *high, const double *low, const double *close,
                      const double *volume, long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, unique_ptr<SparseTable>> *cachedMinMax, int shift)
 {
     const long long key = hashString(inputText);
@@ -2854,8 +2853,7 @@ double calculateExpr(const string &inputText, const string &broker, const string
     return eval(instr, length, open, high, low, close, volume, startTime, fundingRate, cachedIndicator, cachedMinMax, shift);
 }
 
-string calculateSubExpr(string &expr, const string &broker, const string &symbol, const string &timeframe, int length,
-                        const double *open, const double *high, const double *low, const double *close,
+string calculateSubExpr(string &expr, int length, const double *open, const double *high, const double *low, const double *close,
                         const double *volume, long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, unique_ptr<SparseTable>> *cachedMinMax, int shift)
 {
     stack<string> st;
@@ -2876,7 +2874,7 @@ string calculateSubExpr(string &expr, const string &broker, const string &symbol
             }
             string lastS = st.top();
             st.pop();
-            double result = calculateExpr(toLowerCase(s), broker, symbol, timeframe, length, open, high, low, close, volume, startTime, fundingRate, cachedIndicator, cachedMinMax, shift);
+            double result = calculateExpr(toLowerCase(s), length, open, high, low, close, volume, startTime, fundingRate, cachedIndicator, cachedMinMax, shift);
             s = lastS + " ";
             s += to_string(result);
         }

@@ -126,8 +126,7 @@ void Worker::dfs_handleLogic(Route &route, const shared_ptr<Bot> &bot)
 
 string Worker::calculateSub(string &expr)
 {
-    return calculateSubExpr(expr, broker, symbol, timeframe, open.size(),
-                            open.data(), high.data(), low.data(), close.data(), volume.data(),
+    return calculateSubExpr(expr, open.size(), open.data(), high.data(), low.data(), close.data(), volume.data(),
                             startTime.data(), fundingRate, &cachedIndicator, &cachedMinMax, shift);
 }
 
@@ -142,18 +141,14 @@ double Worker::calculate(string &expr)
             return it->second;
         }
 
-        double result = calculateExpr(
-            expr, broker, symbol, timeframe, open.size(),
-            open.data(), high.data(), low.data(), close.data(), volume.data(),
-            startTime.data(), fundingRate, &cachedIndicator, &cachedMinMax, shift);
+        double result = calculateExpr(expr, open.size(), open.data(), high.data(), low.data(), close.data(), volume.data(),
+                                      startTime.data(), fundingRate, &cachedIndicator, &cachedMinMax, shift);
 
         cachedExpr[key] = result;
         return result;
     }
-    return calculateExpr(
-        expr, broker, symbol, timeframe, open.size(),
-        open.data(), high.data(), low.data(), close.data(), volume.data(),
-        startTime.data(), fundingRate, &cachedIndicator, &cachedMinMax, shift);
+    return calculateExpr(expr, open.size(), open.data(), high.data(), low.data(), close.data(), volume.data(),
+                         startTime.data(), fundingRate, &cachedIndicator, &cachedMinMax, shift);
 }
 
 bool Worker::adjustParam(NodeData &node)
