@@ -432,7 +432,7 @@ int main(int argc, char *argv[])
 
                 if (size % sizeof(Rate) != 0)
                 {
-                    throw std::runtime_error(StringFormat("File size not aligned with Rate {}", filePath));
+                    LOGE("File size not aligned with Rate {}", filePath);
                     return;
                 }
 
