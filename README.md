@@ -203,24 +203,12 @@ $ sudo service nginx restart
 ## ⌛ Profiling
 ```
 $ cd ~/
-$ git clone https://github.com/brendangregg/FlameGraph.git
+$ git clone https://github.com/TranKimTin/FlameGraph
 cd FlameGraph
 
 # Realtime profiling
-$ perf top -p <PID> -- sleep 30
-
-# Record profiling
-$ sudo perf record -g --call-graph=dwarf -p <PID>
-
-# Report on terminal
-$ perf report
-
-# Report on browser
-$ sudo perf script > out.perf
-$ ./stackcollapse-perf.pl out.perf | ./stackcollapse-recursive.pl > out.folded
-$ ./flamegraph.pl out.folded > flamegraph.svg
-$ scp user@your-server-ip:~/FlameGraph/flamegraph.svg .
-# open flamegraph.svg with browser
+$ sh ./backtest_profiler.sh
+$ sh ./botfather_profiler.sh
 
 ```
 
