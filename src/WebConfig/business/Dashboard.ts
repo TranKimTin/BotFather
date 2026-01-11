@@ -55,6 +55,12 @@ export async function getBotInfo(userData: UserTokenInfo) {
                 }
                 catch (err) {
                     console.error(item.botName, err);
+                    accountInfo[apiKey] = {
+                        totalWalletBalance: 0,
+                        availableBalance: 0,
+                        totalUnrealizedProfit: 0
+                    };
+                    openOrders[apiKey] = [];
                 }
 
             }
