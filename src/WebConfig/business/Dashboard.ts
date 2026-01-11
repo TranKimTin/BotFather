@@ -51,13 +51,10 @@ export async function getBotInfo(userData: UserTokenInfo) {
                     promiseList = [];
                 }
             }
-            item.accountInfo = accountInfo[apiKey];
-            item.openOrders = openOrders[apiKey];
         }
     }
     if (promiseList.length >= 10) {
         await Promise.all(promiseList);
-        promiseList = [];
     }
     for (const item of data) {
         if (item.apiKey && item.secretKey && item.iv) {
