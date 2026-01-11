@@ -377,6 +377,7 @@ int main(int argc, char *argv[])
     BacktestTime to = BacktestTime(2025, 12);
 #endif
     init();
+    LOGI("Progress_1");
 
     exchangeInfo = getBinanceFutureInfo();
     exchangeInfo.max_load_factor(0.5);
@@ -404,7 +405,6 @@ int main(int argc, char *argv[])
         }
     }
     totalSymbol = symbolList.size();
-    LOGI("Progress_1");
 
     for (string symbol : symbolList)
     {
