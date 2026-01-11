@@ -421,7 +421,7 @@ int main(int argc, char *argv[])
                 ifstream file(filePath, std::ios::binary | std::ios::ate);
                 if (!file)
                 {
-                    if (rateData.startTime.empty())
+                    if (data.empty())
                     {
                         continue;
                     }
@@ -434,7 +434,7 @@ int main(int argc, char *argv[])
                 if (size % sizeof(Rate) != 0)
                 {
                     LOGI("File size not aligned with Rate {}", filePath);
-                    return;
+                    break;
                 }
 
                 int appendSize = size / sizeof(Rate);
