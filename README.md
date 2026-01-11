@@ -204,8 +204,7 @@ $ sudo service nginx restart
 ```
 $ cd ~/
 $ git clone https://github.com/TranKimTin/FlameGraph
-cd FlameGraph
-
+$ cd FlameGraph
 $ sh ./backtest_profiler.sh
 $ sh ./botfather_profiler.sh
 
