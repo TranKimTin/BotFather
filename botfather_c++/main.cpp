@@ -3,7 +3,6 @@
 #include "util.h"
 #include "mysql_connector.h"
 #include "telegram.h"
-#include "order_monitor.h"
 #include <csignal>
 #include <execinfo.h> // backtrace
 #include <unistd.h>   // write
@@ -67,7 +66,6 @@ void init()
 
     MySQLConnector::getInstance().initializePool(30);
     Telegram::getInstance();
-    startOrderMonitor();
 
     signal(SIGSEGV, signal_handler);
     signal(SIGABRT, signal_handler);

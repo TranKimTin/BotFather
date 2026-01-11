@@ -126,12 +126,11 @@ void Worker::dfs_handleLogic(Route &route, const shared_ptr<Bot> &bot)
 
 string Worker::calculateSub(string &expr)
 {
-    return calculateSubExpr(expr, broker, symbol, timeframe, open.size(),
-                            open.data(), high.data(), low.data(), close.data(), volume.data(),
+    return calculateSubExpr(expr, open.size(), open.data(), high.data(), low.data(), close.data(), volume.data(),
                             startTime.data(), fundingRate, &cachedIndicator, &cachedMinMax, shift);
 }
 
-any Worker::calculate(string &expr)
+double Worker::calculate(string &expr)
 {
     if (shift == 0)
     {
@@ -142,18 +141,14 @@ any Worker::calculate(string &expr)
             return it->second;
         }
 
-        any result = calculateExpr(
-            expr, broker, symbol, timeframe, open.size(),
-            open.data(), high.data(), low.data(), close.data(), volume.data(),
-            startTime.data(), fundingRate, &cachedIndicator, &cachedMinMax, shift);
+        double result = calculateExpr(expr, open.size(), open.data(), high.data(), low.data(), close.data(), volume.data(),
+                                      startTime.data(), fundingRate, &cachedIndicator, &cachedMinMax, shift);
 
         cachedExpr[key] = result;
         return result;
     }
-    return calculateExpr(
-        expr, broker, symbol, timeframe, open.size(),
-        open.data(), high.data(), low.data(), close.data(), volume.data(),
-        startTime.data(), fundingRate, &cachedIndicator, &cachedMinMax, shift);
+    return calculateExpr(expr, open.size(), open.data(), high.data(), low.data(), close.data(), volume.data(),
+                         startTime.data(), fundingRate, &cachedIndicator, &cachedMinMax, shift);
 }
 
 bool Worker::adjustParam(NodeData &node)
@@ -171,14 +166,14 @@ bool Worker::adjustParam(NodeData &node)
             expr = StringFormat("close() * (100 + abs({})) / 100", expr);
         }
 
-        any result = calculate(expr);
-        if (!result.has_value() || result.type() != typeid(double))
+        double result = calculate(expr);
+        if (result == 0.0)
         {
             LOGE("Calculate stop error. expr={}", node.stop);
             return false;
         }
 
-        node.stop = doubleToString(any_cast<double>(result), exchangeInfo.digitPrices);
+        node.stop = doubleToString(result, exchangeInfo.digitPrices);
     }
     else if (node.type == NODE_TYPE::SELL_STOP_MARKET || node.type == NODE_TYPE::SELL_STOP_LIMIT)
     {
@@ -192,14 +187,14 @@ bool Worker::adjustParam(NodeData &node)
             expr = StringFormat("close() * (100 - abs({})) / 100", expr);
         }
 
-        any result = calculate(expr);
-        if (!result.has_value() || result.type() != typeid(double))
+        double result = calculate(expr);
+        if (result == 0.0)
         {
             LOGE("Calculate stop error. expr={}", node.stop);
             return false;
         }
 
-        node.stop = doubleToString(any_cast<double>(result), exchangeInfo.digitPrices);
+        node.stop = doubleToString(result, exchangeInfo.digitPrices);
     }
     else
     {
@@ -219,14 +214,14 @@ bool Worker::adjustParam(NodeData &node)
             expr = StringFormat("close() * (100 - abs({})) / 100", expr);
         }
 
-        any result = calculate(expr);
-        if (!result.has_value() || result.type() != typeid(double))
+        double result = calculate(expr);
+        if (result == 0.0)
         {
             LOGE("Calculate entry error. expr={}", node.entry);
             return false;
         }
 
-        node.entry = doubleToString(any_cast<double>(result), exchangeInfo.digitPrices);
+        node.entry = doubleToString(result, exchangeInfo.digitPrices);
     }
     else if (node.type == NODE_TYPE::SELL_LIMIT || node.type == NODE_TYPE::SELL_STOP_LIMIT)
     {
@@ -240,14 +235,14 @@ bool Worker::adjustParam(NodeData &node)
             expr = StringFormat("close() * (100 + abs({})) / 100", expr);
         }
 
-        any result = calculate(expr);
-        if (!result.has_value() || result.type() != typeid(double))
+        double result = calculate(expr);
+        if (result == 0.0)
         {
             LOGE("Calculate entry error. expr={}", node.entry);
             return false;
         }
 
-        node.entry = doubleToString(any_cast<double>(result), exchangeInfo.digitPrices);
+        node.entry = doubleToString(result, exchangeInfo.digitPrices);
     }
     else if (node.type == NODE_TYPE::BUY_STOP_MARKET || node.type == NODE_TYPE::SELL_STOP_MARKET)
     {
@@ -292,14 +287,14 @@ bool Worker::adjustParam(NodeData &node)
             expr = StringFormat("({}) * (100 - abs({})) / 100", node.entry, expr);
         }
 
-        any result = calculate(expr);
-        if (!result.has_value() || result.type() != typeid(double))
+        double result = calculate(expr);
+        if (result == 0.0)
         {
             LOGE("Calculate SL error. expr={}", node.sl);
             return false;
         }
 
-        node.sl = doubleToString(any_cast<double>(result), exchangeInfo.digitPrices);
+        node.sl = doubleToString(result, exchangeInfo.digitPrices);
     }
     else if (node.type == NODE_TYPE::SELL_MARKET || node.type == NODE_TYPE::SELL_LIMIT || node.type == NODE_TYPE::SELL_STOP_MARKET || node.type == NODE_TYPE::SELL_STOP_LIMIT)
     {
@@ -313,14 +308,14 @@ bool Worker::adjustParam(NodeData &node)
             expr = StringFormat("({}) * (100 + abs({})) / 100", node.entry, expr);
         }
 
-        any result = calculate(expr);
-        if (!result.has_value() || result.type() != typeid(double))
+        double result = calculate(expr);
+        if (result == 0.0)
         {
             LOGE("Calculate SL error. expr={}", node.sl);
             return false;
         }
 
-        node.sl = doubleToString(any_cast<double>(result), exchangeInfo.digitPrices);
+        node.sl = doubleToString(result, exchangeInfo.digitPrices);
     }
     else
     {
@@ -344,14 +339,14 @@ bool Worker::adjustParam(NodeData &node)
             expr = StringFormat("({} + abs({} - {}) * abs({}))", node.entry, node.entry, node.sl, expr);
         }
 
-        any result = calculate(expr);
-        if (!result.has_value() || result.type() != typeid(double))
+        double result = calculate(expr);
+        if (result == 0.0)
         {
             LOGE("Calculate TP error. expr={}", node.tp);
             return false;
         }
 
-        node.tp = doubleToString(any_cast<double>(result), exchangeInfo.digitPrices);
+        node.tp = doubleToString(result, exchangeInfo.digitPrices);
     }
     else if (node.type == NODE_TYPE::SELL_MARKET || node.type == NODE_TYPE::SELL_LIMIT || node.type == NODE_TYPE::SELL_STOP_MARKET || node.type == NODE_TYPE::SELL_STOP_LIMIT)
     {
@@ -369,14 +364,14 @@ bool Worker::adjustParam(NodeData &node)
             expr = StringFormat("({} - abs({} - {}) * abs({}))", node.entry, node.entry, node.sl, expr);
         }
 
-        any result = calculate(expr);
-        if (!result.has_value() || result.type() != typeid(double))
+        double result = calculate(expr);
+        if (result == 0.0)
         {
             LOGE("Calculate TP error. expr={}", node.tp);
             return false;
         }
 
-        node.tp = doubleToString(any_cast<double>(result), exchangeInfo.digitPrices);
+        node.tp = doubleToString(result, exchangeInfo.digitPrices);
     }
     else
     {
@@ -396,14 +391,14 @@ bool Worker::adjustParam(NodeData &node)
             expr = StringFormat("({}) / {}", expr, node.entry);
         }
 
-        any result = calculate(expr);
-        if (!result.has_value() || result.type() != typeid(double))
+        double result = calculate(expr);
+        if (result == 0.0)
         {
             LOGE("Calculate volume error. expr={}", node.volume);
             return false;
         }
 
-        node.volume = doubleToString(any_cast<double>(result), exchangeInfo.digitVolume);
+        node.volume = doubleToString(result, exchangeInfo.digitVolume);
     }
     else
     {
@@ -424,14 +419,14 @@ bool Worker::adjustParam(NodeData &node)
             expr = StringFormat("(({}) * 60000 * {}) + {}", expr, timeframeToNumberMinutes(timeframe), nextTime(startTime[shift], timeframe));
         }
 
-        any result = calculate(expr);
-        if (!result.has_value() || result.type() != typeid(double))
+        double result = calculate(expr);
+        if (result == 0.0)
         {
             LOGE("Calculate expiredTime error. expr={}", node.expiredTime);
             return false;
         }
 
-        node.expiredTime = to_string((long long)any_cast<double>(result));
+        node.expiredTime = to_string((long long)result);
     }
     else
     {
@@ -630,33 +625,8 @@ bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
 
     if (nodeData.type == NODE_TYPE::EXPR)
     {
-        any result = calculate(nodeData.value);
-
-        if (result.has_value())
-        {
-            if (result.type() == typeid(int))
-            {
-                return any_cast<int>(result) != 0;
-            }
-            else if (result.type() == typeid(double))
-            {
-                return any_cast<double>(result) != 0.0;
-            }
-            else if (result.type() == typeid(string))
-            {
-                return true;
-            }
-            else
-            {
-                LOGE("Unknown result type");
-                return false;
-            }
-        }
-        else
-        {
-            LOGD("No result. symbol: {}:{}, timeframe: {}, expr={}", broker, symbol, timeframe, nodeData.value);
-            return false;
-        }
+        double result = calculate(nodeData.value);
+        return result != 0.0;
     }
 
     if (nodeData.type == NODE_TYPE::GET_SIGNAL)

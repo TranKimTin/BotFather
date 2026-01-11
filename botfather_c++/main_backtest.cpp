@@ -28,7 +28,6 @@ void init()
     spdlog::flush_on(spdlog::level::err);
     spdlog::flush_every(chrono::seconds(1));
 
-
     MySQLConnector::getInstance().initializePool(1);
 
     srand(time(NULL));
@@ -382,6 +381,7 @@ int main(int argc, char *argv[])
     exchangeInfo = getBinanceFutureInfo();
     exchangeInfo.max_load_factor(0.5);
 
+    Timer *t = new Timer(StringFormat("Backtest {} {} {} {}", botName, timeframe, from.toString(), to.toString()));
     string sql = "SELECT id,botName,userID,timeframes,symbolList,route,idTelegram,apiKey,secretKey,iv,enableRealOrder,maxOpenOrderPerSymbolBot,maxOpenOrderAllSymbolBot,maxOpenOrderPerSymbolAccount,maxOpenOrderAllSymbolAccount FROM Bot WHERE botName = ?";
     vector<any> args = {botName};
     auto &db = MySQLConnector::getInstance();
@@ -396,8 +396,10 @@ int main(int argc, char *argv[])
 
     // bot->symbolList = {{"binance_future", "CLANKERUSDT", "binance_future:CLANKERUSDT"}};
     vector<string> symbolList;
-    for (Symbol &s : bot->symbolList) {
-        if (s.broker == "binance_future") {
+    for (Symbol &s : bot->symbolList)
+    {
+        if (s.broker == "binance_future")
+        {
             symbolList.push_back(s.symbol);
         }
     }
@@ -457,6 +459,7 @@ int main(int argc, char *argv[])
     }
 
     task.wait();
+    delete t;
     destroy();
     return 0;
 }

@@ -10,6 +10,7 @@
 #include "socket_bybit_future.h"
 #include "socket_okx.h"
 #include "expr.h"
+#include "order_monitor.h"
 
 sio::client client;
 vector<SocketData *> exchanges;
@@ -46,10 +47,11 @@ void test()
     vector<double> volume(rateData.volume.begin(), rateData.volume.end());
     vector<long long> startTime(rateData.startTime.begin(), rateData.startTime.end());
 
-    string expr = "{min(11, 2, 3, 10, 4, 5)}";
+    string expr = "{1+2+3+4+5}";
     boost::unordered_flat_map<long long, vector<double>> cachedIndicator;
     boost::unordered_flat_map<long long, unique_ptr<SparseTable>> cachedMinMax;
-    int shift = 0;
+    int shift = 10;
+
     string res = calculateSubExpr(expr, broker, symbol, timeframe, rateData.startTime.size(), open.data(), high.data(), low.data(), close.data(),
                                   volume.data(), startTime.data(), 0.01, &cachedIndicator, &cachedMinMax, shift);
     LOGI(res);
@@ -148,6 +150,7 @@ void runApp()
     Redis::getInstance().connect(env["REDIS_SERVER"], stoi(env["REDIS_PORT"]), env["REDIS_PASSWORD"]);
 
 #ifndef TEST
+    startOrderMonitor();
 
     exchanges.push_back(new SocketBinance(5));
     exchanges.push_back(new SocketBinanceFuture(5));

@@ -1064,7 +1064,7 @@ Route getRoute(const json &j)
         string expr = toLowerCase(route.data.value);
         if (!expr.empty())
         {
-            cacheParseTree(expr);
+            cacheInstr(expr);
         }
     }
     return route;
