@@ -425,6 +425,7 @@ int main(int argc, char *argv[])
                     {
                         continue;
                     }
+                    LOGE("File not found {}", filePath);
                     break;
                 }
                 size_t size = file.tellg();
