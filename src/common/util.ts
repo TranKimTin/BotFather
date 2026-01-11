@@ -4,7 +4,7 @@ import * as ccxt from 'ccxt'
 import * as technicalindicators from 'technicalindicators';
 import _ from 'lodash';
 import axios from 'axios';
-import { CacheIndicator, CacheIndicatorItem, FundingRate, MACD_Output, MAX_CACHE_SIZE, RateData, RateKey } from './Interface';
+import { CacheIndicator, CacheIndicatorItem, FundingRate, MACD_Output, MAX_CACHE_SIZE, ORDER_STATUS, RateData, RateKey } from './Interface';
 import pm2 from 'pm2';
 import dotenv from 'dotenv';
 import { BollingerBandsOutput } from 'technicalindicators/declarations/volatility/BollingerBands';
@@ -15,6 +15,9 @@ import fs from "fs";
 import path from "path";
 import AdmZip from "adm-zip";
 import { spawn } from "child_process";
+import * as mysql from '../WebConfig/lib/mysql';
+import * as redis from './redis';
+
 
 dotenv.config({ path: `${__dirname}/../../.env` });
 
@@ -1332,4 +1335,29 @@ export function runBacktest(botName: string, timeframe: string, startYear: numbe
     // });
 
     return proc;
+}
+
+export async function getBotInfo(forceCache: boolean = false): Promise<Array<any>> {
+    const key = `getBotInfo`;
+    let cache = await redis.get(key);
+    if (!cache || forceCache) {
+        const sql = `SELECT u.id, u.email, b.botName, b.enableRealOrder, b.apiKey, b.secretKey, b.iv,
+                    COUNT(IF(o.status in ('Khớp TP', 'Khớp SL'), IF(o.timeSL IS NOT NULL OR o.timeTP IS NOT NULL, 1, NULL), NULL)) AS tradeCountClosed,
+                    COUNT(IF(o.status in ('Khớp entry'), IF(o.timeSL IS NULL AND o.timeTP IS NULL, 1, NULL), NULL)) AS tradeCountOpening,
+                    SUM(IF(o.status in ('Khớp TP', 'Khớp SL'), IF(o.timeSL IS NOT NULL OR o.timeTP IS NOT NULL, o.profit, 0), 0)) AS profit,
+                    SUM(IF(o.status in ('Khớp entry'), IF(o.timeSL IS NULL AND o.timeTP IS NULL, o.profit, 0), 0)) AS unrealizedProfit,
+                    SUM(IF(o.status in ('Khớp TP', 'Khớp SL'), IF(o.timeSL IS NOT NULL OR o.timeTP IS NOT NULL, (o.entry + IF(o.timeSL IS NOT NULL, o.sl, o.tp)) / 2 * o.volume, 0), 0)) AS volumeClosed,
+                    SUM(IF(o.status in ('Khớp entry'), IF(o.timeSL IS NULL AND o.timeTP IS NULL, o.entry * o.volume, 0), 0)) AS volumeOpening,
+                    COUNT(IF(o.status in ('Khớp TP', 'Khớp SL'), IF(o.profit >= 0 AND ( o.timeSL IS NOT NULL OR o.timeTP IS NOT NULL), 1, NULL), NULL)) / COUNT(IF(o.status in ('Khớp TP', 'Khớp SL'), 1, NULL)) * 100 AS winrate
+                FROM Bot b
+                JOIN User u ON u.id = b.userID
+                LEFT JOIN Orders o ON o.botID = b.id
+                GROUP BY b.id
+                ORDER BY b.enableRealOrder DESC, b.botName ASC;`;
+        const data = await mysql.query(sql, [ORDER_STATUS.MATCH_ENTRY, ORDER_STATUS.MATCH_TP, ORDER_STATUS.MATCH_SL]);
+        cache = JSON.stringify(data);
+        await redis.set(key, cache, 3600);
+        console.log('cached bot info');
+    }
+    return JSON.parse(cache);
 }

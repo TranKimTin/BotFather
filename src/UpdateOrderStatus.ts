@@ -288,6 +288,7 @@ async function main() {
         }
         await Promise.all(promiseList);
         console.log(`update ${orders.length} order`);
+        await util.getBotInfo(true);
     }
     catch (err) {
         console.error(err);

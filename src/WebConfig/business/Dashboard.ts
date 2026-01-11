@@ -8,28 +8,7 @@ import * as redis from '../../common/redis';
 dotenv.config({ path: `${__dirname}/../../../.env` });
 
 export async function getBotInfo(userData: UserTokenInfo) {
-    const key = `getBotInfo_${userData.id}`;
-    let cache = await redis.get(key);
-    if (!cache) {
-        const sql = `SELECT u.email, b.botName, b.enableRealOrder, b.apiKey, b.secretKey, b.iv,
-                    COUNT(IF(o.status in ('Khớp TP', 'Khớp SL'), IF(o.timeSL IS NOT NULL OR o.timeTP IS NOT NULL, 1, NULL), NULL)) AS tradeCountClosed,
-                    COUNT(IF(o.status in ('Khớp entry'), IF(o.timeSL IS NULL AND o.timeTP IS NULL, 1, NULL), NULL)) AS tradeCountOpening,
-                    SUM(IF(o.status in ('Khớp TP', 'Khớp SL'), IF(o.timeSL IS NOT NULL OR o.timeTP IS NOT NULL, o.profit, 0), 0)) AS profit,
-                    SUM(IF(o.status in ('Khớp entry'), IF(o.timeSL IS NULL AND o.timeTP IS NULL, o.profit, 0), 0)) AS unrealizedProfit,
-                    SUM(IF(o.status in ('Khớp TP', 'Khớp SL'), IF(o.timeSL IS NOT NULL OR o.timeTP IS NOT NULL, (o.entry + IF(o.timeSL IS NOT NULL, o.sl, o.tp)) / 2 * o.volume, 0), 0)) AS volumeClosed,
-                    SUM(IF(o.status in ('Khớp entry'), IF(o.timeSL IS NULL AND o.timeTP IS NULL, o.entry * o.volume, 0), 0)) AS volumeOpening,
-                    COUNT(IF(o.status in ('Khớp TP', 'Khớp SL'), IF(o.profit >= 0 AND ( o.timeSL IS NOT NULL OR o.timeTP IS NOT NULL), 1, NULL), NULL)) / COUNT(IF(o.status in ('Khớp TP', 'Khớp SL'), 1, NULL)) * 100 AS winrate
-                FROM Bot b
-                JOIN User u ON u.id = b.userID
-                LEFT JOIN Orders o ON o.botID = b.id
-                WHERE (u.id = ? OR ? = ?)
-                GROUP BY b.id
-                ORDER BY b.enableRealOrder DESC, b.botName ASC;`;
-        const data = await mysql.query(sql, [userData.id, userData.role, ROLE.ADMIN, ORDER_STATUS.MATCH_ENTRY, ORDER_STATUS.MATCH_TP, ORDER_STATUS.MATCH_SL]);
-        cache = JSON.stringify(data);
-        await redis.set(key, cache, 1800);
-    }
-    const data: Array<any> = JSON.parse(cache);
+    const data = (await util.getBotInfo()).filter(item => item.id == userData.id || userData.role == ROLE.ADMIN);
 
     const accountInfo: { [key: string]: any } = {};
     const openOrders: { [key: string]: any[] } = {};
