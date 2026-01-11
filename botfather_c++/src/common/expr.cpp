@@ -213,6 +213,8 @@ any Expr::visitHigh(ExprParser::HighContext *ctx)
 any Expr::visitLow(ExprParser::LowContext *ctx)
 {
     int shift = (ctx->children.size() == 4) ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str()) : 0;
+    EMIT_NUMBER(shift);
+    EMIT_OP(LOW);
 
     return {};
 }
@@ -1694,7 +1696,7 @@ static double eval(const std::vector<Instr> &instr, int length,
                 return 0.0;
 
             vector<double> v = vectorDoublePool.acquire();
-            v.resize(length + 1);
+            v.resize(length);
             for (int i = 0; i < length; i++)
             {
                 v[i] = (high[i] - low[i]);
@@ -1720,7 +1722,7 @@ static double eval(const std::vector<Instr> &instr, int length,
                 return 0.0;
 
             vector<double> v = vectorDoublePool.acquire();
-            v.resize(length + 1);
+            v.resize(length);
             for (int i = 0; i < length; i++)
             {
                 v[i] = (high[i] - low[i]) / open[i] * 100.0;
