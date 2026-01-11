@@ -53,7 +53,7 @@ export async function getBotInfo(userData: UserTokenInfo) {
             }
         }
     }
-    if (promiseList.length >= 10) {
+    if (promiseList.length > 0) {
         await Promise.all(promiseList);
     }
     for (const item of data) {
