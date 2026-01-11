@@ -17,7 +17,7 @@ protected:
     shared_ptr<vector<shared_ptr<Bot>>> botList;
     boost::unordered_flat_map<long long, shared_ptr<Bot>> bots;
     boost::unordered_flat_set<long long> visited;
-    boost::unordered_flat_map<long long, any> cachedExpr;
+    boost::unordered_flat_map<long long, double> cachedExpr;
     ExchangeInfo exchangeInfo;
     double fundingRate;
     boost::unordered_flat_map<long long, vector<double>> cachedIndicator;
@@ -30,7 +30,7 @@ protected:
     int shift;
 
     string calculateSub(string &expr);
-    any calculate(string &expr);
+    double calculate(string &expr);
     bool adjustParam(NodeData &data);
 
     void dfs_handleLogic(Route &route, const shared_ptr<Bot> &bot);

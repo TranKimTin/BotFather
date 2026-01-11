@@ -10,46 +10,110 @@
 #include <CommonTokenStream.h>
 using namespace antlr4;
 
-struct cachedIndicatorParseTree
+enum OP_TYPE
 {
-    unique_ptr<ANTLRInputStream> input;
-    unique_ptr<ExprLexer> lexer;
-    unique_ptr<CommonTokenStream> tokens;
-    unique_ptr<ExprParser> parser;
-    antlr4::tree::ParseTree *tree = nullptr;
+    NUMBER,
+    GT,
+    GE,
+    LT,
+    LE,
+    EQ,
+    NEQ,
+    ASSIGN,
+    NEG,
+    MUL,
+    DIV,
+    ADD,
+    SUB,
+    ABS,
+    HOUR,
+    MINUTE,
+    FUNDING,
+    MIN,
+    MAX,
+    OPEN,
+    HIGH,
+    LOW,
+    CLOSE,
+    VOLUME,
+    CHANGE,
+    CHANGE_P,
+    AMPL,
+    AMPL_P,
+    UPPER_SHADOW,
+    UPPER_SHADOW_P,
+    LOWER_SHADOW,
+    LOWER_SHADOW_P,
+    RSI,
+    RSI_SLOPE,
+    MA,
+    EMA,
+    MACD_VALUE,
+    MACD_SIGNAL,
+    MACD_HISTOGRAM,
+    BB_UPPER,
+    BB_MIDDLE,
+    BB_LOWER,
+    MACD_N_DINH,
+    MACD_SLOPE,
+    AVG_OPEN,
+    AVG_HIGH,
+    AVG_LOW,
+    AVG_CLOSE,
+    AVG_AMPL,
+    AVG_AMPL_P,
+    MIN_OPEN,
+    MIN_HIGH,
+    MIN_LOW,
+    MIN_CLOSE,
+    MIN_CHANGE,
+    MIN_CHANGE_P,
+    MIN_AMPL,
+    MIN_AMPL_P,
+    MAX_OPEN,
+    MAX_HIGH,
+    MAX_LOW,
+    MAX_CLOSE,
+    MAX_CHANGE,
+    MAX_CHANGE_P,
+    MAX_AMPL,
+    MAX_AMPL_P,
+    MIN_RSI,
+    MAX_RSI,
+    AVG_RSI,
+    MIN_MACD_VALUE,
+    MAX_MACD_VALUE,
+    AVG_MACD_VALUE,
+    MIN_MACD_SIGNAL,
+    MAX_MACD_SIGNAL,
+    AVG_MACD_SIGNAL,
+    MIN_MACD_HISTOGRAM,
+    MAX_MACD_HISTOGRAM,
+    AVG_MACD_HISTOGRAM,
+    RANDOM,
+    BULLISH_ENGULFING,
+    BEARISH_ENGULFING,
+    BULLISH_HAMMER,
+    BEARISH_HAMMER,
+    DOJI
 };
+struct Instr
+{
+    OP_TYPE type;
+    double value;
+};
+
 class Expr : public ExprBaseVisitor
 {
 private:
-    string broker;
-    string symbol;
-    string timeframe;
-    int length;
-    const double *open;
-    const double *high;
-    const double *low;
-    const double *close;
-    const double *volume;
-    long long *startTime;
-    double fundingRate;
-    boost::unordered_flat_map<long long, vector<double>> *cachedIndicator;
-    boost::unordered_flat_map<long long, unique_ptr<SparseTable>> *cachedMinMax;
-    int offset;
+    vector<Instr> *instr;
 
 public:
-    Expr(const string &broker, const string &symbol, const string &timeframe, int length,
-         const double *open, const double *high, const double *low, const double *close, const double *volume,
-         long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, unique_ptr<SparseTable>> *cachedMinMax, int offset)
-        : broker(broker), symbol(symbol), timeframe(timeframe), length(length), open(open), high(high), low(low), close(close), volume(volume), startTime(startTime), fundingRate(fundingRate), cachedIndicator(cachedIndicator), cachedMinMax(cachedMinMax), offset(offset)
+    Expr(vector<Instr> *instr = NULL) : instr(instr)
     {
     }
 
     // any visit(antlr4::tree::ParseTree *tree) override;
-
-    vector<double> &getRSI(int period);
-    vector<double> &getMACD(int fastPeriod, int slowPeriod, int signalPeriod);
-    double getAVG(const double arr[], int l, int r, long long key);
-
     any visitNumber(ExprParser::NumberContext *ctx) override;
     any visitFloat(ExprParser::FloatContext *ctx) override;
     any visitInt(ExprParser::IntContext *ctx) override;
@@ -147,7 +211,7 @@ public:
     any visitDoji(ExprParser::DojiContext *ctx) override;
 };
 
-any calculateExpr(const string &inputText, const string &broker, const string &symbol, const string &timeframe, int length,
+double calculateExpr(const string &inputText, const string &broker, const string &symbol, const string &timeframe, int length,
                   const double *open, const double *high, const double *low, const double *close,
                   const double *volume, long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, unique_ptr<SparseTable>> *cachedMinMax, int shift);
 
@@ -155,4 +219,4 @@ string calculateSubExpr(string &expr, const string &broker, const string &symbol
                         const double *open, const double *high, const double *low, const double *close,
                         const double *volume, long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, unique_ptr<SparseTable>> *cachedMinMax, int shift);
 
-void cacheParseTree(const string &key);
+void cacheInstr(const string &key);
