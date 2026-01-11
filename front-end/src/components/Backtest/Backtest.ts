@@ -123,10 +123,14 @@ export default defineComponent({
                             r_lose.value++;
                         }
                     }
-                    console.log(newOrder);
+                    // console.log(newOrder);
                 }
-                else if(mess.startsWith('Progress')) {
+                else if (mess.startsWith('Progress')) {
                     r_progress.value = +mess.split('_')[1];
+                    console.log(mess);
+                }
+                else {
+                    console.log(mess);
                 }
             };
 

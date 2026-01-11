@@ -425,7 +425,7 @@ int main(int argc, char *argv[])
                     {
                         continue;
                     }
-                    LOGE("File not found {}", filePath);
+                    LOGI("File not found {}", filePath);
                     break;
                 }
                 size_t size = file.tellg();
@@ -433,7 +433,7 @@ int main(int argc, char *argv[])
 
                 if (size % sizeof(Rate) != 0)
                 {
-                    LOGE("File size not aligned with Rate {}", filePath);
+                    LOGI("File size not aligned with Rate {}", filePath);
                     return;
                 }
 
