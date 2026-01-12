@@ -188,6 +188,7 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
 
             if (order.orderType == NODE_TYPE::BUY_MARKET)
             {
+                order.matchTime = rate.startTime;
                 order.status = ORDER_STATUS::MATCH_ENTRY;
 
                 order.priority = -order.tp;
@@ -198,6 +199,7 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
             }
             else if (order.orderType == NODE_TYPE::SELL_MARKET)
             {
+                order.matchTime = rate.startTime;
                 order.status = ORDER_STATUS::MATCH_ENTRY;
 
                 order.priority = order.tp;
@@ -232,6 +234,7 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
                 continue;
             }
 
+            order.matchTime = rate.startTime;
             order.status = ORDER_STATUS::MATCH_ENTRY;
 
             order.priority = -order.tp;
@@ -253,6 +256,7 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
                 continue;
             }
 
+            order.matchTime = rate.startTime;
             order.status = ORDER_STATUS::MATCH_ENTRY;
 
             order.priority = order.tp;
@@ -284,6 +288,10 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
         {
             BacktestOrder order = pendingTPBuy.top();
             pendingTPBuy.pop();
+            if (order.orderType != NODE_TYPE::BUY_MARKET && order.matchTime == rate.startTime)
+            {
+                continue;
+            }
             if (orderClosed[order.id])
             {
                 continue;
@@ -318,6 +326,10 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
         {
             BacktestOrder order = pendingTPSell.top();
             pendingTPSell.pop();
+            if (order.orderType != NODE_TYPE::SELL_MARKET && order.matchTime == rate.startTime)
+            {
+                continue;
+            }
             if (orderClosed[order.id])
             {
                 continue;
