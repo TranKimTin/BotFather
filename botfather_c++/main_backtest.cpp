@@ -182,13 +182,15 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
     for (; i < data1m.size(); i++)
     {
         Rate &rate = data1m[i];
+        double lastClose = (i > 0 ? data1m[i - 1].close : data1m[i].open);
+        bool isMakerOrder = false;
         while (j < orderList.size() && orderList[j].createdTime <= rate.startTime)
         {
             BacktestOrder &order = orderList[j];
 
             if (order.orderType == NODE_TYPE::BUY_MARKET)
             {
-                order.matchTime = rate.startTime;
+                isMakerOrder = true;
                 order.status = ORDER_STATUS::MATCH_ENTRY;
 
                 order.priority = -order.tp;
@@ -199,7 +201,7 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
             }
             else if (order.orderType == NODE_TYPE::SELL_MARKET)
             {
-                order.matchTime = rate.startTime;
+                isMakerOrder = true;
                 order.status = ORDER_STATUS::MATCH_ENTRY;
 
                 order.priority = order.tp;
@@ -234,8 +236,12 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
                 continue;
             }
 
-            order.matchTime = rate.startTime;
             order.status = ORDER_STATUS::MATCH_ENTRY;
+
+            if (rate.startTime == order.createdTime && order.entry == lastClose)
+            {
+                isMakerOrder = true;
+            }
 
             order.priority = -order.tp;
             pendingTPBuy.push(order);
@@ -256,8 +262,12 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
                 continue;
             }
 
-            order.matchTime = rate.startTime;
             order.status = ORDER_STATUS::MATCH_ENTRY;
+
+            if (rate.startTime == order.createdTime && order.entry == lastClose)
+            {
+                isMakerOrder = true;
+            }
 
             order.priority = order.tp;
             pendingTPSell.push(order);
@@ -270,6 +280,10 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
         {
             BacktestOrder order = pendingSLBuy.top();
             pendingSLBuy.pop();
+            if (!isMakerOrder && order.createdTime == rate.startTime)
+            {
+                continue;
+            }
             if (orderClosed[order.id])
             {
                 continue;
@@ -288,7 +302,7 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
         {
             BacktestOrder order = pendingTPBuy.top();
             pendingTPBuy.pop();
-            if (order.orderType != NODE_TYPE::BUY_MARKET && order.matchTime == rate.startTime)
+            if (!isMakerOrder && order.createdTime == rate.startTime)
             {
                 continue;
             }
@@ -310,6 +324,10 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
         {
             BacktestOrder order = pendingSLSell.top();
             pendingSLSell.pop();
+            if (!isMakerOrder && order.createdTime == rate.startTime)
+            {
+                continue;
+            }
             if (orderClosed[order.id])
             {
                 continue;
@@ -326,7 +344,7 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
         {
             BacktestOrder order = pendingTPSell.top();
             pendingTPSell.pop();
-            if (order.orderType != NODE_TYPE::SELL_MARKET && order.matchTime == rate.startTime)
+            if (!isMakerOrder && order.createdTime == rate.startTime)
             {
                 continue;
             }
