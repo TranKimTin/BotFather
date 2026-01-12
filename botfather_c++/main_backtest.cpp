@@ -13,6 +13,14 @@ tbb::task_group task;
 
 thread_local RateDataV rateData;
 thread_local WorkerBacktest workerBacktest;
+thread_local vector<bool> orderClosed;
+thread_local priority_queue<BacktestOrder> pendingBuy;
+thread_local priority_queue<BacktestOrder> pendingSell;
+thread_local priority_queue<BacktestOrder> pendingTPBuy;
+thread_local priority_queue<BacktestOrder> pendingSLBuy;
+thread_local priority_queue<BacktestOrder> pendingTPSell;
+thread_local priority_queue<BacktestOrder> pendingSLSell;
+thread_local int maxID;
 string currentTF = "1m";
 boost::unordered_flat_map<long long, ExchangeInfo> exchangeInfo;
 atomic<int> cnt{0};
@@ -38,16 +46,104 @@ void destroy()
     spdlog::shutdown();
 }
 
-static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, vector<Rate> &data1m)
+static void handleRemainOrder(Rate rate)
 {
-    if (rateData.startTime.size() < 30 || data1m.size() < 30)
-    {
+    if (rate.close == -1)
         return;
+    vector<BacktestOrder> result;
+    while (!pendingBuy.empty())
+    {
+        BacktestOrder order = pendingBuy.top();
+        pendingBuy.pop();
+        order.profit = 0.0;
+
+        if (order.expiredTime != 0 && order.expiredTime <= rate.startTime)
+        {
+            order.status = ORDER_STATUS::CANCELED;
+            result.push_back(order);
+            continue;
+        }
+
+        result.push_back(order);
+    }
+    while (!pendingSell.empty())
+    {
+        BacktestOrder order = pendingSell.top();
+        pendingSell.pop();
+
+        order.profit = 0.0;
+        if (order.expiredTime != 0 && order.expiredTime <= rate.startTime)
+        {
+            order.status = ORDER_STATUS::CANCELED;
+            result.push_back(order);
+            continue;
+        }
+
+        result.push_back(order);
     }
 
+    while (!pendingTPBuy.empty())
+    {
+        BacktestOrder order = pendingTPBuy.top();
+        pendingTPBuy.pop();
+        if (orderClosed[order.id])
+        {
+            continue;
+        }
+
+        orderClosed[order.id] = true;
+        order.profit = (rate.close - order.entry) * order.volume;
+        result.push_back(order);
+    }
+    while (!pendingSLBuy.empty())
+    {
+        BacktestOrder order = pendingSLBuy.top();
+        pendingSLBuy.pop();
+        if (orderClosed[order.id])
+        {
+            continue;
+        }
+
+        orderClosed[order.id] = true;
+        order.profit = (rate.close - order.entry) * order.volume;
+        result.push_back(order);
+    }
+    while (!pendingTPSell.empty())
+    {
+        BacktestOrder order = pendingTPSell.top();
+        pendingTPSell.pop();
+        if (orderClosed[order.id])
+        {
+            continue;
+        }
+        orderClosed[order.id] = true;
+        order.profit = (order.entry - rate.close) * order.volume;
+        result.push_back(order);
+    }
+    while (!pendingSLSell.empty())
+    {
+        BacktestOrder order = pendingSLSell.top();
+        pendingSLSell.pop();
+        if (orderClosed[order.id])
+        {
+            continue;
+        }
+        orderClosed[order.id] = true;
+        order.profit = (order.entry - rate.close) * order.volume;
+        result.push_back(order);
+    }
+    for (BacktestOrder &order : result)
+    {
+        LOGI("NewOrder_{}_{}_{}_{}_{}_{}_{}_{}_{}_{}_{}",
+             rateData.symbol, order.orderType, order.entry, order.volume, order.tp, order.sl, order.createdTime, order.expiredTime, order.matchTime, order.profit, order.status);
+    }
+}
+
+static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, vector<Rate> &data1m)
+{
     // data1m is in ascending order
     vector<BacktestOrder> orderList;
-    workerBacktest.initData("binance_future", rateData.symbol, rateData.interval, rateData.open, rateData.high, rateData.low, rateData.close, rateData.volume, rateData.startTime, exchangeInfo[hashString(rateData.symbol)], &orderList);
+    workerBacktest.initData("binance_future", rateData.symbol, rateData.interval, rateData.open, rateData.high, rateData.low, rateData.close, rateData.volume, rateData.startTime, exchangeInfo[hashString(rateData.symbol)], &orderList, maxID);
     for (int i = rateData.startTime.size() - 30; i >= 0; i--)
     {
         if (rateData.startTime[i] < backTestStartTime)
@@ -59,24 +155,31 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
     }
     workerBacktest.release(rateData);
 
-    if (orderList.empty())
+    if (!orderList.empty())
     {
-        return;
+    }
+    maxID += orderList.size();
+    if (orderClosed.size() < maxID)
+    {
+        orderClosed.resize(maxID);
     }
 
     // orderList is in ascending order
-    vector<bool> orderClosed(orderList.size(), false);
-    priority_queue<BacktestOrder> pendingBuy;
-    priority_queue<BacktestOrder> pendingSell;
-    priority_queue<BacktestOrder> pendingTPBuy;
-    priority_queue<BacktestOrder> pendingSLBuy;
-    priority_queue<BacktestOrder> pendingTPSell;
-    priority_queue<BacktestOrder> pendingSLSell;
 
     int j = 0;
     vector<BacktestOrder> result;
 
-    for (int i = (backTestStartTime <= data1m[0].startTime ? 0 : (backTestStartTime - data1m[0].startTime) / 60000); i < data1m.size(); i++)
+    int i = (backTestStartTime <= data1m[0].startTime ? 0 : (backTestStartTime - data1m[0].startTime) / 60000);
+    while (i > 0 && data1m[i].startTime > backTestStartTime)
+    {
+        i--;
+    }
+    while (i < data1m.size() && data1m[i].startTime < backTestStartTime)
+    {
+        i++;
+    }
+
+    for (; i < data1m.size(); i++)
     {
         Rate &rate = data1m[i];
         while (j < orderList.size() && orderList[j].createdTime <= rate.startTime)
@@ -229,90 +332,6 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
         }
     }
 
-    // handle remain order
-    Rate &rate = data1m.back();
-    while (!pendingBuy.empty())
-    {
-        BacktestOrder order = pendingBuy.top();
-        pendingBuy.pop();
-        order.profit = 0.0;
-
-        if (order.expiredTime != 0 && order.expiredTime <= rate.startTime)
-        {
-            order.status = ORDER_STATUS::CANCELED;
-            result.push_back(order);
-            continue;
-        }
-
-        result.push_back(order);
-    }
-    while (!pendingSell.empty())
-    {
-        BacktestOrder order = pendingSell.top();
-        pendingSell.pop();
-
-        order.profit = 0.0;
-        if (order.expiredTime != 0 && order.expiredTime <= rate.startTime)
-        {
-            order.status = ORDER_STATUS::CANCELED;
-            result.push_back(order);
-            continue;
-        }
-
-        result.push_back(order);
-    }
-
-    while (!pendingTPBuy.empty())
-    {
-        BacktestOrder order = pendingTPBuy.top();
-        pendingTPBuy.pop();
-        if (orderClosed[order.id])
-        {
-            continue;
-        }
-
-        orderClosed[order.id] = true;
-        order.profit = (rate.close - order.entry) * order.volume;
-        result.push_back(order);
-    }
-    while (!pendingSLBuy.empty())
-    {
-        BacktestOrder order = pendingSLBuy.top();
-        pendingSLBuy.pop();
-        if (orderClosed[order.id])
-        {
-            continue;
-        }
-
-        orderClosed[order.id] = true;
-        order.profit = (rate.close - order.entry) * order.volume;
-        result.push_back(order);
-    }
-    while (!pendingTPSell.empty())
-    {
-        BacktestOrder order = pendingTPSell.top();
-        pendingTPSell.pop();
-        if (orderClosed[order.id])
-        {
-            continue;
-        }
-        orderClosed[order.id] = true;
-        order.profit = (order.entry - rate.close) * order.volume;
-        result.push_back(order);
-    }
-    while (!pendingSLSell.empty())
-    {
-        BacktestOrder order = pendingSLSell.top();
-        pendingSLSell.pop();
-        if (orderClosed[order.id])
-        {
-            continue;
-        }
-        orderClosed[order.id] = true;
-        order.profit = (order.entry - rate.close) * order.volume;
-        result.push_back(order);
-    }
-
     for (BacktestOrder &order : result)
     {
         LOGI("NewOrder_{}_{}_{}_{}_{}_{}_{}_{}_{}_{}_{}",
@@ -370,10 +389,10 @@ int main(int argc, char *argv[])
     BacktestTime from = BacktestTime(stoi(argv[3]), stoi(argv[4]));
     BacktestTime to = BacktestTime(stoi(argv[5]), stoi(argv[6]));
 #else
-    string botName = "003_05_12_2025_LongShort_G3_BA";
+    string botName = "11_1_2026_Long_M1_G9";
     string timeframe = "1m";
 
-    BacktestTime from = BacktestTime(2025, 10);
+    BacktestTime from = BacktestTime(2025, 7);
     BacktestTime to = BacktestTime(2025, 12);
 #endif
     init();
@@ -410,12 +429,22 @@ int main(int argc, char *argv[])
     {
         task.run([=]()
                  {
+            orderClosed.clear();
+            pendingBuy = priority_queue<BacktestOrder>();
+            pendingSell = priority_queue<BacktestOrder>();
+            pendingTPBuy = priority_queue<BacktestOrder>();
+            pendingSLBuy = priority_queue<BacktestOrder>();
+            pendingTPSell = priority_queue<BacktestOrder>();
+            pendingSLSell = priority_queue<BacktestOrder>();
+            maxID = 1;
             int blockMonth = 12; 
             BacktestTime fr = from;
+            Rate lastRate;
+            lastRate.close = -1;
+            rateData.symbol = symbol;
+            rateData.interval = timeframe;
             for(; fr <= to; fr = fr + blockMonth) {
                 rateData.clear();
-                rateData.symbol = symbol;
-                rateData.interval = timeframe;
                 vector<Rate> data;
 
                 for (BacktestTime t = fr - 3; t <= to && t < fr + blockMonth; t++)
@@ -446,6 +475,10 @@ int main(int argc, char *argv[])
                     file.read(reinterpret_cast<char *>(data.data() + data.size() - appendSize), size);
                     file.close();
                 }
+                if (data.empty())
+                {
+                    continue;
+                }
 
                 for (Rate &rate : data)
                 {
@@ -453,9 +486,9 @@ int main(int argc, char *argv[])
                 }
                 rateData.reverse();
                 backtest(bot, fr.toMillisecondsUTC(), data);
+                lastRate = data.back();
             }
-            
-
+            handleRemainOrder(lastRate);
 
             int oldProgress = (cnt.load() * 100) / totalSymbol;
             cnt++;
