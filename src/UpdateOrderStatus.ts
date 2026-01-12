@@ -124,6 +124,9 @@ async function handleOrder(order: Order) {
                 if (rate.high >= order.stop) {
                     order.status = ORDER_STATUS.MATCH_STOP;
                     order.timeStop = rate.startTime;
+
+                    isUpdated = true;
+                    order.lastTimeUpdated = rate.startTime;
                     continue;
                 }
             }
@@ -133,6 +136,9 @@ async function handleOrder(order: Order) {
                 if (rate.low <= order.stop) {
                     order.status = ORDER_STATUS.MATCH_STOP;
                     order.timeStop = rate.startTime;
+
+                    isUpdated = true;
+                    order.lastTimeUpdated = rate.startTime;
                     continue;
                 }
             }
@@ -145,6 +151,8 @@ async function handleOrder(order: Order) {
                     order.timeEntry = rate.startTime;
                 }
                 if (order.timeEntry == order.createdTime) {
+                    isUpdated = true;
+                    order.lastTimeUpdated = rate.startTime;
                     continue;
                 }
             }
@@ -156,6 +164,8 @@ async function handleOrder(order: Order) {
                     order.timeEntry = rate.startTime;
                 }
                 if (order.timeEntry == order.createdTime) {
+                    isUpdated = true;
+                    order.lastTimeUpdated = rate.startTime;
                     continue;
                 }
             }
