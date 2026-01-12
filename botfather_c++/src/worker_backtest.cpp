@@ -30,6 +30,13 @@ void WorkerBacktest::initData(string broker, string symbol, string timeframe, ve
 
 void WorkerBacktest::release(RateDataV &rateData)
 {
+    startTime.clear();
+    open.clear();
+    high.clear();
+    low.clear();
+    close.clear();
+    volume.clear();
+    
     rateData.startTime = move(startTime);
     rateData.open = move(open);
     rateData.high = move(high);

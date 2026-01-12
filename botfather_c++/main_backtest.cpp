@@ -410,46 +410,53 @@ int main(int argc, char *argv[])
     {
         task.run([=]()
                  {
-            rateData.clear();
-            rateData.symbol = symbol;
-            rateData.interval = timeframe;
-            vector<Rate> data;
+            int blockMonth = 12; 
+            BacktestTime fr = from;
+            for(; fr <= to; fr = fr + blockMonth) {
+                rateData.clear();
+                rateData.symbol = symbol;
+                rateData.interval = timeframe;
+                vector<Rate> data;
 
-            for (BacktestTime t = from - 3; t <= to; t++)
-            {
-                string filePath = (exeDir() / ".." / ".." / "data" / StringFormat("{}-1m-{}.bin", symbol, t.toString())).lexically_normal().c_str();
-                ifstream file(filePath, std::ios::binary | std::ios::ate);
-                if (!file)
+                for (BacktestTime t = fr - 3; t <= to && t < fr + blockMonth; t++)
                 {
-                    if (data.empty())
+                    string filePath = (exeDir() / ".." / ".." / "data" / StringFormat("{}-1m-{}.bin", symbol, t.toString())).lexically_normal().c_str();
+                    ifstream file(filePath, std::ios::binary | std::ios::ate);
+                    if (!file)
                     {
-                        continue;
+                        if (data.empty())
+                        {
+                            continue;
+                        }
+                        LOGI("File not found {}", filePath);
+                        break;
                     }
-                    LOGI("File not found {}", filePath);
-                    break;
-                }
-                size_t size = file.tellg();
-                file.seekg(0);
+                    size_t size = file.tellg();
+                    file.seekg(0);
 
-                if (size % sizeof(Rate) != 0)
+                    if (size % sizeof(Rate) != 0)
+                    {
+                        LOGI("File size not aligned with Rate {}", filePath);
+                        break;
+                    }
+
+                    int appendSize = size / sizeof(Rate);
+                    data.resize(data.size() + appendSize);
+
+                    file.read(reinterpret_cast<char *>(data.data() + data.size() - appendSize), size);
+                    file.close();
+                }
+
+                for (Rate &rate : data)
                 {
-                    LOGI("File size not aligned with Rate {}", filePath);
-                    break;
+                    mergeCandle1m(rate, symbol, timeframe, bot);
                 }
-
-                int appendSize = size / sizeof(Rate);
-                data.resize(data.size() + appendSize);
-
-                file.read(reinterpret_cast<char *>(data.data() + data.size() - appendSize), size);
-                file.close();
+                rateData.reverse();
+                backtest(bot, fr.toMillisecondsUTC(), data);
             }
+            
 
-            for (Rate &rate : data)
-            {
-                mergeCandle1m(rate, symbol, timeframe, bot);
-            }
-            rateData.reverse();
-            backtest(bot, from.toMillisecondsUTC(), data);
+
             int oldProgress = (cnt.load() * 100) / totalSymbol;
             cnt++;
             int progress = (cnt.load() * 100) / totalSymbol;
