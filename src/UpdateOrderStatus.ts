@@ -124,6 +124,7 @@ async function handleOrder(order: Order) {
                 if (rate.high >= order.stop) {
                     order.status = ORDER_STATUS.MATCH_STOP;
                     order.timeStop = rate.startTime;
+                    continue;
                 }
             }
             if (order.status === ORDER_STATUS.OPENED
@@ -132,6 +133,7 @@ async function handleOrder(order: Order) {
                 if (rate.low <= order.stop) {
                     order.status = ORDER_STATUS.MATCH_STOP;
                     order.timeStop = rate.startTime;
+                    continue;
                 }
             }
 
@@ -142,6 +144,9 @@ async function handleOrder(order: Order) {
                     order.status = ORDER_STATUS.MATCH_ENTRY;
                     order.timeEntry = rate.startTime;
                 }
+                if (order.timeEntry == order.createdTime) {
+                    continue;
+                }
             }
             if ((order.status === ORDER_STATUS.MATCH_STOP && order.orderType === NODE_TYPE.SELL_STOP_LIMIT)
                 || (order.status === ORDER_STATUS.OPENED && order.orderType === NODE_TYPE.SELL_LIMIT)) {
@@ -149,6 +154,9 @@ async function handleOrder(order: Order) {
                 if (rate.high >= order.entry) {
                     order.status = ORDER_STATUS.MATCH_ENTRY;
                     order.timeEntry = rate.startTime;
+                }
+                if (order.timeEntry == order.createdTime) {
+                    continue;
                 }
             }
 
@@ -173,10 +181,8 @@ async function handleOrder(order: Order) {
                     order.timeSL = rate.startTime;
                 }
                 else if (rate.high >= order.tp) {
-                    if (order.orderType === NODE_TYPE.BUY_MARKET || order.timeEntry != rate.startTime) {
-                        order.status = ORDER_STATUS.MATCH_TP;
-                        order.timeTP = rate.startTime;
-                    }
+                    order.status = ORDER_STATUS.MATCH_TP;
+                    order.timeTP = rate.startTime;
                 }
             }
             if (order.status === ORDER_STATUS.MATCH_ENTRY
@@ -187,10 +193,9 @@ async function handleOrder(order: Order) {
                     order.timeSL = rate.startTime;
                 }
                 else if (rate.low <= order.tp && (order.timeEntry != rate.startTime || rate.close < rate.open)) {
-                    if (order.orderType === NODE_TYPE.SELL_MARKET || order.timeEntry != rate.startTime) {
-                        order.status = ORDER_STATUS.MATCH_TP;
-                        order.timeTP = rate.startTime;
-                    }
+                    order.status = ORDER_STATUS.MATCH_TP;
+                    order.timeTP = rate.startTime;
+
                 }
             }
 
