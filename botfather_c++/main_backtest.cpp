@@ -437,7 +437,7 @@ int main(int argc, char *argv[])
             pendingTPSell = priority_queue<BacktestOrder>();
             pendingSLSell = priority_queue<BacktestOrder>();
             maxID = 1;
-            int blockMonth = 12; 
+            int blockMonth = 6; 
             BacktestTime fr = from;
             Rate lastRate;
             lastRate.close = -1;
