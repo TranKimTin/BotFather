@@ -28,7 +28,7 @@
       <div class="flex-auto">Thắng: {{ r_win }}</div>
       <div class="flex-auto">Thua: {{ r_lose }}</div>
       <div class="flex-auto">Winrate: {{ (r_win / (r_win + r_lose) * 100).toFixed(2) }} %</div>
-      
+      <div class="flex-auto">Drawdown: {{ r_drawdown.toFixed(2) }} $</div>
     </div>
 
     <div v-if="r_loading">Đang chạy backtest... {{ r_progress }}%</div>
@@ -36,10 +36,10 @@
       <BalanceChart :data="r_balanceData" />
       <div>
         <div class="flex justify-end">
-            <InputText v-model="r_globalFilter" placeholder="Tìm kiếm..." class="p-inputtext-sm w-72" />
+          <InputText v-model="r_globalFilter" placeholder="Tìm kiếm..." class="p-inputtext-sm w-72" />
         </div>
         <DataTable :value="r_orderList" class="mt-2" tableStyle="min-width: 50rem" scrollable scrollHeight="85vh"
-          :virtualScrollerOptions="{ itemSize: 50 }" :globalFilterFields="['symbol', 'status']" 
+          :virtualScrollerOptions="{ itemSize: 50 }" :globalFilterFields="['symbol', 'status']"
           :filters="{ global: { value: r_globalFilter.trim(), matchMode: 'contains' } }">
           <Column :header="`STT (${r_orderList.length})`">
             <template #body="order">
@@ -47,12 +47,11 @@
             </template>
           </Column>
           <Column sort-field="symbol" header="Coin" sortable>
-              <template #body="order">
-                  <a :href="`https://www.binance.com/en/futures/${order.data.symbol}?_from=markets`"
-                      target="_blank">
-                      {{ order.data.symbol }}
-                  </a>
-              </template>
+            <template #body="order">
+              <a :href="`https://www.binance.com/en/futures/${order.data.symbol}?_from=markets`" target="_blank">
+                {{ order.data.symbol }}
+              </a>
+            </template>
           </Column>
           <Column field="createdTime" header="Thời gian mở">
             <template #body="order">
@@ -60,11 +59,11 @@
             </template>
           </Column>
           <Column header="Loại lệnh" sortable>
-              <template #body="order">
-                  <span :style="{ color: order.data.orderType.toLowerCase().includes('buy') ? 'green' : 'red' }">
-                      {{ order.data.orderType }}
-                  </span>
-              </template>
+            <template #body="order">
+              <span :style="{ color: order.data.orderType.toLowerCase().includes('buy') ? 'green' : 'red' }">
+                {{ order.data.orderType }}
+              </span>
+            </template>
           </Column>
           <Column field="volume" header="Volume"></Column>
           <Column header="VolumeInUSD">
@@ -72,7 +71,7 @@
               {{ +(order.data.volume * order.data.entry).toFixed(2) }}
             </template>
           </Column>
-            <Column field="entry" header="Entry"></Column>
+          <Column field="entry" header="Entry"></Column>
           <Column field="tp" header="TP"></Column>
           <Column field="sl" header="SL"></Column>
 
@@ -85,8 +84,11 @@
             <template #body="order">
               <span v-if="order.data.profit != 0">
                 <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full"
-                  :class="order.data.profit >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'"><span v-if="order.data.profit >= 0">+</span>{{
-                    (parseFloat(order.data.profit.toFixed(2))).toLocaleString() }} $ </span> (<span v-if="order.data.profit >= 0">+</span>{{ +(order.data.profit / (order.data.entry * order.data.volume) * 100).toFixed(2) }} %)
+                  :class="order.data.profit >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'"><span
+                    v-if="order.data.profit >= 0">+</span>{{
+                      (parseFloat(order.data.profit.toFixed(2))).toLocaleString() }} $ </span> (<span
+                  v-if="order.data.profit >= 0">+</span>{{ +(order.data.profit / (order.data.entry * order.data.volume)
+                    * 100).toFixed(2) }} %)
               </span>
             </template>
           </Column>

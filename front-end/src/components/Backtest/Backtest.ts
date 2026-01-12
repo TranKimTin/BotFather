@@ -52,7 +52,8 @@ export default defineComponent({
         const r_balanceData = ref<Array<PropData>>([]);
         const r_win = ref<number>(0);
         const r_lose = ref<number>(0);
-        const r_progress = ref<number>(0);;
+        const r_progress = ref<number>(0);
+        const r_drawdown = ref<number>(0);
 
         onMounted(() => {
             axios.get('/getBotList').then(result => {
@@ -93,6 +94,7 @@ export default defineComponent({
             r_win.value = 0;
             r_lose.value = 0;
             r_progress.value = 0;
+            r_drawdown.value = 0;
 
             const onMessage = (mess: string) => {
                 if (mess.startsWith('NewOrder')) {
@@ -144,9 +146,13 @@ export default defineComponent({
                 sortedData.sort((a, b) => a.matchTime - b.matchTime);
                 let balance = 0;
                 let fee = 0;
+                let maxBalance = 0;
+
                 for (const order of sortedData) {
                     balance += order.profit;
                     fee += order.volume * order.entry * 0.1 / 100;
+                    maxBalance = Math.max(maxBalance, balance - fee);
+                    r_drawdown.value = Math.max(r_drawdown.value, maxBalance - (balance - fee));
                     r_balanceData.value.push({
                         timestamp: moment(order.matchTime).format('YYYY-MM-DD HH:mm'),
                         balance: balance - fee,
@@ -160,6 +166,8 @@ export default defineComponent({
                         balance += order.profit;
                         fee += order.volume * order.entry * 0.1 / 100;
                     }
+                    maxBalance = Math.max(maxBalance, balance - fee);
+                    r_drawdown.value = Math.max(r_drawdown.value, maxBalance - (balance - fee));
                     r_balanceData.value.push({
                         timestamp: moment({ year: r_endYear.value, month: r_endMonth.value - 1 }).add(1, 'month').format('YYYY-MM-DD HH:mm'),
                         balance: balance - fee,
@@ -189,6 +197,7 @@ export default defineComponent({
             r_balanceData,
             r_win,
             r_lose,
+            r_drawdown,
             months,
             years,
             runBacktest,
