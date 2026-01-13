@@ -342,6 +342,7 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
         else // nến xanh
         {
             handleOrder(lastClose, rate.startTime, result);
+            handleOrder(rate.low, rate.startTime, result);
             handleOrder(rate.high, rate.startTime, result);
             handleOrder(rate.close, rate.startTime, result);
         }
