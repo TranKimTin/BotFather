@@ -5,7 +5,7 @@
 void SparseTable::init(const double *a, int length)
 {
     n = length;
-    max_log = log2(n) + 1;
+    max_log = 32 - __builtin_clz(n);
 
     log2s.resize(n + 1);
     log2s[1] = 0;
@@ -21,14 +21,19 @@ void SparseTable::init(const double *a, int length)
         st_max[idx(i, 0)] = a[i];
     }
 
-    for (int j = 1; (1 << j) <= n; ++j)
+    for (int j = 1, len = 2; len <= n; ++j, len <<= 1)
     {
-        for (int i = 0; i + (1 << j) <= n; ++i)
+        int half = len >> 1;
+        int cur = j * n;
+        int prev = (j - 1) * n;
+
+        for (int i = 0; i + len <= n; ++i)
         {
-            st_min[idx(i, j)] = min(st_min[idx(i, j - 1)],
-                                    st_min[idx(i + (1 << (j - 1)), j - 1)]);
-            st_max[idx(i, j)] = max(st_max[idx(i, j - 1)],
-                                    st_max[idx(i + (1 << (j - 1)), j - 1)]);
+            st_min[cur + i] =
+                std::min(st_min[prev + i], st_min[prev + i + half]);
+
+            st_max[cur + i] =
+                std::max(st_max[prev + i], st_max[prev + i + half]);
         }
     }
 }

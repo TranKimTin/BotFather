@@ -12,7 +12,7 @@ private:
     int n;
     int max_log;
 
-    inline int idx(int i, int j) const { return i * max_log + j; }
+    inline int idx(int i, int j) const { return j * n + i; }
 
 public:
     SparseTable() = default;                // Cho phép tạo qua pool
