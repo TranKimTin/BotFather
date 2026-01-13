@@ -114,6 +114,7 @@ async function handleOrder(order: Order) {
             .then(data => data.reverse()); //time tang dan
 
         let isUpdated: boolean = false;
+        let lastClose = 0;
         for (const rate of data) {
             if (!rate.isFinal) break;
             if ([ORDER_STATUS.CANCELED, ORDER_STATUS.MATCH_TP, ORDER_STATUS.MATCH_SL].includes(order.status)) break;
@@ -202,15 +203,18 @@ async function handleOrder(order: Order) {
             }
 
             if (rate.open > rate.close) {
+                handleOrder(lastClose || rate.open, rate.startTime);
                 handleOrder(rate.high, rate.startTime);
                 handleOrder(rate.low, rate.startTime);
                 handleOrder(rate.close, rate.startTime);
             }
             else {
+                handleOrder(lastClose || rate.open, rate.startTime);
                 handleOrder(rate.low, rate.startTime);
                 handleOrder(rate.high, rate.startTime);
                 handleOrder(rate.close, rate.startTime);
             }
+            lastClose = rate.close;
 
             //profit, unrealized
             if ([NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_STOP_LIMIT, NODE_TYPE.BUY_STOP_MARKET].includes(order.orderType)) {
