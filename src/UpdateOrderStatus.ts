@@ -204,13 +204,17 @@ async function handleOrder(order: Order) {
             }
 
             if (rate.open > rate.close) {
-                handleOrder(lastClose, rate.startTime);
+                if (lastClose >= rate.low && lastClose <= rate.high) {
+                    handleOrder(lastClose, rate.startTime);
+                }
                 handleOrder(rate.high, rate.startTime);
                 handleOrder(rate.low, rate.startTime);
                 handleOrder(rate.close, rate.startTime);
             }
             else {
-                handleOrder(lastClose, rate.startTime);
+                if (lastClose >= rate.low && lastClose <= rate.high) {
+                    handleOrder(lastClose, rate.startTime);
+                }
                 handleOrder(rate.low, rate.startTime);
                 handleOrder(rate.high, rate.startTime);
                 handleOrder(rate.close, rate.startTime);

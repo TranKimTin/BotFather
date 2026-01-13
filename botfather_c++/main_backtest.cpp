@@ -334,14 +334,20 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
         double lastClose = (i > 0 ? data1m[i - 1].close : data1m[i].open);
         if (rate.open > rate.close) // nến đỏ
         {
-            handleOrder(lastClose, rate.startTime, result);
+            if (lastClose >= rate.low && lastClose <= rate.high)
+            {
+                handleOrder(lastClose, rate.startTime, result);
+            }
             handleOrder(rate.high, rate.startTime, result);
             handleOrder(rate.low, rate.startTime, result);
             handleOrder(rate.close, rate.startTime, result);
         }
         else // nến xanh
         {
-            handleOrder(lastClose, rate.startTime, result);
+            if (lastClose >= rate.low && lastClose <= rate.high)
+            {
+                handleOrder(lastClose, rate.startTime, result);
+            }
             handleOrder(rate.low, rate.startTime, result);
             handleOrder(rate.high, rate.startTime, result);
             handleOrder(rate.close, rate.startTime, result);
