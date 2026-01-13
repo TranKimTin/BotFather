@@ -1729,7 +1729,7 @@ static double eval(const std::vector<Instr> &instr, int length,
             if (from < 0 || to >= length)
                 return 0.0;
 
-            if (cachedIndicator->find(ID_AVG_AMPL) == cachedIndicator->end())
+            if (cachedIndicator->find(ID_AVG_AMPL_P) == cachedIndicator->end())
             {
                 vector<double> v = vectorDoublePool.acquire();
                 v.resize(length);
