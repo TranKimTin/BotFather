@@ -1695,15 +1695,23 @@ static double eval(const std::vector<Instr> &instr, int length,
             if (from < 0 || to >= length)
                 return 0.0;
 
-            vector<double> v = vectorDoublePool.acquire();
-            v.resize(length);
-            for (int i = 0; i < length; i++)
+            if (cachedIndicator->find(ID_AVG_AMPL) == cachedIndicator->end())
             {
-                v[i] = (high[i] - low[i]);
+                vector<double> v = vectorDoublePool.acquire();
+                v.resize(length);
+                for (int i = 0; i < length; i++)
+                {
+                    v[i] = (high[i] - low[i]);
+                }
+                double result = getAVG(v.data(), from, to, v.size(), ID_AVG_AMPL, cachedIndicator);
+                vectorDoublePool.release(v);
+                PUSH(result);
             }
-            double result = getAVG(v.data(), from, to, length, ID_AVG_AMPL, cachedIndicator);
-            vectorDoublePool.release(v);
-            PUSH(result);
+            else
+            {
+                double result = getAVG(NULL, from, to, length, ID_AVG_AMPL, cachedIndicator);
+                PUSH(result);
+            }
             break;
         }
 
@@ -1721,15 +1729,23 @@ static double eval(const std::vector<Instr> &instr, int length,
             if (from < 0 || to >= length)
                 return 0.0;
 
-            vector<double> v = vectorDoublePool.acquire();
-            v.resize(length);
-            for (int i = 0; i < length; i++)
+            if (cachedIndicator->find(ID_AVG_AMPL) == cachedIndicator->end())
             {
-                v[i] = (high[i] - low[i]) / open[i] * 100.0;
+                vector<double> v = vectorDoublePool.acquire();
+                v.resize(length);
+                for (int i = 0; i < length; i++)
+                {
+                    v[i] = (high[i] - low[i]) / open[i] * 100.0;
+                }
+                double result = getAVG(v.data(), from, to, v.size(), ID_AVG_AMPL_P, cachedIndicator);
+                vectorDoublePool.release(v);
+                PUSH(result);
             }
-            double result = getAVG(v.data(), from, to, length, ID_AVG_AMPL_P, cachedIndicator);
-            vectorDoublePool.release(v);
-            PUSH(result);
+            else
+            {
+                double result = getAVG(NULL, from, to, length, ID_AVG_AMPL_P, cachedIndicator);
+                PUSH(result);
+            }
             break;
         }
 
