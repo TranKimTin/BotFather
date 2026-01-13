@@ -181,14 +181,15 @@ async function handleOrder(order: Order) {
                 if (order.status === ORDER_STATUS.MATCH_ENTRY
                     && [NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(order.orderType)) {
                     //handle TP SL SELL
-                    if (price >= order.sl) {
-                        order.status = ORDER_STATUS.MATCH_SL;
-                        order.timeSL = startTime;
-                    }
-                    else if (price <= order.tp) {
+                    if (price <= order.tp) {
                         order.status = ORDER_STATUS.MATCH_TP;
                         order.timeTP = startTime;
-
+                    }
+                    else {
+                        if (price >= order.sl) {
+                            order.status = ORDER_STATUS.MATCH_SL;
+                            order.timeSL = startTime;
+                        }
                     }
                 }
 

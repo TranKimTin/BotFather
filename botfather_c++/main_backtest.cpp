@@ -220,22 +220,6 @@ static void handleOrder(double price, long long startTime, vector<BacktestOrder>
         result.push_back(order);
     }
 
-    while (!pendingSLSell.empty() && pendingSLSell.top().sl <= price)
-    {
-        BacktestOrder order = pendingSLSell.top();
-        pendingSLSell.pop();
-        if (orderClosed[order.id])
-        {
-            continue;
-        }
-        orderClosed[order.id] = true;
-
-        order.status = ORDER_STATUS::MATCH_SL;
-        order.matchTime = startTime;
-        order.profit = (order.entry - order.sl) * order.volume;
-
-        result.push_back(order);
-    }
     while (!pendingTPSell.empty() && pendingTPSell.top().tp >= price)
     {
         BacktestOrder order = pendingTPSell.top();
@@ -249,6 +233,22 @@ static void handleOrder(double price, long long startTime, vector<BacktestOrder>
         order.status = ORDER_STATUS::MATCH_TP;
         order.matchTime = startTime;
         order.profit = (order.entry - order.tp) * order.volume;
+
+        result.push_back(order);
+    }
+    while (!pendingSLSell.empty() && pendingSLSell.top().sl <= price)
+    {
+        BacktestOrder order = pendingSLSell.top();
+        pendingSLSell.pop();
+        if (orderClosed[order.id])
+        {
+            continue;
+        }
+        orderClosed[order.id] = true;
+
+        order.status = ORDER_STATUS::MATCH_SL;
+        order.matchTime = startTime;
+        order.profit = (order.entry - order.sl) * order.volume;
 
         result.push_back(order);
     }
