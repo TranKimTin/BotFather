@@ -118,102 +118,97 @@ async function handleOrder(order: Order) {
             if (!rate.isFinal) break;
             if ([ORDER_STATUS.CANCELED, ORDER_STATUS.MATCH_TP, ORDER_STATUS.MATCH_SL].includes(order.status)) break;
 
-            if (order.status === ORDER_STATUS.OPENED
-                && [NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT].includes(order.orderType)) {
-                //handle stop buy
-                if (rate.high >= order.stop) {
-                    order.status = ORDER_STATUS.MATCH_STOP;
-                    order.timeStop = rate.startTime;
-
-                    isUpdated = true;
-                    order.lastTimeUpdated = rate.startTime;
-                    continue;
+            const handleOrder = (price: number, startTime: number) => {
+                if (order.status === ORDER_STATUS.OPENED
+                    && [NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT].includes(order.orderType)) {
+                    //handle stop buy
+                    if (price >= order.stop) {
+                        order.status = ORDER_STATUS.MATCH_STOP;
+                        order.timeStop = startTime;
+                    }
                 }
-            }
-            if (order.status === ORDER_STATUS.OPENED
-                && [NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(order.orderType)) {
-                //handle stop sell
-                if (rate.low <= order.stop) {
-                    order.status = ORDER_STATUS.MATCH_STOP;
-                    order.timeStop = rate.startTime;
-
-                    isUpdated = true;
-                    order.lastTimeUpdated = rate.startTime;
-                    continue;
+                if (order.status === ORDER_STATUS.OPENED
+                    && [NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(order.orderType)) {
+                    //handle stop sell
+                    if (price <= order.stop) {
+                        order.status = ORDER_STATUS.MATCH_STOP;
+                        order.timeStop = startTime;
+                    }
                 }
-            }
 
-            if ((order.status === ORDER_STATUS.MATCH_STOP && order.orderType === NODE_TYPE.BUY_STOP_LIMIT)
-                || (order.status === ORDER_STATUS.OPENED && order.orderType === NODE_TYPE.BUY_LIMIT)) {
-                //handle entry buy limit
-                if (rate.low <= order.entry) {
+                if ((order.status === ORDER_STATUS.MATCH_STOP && order.orderType === NODE_TYPE.BUY_STOP_LIMIT)
+                    || (order.status === ORDER_STATUS.OPENED && order.orderType === NODE_TYPE.BUY_LIMIT)) {
+                    //handle entry buy limit
+                    if (price <= order.entry) {
+                        order.status = ORDER_STATUS.MATCH_ENTRY;
+                        order.timeEntry = startTime;
+                    }
+                }
+                if ((order.status === ORDER_STATUS.MATCH_STOP && order.orderType === NODE_TYPE.SELL_STOP_LIMIT)
+                    || (order.status === ORDER_STATUS.OPENED && order.orderType === NODE_TYPE.SELL_LIMIT)) {
+                    //handle entry sell limit
+                    if (price >= order.entry) {
+                        order.status = ORDER_STATUS.MATCH_ENTRY;
+                        order.timeEntry = startTime;
+                    }
+                }
+
+                if ((order.status === ORDER_STATUS.MATCH_STOP && order.orderType === NODE_TYPE.BUY_STOP_MARKET)
+                    || (order.status === ORDER_STATUS.OPENED && order.orderType === NODE_TYPE.BUY_MARKET)) {
+                    //handle entry buy market
                     order.status = ORDER_STATUS.MATCH_ENTRY;
-                    order.timeEntry = rate.startTime;
+                    order.timeEntry = startTime;
                 }
-                if (order.timeEntry == order.createdTime) {
-                    isUpdated = true;
-                    order.lastTimeUpdated = rate.startTime;
-                    continue;
-                }
-            }
-            if ((order.status === ORDER_STATUS.MATCH_STOP && order.orderType === NODE_TYPE.SELL_STOP_LIMIT)
-                || (order.status === ORDER_STATUS.OPENED && order.orderType === NODE_TYPE.SELL_LIMIT)) {
-                //handle entry sell limit
-                if (rate.high >= order.entry) {
+                if ((order.status === ORDER_STATUS.MATCH_STOP && order.orderType === NODE_TYPE.SELL_STOP_MARKET)
+                    || (order.status === ORDER_STATUS.OPENED && order.orderType === NODE_TYPE.SELL_MARKET)) {
+                    //handle entry sell market
                     order.status = ORDER_STATUS.MATCH_ENTRY;
-                    order.timeEntry = rate.startTime;
+                    order.timeEntry = startTime;
                 }
-                if (order.timeEntry == order.createdTime) {
-                    isUpdated = true;
-                    order.lastTimeUpdated = rate.startTime;
-                    continue;
+
+                if (order.status === ORDER_STATUS.MATCH_ENTRY
+                    && [NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT].includes(order.orderType)) {
+                    //handle TP SL BUY
+                    if (price <= order.sl) {
+                        order.status = ORDER_STATUS.MATCH_SL;
+                        order.timeSL = startTime;
+                    }
+                    else if (price >= order.tp) {
+                        order.status = ORDER_STATUS.MATCH_TP;
+                        order.timeTP = startTime;
+                    }
+                }
+                if (order.status === ORDER_STATUS.MATCH_ENTRY
+                    && [NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(order.orderType)) {
+                    //handle TP SL SELL
+                    if (price >= order.sl) {
+                        order.status = ORDER_STATUS.MATCH_SL;
+                        order.timeSL = startTime;
+                    }
+                    else if (price <= order.tp) {
+                        order.status = ORDER_STATUS.MATCH_TP;
+                        order.timeTP = startTime;
+
+                    }
+                }
+
+                if (order.status === ORDER_STATUS.OPENED && order.expiredTime) {
+                    //handle expired time
+                    if (order.expiredTime <= startTime) {
+                        order.status = ORDER_STATUS.CANCELED;
+                    }
                 }
             }
 
-            if ((order.status === ORDER_STATUS.MATCH_STOP && order.orderType === NODE_TYPE.BUY_STOP_MARKET)
-                || (order.status === ORDER_STATUS.OPENED && order.orderType === NODE_TYPE.BUY_MARKET)) {
-                //handle entry buy market
-                order.status = ORDER_STATUS.MATCH_ENTRY;
-                order.timeEntry = rate.startTime;
+            if (rate.open > rate.close) {
+                handleOrder(rate.high, rate.startTime);
+                handleOrder(rate.low, rate.startTime);
+                handleOrder(rate.close, rate.startTime);
             }
-            if ((order.status === ORDER_STATUS.MATCH_STOP && order.orderType === NODE_TYPE.SELL_STOP_MARKET)
-                || (order.status === ORDER_STATUS.OPENED && order.orderType === NODE_TYPE.SELL_MARKET)) {
-                //handle entry sell market
-                order.status = ORDER_STATUS.MATCH_ENTRY;
-                order.timeEntry = rate.startTime;
-            }
-
-            if (order.status === ORDER_STATUS.MATCH_ENTRY
-                && [NODE_TYPE.BUY_MARKET, NODE_TYPE.BUY_LIMIT, NODE_TYPE.BUY_STOP_MARKET, NODE_TYPE.BUY_STOP_LIMIT].includes(order.orderType)) {
-                //handle TP SL BUY
-                if (rate.low <= order.sl) {
-                    order.status = ORDER_STATUS.MATCH_SL;
-                    order.timeSL = rate.startTime;
-                }
-                else if (rate.high >= order.tp) {
-                    order.status = ORDER_STATUS.MATCH_TP;
-                    order.timeTP = rate.startTime;
-                }
-            }
-            if (order.status === ORDER_STATUS.MATCH_ENTRY
-                && [NODE_TYPE.SELL_MARKET, NODE_TYPE.SELL_LIMIT, NODE_TYPE.SELL_STOP_MARKET, NODE_TYPE.SELL_STOP_LIMIT].includes(order.orderType)) {
-                //handle TP SL SELL
-                if (rate.high >= order.sl && (order.timeEntry != rate.startTime || rate.close > rate.open)) {
-                    order.status = ORDER_STATUS.MATCH_SL;
-                    order.timeSL = rate.startTime;
-                }
-                else if (rate.low <= order.tp && (order.timeEntry != rate.startTime || rate.close < rate.open)) {
-                    order.status = ORDER_STATUS.MATCH_TP;
-                    order.timeTP = rate.startTime;
-
-                }
-            }
-
-            if (order.status === ORDER_STATUS.OPENED && order.expiredTime) {
-                //handle expired time
-                if (order.expiredTime <= rate.startTime) {
-                    order.status = ORDER_STATUS.CANCELED;
-                }
+            else {
+                handleOrder(rate.low, rate.startTime);
+                handleOrder(rate.high, rate.startTime);
+                handleOrder(rate.close, rate.startTime);
             }
 
             //profit, unrealized
@@ -239,6 +234,7 @@ async function handleOrder(order: Order) {
                     order.profit = order.volume * (order.entry - order.sl);
                 }
             }
+
 
             order.lastTimeUpdated = rate.startTime;
             isUpdated = true;

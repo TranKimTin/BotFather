@@ -139,6 +139,121 @@ static void handleRemainOrder(Rate rate)
     }
 }
 
+static void handleOrder(double price, long long startTime, vector<BacktestOrder> &result)
+{
+    while (!pendingBuy.empty() && pendingBuy.top().entry >= price)
+    {
+        BacktestOrder order = pendingBuy.top();
+        pendingBuy.pop();
+
+        if (order.expiredTime != 0 && order.expiredTime <= startTime)
+        {
+            order.status = ORDER_STATUS::CANCELED;
+            order.profit = 0.0;
+            result.push_back(order);
+            continue;
+        }
+
+        order.status = ORDER_STATUS::MATCH_ENTRY;
+
+        order.priority = -order.tp;
+        pendingTPBuy.push(order);
+
+        order.priority = order.sl;
+        pendingSLBuy.push(order);
+    }
+    while (!pendingSell.empty() && pendingSell.top().entry <= price)
+    {
+        BacktestOrder order = pendingSell.top();
+        pendingSell.pop();
+
+        if (order.expiredTime != 0 && order.expiredTime <= startTime)
+        {
+            order.status = ORDER_STATUS::CANCELED;
+            order.profit = 0.0;
+            result.push_back(order);
+            continue;
+        }
+
+        order.status = ORDER_STATUS::MATCH_ENTRY;
+
+        order.priority = order.tp;
+        pendingTPSell.push(order);
+
+        order.priority = -order.sl;
+        pendingSLSell.push(order);
+    }
+
+    while (!pendingSLBuy.empty() && pendingSLBuy.top().sl >= price)
+    {
+        BacktestOrder order = pendingSLBuy.top();
+        pendingSLBuy.pop();
+        if (orderClosed[order.id])
+        {
+            continue;
+        }
+
+        orderClosed[order.id] = true;
+
+        order.status = ORDER_STATUS::MATCH_SL;
+        order.matchTime = startTime;
+        order.profit = (order.sl - order.entry) * order.volume;
+
+        result.push_back(order);
+    }
+
+    while (!pendingTPBuy.empty() && pendingTPBuy.top().tp <= price)
+    {
+        BacktestOrder order = pendingTPBuy.top();
+        pendingTPBuy.pop();
+        if (orderClosed[order.id])
+        {
+            continue;
+        }
+
+        orderClosed[order.id] = true;
+
+        order.status = ORDER_STATUS::MATCH_TP;
+        order.matchTime = startTime;
+        order.profit = (order.tp - order.entry) * order.volume;
+
+        result.push_back(order);
+    }
+
+    while (!pendingSLSell.empty() && pendingSLSell.top().sl <= price)
+    {
+        BacktestOrder order = pendingSLSell.top();
+        pendingSLSell.pop();
+        if (orderClosed[order.id])
+        {
+            continue;
+        }
+        orderClosed[order.id] = true;
+
+        order.status = ORDER_STATUS::MATCH_SL;
+        order.matchTime = startTime;
+        order.profit = (order.entry - order.sl) * order.volume;
+
+        result.push_back(order);
+    }
+    while (!pendingTPSell.empty() && pendingTPSell.top().tp >= price)
+    {
+        BacktestOrder order = pendingTPSell.top();
+        pendingTPSell.pop();
+        if (orderClosed[order.id])
+        {
+            continue;
+        }
+        orderClosed[order.id] = true;
+
+        order.status = ORDER_STATUS::MATCH_TP;
+        order.matchTime = startTime;
+        order.profit = (order.entry - order.tp) * order.volume;
+
+        result.push_back(order);
+    }
+}
+
 static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, vector<Rate> &data1m)
 {
     // data1m is in ascending order
@@ -155,9 +270,6 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
     }
     workerBacktest.release(rateData);
 
-    if (!orderList.empty())
-    {
-    }
     maxID += orderList.size();
     if (orderClosed.size() < maxID)
     {
@@ -182,7 +294,6 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
     for (; i < data1m.size(); i++)
     {
         Rate &rate = data1m[i];
-        double lastClose = (i > 0 ? data1m[i - 1].close : data1m[i].open);
         while (j < orderList.size() && orderList[j].createdTime <= rate.startTime)
         {
             BacktestOrder &order = orderList[j];
@@ -220,136 +331,17 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
             j++;
         }
 
-        while (!pendingBuy.empty() && pendingBuy.top().entry >= rate.low)
+        if (rate.open > rate.close) // nến đỏ
         {
-            BacktestOrder order = pendingBuy.top();
-            pendingBuy.pop();
-
-            if (order.expiredTime != 0 && order.expiredTime <= rate.startTime)
-            {
-                order.status = ORDER_STATUS::CANCELED;
-                order.profit = 0.0;
-                result.push_back(order);
-                continue;
-            }
-
-            order.status = ORDER_STATUS::MATCH_ENTRY;
-
-            order.priority = -order.tp;
-            pendingTPBuy.push(order);
-
-            order.priority = order.sl;
-            pendingSLBuy.push(order);
+            handleOrder(rate.high, rate.startTime, result);
+            handleOrder(rate.low, rate.startTime, result);
+            handleOrder(rate.close, rate.startTime, result);
         }
-        while (!pendingSell.empty() && pendingSell.top().entry <= rate.high)
+        else // nến xanh
         {
-            BacktestOrder order = pendingSell.top();
-            pendingSell.pop();
-
-            if (order.expiredTime != 0 && order.expiredTime <= rate.startTime)
-            {
-                order.status = ORDER_STATUS::CANCELED;
-                order.profit = 0.0;
-                result.push_back(order);
-                continue;
-            }
-
-            order.status = ORDER_STATUS::MATCH_ENTRY;
-
-            order.priority = order.tp;
-            pendingTPSell.push(order);
-
-            order.priority = -order.sl;
-            pendingSLSell.push(order);
-        }
-
-        while (!pendingSLBuy.empty() && pendingSLBuy.top().sl >= rate.low)
-        {
-            BacktestOrder order = pendingSLBuy.top();
-            pendingSLBuy.pop();
-            bool isMakerOrder = (order.orderType == NODE_TYPE::BUY_MARKET) || (order.createdTime == rate.startTime && order.entry == lastClose);
-            if (!isMakerOrder && order.createdTime == rate.startTime)
-            {
-                continue;
-            }
-            if (orderClosed[order.id])
-            {
-                continue;
-            }
-
-            orderClosed[order.id] = true;
-
-            order.status = ORDER_STATUS::MATCH_SL;
-            order.matchTime = rate.startTime;
-            order.profit = (order.sl - order.entry) * order.volume;
-
-            result.push_back(order);
-        }
-
-        while (!pendingTPBuy.empty() && pendingTPBuy.top().tp <= rate.high)
-        {
-            BacktestOrder order = pendingTPBuy.top();
-            pendingTPBuy.pop();
-            bool isMakerOrder = (order.orderType == NODE_TYPE::BUY_MARKET) || (order.createdTime == rate.startTime && order.entry == lastClose);
-            if (!isMakerOrder && order.createdTime == rate.startTime)
-            {
-                continue;
-            }
-            if (orderClosed[order.id])
-            {
-                continue;
-            }
-
-            orderClosed[order.id] = true;
-
-            order.status = ORDER_STATUS::MATCH_TP;
-            order.matchTime = rate.startTime;
-            order.profit = (order.tp - order.entry) * order.volume;
-
-            result.push_back(order);
-        }
-
-        while (!pendingSLSell.empty() && pendingSLSell.top().sl <= rate.high)
-        {
-            BacktestOrder order = pendingSLSell.top();
-            pendingSLSell.pop();
-            bool isMakerOrder = (order.orderType == NODE_TYPE::SELL_MARKET) || (order.createdTime == rate.startTime && order.entry == lastClose);
-            if (!isMakerOrder && order.createdTime == rate.startTime)
-            {
-                continue;
-            }
-            if (orderClosed[order.id])
-            {
-                continue;
-            }
-            orderClosed[order.id] = true;
-
-            order.status = ORDER_STATUS::MATCH_SL;
-            order.matchTime = rate.startTime;
-            order.profit = (order.entry - order.sl) * order.volume;
-
-            result.push_back(order);
-        }
-        while (!pendingTPSell.empty() && pendingTPSell.top().tp >= rate.low)
-        {
-            BacktestOrder order = pendingTPSell.top();
-            pendingTPSell.pop();
-            bool isMakerOrder = (order.orderType == NODE_TYPE::SELL_MARKET) || (order.createdTime == rate.startTime && order.entry == lastClose);
-            if (!isMakerOrder && order.createdTime == rate.startTime)
-            {
-                continue;
-            }
-            if (orderClosed[order.id])
-            {
-                continue;
-            }
-            orderClosed[order.id] = true;
-
-            order.status = ORDER_STATUS::MATCH_TP;
-            order.matchTime = rate.startTime;
-            order.profit = (order.entry - order.tp) * order.volume;
-
-            result.push_back(order);
+            handleOrder(rate.low, rate.startTime, result);
+            handleOrder(rate.high, rate.startTime, result);
+            handleOrder(rate.close, rate.startTime, result);
         }
     }
 
