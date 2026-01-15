@@ -300,7 +300,11 @@ export default defineComponent({
             newValue.sort((a, b) => timeframes.indexOf(a) - timeframes.indexOf(b));
         });
         watch(r_botName, (newValue) => {
-            Cookies.set("botName", newValue);
+            Cookies.set("botName", newValue, {
+                expires: 30,
+                sameSite: 'Lax',
+                secure: false
+            });
         });
 
 
@@ -652,7 +656,11 @@ export default defineComponent({
 
                 let res = await axios.post('/save', data);
                 Toast.showSuccess(`Đã lưu ${data.botName}`);
-                Cookies.set("botName", data.botName);
+                Cookies.set("botName", data.botName, {
+                    expires: 30,
+                    sameSite: 'Lax',
+                    secure: false
+                });
             }
 
             catch (err: any) {

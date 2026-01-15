@@ -18,9 +18,17 @@ export default defineComponent({
 
             axios.post(`/login`, { email, password }).then(response => {
                 let token = response.token;
-                Cookies.set("token", token);
+                Cookies.set("token", token, {
+                    expires: 30,
+                    sameSite: 'Lax',
+                    secure: false
+                });
                 let user = jwtDecode(token);
-                Cookies.set('user', JSON.stringify(user));
+                Cookies.set('user', JSON.stringify(user), {
+                    expires: 30,
+                    sameSite: 'Lax',
+                    secure: false
+                });
                 router.push('/');
             });
         }
