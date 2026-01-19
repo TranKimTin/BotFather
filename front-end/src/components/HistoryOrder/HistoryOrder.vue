@@ -32,9 +32,6 @@
                     +(r_gain + r_loss + r_unrealizedGain + r_unrealizedLoss).toFixed(2) }} $</strong>
         </div>
         <div class="flex-auto">
-            Vốn tối thiểu: <strong> {{ r_minBalanceRequired }} $ </strong> (bẩy x1)
-        </div>
-        <div class="flex-auto">
             Drawdown: <span v-if="r_maxDD > 0">-</span> {{ r_maxDD }} $
         </div>
     </div>
@@ -76,13 +73,15 @@
 
     <div v-if="!r_isLoading">
         <BalanceChart :data="r_balanceData" />
+        <MarginChart :data="r_marginPropData" />
         <div>
             <div class="flex justify-end">
                 <InputText v-model="r_globalFilter" placeholder="Tìm kiếm..." class="p-inputtext-sm w-72" />
             </div>
             <DataTable :value="r_orderList" :globalFilterFields="['symbol', 'status']"
-                :filters="{ global: { value: r_globalFilter.trim(), matchMode: 'contains' } }" tableStyle="min-width: 50rem"
-                scrollable scrollHeight="85vh" :virtualScrollerOptions="{ itemSize: 50 }" stripedRows>
+                :filters="{ global: { value: r_globalFilter.trim(), matchMode: 'contains' } }"
+                tableStyle="min-width: 50rem" scrollable scrollHeight="85vh" :virtualScrollerOptions="{ itemSize: 50 }"
+                stripedRows>
                 <Column :header="`STT (${r_orderList.length})`">
                     <template #body="order">
                         {{ order.index + 1 }}

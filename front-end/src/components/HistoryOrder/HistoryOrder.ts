@@ -11,6 +11,7 @@ import * as Toast from '../../toast/toast';
 import Select from 'primevue/select';
 import moment from 'moment';
 import ProgressSpinner from 'primevue/progressspinner';
+import MarginChart from './MarginChart.vue';
 
 interface Order {
     id: number,
@@ -60,38 +61,14 @@ export interface PropData {
     balanceNoFee: number,
     balanceReal: number
 }
-
-function getMinBalanceRequired(orders: Array<Order>): number {
-    let minBalanceRequired = 0;
-    let list: Array<{ timestamp: number, volumeInUSD: number }> = [];
-    let timeMin = 0;
-
-    for (let item of orders) {
-        list.push({ timestamp: new Date(item.createdTime).getTime(), volumeInUSD: item.volumeInUSD });
-
-        if (item.timeTP || item.timeSL || item.status === ORDER_STATUS.CANCELED) {
-            list.push({ timestamp: new Date(item.timeTP || item.timeSL || item.expiredTime).getTime(), volumeInUSD: -item.volumeInUSD });
-        }
-    }
-
-    list.sort((a, b) => a.timestamp - b.timestamp);
-
-    let currentBalance = 0;
-    for (let item of list) {
-        currentBalance += item.volumeInUSD;
-        if (minBalanceRequired < currentBalance) {
-            timeMin = item.timestamp;
-            minBalanceRequired = currentBalance;
-        }
-    }
-
-    console.log('time min: ', moment(timeMin).format('YYYY-MM-DD HH:mm'), ' min balance: ', minBalanceRequired);
-
-    return minBalanceRequired * 1.1;
+export interface MarginPropData {
+    createdTime: number,
+    matchTime: number,
+    volume: number
 }
 
 export default defineComponent({
-    components: { DataTable, Column, MultiSelect, BalanceChart, Select, InputText, ProgressSpinner },
+    components: { DataTable, Column, MultiSelect, BalanceChart, Select, InputText, ProgressSpinner, MarginChart },
     setup() {
         const route = useRoute();
         const router = useRouter();
@@ -118,11 +95,11 @@ export default defineComponent({
         const r_accountMargin = ref<number>(0);
         const r_AccountUnrealizedPnL = ref<number>(0);
         const r_globalFilter = ref<string>("");
-        const r_minBalanceRequired = ref<number>(0);
         const r_volumeRealOpening = ref<number>(0);
 
         const r_botNameList = ref<Array<string>>([]);
         const r_botName = ref<string>(botName);
+        const r_marginPropData = ref<Array<MarginPropData>>([]);
 
         let firstLoad = true;
 
@@ -197,7 +174,6 @@ export default defineComponent({
                     let lastTimeUpdated: string = '';
                     let idxTradeReal = 0;
                     let balanceReal = 0;
-                    let minBalanceRequired = getMinBalanceRequired(orders);
                     let volumeRealOpenning = 0;
 
                     if (accountInfo) {
@@ -298,6 +274,12 @@ export default defineComponent({
 
                     console.log({ gain, feeGain, loss, feeLoss, unrealizedGain, unrealizedLoss, cntGain, cntLoss, cntOpening })
 
+                    r_marginPropData.value = orders.map(item => ({
+                        createdTime: new Date(item.createdTime).getTime(),
+                        matchTime: new Date(item.timeTP || item.timeSL || (item.status == ORDER_STATUS.CANCELED ? item.expiredTime : 0) || new Date().getTime() + 3600000).getTime(),
+                        volume: item.volumeInUSD
+                    }));
+
                     r_orderList.value = orders;
                     r_gain.value = parseFloat((gain - feeGain).toFixed(2));
                     r_loss.value = parseFloat((loss - feeLoss).toFixed(2));
@@ -310,7 +292,6 @@ export default defineComponent({
                     r_isLoading.value = false;
                     r_balanceData.value = balanceData;
                     r_tradereal_profit.value = balanceReal;
-                    r_minBalanceRequired.value = Math.round(minBalanceRequired);
                     r_volumeRealOpening.value = Math.round(volumeRealOpenning);
 
                     if (tradeReal.length > 0) {
@@ -409,8 +390,8 @@ export default defineComponent({
             r_AccountUnrealizedPnL,
             r_tradereal_profit,
             r_globalFilter,
-            r_minBalanceRequired,
             r_volumeRealOpening,
+            r_marginPropData,
             timeframes,
             brokers,
             clearHistory

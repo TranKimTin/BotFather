@@ -34,6 +34,7 @@
     <div v-if="r_loading">Đang chạy backtest... {{ r_progress }}%</div>
     <div v-if="!r_loading">
       <BalanceChart :data="r_balanceData" />
+      <MarginChart :data="r_marginPropData" />
       <div>
         <div class="flex justify-end">
           <InputText v-model="r_globalFilter" placeholder="Tìm kiếm..." class="p-inputtext-sm w-72" />

@@ -9,7 +9,8 @@ import Column from 'primevue/column';
 import InputText from 'primevue/inputtext';
 import BalanceChart from "../HistoryOrder/BalanceChart.vue";
 import moment from 'moment';
-import { ORDER_STATUS } from '../HistoryOrder/HistoryOrder';
+import { type MarginPropData, ORDER_STATUS } from '../HistoryOrder/HistoryOrder';
+import MarginChart from '../HistoryOrder/MarginChart.vue';
 
 interface Order {
     orderType: string,
@@ -33,7 +34,7 @@ export interface PropData {
 }
 
 export default defineComponent({
-    components: { Select, InputNumber, Button, DataTable, Column, InputText, BalanceChart },
+    components: { Select, InputNumber, Button, DataTable, Column, InputText, BalanceChart, MarginChart },
     setup() {
         const r_botList = ref<Array<String>>([]);
         const r_botName = ref<string>('');
@@ -50,6 +51,7 @@ export default defineComponent({
         const r_loading = ref<boolean>(false);
         const r_globalFilter = ref<string>('');
         const r_balanceData = ref<Array<PropData>>([]);
+        const r_marginPropData = ref<Array<MarginPropData>>([]);
         const r_win = ref<number>(0);
         const r_lose = ref<number>(0);
         const r_progress = ref<number>(0);
@@ -90,6 +92,7 @@ export default defineComponent({
             r_profit.value = 0;
             r_orderList.value = [];
             r_balanceData.value = [];
+            r_marginPropData.value = [];
             r_loading.value = true;
             r_win.value = 0;
             r_lose.value = 0;
@@ -159,6 +162,11 @@ export default defineComponent({
                         balanceNoFee: balance,
                         balanceReal: 0
                     });
+                    r_marginPropData.value = r_orderList.value.map(item => ({
+                        createdTime: new Date(item.createdTime).getTime(),
+                        matchTime: new Date(item.matchTime || (item.status == ORDER_STATUS.CANCELED ? item.expiredTime : 0) || new Date().getTime() + 3600000).getTime(),
+                        volume: item.volume * item.entry
+                    }));
                 }
                 const remainData = r_orderList.value.filter(item => item.status === ORDER_STATUS.MATCH_ENTRY);
                 if (remainData.length > 0) {
@@ -195,6 +203,7 @@ export default defineComponent({
             r_loading,
             r_globalFilter,
             r_balanceData,
+            r_marginPropData,
             r_win,
             r_lose,
             r_drawdown,
