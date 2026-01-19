@@ -162,11 +162,6 @@ export default defineComponent({
                         balanceNoFee: balance,
                         balanceReal: 0
                     });
-                    r_marginPropData.value = r_orderList.value.map(item => ({
-                        createdTime: new Date(item.createdTime).getTime(),
-                        matchTime: new Date(item.matchTime || (item.status == ORDER_STATUS.CANCELED ? item.expiredTime : 0) || new Date().getTime() + 3600000).getTime(),
-                        volume: item.volume * item.entry
-                    }));
                 }
                 const remainData = r_orderList.value.filter(item => item.status === ORDER_STATUS.MATCH_ENTRY);
                 if (remainData.length > 0) {
@@ -184,6 +179,11 @@ export default defineComponent({
                     });
                 }
                 r_profit.value = balance - fee;
+                r_marginPropData.value = r_orderList.value.map(item => ({
+                    createdTime: new Date(item.createdTime).getTime(),
+                    matchTime: new Date(item.matchTime || (item.status == ORDER_STATUS.CANCELED ? item.expiredTime : 0) || new Date().getTime() + 3600000).getTime(),
+                    volume: item.volume * item.entry
+                }));
             };
 
             es = axios.getEventSource('/runBacktest', args, onMessage, onFinish);
