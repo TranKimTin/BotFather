@@ -25,6 +25,7 @@ string currentTF = "1m";
 boost::unordered_flat_map<long long, ExchangeInfo> exchangeInfo;
 atomic<int> cnt{0};
 int totalSymbol;
+const int blockMonth = 6;
 
 void init()
 {
@@ -361,7 +362,7 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
     }
 }
 
-static void mergeCandle1m(Rate &rate, const string &symbol, const string &timeframe, const shared_ptr<Bot> &bot)
+static void mergeCandle1m(RateDataV &rateData, Rate &rate, const string &symbol, const string &timeframe)
 {
     long long rateStartTime = getStartTime(timeframe, rate.startTime);
 
@@ -397,6 +398,54 @@ static void mergeCandle1m(Rate &rate, const string &symbol, const string &timefr
     }
 }
 
+static shared_ptr<Bot> getBotInfo(const string &botName)
+{
+    string sql = "SELECT id,botName,userID,timeframes,symbolList,route,idTelegram,apiKey,secretKey,iv,enableRealOrder,maxOpenOrderPerSymbolBot,maxOpenOrderAllSymbolBot,maxOpenOrderPerSymbolAccount,maxOpenOrderAllSymbolAccount FROM Bot WHERE botName = ?";
+    vector<any> args = {botName};
+    auto &db = MySQLConnector::getInstance();
+    vector<map<string, any>> res = db.executeQuery(sql, args);
+    if (res.size() != 1)
+    {
+        throw std::runtime_error(StringFormat("Can't not find bot {}.", botName));
+    }
+    return initBot(res[0]);
+}
+
+static vector<Rate> getData1m(const string &symbol, BacktestTime fr, BacktestTime to)
+{
+    vector<Rate> data;
+
+    for (BacktestTime t = fr - 3; t <= to && t < fr + blockMonth; t++)
+    {
+        string filePath = (exeDir() / ".." / ".." / "data" / StringFormat("{}-1m-{}.bin", symbol, t.toString())).lexically_normal().c_str();
+        ifstream file(filePath, std::ios::binary | std::ios::ate);
+        if (!file)
+        {
+            if (data.empty())
+            {
+                continue;
+            }
+            LOGI("File not found {}", filePath);
+            break;
+        }
+        size_t size = file.tellg();
+        file.seekg(0);
+
+        if (size % sizeof(Rate) != 0)
+        {
+            LOGI("File size not aligned with Rate {}", filePath);
+            break;
+        }
+
+        int appendSize = size / sizeof(Rate);
+        data.resize(data.size() + appendSize);
+
+        file.read(reinterpret_cast<char *>(data.data() + data.size() - appendSize), size);
+        file.close();
+    }
+    return move(data);
+}
+
 int main(int argc, char *argv[])
 {
 #ifndef DEBUG_LOG
@@ -424,17 +473,7 @@ int main(int argc, char *argv[])
     exchangeInfo.max_load_factor(0.5);
 
     Timer *t = new Timer(StringFormat("Backtest {} {} {} {}", botName, timeframe, from.toString(), to.toString()));
-    string sql = "SELECT id,botName,userID,timeframes,symbolList,route,idTelegram,apiKey,secretKey,iv,enableRealOrder,maxOpenOrderPerSymbolBot,maxOpenOrderAllSymbolBot,maxOpenOrderPerSymbolAccount,maxOpenOrderAllSymbolAccount FROM Bot WHERE botName = ?";
-    vector<any> args = {botName};
-    auto &db = MySQLConnector::getInstance();
-    vector<map<string, any>> res = db.executeQuery(sql, args);
-    if (res.size() != 1)
-    {
-        throw std::runtime_error(StringFormat("Can't not find bot {}.", botName));
-        return 0;
-    }
-    shared_ptr<Bot> bot = initBot(res[0]);
-    vector<shared_ptr<Bot>> botList = {bot};
+    shared_ptr<Bot> bot = getBotInfo(botName);
 
     // bot->symbolList = {{"binance_future", "CLANKERUSDT", "binance_future:CLANKERUSDT"}};
     vector<string> symbolList;
@@ -459,7 +498,6 @@ int main(int argc, char *argv[])
             pendingTPSell = priority_queue<BacktestOrder>();
             pendingSLSell = priority_queue<BacktestOrder>();
             maxID = 1;
-            int blockMonth = 6; 
             BacktestTime fr = from;
             Rate lastRate;
             lastRate.close = -1;
@@ -467,36 +505,7 @@ int main(int argc, char *argv[])
             rateData.interval = timeframe;
             for(; fr <= to; fr = fr + blockMonth) {
                 rateData.clear();
-                vector<Rate> data;
-
-                for (BacktestTime t = fr - 3; t <= to && t < fr + blockMonth; t++)
-                {
-                    string filePath = (exeDir() / ".." / ".." / "data" / StringFormat("{}-1m-{}.bin", symbol, t.toString())).lexically_normal().c_str();
-                    ifstream file(filePath, std::ios::binary | std::ios::ate);
-                    if (!file)
-                    {
-                        if (data.empty())
-                        {
-                            continue;
-                        }
-                        LOGI("File not found {}", filePath);
-                        break;
-                    }
-                    size_t size = file.tellg();
-                    file.seekg(0);
-
-                    if (size % sizeof(Rate) != 0)
-                    {
-                        LOGI("File size not aligned with Rate {}", filePath);
-                        break;
-                    }
-
-                    int appendSize = size / sizeof(Rate);
-                    data.resize(data.size() + appendSize);
-
-                    file.read(reinterpret_cast<char *>(data.data() + data.size() - appendSize), size);
-                    file.close();
-                }
+                vector<Rate> data = getData1m(symbol, fr, to);
                 if (data.empty())
                 {
                     continue;
@@ -504,7 +513,7 @@ int main(int argc, char *argv[])
 
                 for (Rate &rate : data)
                 {
-                    mergeCandle1m(rate, symbol, timeframe, bot);
+                    mergeCandle1m(rateData, rate, symbol, timeframe);
                 }
                 rateData.reverse();
                 backtest(bot, fr.toMillisecondsUTC(), data);
