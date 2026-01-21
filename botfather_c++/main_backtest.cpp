@@ -21,6 +21,7 @@ thread_local priority_queue<BacktestOrder> pendingSLBuy;
 thread_local priority_queue<BacktestOrder> pendingTPSell;
 thread_local priority_queue<BacktestOrder> pendingSLSell;
 thread_local int maxID;
+thread_local boost::unordered_flat_map<long long, RateDataV> gData;
 string currentTF = "1m";
 boost::unordered_flat_map<long long, ExchangeInfo> exchangeInfo;
 atomic<int> cnt{0};
@@ -446,6 +447,48 @@ static vector<Rate> getData1m(const string &symbol, BacktestTime fr, BacktestTim
     return move(data);
 }
 
+static void initSignalData(const string &s, shared_ptr<Bot> b, BacktestTime fr, BacktestTime to)
+{
+    gData.clear();
+    queue<pair<shared_ptr<Bot>, string>> q;
+    queue<Route *> qRoute;
+
+    q.push({b, s});
+    while (!q.empty())
+    {
+        auto [bot, symbol] = q.front();
+        q.pop();
+
+        qRoute.push(&bot->route);
+        while (!qRoute.empty())
+        {
+            Route *route = qRoute.front();
+            qRoute.pop();
+            if (route->data.type == NODE_TYPE::GET_SIGNAL)
+            {
+                string symbolSignal = (route->data.symbol == "Symbol hiện tại" ? symbol : route->data.symbol);
+                long long key = hashString(symbolSignal + "_" + route->data.timeframe);
+                if (gData.find(key) == gData.end())
+                {
+                    vector<Rate> data = getData1m(symbolSignal, fr, to);
+
+                    for (Rate &rate : data)
+                    {
+                        mergeCandle1m(gData[key], rate, symbolSignal, route->data.timeframe);
+                    }
+                    gData[key].reverse();
+                }
+                shared_ptr<Bot> botSignal = getBotInfo(route->data.botName);
+                q.push({botSignal, symbolSignal});
+            }
+            for (Route &r : route->next)
+            {
+                qRoute.push(&r);
+            }
+        }
+    }
+}
+
 int main(int argc, char *argv[])
 {
 #ifndef DEBUG_LOG
@@ -460,8 +503,8 @@ int main(int argc, char *argv[])
     BacktestTime from = BacktestTime(stoi(argv[3]), stoi(argv[4]));
     BacktestTime to = BacktestTime(stoi(argv[5]), stoi(argv[6]));
 #else
-    string botName = "11_1_2026_Long_M1_G9";
-    string timeframe = "1m";
+    string botName = "test1";
+    string timeframe = "1h";
 
     BacktestTime from = BacktestTime(2025, 7);
     BacktestTime to = BacktestTime(2025, 12);
@@ -516,6 +559,8 @@ int main(int argc, char *argv[])
                     mergeCandle1m(rateData, rate, symbol, timeframe);
                 }
                 rateData.reverse();
+
+                initSignalData(symbol, bot, fr, to);
                 backtest(bot, fr.toMillisecondsUTC(), data);
                 lastRate = data.back();
             }
