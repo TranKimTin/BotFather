@@ -22,6 +22,8 @@ thread_local priority_queue<BacktestOrder> pendingTPSell;
 thread_local priority_queue<BacktestOrder> pendingSLSell;
 thread_local int maxID;
 thread_local boost::unordered_flat_map<long long, RateDataV> gData;
+thread_local boost::unordered_flat_map<long long, shared_ptr<Bot>> bots;
+
 string currentTF = "1m";
 boost::unordered_flat_map<long long, ExchangeInfo> exchangeInfo;
 atomic<int> cnt{0};
@@ -262,6 +264,7 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
     // data1m is in ascending order
     vector<BacktestOrder> orderList;
     workerBacktest.initData("binance_future", rateData.symbol, rateData.interval, rateData.open, rateData.high, rateData.low, rateData.close, rateData.volume, rateData.startTime, exchangeInfo[hashString(rateData.symbol)], &orderList, maxID);
+    workerBacktest.setBots(bots);
     for (int i = rateData.startTime.size() - 30; i >= 0; i--)
     {
         if (rateData.startTime[i] < backTestStartTime)
@@ -402,15 +405,20 @@ static void mergeCandle1m(RateDataV &rateData, Rate &rate, const string &symbol,
 
 static shared_ptr<Bot> getBotInfo(const string &botName)
 {
-    string sql = "SELECT id,botName,userID,timeframes,symbolList,route,idTelegram,apiKey,secretKey,iv,enableRealOrder,maxOpenOrderPerSymbolBot,maxOpenOrderAllSymbolBot,maxOpenOrderPerSymbolAccount,maxOpenOrderAllSymbolAccount FROM Bot WHERE botName = ?";
-    vector<any> args = {botName};
-    auto &db = MySQLConnector::getInstance();
-    vector<map<string, any>> res = db.executeQuery(sql, args);
-    if (res.size() != 1)
+    long long key = hashString(botName);
+    if (bots.find(key) == bots.end())
     {
-        throw std::runtime_error(StringFormat("Can't not find bot {}.", botName));
+        string sql = "SELECT id,botName,userID,timeframes,symbolList,route,idTelegram,apiKey,secretKey,iv,enableRealOrder,maxOpenOrderPerSymbolBot,maxOpenOrderAllSymbolBot,maxOpenOrderPerSymbolAccount,maxOpenOrderAllSymbolAccount FROM Bot WHERE botName = ?";
+        vector<any> args = {botName};
+        auto &db = MySQLConnector::getInstance();
+        vector<map<string, any>> res = db.executeQuery(sql, args);
+        if (res.size() != 1)
+        {
+            throw std::runtime_error(StringFormat("Can't not find bot {}.", botName));
+        }
+        bots[key] = initBot(res[0]);
     }
-    return initBot(res[0]);
+    return bots[key];
 }
 
 static vector<Rate> getData1m(const string &symbol, BacktestTime fr, BacktestTime to)

@@ -32,6 +32,11 @@ void WorkerBacktest::initData(string broker, string symbol, string timeframe,
     this->cachedSignal.clear();
 }
 
+void WorkerBacktest::setBots(boost::unordered_flat_map<long long, shared_ptr<Bot>> &bots)
+{
+    this->bots = bots;
+}
+
 void WorkerBacktest::release(RateDataV &rateData)
 {
     startTime.clear();
