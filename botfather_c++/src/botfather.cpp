@@ -49,7 +49,7 @@ void test()
 
     string expr = "{1+2+3+4+5}";
     boost::unordered_flat_map<long long, vector<double>> cachedIndicator;
-    boost::unordered_flat_map<long long, unique_ptr<SparseTable>> cachedMinMax;
+    boost::unordered_flat_map<long long, shared_ptr<SparseTable>> cachedMinMax;
     int shift = 10;
 
     string res = calculateSubExpr(expr, broker, symbol, timeframe, rateData.startTime.size(), open.data(), high.data(), low.data(), close.data(),

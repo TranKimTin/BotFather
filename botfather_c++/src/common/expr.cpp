@@ -1090,7 +1090,7 @@ static double getAVG(const double arr[], int l, int r, int length, long long key
 
 static double eval(const std::vector<Instr> &instr, int length,
                    const double *open, const double *high, const double *low, const double *close, const double *volume,
-                   long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, unique_ptr<SparseTable>> *cachedMinMax, int offset)
+                   long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, shared_ptr<SparseTable>> *cachedMinMax, int offset)
 {
     double st[32];
     int sp = 0;
@@ -1421,6 +1421,7 @@ static double eval(const std::vector<Instr> &instr, int length,
             }
 
             PUSH(cached[shift]);
+            // LOGD("rsi({})={}", shift, cached[shift]);
             break;
         }
 
@@ -2852,7 +2853,7 @@ void cacheInstr(const string &inputText)
 }
 
 double calculateExpr(const string &inputText, int length, const double *open, const double *high, const double *low, const double *close,
-                     const double *volume, long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, unique_ptr<SparseTable>> *cachedMinMax, int shift)
+                     const double *volume, long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, shared_ptr<SparseTable>> *cachedMinMax, int shift)
 {
     const long long key = hashString(inputText);
     // LOGD("Calculating expr: {}", inputText);
@@ -2872,7 +2873,7 @@ double calculateExpr(const string &inputText, int length, const double *open, co
 }
 
 string calculateSubExpr(string &expr, int length, const double *open, const double *high, const double *low, const double *close,
-                        const double *volume, long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, unique_ptr<SparseTable>> *cachedMinMax, int shift)
+                        const double *volume, long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, shared_ptr<SparseTable>> *cachedMinMax, int shift)
 {
     stack<string> st;
     string s;

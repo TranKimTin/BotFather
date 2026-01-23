@@ -103,7 +103,7 @@ class SparseTablePool
 {
 public:
     // Lấy 1 SparseTable từ pool, nếu hết thì tạo mới
-    unique_ptr<SparseTable> acquire()
+    shared_ptr<SparseTable> acquire()
     {
         if (!pool.empty())
         {
@@ -111,11 +111,11 @@ public:
             pool.pop();
             return ptr;
         }
-        return make_unique<SparseTable>();
+        return make_shared<SparseTable>();
     }
 
     // Trả SparseTable về pool
-    void release(unique_ptr<SparseTable> table)
+    void release(shared_ptr<SparseTable> table)
     {
         pool.push(move(table));
     }
@@ -126,5 +126,5 @@ public:
     }
 
 private:
-    stack<unique_ptr<SparseTable>> pool;
+    stack<shared_ptr<SparseTable>> pool;
 };

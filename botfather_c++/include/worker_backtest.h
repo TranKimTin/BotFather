@@ -5,9 +5,9 @@ class WorkerBacktest : public Worker
 private:
     vector<BacktestOrder> *orderList;
     int startID;
+    boost::unordered_flat_map<long long, WorkerBacktest> *workers;
 
     bool getSignal(const string &botName, const string &symbol, const string &timeframe) override;
-    bool isPostedSignal(shared_ptr<Bot> bot) override;
 
 public:
     WorkerBacktest() : Worker()
@@ -19,5 +19,8 @@ public:
 
     bool handlerNewOrder(NodeData &node, const shared_ptr<Bot> &bot) override;
     bool sendTelegram(NodeData &node, const shared_ptr<Bot> &bot) override;
-    void setBots(boost::unordered_flat_map<long long, shared_ptr<Bot>> &bots);
+    void setBots(shared_ptr<boost::unordered_flat_map<long long, shared_ptr<Bot>>> b);
+    void setWorker(boost::unordered_flat_map<long long, WorkerBacktest> *w);
+    void setShift(int s);
+    int getShift();
 };

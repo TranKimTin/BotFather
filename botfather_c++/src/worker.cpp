@@ -39,10 +39,10 @@ void Worker::init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, st
     this->socketData = socketData;
     this->shift = 0;
 
-    this->bots.clear();
+    this->bots->clear();
     for (const auto &bot : *botList)
     {
-        this->bots[hashString(bot->botName)] = bot;
+        (*bots)[hashString(bot->botName)] = bot;
     }
 
     for (auto &pair : cachedIndicator)
@@ -667,7 +667,7 @@ bool Worker::handleLogic(NodeData &nodeData, const shared_ptr<Bot> &bot)
 
 bool Worker::getSignal(const string &botName, const string &symbol, const string &timeframe)
 {
-    shared_ptr<Bot> bot = bots[hashString(botName)];
+    shared_ptr<Bot> bot = (*bots)[hashString(botName)];
     if (!bot)
     {
         return false;
@@ -740,5 +740,6 @@ bool Worker::isPostedSignal(shared_ptr<Bot> bot)
     postedSignal = false;
     visited.clear();
     dfs_handleLogic(bot->route, bot);
+    onlyCheckSignal = false;
     return postedSignal;
 }

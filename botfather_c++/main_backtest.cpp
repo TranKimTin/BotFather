@@ -22,7 +22,8 @@ thread_local priority_queue<BacktestOrder> pendingTPSell;
 thread_local priority_queue<BacktestOrder> pendingSLSell;
 thread_local int maxID;
 thread_local boost::unordered_flat_map<long long, RateDataV> gData;
-thread_local boost::unordered_flat_map<long long, shared_ptr<Bot>> bots;
+thread_local shared_ptr<boost::unordered_flat_map<long long, shared_ptr<Bot>>> bots;
+thread_local boost::unordered_flat_map<long long, WorkerBacktest> workers;
 
 string currentTF = "1m";
 boost::unordered_flat_map<long long, ExchangeInfo> exchangeInfo;
@@ -264,6 +265,7 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
     // data1m is in ascending order
     vector<BacktestOrder> orderList;
     workerBacktest.initData("binance_future", rateData.symbol, rateData.interval, rateData.open, rateData.high, rateData.low, rateData.close, rateData.volume, rateData.startTime, exchangeInfo[hashString(rateData.symbol)], &orderList, maxID);
+    workerBacktest.setWorker(&workers);
     workerBacktest.setBots(bots);
     for (int i = rateData.startTime.size() - 30; i >= 0; i--)
     {
@@ -406,7 +408,7 @@ static void mergeCandle1m(RateDataV &rateData, Rate &rate, const string &symbol,
 static shared_ptr<Bot> getBotInfo(const string &botName)
 {
     long long key = hashString(botName);
-    if (bots.find(key) == bots.end())
+    if (bots->find(key) == bots->end())
     {
         string sql = "SELECT id,botName,userID,timeframes,symbolList,route,idTelegram,apiKey,secretKey,iv,enableRealOrder,maxOpenOrderPerSymbolBot,maxOpenOrderAllSymbolBot,maxOpenOrderPerSymbolAccount,maxOpenOrderAllSymbolAccount FROM Bot WHERE botName = ?";
         vector<any> args = {botName};
@@ -416,9 +418,9 @@ static shared_ptr<Bot> getBotInfo(const string &botName)
         {
             throw std::runtime_error(StringFormat("Can't not find bot {}.", botName));
         }
-        bots[key] = initBot(res[0]);
+        (*bots)[key] = initBot(res[0]);
     }
-    return bots[key];
+    return bots->at(key);
 }
 
 static vector<Rate> getData1m(const string &symbol, BacktestTime fr, BacktestTime to)
@@ -459,6 +461,7 @@ static vector<Rate> getData1m(const string &symbol, BacktestTime fr, BacktestTim
 static void initSignalData(const string &s, shared_ptr<Bot> b, BacktestTime fr, BacktestTime to)
 {
     gData.clear();
+    workers.clear();
     queue<pair<shared_ptr<Bot>, string>> q;
     queue<Route *> qRoute;
 
@@ -486,9 +489,20 @@ static void initSignalData(const string &s, shared_ptr<Bot> b, BacktestTime fr, 
                         mergeCandle1m(gData[key], rate, symbolSignal, route->data.timeframe);
                     }
                     gData[key].reverse();
+                    gData[key].symbol = symbolSignal;
+                    gData[key].interval = route->data.timeframe;
                 }
                 shared_ptr<Bot> botSignal = getBotInfo(route->data.botName);
                 q.push({botSignal, symbolSignal});
+
+                RateDataV &wData = gData[key];
+                long long workerKey = hashString(route->data.botName + "_" + wData.symbol + "_" + wData.interval);
+                if (workers.find(workerKey) == workers.end())
+                {
+                    workers[workerKey].initData("binance_future", wData.symbol, wData.interval, wData.open, wData.high, wData.low, wData.close, wData.volume, wData.startTime, exchangeInfo[hashString(wData.symbol)], NULL, 0);
+                    workers[workerKey].setWorker(&workers);
+                    workers[workerKey].setBots(bots);
+                }
             }
             for (Route &r : route->next)
             {
@@ -513,14 +527,15 @@ int main(int argc, char *argv[])
     BacktestTime to = BacktestTime(stoi(argv[5]), stoi(argv[6]));
 #else
     string botName = "test1";
-    string timeframe = "1h";
+    string timeframe = "30m";
 
-    BacktestTime from = BacktestTime(2025, 7);
+    BacktestTime from = BacktestTime(2025, 05);
     BacktestTime to = BacktestTime(2025, 12);
 #endif
     init();
     LOGI("Progress_1");
 
+    bots = make_shared<boost::unordered_flat_map<long long, shared_ptr<Bot>>>();
     exchangeInfo = getBinanceFutureInfo();
     exchangeInfo.max_load_factor(0.5);
 

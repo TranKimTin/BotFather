@@ -32,9 +32,24 @@ void WorkerBacktest::initData(string broker, string symbol, string timeframe,
     this->cachedSignal.clear();
 }
 
-void WorkerBacktest::setBots(boost::unordered_flat_map<long long, shared_ptr<Bot>> &bots)
+void WorkerBacktest::setBots(shared_ptr<boost::unordered_flat_map<long long, shared_ptr<Bot>>> b)
 {
-    this->bots = bots;
+    this->bots = b;
+}
+
+void WorkerBacktest::setWorker(boost::unordered_flat_map<long long, WorkerBacktest> *w)
+{
+    this->workers = w;
+}
+
+void WorkerBacktest::setShift(int s)
+{
+    this->shift = s;
+}
+
+int WorkerBacktest::getShift()
+{
+    return this->shift;
 }
 
 void WorkerBacktest::release(RateDataV &rateData)
@@ -56,16 +71,41 @@ void WorkerBacktest::release(RateDataV &rateData)
 
 bool WorkerBacktest::getSignal(const string &botName, const string &symbol, const string &timeframe)
 {
-    return true;
-}
+    if (workers == NULL)
+        return false;
 
-bool WorkerBacktest::isPostedSignal(shared_ptr<Bot> bot)
-{
-    return true;
-};
+    long long workerKey = hashString(botName + "_" + symbol + "_" + timeframe);
+    if (workers->find(workerKey) == workers->end())
+        return false;
+
+    long long botKey = hashString(botName);
+    if (bots->find(botKey) == bots->end())
+        return false;
+
+    shared_ptr<Bot> bot = bots->at(botKey);
+    WorkerBacktest &worker = workers->at(workerKey);
+    int oldShift = worker.getShift();
+
+    long long t1 = timeframeToNumberSeconds(this->timeframe);
+    long long t2 = timeframeToNumberSeconds(worker.timeframe);
+    if (t1 <= t2)
+    {
+        worker.setShift(this->shift * t1 / t2);
+    }
+    else
+    {
+        worker.setShift(((this->shift + 1) * t1 / t2) - 1);
+    }
+    bool result = worker.isPostedSignal(bot);
+    worker.setShift(oldShift);
+    return result;
+}
 
 bool WorkerBacktest::handlerNewOrder(NodeData &node, const shared_ptr<Bot> &bot)
 {
+    if (this->orderList == NULL)
+        return true;
+
     BacktestOrder order;
     order.status = ORDER_STATUS::OPENED;
     order.id = startID + this->orderList->size();
@@ -83,5 +123,6 @@ bool WorkerBacktest::handlerNewOrder(NodeData &node, const shared_ptr<Bot> &bot)
 
 bool WorkerBacktest::sendTelegram(NodeData &node, const shared_ptr<Bot> &bot)
 {
+    LOGD("{} {} {} {}", toTimeString(startTime[shift]), symbol, timeframe, calculateSub(node.value));
     return true;
 }
