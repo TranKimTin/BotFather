@@ -526,10 +526,10 @@ int main(int argc, char *argv[])
     BacktestTime from = BacktestTime(stoi(argv[3]), stoi(argv[4]));
     BacktestTime to = BacktestTime(stoi(argv[5]), stoi(argv[6]));
 #else
-    string botName = "test1";
-    string timeframe = "30m";
+    string botName = "22_1_2026_BTC_Staff_Short_V1";
+    string timeframe = "5m";
 
-    BacktestTime from = BacktestTime(2025, 05);
+    BacktestTime from = BacktestTime(2025, 1);
     BacktestTime to = BacktestTime(2025, 12);
 #endif
     init();
@@ -564,6 +564,9 @@ int main(int argc, char *argv[])
             pendingSLBuy = priority_queue<BacktestOrder>();
             pendingTPSell = priority_queue<BacktestOrder>();
             pendingSLSell = priority_queue<BacktestOrder>();
+            if (!bots) {
+                bots = make_shared<boost::unordered_flat_map<long long, shared_ptr<Bot>>>();
+            }
             maxID = 1;
             BacktestTime fr = from;
             Rate lastRate;
