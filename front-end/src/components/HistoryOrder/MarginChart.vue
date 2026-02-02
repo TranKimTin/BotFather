@@ -70,12 +70,11 @@ export default {
                     if (labels.length == 0 || label != labels[labels.length - 1]) {
                         labels.push(label);
                         marginData.push(margin);
-                        cntOpeningOrders.push(++cnt);
+                        cntOpeningOrders.push(--cnt);
                     }
                     else {
                         marginData.pop();
                         marginData.push(margin);
-                        cntOpeningOrders.push(--cnt);
                     }
 
                     heap.pop();
@@ -90,7 +89,6 @@ export default {
                 else {
                     marginData.pop();
                     marginData.push(margin);
-                    cntOpeningOrders.push(--cnt);
                 }
             }
 
