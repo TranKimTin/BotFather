@@ -54,7 +54,9 @@ export default {
 
             const labels: Array<string> = [];
             const marginData: Array<number> = [];
+            const cntOpeningOrders: Array<number> = [];
             const heap = new Heap((a: MarginPropData, b: MarginPropData) => a.matchTime - b.matchTime); // min heap
+            let cnt = 0;
 
             let margin = 0;
             for (let i = 0; i < data.length; i++) {
@@ -68,10 +70,12 @@ export default {
                     if (labels.length == 0 || label != labels[labels.length - 1]) {
                         labels.push(label);
                         marginData.push(margin);
+                        cntOpeningOrders.push(++cnt);
                     }
                     else {
                         marginData.pop();
                         marginData.push(margin);
+                        cntOpeningOrders.push(--cnt);
                     }
 
                     heap.pop();
@@ -81,10 +85,12 @@ export default {
                 if (labels.length == 0 || label != labels[labels.length - 1]) {
                     labels.push(label);
                     marginData.push(margin);
+                    cntOpeningOrders.push(++cnt);
                 }
                 else {
                     marginData.pop();
                     marginData.push(margin);
+                    cntOpeningOrders.push(--cnt);
                 }
             }
 
@@ -99,6 +105,17 @@ export default {
                     pointHoverRadius: 5,
                     pointBackgroundColor: '#ffffff',
                     pointBorderColor: '#8DD134'
+                },
+                {
+                    label: 'Số lệnh đang mở',
+                    backgroundColor: '#FFA900',
+                    borderColor: '#FFA900',
+                    data: cntOpeningOrders,
+                    fill: false,
+                    pointRadius: 1,
+                    pointHoverRadius: 5,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: '#FFA900'
                 }
             ];
 
