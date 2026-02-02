@@ -65,12 +65,13 @@ export default {
                 margin += order.volume;
                 heap.push(order);
                 while (!heap.isEmpty() && heap.peek()?.matchTime! <= order.createdTime) {
+                    cnt--;
                     margin -= heap.peek()?.volume!;
                     const label = moment(heap.peek()?.matchTime!).format('YYYY-MM-DD HH:mm');
                     if (labels.length == 0 || label != labels[labels.length - 1]) {
                         labels.push(label);
                         marginData.push(margin);
-                        cntOpeningOrders.push(--cnt);
+                        cntOpeningOrders.push(cnt);
                     }
                     else {
                         marginData.pop();
@@ -80,11 +81,12 @@ export default {
                     heap.pop();
                 }
 
+                cnt++;
                 const label = moment(heap.peek()?.matchTime!).format('YYYY-MM-DD HH:mm');
                 if (labels.length == 0 || label != labels[labels.length - 1]) {
                     labels.push(label);
                     marginData.push(margin);
-                    cntOpeningOrders.push(++cnt);
+                    cntOpeningOrders.push(cnt);
                 }
                 else {
                     marginData.pop();
