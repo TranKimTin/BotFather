@@ -482,6 +482,7 @@ bool Worker::handlerNewOrder(NodeData &node, const shared_ptr<Bot> &bot)
                 || (!node.tp.empty() && !isValidPrice(stod(node.tp), exchangeInfo)))
             {
                 LOGE("Order price is out of range. Entry: {}, SL: {}, TP: {}, Valid range: [{}, {}]", node.entry, node.sl, node.tp, exchangeInfo.minPrice, exchangeInfo.maxPrice);
+                return;
             }
             else {
                 shared_ptr<BinanceFuture> exchange = make_shared<BinanceFuture>(bot->apiKey, bot->secretKey, bot->iv, bot);
@@ -490,44 +491,60 @@ bool Worker::handlerNewOrder(NodeData &node, const shared_ptr<Bot> &bot)
                 {
                     if (compareStringNumber(node.tp, node.entry) > 0 && compareStringNumber(node.sl, node.entry) < 0)
                     {
-                        exchange->buyMarket(symbol, node.volume, node.tp, node.sl);
+                        string res = exchange->buyMarket(symbol, node.volume, node.tp, node.sl);
+                        if (res.empty()) {
+                            return;
+                        }
                     }
                     else
                     {
                         LOGE("Invalid TP or SL for BUY_MARKET order. TP: {}, SL: {}, Entry: {}", node.tp, node.sl, node.entry);
+                        return;
                     }
                 }
                 else if (node.type == NODE_TYPE::BUY_LIMIT)
                 {
                     if (compareStringNumber(node.tp, node.entry) > 0 && compareStringNumber(node.sl, node.entry) < 0)
                     {
-                        exchange->buyLimit(symbol, node.volume, node.entry, node.tp, node.sl, node.expiredTime);
+                        string res = exchange->buyLimit(symbol, node.volume, node.entry, node.tp, node.sl, node.expiredTime);
+                        if (res.empty()) {
+                            return;
+                        }
                     }
                     else
                     {
                         LOGE("Invalid TP or SL for BUY_LIMIT order. TP: {}, SL: {}, Entry: {}", node.tp, node.sl, node.entry);
+                        return;
                     }
                 }
                 else if (node.type == NODE_TYPE::SELL_MARKET)
                 {
                     if (compareStringNumber(node.tp, node.entry) < 0 && compareStringNumber(node.sl, node.entry) > 0)
                     {
-                        exchange->sellMarket(symbol, node.volume, node.tp, node.sl);
+                        string res = exchange->sellMarket(symbol, node.volume, node.tp, node.sl);
+                        if (res.empty()) {
+                            return;
+                        }
                     }
                     else
                     {
                         LOGE("Invalid TP or SL for SELL_MARKET order. TP: {}, SL: {}, Entry: {}", node.tp, node.sl, node.entry);
+                        return;
                     }
                 }
                 else if (node.type == NODE_TYPE::SELL_LIMIT)
                 {
                     if (compareStringNumber(node.tp, node.entry) < 0 && compareStringNumber(node.sl, node.entry) > 0)
                     {
-                        exchange->sellLimit(symbol, node.volume, node.entry, node.tp, node.sl, node.expiredTime);
+                        string res = exchange->sellLimit(symbol, node.volume, node.entry, node.tp, node.sl, node.expiredTime);
+                        if (res.empty()) {
+                            return;
+                        }
                     }
                     else
                     {
                         LOGE("Invalid TP or SL for SELL_LIMIT order. TP: {}, SL: {}, Entry: {}", node.tp, node.sl, node.entry);
+                        return;
                     }
                 }
             }
