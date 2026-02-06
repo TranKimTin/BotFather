@@ -1,4 +1,4 @@
-import { defineComponent, ref, onMounted } from 'vue';
+import { defineComponent, ref, onMounted, watch } from 'vue';
 import * as axios from '../../axios/axios';
 import * as Toast from '../../toast/toast';
 import Select from 'primevue/select';
@@ -11,6 +11,7 @@ import BalanceChart from "../HistoryOrder/BalanceChart.vue";
 import moment from 'moment';
 import { type MarginPropData, ORDER_STATUS } from '../HistoryOrder/HistoryOrder';
 import MarginChart from '../HistoryOrder/MarginChart.vue';
+import Heap from 'heap-js';
 
 interface Order {
     orderType: string,
@@ -56,6 +57,8 @@ export default defineComponent({
         const r_lose = ref<number>(0);
         const r_progress = ref<number>(0);
         const r_drawdown = ref<number>(0);
+        const r_maxOrder = ref<number>(100);
+        let allOrders: Array<Order> = [];
 
         onMounted(() => {
             axios.get('/getBotList').then(result => {
@@ -65,6 +68,95 @@ export default defineComponent({
         });
 
         let es: EventSource | null = null;
+
+        function adjustOrders() {
+            const now = new Date().getTime();
+            allOrders.sort((a, b) => a.createdTime - b.createdTime);
+            let cnt = 0;
+            r_orderList.value = [];
+            const heap = new Heap((a: Order, b: Order) => {
+                const aTime = new Date(a.matchTime || (a.status == ORDER_STATUS.CANCELED ? a.expiredTime : 0) || now + 3600000).getTime();
+                const bTime = new Date(b.matchTime || (b.status == ORDER_STATUS.CANCELED ? b.expiredTime : 0) || now + 3600000).getTime();
+                return aTime - bTime;
+            }); // min heap
+
+            for (let i = 0; i < allOrders.length; i++) {
+                const order = allOrders[i];
+
+                while (!heap.isEmpty()) {
+                    const topTime = new Date(heap.peek()?.matchTime || (heap.peek()?.status == ORDER_STATUS.CANCELED ? heap.peek()?.expiredTime : 0) || now + 3600000).getTime();
+                    if (topTime > order.createdTime) {
+                        break;
+                    }
+                    cnt--;
+                    heap.pop();
+                }
+                if (cnt >= r_maxOrder.value) {
+                    continue;
+                }
+                heap.push(order);
+                r_orderList.value.push(order);
+                cnt++;
+            }
+
+            const sortedData = r_orderList.value.filter(item => item.status === ORDER_STATUS.MATCH_TP || item.status === ORDER_STATUS.MATCH_SL);
+            sortedData.sort((a, b) => a.matchTime - b.matchTime);
+
+            r_profit.value = 0;
+            r_balanceData.value = [];
+            r_marginPropData.value = [];
+            r_win.value = 0;
+            r_lose.value = 0;
+            r_drawdown.value = 0;
+
+            let balance = 0;
+            let fee = 0;
+            let maxBalance = 0;
+
+            for (const order of sortedData) {
+                balance += order.profit;
+                fee += order.volume * order.entry * 0.1 / 100;
+                maxBalance = Math.max(maxBalance, balance - fee);
+                r_drawdown.value = Math.max(r_drawdown.value, maxBalance - (balance - fee));
+                r_balanceData.value.push({
+                    timestamp: moment(order.matchTime).format('YYYY-MM-DD HH:mm'),
+                    balance: balance - fee,
+                    balanceNoFee: balance,
+                    balanceReal: 0
+                });
+                if (order.profit > 0) {
+                    r_win.value++;
+                }
+                else {
+                    r_lose.value++;
+                }
+            }
+            const remainData = r_orderList.value.filter(item => item.status === ORDER_STATUS.MATCH_ENTRY);
+            if (remainData.length > 0) {
+                for (const order of remainData) {
+                    balance += order.profit;
+                    fee += order.volume * order.entry * 0.1 / 100;
+                }
+                maxBalance = Math.max(maxBalance, balance - fee);
+                r_drawdown.value = Math.max(r_drawdown.value, maxBalance - (balance - fee));
+                r_balanceData.value.push({
+                    timestamp: moment({ year: r_endYear.value, month: r_endMonth.value - 1 }).add(1, 'month').format('YYYY-MM-DD HH:mm'),
+                    balance: balance - fee,
+                    balanceNoFee: balance,
+                    balanceReal: 0
+                });
+            }
+            r_profit.value = balance - fee;
+            r_marginPropData.value = r_orderList.value.map(item => ({
+                createdTime: new Date(item.createdTime).getTime(),
+                matchTime: new Date(item.matchTime || (item.status == ORDER_STATUS.CANCELED ? item.expiredTime : 0) || now + 3600000).getTime(),
+                volume: item.volume * item.entry
+            }));
+        }
+
+        watch(r_maxOrder, () => {
+            adjustOrders();
+        });
 
         function runBacktest() {
             if (!r_botName.value) {
@@ -89,6 +181,7 @@ export default defineComponent({
                 es.close();
             }
 
+            allOrders = [];
             r_profit.value = 0;
             r_orderList.value = [];
             r_balanceData.value = [];
@@ -128,7 +221,6 @@ export default defineComponent({
                             r_lose.value++;
                         }
                     }
-                    // console.log(newOrder);
                 }
                 else if (mess.startsWith('Progress')) {
                     r_progress.value = +mess.split('_')[1];
@@ -142,48 +234,10 @@ export default defineComponent({
             const onFinish = () => {
                 console.log('Backtest finished');
                 Toast.showSuccess(`Backtest cho bot ${r_botName.value} xong.`);
-                r_orderList.value.sort((a, b) => b.createdTime - a.createdTime);
+                allOrders = r_orderList.value;
                 r_loading.value = false;
 
-                const sortedData = r_orderList.value.filter(item => item.status === ORDER_STATUS.MATCH_TP || item.status === ORDER_STATUS.MATCH_SL);
-                sortedData.sort((a, b) => a.matchTime - b.matchTime);
-                let balance = 0;
-                let fee = 0;
-                let maxBalance = 0;
-
-                for (const order of sortedData) {
-                    balance += order.profit;
-                    fee += order.volume * order.entry * 0.1 / 100;
-                    maxBalance = Math.max(maxBalance, balance - fee);
-                    r_drawdown.value = Math.max(r_drawdown.value, maxBalance - (balance - fee));
-                    r_balanceData.value.push({
-                        timestamp: moment(order.matchTime).format('YYYY-MM-DD HH:mm'),
-                        balance: balance - fee,
-                        balanceNoFee: balance,
-                        balanceReal: 0
-                    });
-                }
-                const remainData = r_orderList.value.filter(item => item.status === ORDER_STATUS.MATCH_ENTRY);
-                if (remainData.length > 0) {
-                    for (const order of remainData) {
-                        balance += order.profit;
-                        fee += order.volume * order.entry * 0.1 / 100;
-                    }
-                    maxBalance = Math.max(maxBalance, balance - fee);
-                    r_drawdown.value = Math.max(r_drawdown.value, maxBalance - (balance - fee));
-                    r_balanceData.value.push({
-                        timestamp: moment({ year: r_endYear.value, month: r_endMonth.value - 1 }).add(1, 'month').format('YYYY-MM-DD HH:mm'),
-                        balance: balance - fee,
-                        balanceNoFee: balance,
-                        balanceReal: 0
-                    });
-                }
-                r_profit.value = balance - fee;
-                r_marginPropData.value = r_orderList.value.map(item => ({
-                    createdTime: new Date(item.createdTime).getTime(),
-                    matchTime: new Date(item.matchTime || (item.status == ORDER_STATUS.CANCELED ? item.expiredTime : 0) || new Date().getTime() + 3600000).getTime(),
-                    volume: item.volume * item.entry
-                }));
+                adjustOrders();
             };
 
             es = axios.getEventSource('/runBacktest', args, onMessage, onFinish);
@@ -207,6 +261,7 @@ export default defineComponent({
             r_win,
             r_lose,
             r_drawdown,
+            r_maxOrder,
             months,
             years,
             runBacktest,

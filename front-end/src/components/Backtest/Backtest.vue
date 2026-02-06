@@ -7,6 +7,9 @@
       <label class="flex items-center">Khung:</label>
       <Select v-model="r_timeframe" filter :options="timeframes" placeholder="Khung thời gian" class="flex-auto" />
 
+      <label class="flex items-center">Số lệnh tối đa:</label>
+      <InputNumber v-model="r_maxOrder" :min="1" :max="1000" placeholder="Số lệnh tối đa" class="flex-auto" />
+
       <label class="flex items-center">Thời gian:</label>
       <div>
         <Select v-model="r_startMonth" :options="months" class="flex-auto" />

@@ -62,8 +62,6 @@ export default {
             for (let i = 0; i < data.length; i++) {
                 const order = data[i];
 
-                margin += order.volume;
-                heap.push(order);
                 while (!heap.isEmpty() && heap.peek()?.matchTime! <= order.createdTime) {
                     cnt--;
                     margin -= heap.peek()?.volume!;
@@ -81,8 +79,12 @@ export default {
                     heap.pop();
                 }
 
-                cnt++;
-                const label = moment(heap.peek()?.matchTime!).format('YYYY-MM-DD HH:mm');
+                if (order.volume > 0) {
+                    cnt++;
+                    margin += order.volume;
+                }
+                heap.push(order);
+                const label = moment(order.createdTime).format('YYYY-MM-DD HH:mm');
                 if (labels.length == 0 || label != labels[labels.length - 1]) {
                     labels.push(label);
                     marginData.push(margin);
