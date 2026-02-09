@@ -86,16 +86,21 @@ bool WorkerBacktest::getSignal(const string &botName, const string &symbol, cons
     WorkerBacktest &worker = workers->at(workerKey);
     int oldShift = worker.getShift();
 
-    long long t1 = timeframeToNumberSeconds(this->timeframe);
+    long long t1 = timeframeToNumberSeconds(this->originalTimeframe);
     long long t2 = timeframeToNumberSeconds(worker.timeframe);
-    if (t1 <= t2)
+    if (t1 < t2)
     {
-        worker.setShift(this->shift * t1 / t2);
+        worker.setShift(this->originalShift * t1 / t2 + 1);
+    }
+    else if (t1 == t2)
+    {
+        worker.setShift(this->originalShift);
     }
     else
     {
-        worker.setShift(((this->shift + 1) * t1 / t2) - 1);
+        worker.setShift(((this->originalShift + 1) * t1 / t2) - 1);
     }
+    worker.setOriginal(this->originalShift, this->originalTimeframe);
     bool result = worker.isPostedSignal(bot);
     worker.setShift(oldShift);
     return result;

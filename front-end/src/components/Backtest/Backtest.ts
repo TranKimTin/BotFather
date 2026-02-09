@@ -57,7 +57,7 @@ export default defineComponent({
         const r_lose = ref<number>(0);
         const r_progress = ref<number>(0);
         const r_drawdown = ref<number>(0);
-        const r_maxOrder = ref<number>(100);
+        const r_maxOrder = ref<number>(500);
         let allOrders: Array<Order> = [];
 
         onMounted(() => {

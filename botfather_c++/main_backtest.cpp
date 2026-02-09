@@ -274,6 +274,7 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
             continue;
         }
         int shift = i;
+        workerBacktest.setOriginal(shift, rateData.interval);
         workerBacktest.run(bot, shift);
     }
     workerBacktest.release(rateData);
@@ -526,11 +527,11 @@ int main(int argc, char *argv[])
     BacktestTime from = BacktestTime(stoi(argv[3]), stoi(argv[4]));
     BacktestTime to = BacktestTime(stoi(argv[5]), stoi(argv[6]));
 #else
-    string botName = "22_1_2026_BTC_Staff_Short_V1";
-    string timeframe = "5m";
+    string botName = "bot_tin_02";
+    string timeframe = "3m";
 
-    BacktestTime from = BacktestTime(2025, 1);
-    BacktestTime to = BacktestTime(2025, 12);
+    BacktestTime from = BacktestTime(2026, 1);
+    BacktestTime to = BacktestTime(2026, 1);
 #endif
     init();
     LOGI("Progress_1");
@@ -542,7 +543,7 @@ int main(int argc, char *argv[])
     Timer *t = new Timer(StringFormat("Backtest {} {} {} {}", botName, timeframe, from.toString(), to.toString()));
     shared_ptr<Bot> bot = getBotInfo(botName);
 
-    // bot->symbolList = {{"binance_future", "CLANKERUSDT", "binance_future:CLANKERUSDT"}};
+    bot->symbolList = {{"binance_future", "OXTUSDT", "binance_future:OXTUSDT"}};
     vector<string> symbolList;
     for (Symbol &s : bot->symbolList)
     {
