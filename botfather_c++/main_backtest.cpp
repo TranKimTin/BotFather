@@ -274,7 +274,7 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
             continue;
         }
         int shift = i;
-        workerBacktest.setOriginal(shift, rateData.interval);
+        workerBacktest.setBacktestTime(rateData.startTime[i] + timeframeToNumberMiliseconds(rateData.interval));
         workerBacktest.run(bot, shift);
     }
     workerBacktest.release(rateData);
@@ -291,14 +291,14 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
     vector<BacktestOrder> result;
 
     int i = (backTestStartTime <= data1m[0].startTime ? 0 : (backTestStartTime - data1m[0].startTime) / 60000);
-    while (i > 0 && data1m[i].startTime > backTestStartTime)
-    {
-        i--;
-    }
-    while (i < data1m.size() && data1m[i].startTime < backTestStartTime)
-    {
-        i++;
-    }
+    // while (i > 0 && data1m[i].startTime > backTestStartTime)
+    // {
+    //     i--;
+    // }
+    // while (i < data1m.size() && data1m[i].startTime < backTestStartTime)
+    // {
+    //     i++;
+    // }
 
     for (; i < data1m.size(); i++)
     {
@@ -527,10 +527,10 @@ int main(int argc, char *argv[])
     BacktestTime from = BacktestTime(stoi(argv[3]), stoi(argv[4]));
     BacktestTime to = BacktestTime(stoi(argv[5]), stoi(argv[6]));
 #else
-    string botName = "bot_tin_02";
-    string timeframe = "3m";
+    string botName = "chinh_myx";
+    string timeframe = "4h";
 
-    BacktestTime from = BacktestTime(2026, 1);
+    BacktestTime from = BacktestTime(2022, 1);
     BacktestTime to = BacktestTime(2026, 1);
 #endif
     init();
@@ -543,7 +543,7 @@ int main(int argc, char *argv[])
     Timer *t = new Timer(StringFormat("Backtest {} {} {} {}", botName, timeframe, from.toString(), to.toString()));
     shared_ptr<Bot> bot = getBotInfo(botName);
 
-    // bot->symbolList = {{"binance_future", "OXTUSDT", "binance_future:OXTUSDT"}};
+    bot->symbolList = {{"binance_future", "MYXUSDT", "binance_future:MYXUSDT"}};
     vector<string> symbolList;
     for (Symbol &s : bot->symbolList)
     {

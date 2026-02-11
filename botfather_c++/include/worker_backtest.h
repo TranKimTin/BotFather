@@ -6,8 +6,7 @@ private:
     vector<BacktestOrder> *orderList;
     int startID;
     boost::unordered_flat_map<long long, WorkerBacktest> *workers;
-    int originalShift;
-    string originalTimeframe;
+    long long backtestTime;
 
     bool getSignal(const string &botName, const string &symbol, const string &timeframe) override;
 
@@ -25,9 +24,5 @@ public:
     void setWorker(boost::unordered_flat_map<long long, WorkerBacktest> *w);
     void setShift(int s);
     int getShift();
-    void setOriginal(int s, const string &tf)
-    {
-        originalShift = s;
-        originalTimeframe = tf;
-    }
+    void setBacktestTime(long long t);
 };
