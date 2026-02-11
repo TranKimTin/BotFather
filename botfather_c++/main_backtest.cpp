@@ -543,7 +543,7 @@ int main(int argc, char *argv[])
     Timer *t = new Timer(StringFormat("Backtest {} {} {} {}", botName, timeframe, from.toString(), to.toString()));
     shared_ptr<Bot> bot = getBotInfo(botName);
 
-    bot->symbolList = {{"binance_future", "MYXUSDT", "binance_future:MYXUSDT"}};
+    // bot->symbolList = {{"binance_future", "MYXUSDT", "binance_future:MYXUSDT"}};
     vector<string> symbolList;
     for (Symbol &s : bot->symbolList)
     {
