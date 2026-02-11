@@ -98,7 +98,7 @@ bool WorkerBacktest::getSignal(const string &botName, const string &symbol, cons
     }
     else
     {
-        worker.setShift(((this->originalShift + 1) * t1 / t2) - 1);
+        worker.setShift((this->originalShift * t1 / t2) - 1);
     }
     worker.setOriginal(this->originalShift, this->originalTimeframe);
     bool result = worker.isPostedSignal(bot);
