@@ -114,7 +114,7 @@ bool WorkerBacktest::handlerNewOrder(NodeData &node, const shared_ptr<Bot> &bot)
 
 bool WorkerBacktest::sendTelegram(NodeData &node, const shared_ptr<Bot> &bot)
 {
-    LOGD("{} {} {} {}", toTimeString(startTime[shift]), symbol, timeframe, calculateSub(node.value));
+    LOGI("{} {} {} {}", toTimeString(startTime[shift]), symbol, timeframe, calculateSub(node.value));
     return true;
 }
 
