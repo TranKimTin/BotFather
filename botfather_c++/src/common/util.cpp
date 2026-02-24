@@ -51,6 +51,8 @@ bool checkFinal(const string &tf, long long startTime, string &currentTF)
             return nextTime % 900 == 0; // 15m
         case '2':
             return nextTime % 43200 == 0; // 12h
+        case 'w':
+            return (nextTime % 86400 == 0) && ((nextTime / 86400 + 4) % 7 == 1); // 1w
         }
         break;
     }
@@ -62,6 +64,8 @@ bool checkFinal(const string &tf, long long startTime, string &currentTF)
         {
         case 'm':
             return nextTime % 180 == 0; // 3m
+        case 'd':
+            return (nextTime % 86400 == 0) && ((nextTime / 86400) % 3 == 0); // 3d
         case '0':
             return nextTime % 1800 == 0; // 30m
         }
@@ -90,39 +94,43 @@ long long getStartTime(const string &tf, long long currentTime)
         switch (tf[1])
         {
         case 'm':
-            return currentTime - currentTime % 60000; // 1m
+            return currentTime - (currentTime % 60000); // 1m
         case 'h':
-            return currentTime - currentTime % 3600000; // 1h
+            return currentTime - (currentTime % 3600000); // 1h
         case 'd':
-            return currentTime - currentTime % 86400000; // 1d
+            return currentTime - (currentTime % 86400000); // 1d
         case '5':
-            return currentTime - currentTime % 900000; // 15m
+            return currentTime - (currentTime % 900000); // 15m
         case '2':
-            return currentTime - currentTime % 43200000; // 12h
+            return currentTime - (currentTime % 43200000); // 12h
+        case 'w':
+            return (currentTime / 86400000 - (((currentTime / 86400000 + 4) % 7 + 6) % 7)) * 86400000LL; // 1w
         }
         break;
     }
     case '2':
-        return currentTime - currentTime % 7200000; // 2h
+        return currentTime - (currentTime % 7200000); // 2h
     case '3':
     {
         switch (tf[1])
         {
         case 'm':
-            return currentTime - currentTime % 180000; // 3m
+            return currentTime - (currentTime % 180000); // 3m
+        case 'd':
+            return (currentTime / 86400000) / 3 * 3 * 86400000; // 3d
         case '0':
-            return currentTime - currentTime % 1800000; // 30m
+            return currentTime - (currentTime % 1800000); // 30m
         }
         break;
     }
     case '4':
-        return currentTime - currentTime % 14400000; // 4h
+        return currentTime - (currentTime % 14400000); // 4h
     case '5':
-        return currentTime - currentTime % 300000; // 5m
+        return currentTime - (currentTime % 300000); // 5m
     case '6':
-        return currentTime - currentTime % 21600000; // 6h
+        return currentTime - (currentTime % 21600000); // 6h
     case '8':
-        return currentTime - currentTime % 28800000; // 8h
+        return currentTime - (currentTime % 28800000); // 8h
     default:
         break;
     }
@@ -147,6 +155,8 @@ int timeframeToNumberMinutes(const string &tf)
             return 15; // 15m
         case '2':
             return 720; // 12h
+        case 'w':
+            return 10080; // 1w
         }
         break;
     }
@@ -158,6 +168,8 @@ int timeframeToNumberMinutes(const string &tf)
         {
         case 'm':
             return 3; // 3m
+        case 'd':
+            return 4320; // 3d
         case '0':
             return 30; // 30m
         }
