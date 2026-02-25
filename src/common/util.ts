@@ -422,6 +422,8 @@ export function checkFinal(tf: string, startTime: number) {
         case '8h': return nextTime % 28800 == 0;
         case '12h': return nextTime % 43200 == 0;
         case '1d': return nextTime % 86400 == 0;
+        case '3d': return (nextTime % 86400 == 0) && ((nextTime / 86400) % 3 == 0);
+        case '1w': return (nextTime % 86400 == 0) && ((nextTime / 86400 + 4) % 7 == 1);
         default: return false;
     }
 };
@@ -440,6 +442,8 @@ export function getStartTime(tf: string, currentTime: number) {
         case '8h': return currentTime - currentTime % 28800000;
         case '12h': return currentTime - currentTime % 43200000;
         case '1d': return currentTime - currentTime % 86400000;
+        case '3d': return (currentTime / 86400000) / 3 * 3 * 86400000;
+        case '1w': return (currentTime / 86400000 - (((currentTime / 86400000 + 4) % 7 + 6) % 7)) * 86400000;
         default: return currentTime;
     }
 }
@@ -458,6 +462,8 @@ export function timeframeToNumberMinutes(tf: string) {
         case '8h': return 480;
         case '12h': return 720;
         case '1d': return 1440;
+        case '3d': return 4320;
+        case '1w': return 10080;
         default: return 1;
     }
 }
