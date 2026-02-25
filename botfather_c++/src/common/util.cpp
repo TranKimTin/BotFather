@@ -104,7 +104,7 @@ long long getStartTime(const string &tf, long long currentTime)
         case '2':
             return currentTime - (currentTime % 43200000); // 12h
         case 'w':
-            return (currentTime / 86400000 - (((currentTime / 86400000 + 4) % 7 + 6) % 7)) * 86400000LL; // 1w
+            return (currentTime / 86400000 - (((currentTime / 86400000 + 4) % 7 + 6) % 7)) * 86400000; // 1w
         }
         break;
     }
