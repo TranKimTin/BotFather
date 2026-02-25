@@ -267,7 +267,7 @@ static void backtest(const shared_ptr<Bot> &bot, long long backTestStartTime, ve
     workerBacktest.initData("binance_future", rateData.symbol, rateData.interval, rateData.open, rateData.high, rateData.low, rateData.close, rateData.volume, rateData.startTime, exchangeInfo[hashString(rateData.symbol)], &orderList, maxID);
     workerBacktest.setWorker(&workers);
     workerBacktest.setBots(bots);
-    for (int i = rateData.startTime.size() - 30; i >= 0; i--)
+    for (int i = rateData.startTime.size() - (rateData.interval.back() == 'w' ? 3 : 30); i >= 0; i--)
     {
         if (rateData.startTime[i] < backTestStartTime)
         {
@@ -427,7 +427,7 @@ static shared_ptr<Bot> getBotInfo(const string &botName)
 static vector<Rate> getData1m(const string &symbol, BacktestTime fr, BacktestTime to)
 {
     vector<Rate> data;
-
+    
     for (BacktestTime t = fr - 3; t <= to && t < fr + blockMonth; t++)
     {
         string filePath = (exeDir() / ".." / ".." / "data" / StringFormat("{}-1m-{}.bin", symbol, t.toString())).lexically_normal().c_str();

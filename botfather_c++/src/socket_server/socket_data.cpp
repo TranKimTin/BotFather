@@ -62,7 +62,7 @@ void SocketData::onCloseCandle(const string &symbol, string &timeframe, RateData
 {
     // LOGI("On close candle {}:{} {}. size={}", broker, symbol, timeframe, rateData.startTime.size());
     const int length = rateData.startTime.size();
-    if (length < 20)
+    if (length < (timeframe.back() == 'w' ? 3 : 30))
         return;
 
     if (!botList)
