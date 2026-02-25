@@ -405,6 +405,10 @@ RateData getBinanceOHLCV(const string &symbol, const string &timeframe, int limi
 RateData getBinanceFuturetOHLCV(const string &symbol, const string &timeframe, int limit, long long since)
 {
     string url = "https://fapi.binance.com/fapi/v1/klines?symbol=" + symbol + "&interval=" + timeframe + "&limit=" + to_string(limit);
+    if (timeframe == "3d")
+    {
+        url = "https://fapi.binance.com/fapi/v1/continuousKlines?limit=" + to_string(limit) + "&interval=3d&pair=" + symbol + "&contractType=PERPETUAL";
+    }
     if (since > 0)
     {
         url += "&startTime=" + to_string(since);
