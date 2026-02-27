@@ -523,6 +523,7 @@ bool isValidData1m(const vector<Rate> &data)
     {
         if (data[i].startTime - data[i - 1].startTime != 60000)
         {
+            LOGE("Data 1m has invalid time interval at {}: {} - {}", i, data[i - 1].startTime, data[i].startTime);
             return false;
         }
     }
