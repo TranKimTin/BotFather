@@ -540,9 +540,10 @@ export async function getBinanceFutureOHLCV(symbol: string, timeframe: string, l
         let ohlcv: Array<Array<any>> = [];
         if (timeframe === '3d') {
             const url = `https://fapi.binance.com/fapi/v1/continuousKlines?limit=${Math.min(limit, maxCall)}&interval=3d&pair=${symbol}&contractType=PERPETUAL` + (since ? `&startTime=${since}` : '');
+            ohlcv = (await axios.get(url, { timeout: 60000 })).data as Array<Array<any>>;
         }
         else {
-            const ohlcv = await binanceFuture.fetchOHLCV(symbol, timeframe, since, Math.min(limit, maxCall));
+            ohlcv = await binanceFuture.fetchOHLCV(symbol, timeframe, since, Math.min(limit, maxCall));
 
         }
         const data = ohlcv.filter(item => item[0] !== undefined && item[1] !== undefined && item[2] !== undefined && item[3] !== undefined && item[4] !== undefined && item[5] !== undefined).map(item => {

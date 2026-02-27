@@ -427,7 +427,7 @@ static shared_ptr<Bot> getBotInfo(const string &botName)
 static vector<Rate> getData1m(const string &symbol, BacktestTime fr, BacktestTime to)
 {
     vector<Rate> data;
-    
+
     for (BacktestTime t = fr - 3; t <= to && t < fr + blockMonth; t++)
     {
         string filePath = (exeDir() / ".." / ".." / "data" / StringFormat("{}-1m-{}.bin", symbol, t.toString())).lexically_normal().c_str();
@@ -513,6 +513,22 @@ static void initSignalData(const string &s, shared_ptr<Bot> b, BacktestTime fr, 
     }
 }
 
+bool isValidData1m(const vector<Rate> &data)
+{
+    if (data.size() < 2)
+    {
+        return false;
+    }
+    for (int i = 1; i < data.size(); i++)
+    {
+        if (data[i].startTime - data[i - 1].startTime != 60000)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
 int main(int argc, char *argv[])
 {
 #ifndef DEBUG_LOG
@@ -527,11 +543,11 @@ int main(int argc, char *argv[])
     BacktestTime from = BacktestTime(stoi(argv[3]), stoi(argv[4]));
     BacktestTime to = BacktestTime(stoi(argv[5]), stoi(argv[6]));
 #else
-    string botName = "chinh_myx";
-    string timeframe = "4h";
+    string botName = "27_2_26_Staff_M1_V1";
+    string timeframe = "1m";
 
     BacktestTime from = BacktestTime(2022, 1);
-    BacktestTime to = BacktestTime(2026, 1);
+    BacktestTime to = BacktestTime(2022, 6);
 #endif
     init();
     LOGI("Progress_1");
@@ -577,7 +593,7 @@ int main(int argc, char *argv[])
             for(; fr <= to; fr = fr + blockMonth) {
                 rateData.clear();
                 vector<Rate> data = getData1m(symbol, fr, to);
-                if (data.empty())
+                if (!isValidData1m(data))
                 {
                     continue;
                 }
