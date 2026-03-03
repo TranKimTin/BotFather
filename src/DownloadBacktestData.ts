@@ -54,7 +54,7 @@ async function getBinanceOHLCV1mMonth(symbol: string, year: number, month: numbe
         const lastOpenTime = data[data.length - 1][0];
         current = lastOpenTime + intervalMs;
 
-        await new Promise(r => setTimeout(r, 50)) // tránh rate limit
+        await new Promise(r => setTimeout(r, 10)) // tránh rate limit
     }
 
     return result
@@ -68,8 +68,6 @@ async function main() {
     // const symbolList = ['LTCUSDT'];
     const since = new Date('2019-10-01').getTime();
     let i = 0;
-    const promiseList = [];
-
     for (const symbol of symbolList) {
         const months = (await util.getBinanceFutureOHLCV(symbol, '1M', 300, since)).map(item => moment(item.startTime).format('YYYY-MM')).reverse();
         months.pop();
@@ -78,38 +76,30 @@ async function main() {
             if (fs.existsSync(binPath)) {
                 continue;
             }
-            promiseList.push((async () => {
-                console.log(`Downloading ${symbol} 1m data for ${month}...`);
-                const data = await getBinanceOHLCV1mMonth(symbol, Number(month.slice(0, 4)), Number(month.slice(5, 7)));
-                const buffer = Buffer.alloc(data.length * 6 * 8); // n row * 6 column * 8 bytes per value
-                let offset = 0;
-                for (const row of data) {
-                    buffer.writeBigInt64LE(BigInt(row.time), offset);
-                    offset += 8;
-                    buffer.writeDoubleLE(row.open, offset);
-                    offset += 8;
-                    buffer.writeDoubleLE(row.high, offset);
-                    offset += 8;
-                    buffer.writeDoubleLE(row.low, offset);
-                    offset += 8;
-                    buffer.writeDoubleLE(row.close, offset);
-                    offset += 8;
-                    buffer.writeDoubleLE(row.volume, offset);
-                    offset += 8;
-                }
-
-                fs.writeFileSync(binPath, buffer);
-            })());
-
-            if (promiseList.length >= 10) {
-                await Promise.all(promiseList);
-                promiseList.length = 0;
+            console.log(`Downloading ${symbol} 1m data for ${month}...`);
+            const data = await getBinanceOHLCV1mMonth(symbol, Number(month.slice(0, 4)), Number(month.slice(5, 7)));
+            const buffer = Buffer.alloc(data.length * 6 * 8); // n row * 6 column * 8 bytes per value
+            let offset = 0;
+            for (const row of data) {
+                buffer.writeBigInt64LE(BigInt(row.time), offset);
+                offset += 8;
+                buffer.writeDoubleLE(row.open, offset);
+                offset += 8;
+                buffer.writeDoubleLE(row.high, offset);
+                offset += 8;
+                buffer.writeDoubleLE(row.low, offset);
+                offset += 8;
+                buffer.writeDoubleLE(row.close, offset);
+                offset += 8;
+                buffer.writeDoubleLE(row.volume, offset);
+                offset += 8;
             }
+
+            fs.writeFileSync(binPath, buffer);
         }
         i++;
         console.log(`Downloaded data for ${i}/${symbolList.length} symbols.`);
     }
-    await Promise.all(promiseList);
 }
 
 main();
