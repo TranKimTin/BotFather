@@ -54,7 +54,7 @@ async function getBinanceOHLCV1mMonth(symbol: string, year: number, month: numbe
         const lastOpenTime = data[data.length - 1][0];
         current = lastOpenTime + intervalMs;
 
-        await new Promise(r => setTimeout(r, 10)) // tránh rate limit
+        await new Promise(r => setTimeout(r, 30)) // tránh rate limit
     }
 
     return result
