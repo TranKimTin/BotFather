@@ -38,19 +38,6 @@ vector<double> iRSI(int period, const double close[], int n)
     return result;
 }
 
-double iMA(int period, const double close[], int n)
-{
-    if (period <= 0 || n < period)
-        return 0.0;
-
-    double sum = 0.0;
-    for (int i = 0; i < period; ++i)
-    {
-        sum += close[i];
-    }
-    return sum / period;
-}
-
 vector<double> iEMA(int period, const double close[], int n)
 {
     vector<double> result = vectorDoublePool.acquire();

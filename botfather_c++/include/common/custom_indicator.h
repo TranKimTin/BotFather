@@ -16,7 +16,6 @@ struct BB_Output
 };
 
 vector<double> iRSI(int period, const double close[], int n);
-double iMA(int period, const double close[], int n);
 vector<double> iEMA(int period, const double close[], int n);
 vector<double> iMACD(int fastPeriod, int slowPeriod, int signalPeriod, const double close[], int n);
 vector<double> iBB(int period, double stdDev, const double close[], int n);
