@@ -38,72 +38,6 @@ vector<double> iRSI(int period, const double close[], int n)
     return result;
 }
 
-double iRSI_slope(int period, const double close[], int n)
-{
-    n = min(n, MAX_N + period);
-
-    if (n <= period)
-        return 0.0;
-
-    double avgGain = 0.0, avgLoss = 0.0;
-
-    for (int i = n - 2; i >= n - 1 - period; --i)
-    {
-        double diff = close[i] - close[i + 1];
-        avgGain += diff > 0 ? diff : 0;
-        avgLoss += avgLoss < 0 ? diff : 0;
-    }
-    avgGain /= period;
-    avgLoss /= period;
-
-    for (int i = n - 2 - period; i >= 1; --i)
-    {
-        double diff = close[i] - close[i + 1];
-        double gain = diff > 0 ? diff : 0.0;
-        double loss = diff < 0 ? -diff : 0.0;
-
-        avgGain = (avgGain * (period - 1) + gain) / period;
-        avgLoss = (avgLoss * (period - 1) + loss) / period;
-    }
-
-    double rsi0, rsi1;
-
-    if (avgLoss == 0.0)
-    {
-        rsi1 = 100.0;
-    }
-    else
-    {
-        double rs = avgGain / avgLoss;
-        rsi1 = 100.0 - (100.0 / (1.0 + rs));
-    }
-
-    {
-        double diff = close[0] - close[1];
-        double gain = diff > 0 ? diff : 0.0;
-        double loss = diff < 0 ? -diff : 0.0;
-
-        avgGain = (avgGain * (period - 1) + gain) / period;
-        avgLoss = (avgLoss * (period - 1) + loss) / period;
-    }
-
-    if (avgLoss == 0.0)
-    {
-        rsi0 = 100.0;
-    }
-    else
-    {
-        double rs = avgGain / avgLoss;
-        rsi0 = 100.0 - (100.0 / (1.0 + rs));
-    }
-
-    double diffRSI = rsi0 - rsi1;
-    double wide = 3.0;
-    double tan = diffRSI / wide;
-    double slope = atan(tan);
-    return slope / M_PI * 180;
-}
-
 double iMA(int period, const double close[], int n)
 {
     if (period <= 0 || n < period)
@@ -117,23 +51,23 @@ double iMA(int period, const double close[], int n)
     return sum / period;
 }
 
-double iEMA(int period, const double close[], int n)
+vector<double> iEMA(int period, const double close[], int n)
 {
-    n = min(n, MAX_N + period);
+    vector<double> result = vectorDoublePool.acquire();
+    if (n <= 1 || period <= 0)
+        return result;
 
-    if (n <= 0 || period <= 0)
-        return 0.0;
-
+    result.resize(n - 1);
     double k = 2.0 / (period + 1);
-
     double ema = close[n - 1];
 
     for (int i = n - 2; i >= 0; --i)
     {
-        ema = close[i] * k + ema * (1 - k);
+        ema = (close[i] - ema) * k + ema;
+        result[i] = ema;
     }
 
-    return ema;
+    return result;
 }
 
 vector<double> iMACD(int fastPeriod, int slowPeriod, int signalPeriod, const double close[], int n)

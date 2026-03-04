@@ -37,6 +37,7 @@ static const long long ID_AVG_RSI = 20;
 static const long long ID_AVG_MACD_VALUE = 21;
 static const long long ID_AVG_MACD_SIGNAL = 22;
 static const long long ID_AVG_MACD_HISTOGRAM = 23;
+static const long long ID_EMA = 24;
 
 any Expr::visitNumber(ExprParser::NumberContext *ctx)
 {
@@ -1088,6 +1089,18 @@ static double getAVG(const double arr[], int l, int r, int length, long long key
     return (prefixSum[r + 1] - prefixSum[l]) / (r - l + 1);
 }
 
+static vector<double> &getEMA(int period, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, const double *close, int length)
+{
+    long long key = ID_EMA | (static_cast<long long>(period) << 10);
+
+    auto it = cachedIndicator->find(key);
+    if (it == cachedIndicator->end())
+    {
+        it = cachedIndicator->emplace(key, iEMA(period, close, length)).first;
+    }
+    return it->second;
+}
+
 static double eval(const std::vector<Instr> &instr, int length,
                    const double *open, const double *high, const double *low, const double *close, const double *volume,
                    long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, shared_ptr<SparseTable>> *cachedMinMax, int offset)
@@ -1478,7 +1491,12 @@ static double eval(const std::vector<Instr> &instr, int length,
             if (period <= 0 || shift < 0 || shift >= length - period)
                 return 0.0;
 
-            PUSH(iEMA(period, close + shift, length - shift));
+            const vector<double> &cached = getEMA(period, cachedIndicator, close, length);
+            if (shift >= cached.size())
+            {
+                return 0.0;
+            }
+            PUSH(cached[shift]);
             break;
         }
 
