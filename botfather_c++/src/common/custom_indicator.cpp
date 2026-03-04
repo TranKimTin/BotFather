@@ -115,33 +115,50 @@ vector<double> iMACD(int fastPeriod, int slowPeriod, int signalPeriod, const dou
     return result;
 }
 
-BB_Output iBB(int period, double stdDev, const double close[], int n)
+vector<double> iBB(int period, double stdDev, const double close[], int n)
 {
+    vector<double> result = vectorDoublePool.acquire();
+
     if (n < period || period <= 0 || stdDev < 0)
-        return {0.0, 0.0, 0.0};
+        return result;
 
-    double sum = 0.0;
-    for (int i = 0; i < period; ++i)
+    result.resize(n * 3);
+
+    vector<double> ps(n + 1, 0.0);
+    vector<double> psq(n + 1, 0.0);
+    for (int i = 0; i < n; ++i)
     {
-        sum += close[i];
+        ps[i + 1] = ps[i] + close[i];
+        psq[i + 1] = psq[i] + close[i] * close[i];
     }
 
-    double mean = sum / period;
-
-    double variance = 0.0;
-    for (int i = 0; i < period; ++i)
+    for (int i = 0; i < n; ++i)
     {
-        double diff = close[i] - mean;
-        variance += diff * diff;
+        if (i + period <= n)
+        {
+            double sum = ps[i + period] - ps[i];
+            double mean = sum / period;
+            double sumsq = psq[i + period] - psq[i];
+            double var = sumsq / period - mean * mean;
+            if (var < 0 && var > -1e-12)
+                var = 0;
+            double sd = sqrt(max(0.0, var));
+            double lower = mean - stdDev * sd;
+            double upper = mean + stdDev * sd;
+
+            result[i * 3] = lower;
+            result[i * 3 + 1] = mean;
+            result[i * 3 + 2] = upper;
+        }
+        else
+        {
+            result[i * 3] = 0.0;
+            result[i * 3 + 1] = 0.0;
+            result[i * 3 + 2] = 0.0;
+        }
     }
 
-    variance /= period;
-    double std = sqrt(variance);
-
-    double upper = mean + stdDev * std;
-    double lower = mean - stdDev * std;
-
-    return {lower, mean, upper};
+    return result;
 }
 
 int macd_n_dinh(int fastPeriod, int slowPeriod, int signalPeriod, int redDepth, int depth, int enableDivergence, double diffCandle0, vector<double> &diffPercents, const double close[], const double open[], const double high[], int length, const double values[], int valueSize)

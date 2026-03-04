@@ -38,6 +38,7 @@ static const long long ID_AVG_MACD_VALUE = 21;
 static const long long ID_AVG_MACD_SIGNAL = 22;
 static const long long ID_AVG_MACD_HISTOGRAM = 23;
 static const long long ID_EMA = 24;
+static const long long ID_BB = 25;
 
 any Expr::visitNumber(ExprParser::NumberContext *ctx)
 {
@@ -1101,6 +1102,18 @@ static vector<double> &getEMA(int period, boost::unordered_flat_map<long long, v
     return it->second;
 }
 
+static vector<double> &getBB(int period, double stdDev, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, const double *close, int length)
+{
+    long long key = ID_BB | (static_cast<long long>(period) << 10) | (static_cast<long long>(stdDev * 10000) << 20);
+
+    auto it = cachedIndicator->find(key);
+    if (it == cachedIndicator->end())
+    {
+        it = cachedIndicator->emplace(key, iBB(period, stdDev, close, length)).first;
+    }
+    return it->second;
+}
+
 static double eval(const std::vector<Instr> &instr, int length,
                    const double *open, const double *high, const double *low, const double *close, const double *volume,
                    long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, shared_ptr<SparseTable>> *cachedMinMax, int offset)
@@ -1573,7 +1586,12 @@ static double eval(const std::vector<Instr> &instr, int length,
             if (period <= 0 || stdDev <= 0 || shift < 0 || shift >= length - period)
                 return 0.0;
 
-            PUSH(iBB(period, stdDev, close + shift, length - shift).upper);
+            vector<double> &cached = getBB(period, stdDev, cachedIndicator, close, length);
+            if (shift * 3 + 2 >= cached.size())
+            {
+                return 0.0;
+            }
+            PUSH(cached[shift * 3 + 2]);
             break;
         }
 
@@ -1587,7 +1605,12 @@ static double eval(const std::vector<Instr> &instr, int length,
             if (period <= 0 || stdDev <= 0 || shift < 0 || shift >= length - period)
                 return 0.0;
 
-            PUSH(iBB(period, stdDev, close + shift, length - shift).middle);
+            vector<double> &cached = getBB(period, stdDev, cachedIndicator, close, length);
+            if (shift * 3 + 1 >= cached.size())
+            {
+                return 0.0;
+            }
+            PUSH(cached[shift * 3 + 1]);
             break;
         }
 
@@ -1601,7 +1624,12 @@ static double eval(const std::vector<Instr> &instr, int length,
             if (period <= 0 || stdDev <= 0 || shift < 0 || shift >= length - period)
                 return 0.0;
 
-            PUSH(iBB(period, stdDev, close + shift, length - shift).lower);
+            vector<double> &cached = getBB(period, stdDev, cachedIndicator, close, length);
+            if (shift * 3 >= cached.size())
+            {
+                return 0.0;
+            }
+            PUSH(cached[shift * 3]);
             break;
         }
 
