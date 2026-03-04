@@ -39,6 +39,7 @@ static const long long ID_AVG_MACD_SIGNAL = 22;
 static const long long ID_AVG_MACD_HISTOGRAM = 23;
 static const long long ID_EMA = 24;
 static const long long ID_BB = 25;
+static const long long ID_MACD_SLOPE = 26;
 
 any Expr::visitNumber(ExprParser::NumberContext *ctx)
 {
@@ -1114,6 +1115,18 @@ static vector<double> &getBB(int period, double stdDev, boost::unordered_flat_ma
     return it->second;
 }
 
+static vector<double> &getMACD_slope(int fastPeriod, int slowPeriod, int signalPeriod, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, const double *close, int length)
+{
+    long long key = ID_MACD_SLOPE | (static_cast<long long>(fastPeriod) << 10) | (static_cast<long long>(slowPeriod) << 20) | (static_cast<long long>(signalPeriod) << 30);
+
+    auto it = cachedIndicator->find(key);
+    if (it == cachedIndicator->end())
+    {
+        it = cachedIndicator->emplace(key, iMACD_slope(fastPeriod, slowPeriod, signalPeriod, close, length)).first;
+    }
+    return it->second;
+}
+
 static double eval(const std::vector<Instr> &instr, int length,
                    const double *open, const double *high, const double *low, const double *close, const double *volume,
                    long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, shared_ptr<SparseTable>> *cachedMinMax, int offset)
@@ -1674,7 +1687,12 @@ static double eval(const std::vector<Instr> &instr, int length,
             if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 || shift < 0 || shift >= length - slowPeriod - 1)
                 return 0.0;
 
-            PUSH(macd_slope(fastPeriod, slowPeriod, signalPeriod, close + shift, length - shift));
+            vector<double> &cached = getMACD_slope(fastPeriod, slowPeriod, signalPeriod, cachedIndicator, close, length);
+            if (shift >= cached.size())
+            {
+                return 0.0;
+            }
+            PUSH(cached[shift]);
             break;
         }
 

@@ -403,69 +403,69 @@ int macd_n_day(int fastPeriod, int slowPeriod, int signalPeriod, int redDepth, i
     return 0;
 }
 
-double macd_slope(int fastPeriod, int slowPeriod, int signalPeriod, const double close[], int n)
+vector<double> iMACD_slope(int fastPeriod, int slowPeriod, int signalPeriod, const double close[], int n)
 {
-    n = min(n, MAX_N + slowPeriod);
+    vector<double> result = vectorDoublePool.acquire();
+    result.resize(n, 0.0);
 
-    if (n <= slowPeriod || fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0)
-        return 0;
+    if (n <= slowPeriod + 1 ||
+        fastPeriod <= 0 ||
+        slowPeriod <= 0 ||
+        signalPeriod <= 0)
+        return result;
 
     double kFast = 2.0 / (fastPeriod + 1);
     double kSlow = 2.0 / (slowPeriod + 1);
-    double kSignal = 2.0 / (signalPeriod + 1);
+
+    vector<double> macdArr = vectorDoublePool.acquire();
+    macdArr.resize(n, 0.0);
 
     double emaFast = close[n - 1];
     double emaSlow = close[n - 1];
-    double macd = 0.0;
-    double signalEMA = 0.0;
-
-    bool signalInitialized = false;
-
-    MACD_Output m0;
-    MACD_Output m1;
-    double sum0 = 0.0;
-    double sum1 = 0.0;
 
     for (int i = n - 2; i >= 0; --i)
     {
         emaFast = (close[i] - emaFast) * kFast + emaFast;
         emaSlow = (close[i] - emaSlow) * kSlow + emaSlow;
+        macdArr[i] = emaFast - emaSlow;
+    }
 
-        macd = emaFast - emaSlow;
+    double sum0 = 0.0;
+    double sum1 = 0.0;
 
-        if (!signalInitialized)
+    for (int i = 0; i < slowPeriod; ++i)
+        sum0 += macdArr[i];
+
+    for (int i = 1; i <= slowPeriod; ++i)
+        sum1 += macdArr[i];
+
+    for (int i = 0; i + slowPeriod < n - 1; ++i)
+    {
+        double ma0 = sum0 / slowPeriod;
+        double ma1 = sum1 / slowPeriod;
+
+        double diffMACD = macdArr[i] - macdArr[i + 1];
+        double diffMASignal = fabs(ma0 - ma1);
+
+        if (diffMASignal != 0.0)
         {
-            signalEMA = (macd - signalEMA) * kSignal + signalEMA;
+            double tanVal = diffMACD / diffMASignal;
+            result[i] = atan(tanVal) / M_PI * 180.0;
         }
         else
         {
-            signalEMA = macd;
-            signalInitialized = true;
+            result[i] = 0.0;
         }
 
-        if (i == 0)
-            m0 = {macd, signalEMA, macd - signalEMA};
-        if (i == 1)
-            m1 = {macd, signalEMA, macd - signalEMA};
-
-        if (i < slowPeriod)
+        if (i + slowPeriod + 1 < n)
         {
-            sum0 += macd;
-        }
-        if (i > 0 && i <= slowPeriod)
-        {
-            sum1 += macd;
+            sum0 = sum0 - macdArr[i] + macdArr[i + slowPeriod];
+            sum1 = sum1 - macdArr[i + 1] + macdArr[i + slowPeriod + 1];
         }
     }
-    double ma0 = sum0 / slowPeriod;
-    double ma1 = sum1 / slowPeriod;
+    vectorDoublePool.release(macdArr);
 
-    double diffMACD = m0.macd - m1.macd;
-    double diffMASignal = abs(ma0 - ma1);
-    double tan = diffMACD / diffMASignal;
-    double slope = atan(tan);
-
-    return slope / M_PI * 180;
+    return result;
 }
 
 double iAvg(int period, const double close[], int n)

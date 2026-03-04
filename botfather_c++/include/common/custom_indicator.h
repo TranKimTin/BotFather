@@ -22,7 +22,7 @@ vector<double> iMACD(int fastPeriod, int slowPeriod, int signalPeriod, const dou
 vector<double> iBB(int period, double stdDev, const double close[], int n);
 int macd_n_dinh(int fastPeriod, int slowPeriod, int signalPeriod, int redDepth, int depth, int enableDivergence, double diffCandle0, vector<double> &diffPercents, const double close[], const double open[], const double high[], int n, const double values[], int valueSize);
 int macd_n_day(int fastPeriod, int slowPeriod, int signalPeriod, int redDepth, int depth, int enableDivergence, double diffCandle0, vector<double> &diffPercents, const double close[], const double open[], const double high[], int n);
-double macd_slope(int fastPeriod, int slowPeriod, int signalPeriod, const double close[], int n);
+vector<double> iMACD_slope(int fastPeriod, int slowPeriod, int signalPeriod, const double close[], int n);
 double iAvg(int period, const double close[], int n);
 double iMin(int period, const double close[], int n);
 double iMax(int period, const double close[], int n);
