@@ -1434,7 +1434,19 @@ static double eval(const std::vector<Instr> &instr, int length,
             if (period <= 0 || shift < 0 || shift >= length - period - 1)
                 return 0.0;
 
-            PUSH(iRSI_slope(period, close + shift, length - shift));
+            vector<double> &cached = getRSI(period, cachedIndicator, close, length);
+            if (shift >= cached.size() - 1)
+            {
+                return 0.0;
+            }
+            double rsi0 = cached[shift];
+            double rsi1 = cached[shift + 1];
+
+            double diffRSI = rsi0 - rsi1;
+            double wide = 3.0;
+            double tan = diffRSI / wide;
+            double slope = atan(tan);
+            PUSH(slope / M_PI * 180);
             break;
         }
 
@@ -1443,7 +1455,7 @@ static double eval(const std::vector<Instr> &instr, int length,
             int period = POP_INT();
             int shift = POP_INT();
             shift += offset;
-            
+
             int from = shift - period + 1;
             int to = shift;
 
