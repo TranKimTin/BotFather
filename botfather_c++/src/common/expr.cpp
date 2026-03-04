@@ -1443,11 +1443,17 @@ static double eval(const std::vector<Instr> &instr, int length,
             int period = POP_INT();
             int shift = POP_INT();
             shift += offset;
+            
+            int from = shift - period + 1;
+            int to = shift;
 
-            if (period <= 0 || shift < 0 || shift >= length - period)
+            if (to < from)
+                swap(from, to);
+
+            if (from < 0 || to >= length)
                 return 0.0;
 
-            PUSH(iMA(period, close + shift, length - shift));
+            PUSH(getAVG(close, from, to, length, ID_AVG_CLOSE, cachedIndicator));
             break;
         }
 
