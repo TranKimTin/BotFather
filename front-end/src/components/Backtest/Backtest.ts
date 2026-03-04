@@ -41,9 +41,9 @@ export default defineComponent({
         const r_botName = ref<string>('');
         const timeframes = ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d', '1w'];
         const r_timeframe = ref<string>('1h');
-        const r_startMonth = ref<number>(2);
+        const r_startMonth = ref<number>(3);
         const r_startYear = ref<number>(2025);
-        const r_endMonth = ref<number>(1);
+        const r_endMonth = ref<number>(2);
         const r_endYear = ref<number>(2026);
         const months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
         const years = [2020, 2021, 2022, 2023, 2024, 2025, 2026];
