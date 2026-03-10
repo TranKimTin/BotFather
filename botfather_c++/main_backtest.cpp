@@ -7,6 +7,7 @@
 
 #undef LOGI
 #define LOGI(mess, ...) spdlog::info(mess, ##__VA_ARGS__)
+#define BACKTEST_ALL_BOT
 
 using namespace std;
 tbb::task_group task;
@@ -53,6 +54,9 @@ void destroy()
 
 static void handleRemainOrder(Rate rate)
 {
+#ifdef BACKTEST_ALL_BOT
+    return;
+#endif
     if (rate.close == -1)
         return;
     vector<BacktestOrder> result;
@@ -146,6 +150,9 @@ static void handleRemainOrder(Rate rate)
 
 static void handleOrder(double price, long long startTime, vector<BacktestOrder> &result)
 {
+#ifdef BACKTEST_ALL_BOT
+    return;
+#endif
     while (!pendingBuy.empty() && pendingBuy.top().entry >= price)
     {
         BacktestOrder order = pendingBuy.top();
@@ -424,9 +431,33 @@ static shared_ptr<Bot> getBotInfo(const string &botName)
     return bots->at(key);
 }
 
+static vector<shared_ptr<Bot>> getAllBots()
+{
+    vector<shared_ptr<Bot>> botList;
+    auto &db = MySQLConnector::getInstance();
+    string mysql_query = "SELECT id,botName,userID,timeframes,symbolList,route,idTelegram,apiKey,secretKey,iv,enableRealOrder,maxOpenOrderPerSymbolBot,maxOpenOrderAllSymbolBot,maxOpenOrderPerSymbolAccount,maxOpenOrderAllSymbolAccount FROM Bot";
+    vector<any> args;
+
+    vector<map<string, any>> res = db.executeQuery(mysql_query, args);
+    for (auto &row : res)
+    {
+        shared_ptr<Bot> bot = initBot(row);
+        botList.push_back(bot);
+    }
+    return botList;
+}
+
 static vector<Rate> getData1m(const string &symbol, BacktestTime fr, BacktestTime to)
 {
+#ifdef BACKTEST_ALL_BOT
+    static vector<Rate> data;
+    if (!data.empty())
+    {
+        return data;
+    }
+#else
     vector<Rate> data;
+#endif
 
     for (BacktestTime t = fr - 3; t <= to && t < fr + blockMonth; t++)
     {
@@ -456,7 +487,11 @@ static vector<Rate> getData1m(const string &symbol, BacktestTime fr, BacktestTim
         file.read(reinterpret_cast<char *>(data.data() + data.size() - appendSize), size);
         file.close();
     }
+#ifdef BACKTEST_ALL_BOT
+    return data;
+#else
     return move(data);
+#endif
 }
 
 static void initSignalData(const string &s, shared_ptr<Bot> b, BacktestTime fr, BacktestTime to)
@@ -532,7 +567,7 @@ bool isValidData1m(const vector<Rate> &data)
 
 int main(int argc, char *argv[])
 {
-#ifndef DEBUG_LOG
+#if !defined(DEBUG_LOG) && !defined(BACKTEST_ALL_BOT)
     if (argc < 7)
     {
         throw std::runtime_error("Invalid arguments.");
@@ -545,10 +580,10 @@ int main(int argc, char *argv[])
     BacktestTime to = BacktestTime(stoi(argv[5]), stoi(argv[6]));
 #else
     string botName = "27_2_26_Staff_M1_V1";
-    string timeframe = "1m";
+    string timeframe = "5m";
 
-    BacktestTime from = BacktestTime(2022, 1);
-    BacktestTime to = BacktestTime(2022, 6);
+    BacktestTime from = BacktestTime(2025, 6);
+    BacktestTime to = BacktestTime(2025, 12);
 #endif
     init();
     LOGI("Progress_1");
@@ -560,67 +595,95 @@ int main(int argc, char *argv[])
     Timer *t = new Timer(StringFormat("Backtest {} {} {} {}", botName, timeframe, from.toString(), to.toString()));
     shared_ptr<Bot> bot = getBotInfo(botName);
 
-    // bot->symbolList = {{"binance_future", "MYXUSDT", "binance_future:MYXUSDT"}};
-    vector<string> symbolList;
-    for (Symbol &s : bot->symbolList)
+#ifdef BACKTEST_ALL_BOT
+    vector<shared_ptr<Bot>> botList = getAllBots();
+    // botList.resize(1000);
+    for (shared_ptr<Bot> &b : botList)
     {
-        if (s.broker == "binance_future")
+        try
         {
-            symbolList.push_back(s.symbol);
+
+            bot = b;
+            botName = bot->botName;
+            LOGI("Start backtesting bot {}", botName);
+            b->symbolList = {{"binance_future", "BTCUSDT", "binance_future:BTCUSDT"}};
+
+#endif
+            // bot->symbolList = {{"binance_future", "MYXUSDT", "binance_future:MYXUSDT"}};
+            vector<string> symbolList;
+            for (Symbol &s : bot->symbolList)
+            {
+                if (s.broker == "binance_future")
+                {
+                    symbolList.push_back(s.symbol);
+                }
+            }
+            totalSymbol = symbolList.size();
+
+            for (string symbol : symbolList)
+            {
+                task.run([=]()
+                         {
+                             orderClosed.clear();
+                             pendingBuy = priority_queue<BacktestOrder>();
+                             pendingSell = priority_queue<BacktestOrder>();
+                             pendingTPBuy = priority_queue<BacktestOrder>();
+                             pendingSLBuy = priority_queue<BacktestOrder>();
+                             pendingTPSell = priority_queue<BacktestOrder>();
+                             pendingSLSell = priority_queue<BacktestOrder>();
+                             if (!bots)
+                             {
+                                 bots = make_shared<boost::unordered_flat_map<long long, shared_ptr<Bot>>>();
+                             }
+                             maxID = 1;
+                             BacktestTime fr = from;
+                             Rate lastRate;
+                             lastRate.close = -1;
+                             rateData.symbol = symbol;
+                             rateData.interval = timeframe;
+                             for (; fr <= to; fr = fr + blockMonth)
+                             {
+                                 rateData.clear();
+                                 vector<Rate> data = getData1m(symbol, fr, to);
+                                 if (!isValidData1m(data))
+                                 {
+                                     continue;
+                                 }
+
+                                 for (Rate &rate : data)
+                                 {
+                                     mergeCandle1m(rateData, rate, symbol, timeframe);
+                                 }
+                                 rateData.reverse();
+
+                                 initSignalData(symbol, bot, fr, to);
+                                 backtest(bot, fr.toMillisecondsUTC(), data);
+                                 lastRate = data.back();
+                             }
+                             handleRemainOrder(lastRate);
+
+#ifndef BACKTEST_ALL_BOT
+                             int oldProgress = (cnt.load() * 100) / totalSymbol;
+                             cnt++;
+                             int progress = (cnt.load() * 100) / totalSymbol;
+                             if (progress > oldProgress)
+                             {
+                                 LOGI("Progress_{}", progress);
+                             }
+#endif
+                         });
+            }
+
+            task.wait();
+#ifdef BACKTEST_ALL_BOT
+        }
+        catch (const std::exception &e)
+        {
+            LOGE("Error backtesting bot {}: {}", b->botName, e.what());
         }
     }
-    totalSymbol = symbolList.size();
+#endif
 
-    for (string symbol : symbolList)
-    {
-        task.run([=]()
-                 {
-            orderClosed.clear();
-            pendingBuy = priority_queue<BacktestOrder>();
-            pendingSell = priority_queue<BacktestOrder>();
-            pendingTPBuy = priority_queue<BacktestOrder>();
-            pendingSLBuy = priority_queue<BacktestOrder>();
-            pendingTPSell = priority_queue<BacktestOrder>();
-            pendingSLSell = priority_queue<BacktestOrder>();
-            if (!bots) {
-                bots = make_shared<boost::unordered_flat_map<long long, shared_ptr<Bot>>>();
-            }
-            maxID = 1;
-            BacktestTime fr = from;
-            Rate lastRate;
-            lastRate.close = -1;
-            rateData.symbol = symbol;
-            rateData.interval = timeframe;
-            for(; fr <= to; fr = fr + blockMonth) {
-                rateData.clear();
-                vector<Rate> data = getData1m(symbol, fr, to);
-                if (!isValidData1m(data))
-                {
-                    continue;
-                }
-
-                for (Rate &rate : data)
-                {
-                    mergeCandle1m(rateData, rate, symbol, timeframe);
-                }
-                rateData.reverse();
-
-                initSignalData(symbol, bot, fr, to);
-                backtest(bot, fr.toMillisecondsUTC(), data);
-                lastRate = data.back();
-            }
-            handleRemainOrder(lastRate);
-
-            int oldProgress = (cnt.load() * 100) / totalSymbol;
-            cnt++;
-            int progress = (cnt.load() * 100) / totalSymbol;
-            if (progress > oldProgress)
-            {
-                LOGI("Progress_{}", progress);
-            } });
-    }
-
-    task.wait();
     delete t;
     destroy();
     return 0;
