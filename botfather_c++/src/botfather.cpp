@@ -49,7 +49,7 @@ void test()
 
     string expr = "{ma(200, 0)}";
     boost::unordered_flat_map<long long, vector<double>> cachedIndicator;
-    boost::unordered_flat_map<long long, shared_ptr<SparseTable>> cachedMinMax;
+    boost::unordered_flat_map<long long, shared_ptr<SegmentTree>> cachedMinMax;
     int shift = 0;
 
     string res = calculateSubExpr(expr, rateData.startTime.size(), open.data(), high.data(), low.data(), close.data(),

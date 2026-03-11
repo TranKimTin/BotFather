@@ -9,7 +9,7 @@
 static tbb::task_group task;
 thread_local Worker worker;
 thread_local VectorDoublePool vectorDoublePool;
-thread_local SparseTablePool sparseTablePool;
+thread_local SegmentTreePool segmentTreePool;
 
 SocketData::SocketData(const int _BATCH_SIZE) : BATCH_SIZE(_BATCH_SIZE), firstConnection(true)
 {

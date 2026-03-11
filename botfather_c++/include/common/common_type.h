@@ -30,7 +30,7 @@
 #include <fstream>
 #include <atomic>
 
-#include "sparse_table.h"
+#include "segment_tree.h"
 
 #include <websocketpp/config/asio_client.hpp>
 #include <websocketpp/client.hpp>

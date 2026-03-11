@@ -3,7 +3,7 @@
 #include "util.h"
 
 extern thread_local VectorDoublePool vectorDoublePool;
-extern thread_local SparseTablePool sparseTablePool;
+extern thread_local SegmentTreePool segmentTreePool;
 
 void WorkerBacktest::initData(string broker, string symbol, string timeframe,
                               vector<double> open, vector<double> high, vector<double> low,

@@ -21,7 +21,7 @@ protected:
     ExchangeInfo exchangeInfo;
     double fundingRate;
     boost::unordered_flat_map<long long, vector<double>> cachedIndicator;
-    boost::unordered_flat_map<long long, shared_ptr<SparseTable>> cachedMinMax;
+    boost::unordered_flat_map<long long, shared_ptr<SegmentTree>> cachedMinMax;
     boost::unordered_flat_map<long long, bool> cachedSignal;
     SocketData *socketData;
     bool postedSignal;

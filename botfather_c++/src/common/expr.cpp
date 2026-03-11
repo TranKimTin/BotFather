@@ -11,7 +11,7 @@
 #define PUSH(v) st[sp++] = static_cast<double>(v)
 
 extern thread_local VectorDoublePool vectorDoublePool;
-extern thread_local SparseTablePool sparseTablePool;
+extern thread_local SegmentTreePool segmentTreePool;
 
 static const long long ID_RSI = 1;
 static const long long ID_MACD = 2;
@@ -1129,7 +1129,7 @@ static vector<double> &getMACD_slope(int fastPeriod, int slowPeriod, int signalP
 
 static double eval(const std::vector<Instr> &instr, int length,
                    const double *open, const double *high, const double *low, const double *close, const double *volume,
-                   long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, shared_ptr<SparseTable>> *cachedMinMax, int offset)
+                   long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, shared_ptr<SegmentTree>> *cachedMinMax, int offset)
 {
     double st[32];
     int sp = 0;
@@ -1851,7 +1851,7 @@ static double eval(const std::vector<Instr> &instr, int length,
             auto it = cachedMinMax->find(key);
             if (it == cachedMinMax->end())
             {
-                auto st = sparseTablePool.acquire();
+                auto st = segmentTreePool.acquire();
                 st->init(open, length);
 
                 it = cachedMinMax->emplace(key, move(st)).first;
@@ -1879,7 +1879,7 @@ static double eval(const std::vector<Instr> &instr, int length,
             auto it = cachedMinMax->find(key);
             if (it == cachedMinMax->end())
             {
-                auto st = sparseTablePool.acquire();
+                auto st = segmentTreePool.acquire();
                 st->init(high, length);
 
                 it = cachedMinMax->emplace(key, move(st)).first;
@@ -1907,7 +1907,7 @@ static double eval(const std::vector<Instr> &instr, int length,
             auto it = cachedMinMax->find(key);
             if (it == cachedMinMax->end())
             {
-                auto st = sparseTablePool.acquire();
+                auto st = segmentTreePool.acquire();
                 st->init(low, length);
 
                 it = cachedMinMax->emplace(key, move(st)).first;
@@ -1934,7 +1934,7 @@ static double eval(const std::vector<Instr> &instr, int length,
             auto it = cachedMinMax->find(key);
             if (it == cachedMinMax->end())
             {
-                auto st = sparseTablePool.acquire();
+                auto st = segmentTreePool.acquire();
                 st->init(close, length);
 
                 it = cachedMinMax->emplace(key, move(st)).first;
@@ -1961,7 +1961,7 @@ static double eval(const std::vector<Instr> &instr, int length,
             auto it = cachedMinMax->find(key);
             if (it == cachedMinMax->end())
             {
-                auto st = sparseTablePool.acquire();
+                auto st = segmentTreePool.acquire();
                 vector<double> v = vectorDoublePool.acquire();
                 v.resize(length);
                 for (int i = 0; i < length; i++)
@@ -1994,7 +1994,7 @@ static double eval(const std::vector<Instr> &instr, int length,
             auto it = cachedMinMax->find(key);
             if (it == cachedMinMax->end())
             {
-                auto st = sparseTablePool.acquire();
+                auto st = segmentTreePool.acquire();
                 vector<double> v = vectorDoublePool.acquire();
                 v.resize(length);
                 for (int i = 0; i < length; i++)
@@ -2027,7 +2027,7 @@ static double eval(const std::vector<Instr> &instr, int length,
             auto it = cachedMinMax->find(key);
             if (it == cachedMinMax->end())
             {
-                auto st = sparseTablePool.acquire();
+                auto st = segmentTreePool.acquire();
                 vector<double> v = vectorDoublePool.acquire();
                 v.resize(length);
                 for (int i = 0; i < length; i++)
@@ -2060,7 +2060,7 @@ static double eval(const std::vector<Instr> &instr, int length,
             auto it = cachedMinMax->find(key);
             if (it == cachedMinMax->end())
             {
-                auto st = sparseTablePool.acquire();
+                auto st = segmentTreePool.acquire();
                 vector<double> v = vectorDoublePool.acquire();
                 v.resize(length);
                 for (int i = 0; i < length; i++)
@@ -2093,7 +2093,7 @@ static double eval(const std::vector<Instr> &instr, int length,
             auto it = cachedMinMax->find(key);
             if (it == cachedMinMax->end())
             {
-                auto st = sparseTablePool.acquire();
+                auto st = segmentTreePool.acquire();
                 st->init(open, length);
 
                 it = cachedMinMax->emplace(key, move(st)).first;
@@ -2120,7 +2120,7 @@ static double eval(const std::vector<Instr> &instr, int length,
             auto it = cachedMinMax->find(key);
             if (it == cachedMinMax->end())
             {
-                auto st = sparseTablePool.acquire();
+                auto st = segmentTreePool.acquire();
                 st->init(high, length);
 
                 it = cachedMinMax->emplace(key, move(st)).first;
@@ -2147,7 +2147,7 @@ static double eval(const std::vector<Instr> &instr, int length,
             auto it = cachedMinMax->find(key);
             if (it == cachedMinMax->end())
             {
-                auto st = sparseTablePool.acquire();
+                auto st = segmentTreePool.acquire();
                 st->init(low, length);
 
                 it = cachedMinMax->emplace(key, move(st)).first;
@@ -2174,7 +2174,7 @@ static double eval(const std::vector<Instr> &instr, int length,
             auto it = cachedMinMax->find(key);
             if (it == cachedMinMax->end())
             {
-                auto st = sparseTablePool.acquire();
+                auto st = segmentTreePool.acquire();
                 st->init(close, length);
 
                 it = cachedMinMax->emplace(key, move(st)).first;
@@ -2201,7 +2201,7 @@ static double eval(const std::vector<Instr> &instr, int length,
             auto it = cachedMinMax->find(key);
             if (it == cachedMinMax->end())
             {
-                auto st = sparseTablePool.acquire();
+                auto st = segmentTreePool.acquire();
                 vector<double> v = vectorDoublePool.acquire();
                 v.resize(length);
                 for (int i = 0; i < length; i++)
@@ -2234,7 +2234,7 @@ static double eval(const std::vector<Instr> &instr, int length,
             auto it = cachedMinMax->find(key);
             if (it == cachedMinMax->end())
             {
-                auto st = sparseTablePool.acquire();
+                auto st = segmentTreePool.acquire();
                 vector<double> v = vectorDoublePool.acquire();
                 v.resize(length);
                 for (int i = 0; i < length; i++)
@@ -2267,7 +2267,7 @@ static double eval(const std::vector<Instr> &instr, int length,
             auto it = cachedMinMax->find(key);
             if (it == cachedMinMax->end())
             {
-                auto st = sparseTablePool.acquire();
+                auto st = segmentTreePool.acquire();
                 vector<double> v = vectorDoublePool.acquire();
                 v.resize(length);
                 for (int i = 0; i < length; i++)
@@ -2300,7 +2300,7 @@ static double eval(const std::vector<Instr> &instr, int length,
             auto it = cachedMinMax->find(key);
             if (it == cachedMinMax->end())
             {
-                auto st = sparseTablePool.acquire();
+                auto st = segmentTreePool.acquire();
                 vector<double> v = vectorDoublePool.acquire();
                 v.resize(length);
                 for (int i = 0; i < length; i++)
@@ -2341,7 +2341,7 @@ static double eval(const std::vector<Instr> &instr, int length,
             auto it = cachedMinMax->find(key);
             if (it == cachedMinMax->end())
             {
-                auto st = sparseTablePool.acquire();
+                auto st = segmentTreePool.acquire();
                 st->init(cachedRSI.data(), cachedRSI.size());
 
                 it = cachedMinMax->emplace(key, move(st)).first;
@@ -2376,7 +2376,7 @@ static double eval(const std::vector<Instr> &instr, int length,
             auto it = cachedMinMax->find(key);
             if (it == cachedMinMax->end())
             {
-                auto st = sparseTablePool.acquire();
+                auto st = segmentTreePool.acquire();
                 st->init(cachedRSI.data(), cachedRSI.size());
 
                 it = cachedMinMax->emplace(key, move(st)).first;
@@ -2440,7 +2440,7 @@ static double eval(const std::vector<Instr> &instr, int length,
                     v[i] = cachedMACD[i * 3];
                 }
 
-                auto st = sparseTablePool.acquire();
+                auto st = segmentTreePool.acquire();
                 st->init(v.data(), v.size());
 
                 it = cachedMinMax->emplace(key, move(st)).first;
@@ -2480,7 +2480,7 @@ static double eval(const std::vector<Instr> &instr, int length,
                 {
                     v[i] = cachedMACD[i * 3];
                 }
-                auto st = sparseTablePool.acquire();
+                auto st = segmentTreePool.acquire();
                 st->init(v.data(), v.size());
 
                 it = cachedMinMax->emplace(key, move(st)).first;
@@ -2559,7 +2559,7 @@ static double eval(const std::vector<Instr> &instr, int length,
                 {
                     v[i] = cachedMACD[i * 3 + 1];
                 }
-                auto st = sparseTablePool.acquire();
+                auto st = segmentTreePool.acquire();
                 st->init(v.data(), v.size());
 
                 it = cachedMinMax->emplace(key, move(st)).first;
@@ -2599,7 +2599,7 @@ static double eval(const std::vector<Instr> &instr, int length,
                 {
                     v[i] = cachedMACD[i * 3 + 1];
                 }
-                auto st = sparseTablePool.acquire();
+                auto st = segmentTreePool.acquire();
                 st->init(v.data(), v.size());
 
                 it = cachedMinMax->emplace(key, move(st)).first;
@@ -2679,7 +2679,7 @@ static double eval(const std::vector<Instr> &instr, int length,
                 {
                     v[i] = cachedMACD[i * 3 + 2];
                 }
-                auto st = sparseTablePool.acquire();
+                auto st = segmentTreePool.acquire();
                 st->init(v.data(), v.size());
 
                 it = cachedMinMax->emplace(key, move(st)).first;
@@ -2719,7 +2719,7 @@ static double eval(const std::vector<Instr> &instr, int length,
                 {
                     v[i] = cachedMACD[i * 3 + 2];
                 }
-                auto st = sparseTablePool.acquire();
+                auto st = segmentTreePool.acquire();
                 st->init(v.data(), v.size());
 
                 it = cachedMinMax->emplace(key, move(st)).first;
@@ -2935,7 +2935,7 @@ void cacheInstr(const string &inputText)
 }
 
 double calculateExpr(const string &inputText, int length, const double *open, const double *high, const double *low, const double *close,
-                     const double *volume, long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, shared_ptr<SparseTable>> *cachedMinMax, int shift)
+                     const double *volume, long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, shared_ptr<SegmentTree>> *cachedMinMax, int shift)
 {
     const long long key = hashString(inputText);
     // LOGD("Calculating expr: {}", inputText);
@@ -2955,7 +2955,7 @@ double calculateExpr(const string &inputText, int length, const double *open, co
 }
 
 string calculateSubExpr(string &expr, int length, const double *open, const double *high, const double *low, const double *close,
-                        const double *volume, long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, shared_ptr<SparseTable>> *cachedMinMax, int shift)
+                        const double *volume, long long *startTime, double fundingRate, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, boost::unordered_flat_map<long long, shared_ptr<SegmentTree>> *cachedMinMax, int shift)
 {
     stack<string> st;
     string s;

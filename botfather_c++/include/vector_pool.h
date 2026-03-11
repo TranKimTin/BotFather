@@ -99,11 +99,11 @@ private:
     mutable mutex mMutex;
 };
 
-class SparseTablePool
+class SegmentTreePool
 {
 public:
-    // Lấy 1 SparseTable từ pool, nếu hết thì tạo mới
-    shared_ptr<SparseTable> acquire()
+    // Lấy 1 segmentTreePool từ pool, nếu hết thì tạo mới
+    shared_ptr<SegmentTree> acquire()
     {
         if (!pool.empty())
         {
@@ -111,11 +111,11 @@ public:
             pool.pop();
             return ptr;
         }
-        return make_shared<SparseTable>();
+        return make_shared<SegmentTree>();
     }
 
-    // Trả SparseTable về pool
-    void release(shared_ptr<SparseTable> table)
+    // Trả SegmentTree về pool
+    void release(shared_ptr<SegmentTree> table)
     {
         pool.push(move(table));
     }
@@ -126,5 +126,5 @@ public:
     }
 
 private:
-    stack<shared_ptr<SparseTable>> pool;
+    stack<shared_ptr<SegmentTree>> pool;
 };

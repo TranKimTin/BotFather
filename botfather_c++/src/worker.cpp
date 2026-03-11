@@ -13,7 +13,7 @@
 static vector<string> orderTypes = {NODE_TYPE::BUY_MARKET, NODE_TYPE::BUY_LIMIT, NODE_TYPE::BUY_STOP_MARKET, NODE_TYPE::BUY_STOP_LIMIT, NODE_TYPE::SELL_MARKET, NODE_TYPE::SELL_LIMIT, NODE_TYPE::SELL_STOP_MARKET, NODE_TYPE::SELL_STOP_LIMIT};
 static ThreadPool tasks(thread::hardware_concurrency() * 2 + 1);
 extern thread_local VectorDoublePool vectorDoublePool;
-extern thread_local SparseTablePool sparseTablePool;
+extern thread_local SegmentTreePool segmentTreePool;
 
 void Worker::init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, string symbol, string timeframe, vector<double> open, vector<double> high, vector<double> low, vector<double> close, vector<double> volume, vector<long long> startTime, ExchangeInfo exchangeInfo, double fundingRate, SocketData *socketData)
 {
@@ -52,7 +52,7 @@ void Worker::init(shared_ptr<vector<shared_ptr<Bot>>> botList, string broker, st
 
     for (auto &pair : cachedMinMax)
     {
-        sparseTablePool.release(move(pair.second));
+        segmentTreePool.release(move(pair.second));
     }
 
     this->visited.clear();
