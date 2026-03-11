@@ -47,12 +47,12 @@ void test()
     vector<double> volume(rateData.volume.begin(), rateData.volume.end());
     vector<long long> startTime(rateData.startTime.begin(), rateData.startTime.end());
 
-    string expr = "{1+2+3+4+5}";
+    string expr = "{ma(200, 0)}";
     boost::unordered_flat_map<long long, vector<double>> cachedIndicator;
     boost::unordered_flat_map<long long, shared_ptr<SparseTable>> cachedMinMax;
-    int shift = 10;
+    int shift = 0;
 
-    string res = calculateSubExpr(expr, broker, symbol, timeframe, rateData.startTime.size(), open.data(), high.data(), low.data(), close.data(),
+    string res = calculateSubExpr(expr, rateData.startTime.size(), open.data(), high.data(), low.data(), close.data(),
                                   volume.data(), startTime.data(), 0.01, &cachedIndicator, &cachedMinMax, shift);
     LOGI(res);
     // string iv = generateRandomIV();

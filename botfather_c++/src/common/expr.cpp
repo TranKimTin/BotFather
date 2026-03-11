@@ -1495,7 +1495,7 @@ static double eval(const std::vector<Instr> &instr, int length,
             int shift = POP_INT();
             shift += offset;
 
-            int from = shift - period + 1;
+            int from = shift + period - 1;
             int to = shift;
 
             if (to < from)
