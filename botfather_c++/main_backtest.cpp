@@ -7,7 +7,7 @@
 
 #undef LOGI
 #define LOGI(mess, ...) spdlog::info(mess, ##__VA_ARGS__)
-#define BACKTEST_ALL_BOT
+// #define BACKTEST_ALL_BOT
 
 using namespace std;
 tbb::task_group task;
