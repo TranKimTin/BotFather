@@ -966,4 +966,19 @@ export default [
                 + random(1, 10): sinh ngẫu nhiên một số từ 1 đến 10
                 `
     },
+    {
+        type: 'function',
+        label: 'sar',
+        detail: '(step, max_step, i)',
+        apply: 'sar(0.02, 0.2, 0)',
+        boost: 0,
+        info: ` - Chỉ báo Parabolic SAR tại nến thứ i
+                - step: hệ số tăng tốc (acceleration factor)
+                - max_step: hệ số tăng tốc tối đa (maximum acceleration factor)
+                - Giá trị trả về là giá của SAR tại nến thứ i
+                Ví dụ:
+                + sar(0.02, 0.2, 0): giá của SAR tại nến 0
+                + sar(0.02, 0.2, 1): giá của SAR tại nến 1
+                `
+    },
 ];

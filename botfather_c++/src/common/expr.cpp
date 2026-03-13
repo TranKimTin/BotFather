@@ -40,6 +40,7 @@ static const long long ID_AVG_MACD_HISTOGRAM = 23;
 static const long long ID_EMA = 24;
 static const long long ID_BB = 25;
 static const long long ID_MACD_SLOPE = 26;
+static const long long ID_SAR = 27;
 
 any Expr::visitNumber(ExprParser::NumberContext *ctx)
 {
@@ -972,6 +973,20 @@ any Expr::visitAvg_macd_histogram(ExprParser::Avg_macd_histogramContext *ctx)
     return {};
 }
 
+any Expr::visitSar(ExprParser::SarContext *ctx)
+{
+    double step = stod(ctx->number(0)->getText());
+    double maxStep = stod(ctx->number(1)->getText());
+    int shift = ctx->children.size() > 6 ? fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[6])->getSymbol()->getText().c_str()) : 0;
+
+    EMIT_NUMBER(shift);
+    EMIT_NUMBER(maxStep);
+    EMIT_NUMBER(step);
+    EMIT_OP(SAR);
+
+    return {};
+}
+
 any Expr::visitRandom(ExprParser::RandomContext *ctx)
 {
     int from = fast_stoi(static_cast<antlr4::tree::TerminalNode *>(ctx->children[2])->getSymbol()->getText().c_str());
@@ -1123,6 +1138,18 @@ static vector<double> &getMACD_slope(int fastPeriod, int slowPeriod, int signalP
     if (it == cachedIndicator->end())
     {
         it = cachedIndicator->emplace(key, iMACD_slope(fastPeriod, slowPeriod, signalPeriod, close, length)).first;
+    }
+    return it->second;
+}
+
+static vector<double> &getSAR(double step, double maxStep, boost::unordered_flat_map<long long, vector<double>> *cachedIndicator, const double *high, const double *low, int length)
+{
+    long long key = ID_SAR | (static_cast<long long>(step * 10000) << 15) | (static_cast<long long>(maxStep * 10000) << 30);
+
+    auto it = cachedIndicator->find(key);
+    if (it == cachedIndicator->end())
+    {
+        it = cachedIndicator->emplace(key, iSAR(step, maxStep, high, low, length)).first;
     }
     return it->second;
 }
@@ -2903,6 +2930,21 @@ static double eval(const std::vector<Instr> &instr, int length,
             // thân nhỏ hơn 10% tổng chiều dài nến => doji
             else
                 PUSH((body / range <= 0.1) ? 1.0 : 0.0);
+            break;
+        }
+        case OP_TYPE::SAR:
+        {
+            double step = POP_DOUBLE();
+            double maxStep = POP_DOUBLE();
+            int shift = POP_INT();
+            shift += offset;
+
+            if (shift >= length)
+                return 0.0;
+            vector<double> &cached = getSAR(step, maxStep, cachedIndicator, high, low, length);
+            if (shift >= cached.size())
+                return 0.0;
+            PUSH(cached[shift]);
             break;
         }
 

@@ -801,3 +801,69 @@ double iAvgMACD(int fastPeriod, int slowPeriod, int signalPeriod, int k, const d
 
     return sum / k;
 }
+
+vector<double> iSAR(double step, double maxStep, const double high[], const double low[], int n)
+{
+    vector<double> result = vectorDoublePool.acquire();
+
+    if (n <= 1 || step <= 0 || maxStep <= 0)
+        return result;
+
+    result.resize(n);
+
+    int last = n - 1;
+
+    result[last] = low[last];
+
+    bool uptrend = true;
+    double af = step;
+    double ep = high[last];
+
+    for (int i = last - 1; i >= 0; --i)
+    {
+        double sar = result[i + 1] + af * (ep - result[i + 1]);
+
+        if (uptrend)
+        {
+            sar = min(sar, low[i + 1]);
+            if (i + 2 < n)
+                sar = min(sar, low[i + 2]);
+
+            if (low[i] < sar)
+            {
+                uptrend = false;
+                sar = ep;
+                ep = low[i];
+                af = step;
+            }
+            else if (high[i] > ep)
+            {
+                ep = high[i];
+                af = min(af + step, maxStep);
+            }
+        }
+        else
+        {
+            sar = max(sar, high[i + 1]);
+            if (i + 2 < n)
+                sar = max(sar, high[i + 2]);
+
+            if (high[i] > sar)
+            {
+                uptrend = true;
+                sar = ep;
+                ep = high[i];
+                af = step;
+            }
+            else if (low[i] < ep)
+            {
+                ep = low[i];
+                af = min(af + step, maxStep);
+            }
+        }
+
+        result[i] = sar;
+    }
+
+    return result;
+}

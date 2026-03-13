@@ -81,6 +81,7 @@ expr
     | max_macd_histogram        # iMaxMACDHistogram
     | avg_macd_histogram        # iAvgMACDVHistogram
     | random                    # iRandom
+    | sar                       # iSAR
     ;
 
 hour: 'hour' '(' ')';
@@ -151,6 +152,7 @@ min_macd_histogram: 'min_macd_histogram' '(' INT ',' INT ',' INT ',' INT (',' IN
 max_macd_histogram: 'max_macd_histogram' '(' INT ',' INT ',' INT ',' INT (',' INT)? ')';
 avg_macd_histogram: 'avg_macd_histogram' '(' INT ',' INT ',' INT ',' INT (',' INT)? ')';
 random: 'random' '(' INT ',' INT ')';
+sar: 'sar' '(' number ','  number (',' INT)? ')';
 
 comparisonOp : GT | GE | LT | LE | EQ | NEQ | ASSIGN ;
 

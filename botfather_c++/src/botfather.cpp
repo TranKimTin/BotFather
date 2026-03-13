@@ -47,7 +47,7 @@ void test()
     vector<double> volume(rateData.volume.begin(), rateData.volume.end());
     vector<long long> startTime(rateData.startTime.begin(), rateData.startTime.end());
 
-    string expr = "{ma(200, 0)}";
+    string expr = "{sar(0.02, 0.2)}";
     boost::unordered_flat_map<long long, vector<double>> cachedIndicator;
     boost::unordered_flat_map<long long, shared_ptr<SegmentTree>> cachedMinMax;
     int shift = 0;

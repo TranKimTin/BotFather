@@ -34,3 +34,4 @@ double iAvgRSI(int period, int k, const double close[], int n);
 double iMinMACD(int fastPeriod, int slowPeriod, int signalPeriod, int k, const double close[], int n, function<double(MACD_Output)> f);
 double iMaxMACD(int fastPeriod, int slowPeriod, int signalPeriod, int k, const double close[], int n, function<double(MACD_Output)> f);
 double iAvgMACD(int fastPeriod, int slowPeriod, int signalPeriod, int k, const double close[], int n, function<double(MACD_Output)> f);
+vector<double> iSAR(double step, double maxStep, const double high[], const double low[], int n);

@@ -95,7 +95,8 @@ enum OP_TYPE
     BEARISH_ENGULFING,
     BULLISH_HAMMER,
     BEARISH_HAMMER,
-    DOJI
+    DOJI,
+    SAR
 };
 struct Instr
 {
@@ -196,6 +197,7 @@ public:
     any visitMin_macd_histogram(ExprParser::Min_macd_histogramContext *ctx) override;
     any visitMax_macd_histogram(ExprParser::Max_macd_histogramContext *ctx) override;
     any visitAvg_macd_histogram(ExprParser::Avg_macd_histogramContext *ctx) override;
+    any visitSar(ExprParser::SarContext *ctx) override;
 
     any visitRandom(ExprParser::RandomContext *ctx) override;
 
